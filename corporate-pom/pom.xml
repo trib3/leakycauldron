@@ -14,13 +14,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <version.activation>1.1</version.activation>
+        <version.assertk>0.12</version.assertk>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
         <version.dropwizard>1.3.8</version.dropwizard>
+        <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.0.2</version.dropwizard.metrics>
         <version.guice>4.2.2</version.guice>
         <version.jackson>2.9.6</version.jackson>
+        <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.0</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
@@ -38,7 +41,9 @@
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
+        <version.testng>6.14.3</version.testng>
         <version.typesafe.config>1.3.3</version.typesafe.config>
+        <version.validation>1.1.0.Final</version.validation>
     </properties>
 
     <repositories>
@@ -79,16 +84,11 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-core</artifactId>
                 <version>${version.dropwizard}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>aopalliance-repackaged</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>javax.inject</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-configuration</artifactId>
+                <version>${version.dropwizard}</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
@@ -127,8 +127,18 @@
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${version.jaxrs}</version>
             </dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${version.validation}</version>
+            </dependency>
 
             <!-- jackson -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
@@ -186,6 +196,46 @@
                 <artifactId>config</artifactId>
                 <version>${version.typesafe.config}</version>
             </dependency>
+            <dependency>
+                <groupId>com.jasonclawson.dropwizardry</groupId>
+                <artifactId>dropwizardry-config-hocon</artifactId>
+                <version>${version.dropwizard.hocon}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.jasonclawson</groupId>
+                        <artifactId>jackson-dataformat-hocon</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.dropwizard</groupId>
+                        <artifactId>dropwizard-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.jasonclawson</groupId>
+                <artifactId>jackson-dataformat-hocon</artifactId>
+                <version>${version.jackson.hocon}</version>
+            </dependency>
+
+            <!-- testing -->
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${version.testng}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.willowtreeapps.assertk</groupId>
+                <artifactId>assertk-jvm</artifactId>
+                <version>${version.assertk}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-stdlib-jdk8</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
@@ -210,6 +260,16 @@
         <dependency>
             <groupId>io.github.microutils</groupId>
             <artifactId>kotlin-logging</artifactId>
+        </dependency>
+
+        <!-- testing -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.willowtreeapps.assertk</groupId>
+            <artifactId>assertk-jvm</artifactId>
         </dependency>
     </dependencies>
 
@@ -338,10 +398,14 @@
                             <configuration>
                                 <transformers>
                                     <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                        <resource>reference.conf</resource>
+                                    </transformer>
+                                    <transformer
                                             implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     <transformer
                                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <mainClass>com.trib3.data.TribeApplicationKt</mainClass>
+                                        <mainClass>com.trib3.TribeApplicationKt</mainClass>
                                     </transformer>
                                 </transformers>
                             </configuration>
@@ -378,7 +442,6 @@
                             <goals>
                                 <goal>analyze-only</goal>
                                 <goal>analyze-duplicate</goal>
-                                <goal>analyze-dep-mgt</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -408,10 +471,6 @@
                 <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <groupId>org.jetbrains.kotlin</groupId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
@@ -421,5 +480,24 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>enable-kotlin-compilation</id>
+            <activation>
+                <file>
+                    <exists>src/main/kotlin</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>kotlin-maven-plugin</artifactId>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

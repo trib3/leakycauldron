@@ -2,3 +2,4 @@ target/
 .idea
 .attach_pid*
 *.iml
+service.log*

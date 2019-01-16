@@ -1,4 +1,4 @@
-package com.trib3.data
+package com.trib3
 
 import com.amazonaws.serverless.proxy.jersey.JerseyLambdaContainerHandler
 import com.amazonaws.serverless.proxy.model.AwsProxyRequest
@@ -14,7 +14,7 @@ class TribeServerless: RequestHandler<AwsProxyRequest, AwsProxyResponse> {
     val proxy: JerseyLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse>
 
     constructor() {
-        val app = com.trib3.data.init()
+        val app = TribeApplication.init()
         proxy = JerseyLambdaContainerHandler.getAwsProxyHandler(app.env!!.jersey().resourceConfig)
     }
 

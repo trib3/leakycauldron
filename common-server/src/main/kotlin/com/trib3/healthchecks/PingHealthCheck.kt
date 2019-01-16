@@ -1,4 +1,4 @@
-package com.trib3.data.healthchecks
+package com.trib3.healthchecks
 
 import com.codahale.metrics.health.HealthCheck
 
