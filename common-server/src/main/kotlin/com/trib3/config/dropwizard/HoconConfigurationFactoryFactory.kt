@@ -15,8 +15,7 @@ class HoconConfigurationFactoryFactory<T> : ConfigurationFactoryFactory<T> {
         return HoconConfigurationFactory<T>(
             klass,
             validator,
-            objectMapper,
-            propertyPrefix
+            objectMapper
         )
     }
 

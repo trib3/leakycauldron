@@ -10,26 +10,36 @@ import io.dropwizard.configuration.ConfigurationFactory
 import io.dropwizard.configuration.ConfigurationSourceProvider
 import javax.validation.Validator
 
+/**
+ * A ConfigurationFactory that returns config instantiated by parsing hocon from application.conf
+ */
 class HoconConfigurationFactory<T>(
     val klass: Class<T>,
     val validator: Validator,
-    mapper: ObjectMapper,
-    val propertyPrefix: String
+    mapperArg: ObjectMapper
 ): ConfigurationFactory<T> {
 
     val hoconFactory = HoconFactory()
-    val objectMapper = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    val mapper = mapperArg.copy()
+
+    init {
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    }
+
     /**
-     * Just rely on default hocon rules for loading application.conf
+     * Builds the configuration by delegating to [build()]
      */
     override fun build(provider: ConfigurationSourceProvider, path: String): T {
         return build()
     }
 
+    /**
+     * Builds the configuration from the configuration loaded by [ConfigLoader.load()]
+     */
     override fun build(): T {
         val configRoot = ConfigLoader.load().root()
-        val node: JsonNode = objectMapper.readTree(hoconFactory.createParser(configRoot.render()))
-        val config = objectMapper.readValue(TreeTraversingParser(node), klass)
+        val node: JsonNode = mapper.readTree(hoconFactory.createParser(configRoot.render()))
+        val config = mapper.readValue(TreeTraversingParser(node), klass)
         validator.validate(config)
         return config
     }

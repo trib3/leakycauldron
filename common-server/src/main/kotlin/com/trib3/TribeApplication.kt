@@ -1,86 +1,77 @@
 package com.trib3
 
 import com.codahale.metrics.health.HealthCheck
-import com.google.inject.AbstractModule
-import com.google.inject.Guice
-import com.google.inject.multibindings.Multibinder
 import com.trib3.config.TribeApplicationConfig
-import com.trib3.config.dropwizard.HoconConfigurationFactoryFactory
-import com.trib3.healthchecks.PingHealthCheck
 import com.trib3.healthchecks.VersionHealthCheck
+import com.trib3.modules.DefaultApplicationModule
+import com.trib3.modules.DropwizardApplicationModule
+import com.trib3.modules.TribeApplicationModule
 import io.dropwizard.Application
 import io.dropwizard.Bundle
 import io.dropwizard.Configuration
+import io.dropwizard.configuration.ConfigurationFactoryFactory
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import mu.KotlinLogging
+import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Named
+import javax.servlet.DispatcherType
+import javax.servlet.Filter
 
 
-val log = KotlinLogging.logger { }
-
-/**
- * The default guice module, binds our common health check implementations
- */
-class ApplicationModule() : AbstractModule() {
-    override fun configure() {
-        val healthChecks = Multibinder.newSetBinder(binder(), HealthCheck::class.java)
-        healthChecks.addBinding().to(PingHealthCheck::class.java)
-        healthChecks.addBinding().to(VersionHealthCheck::class.java)
-
-        // Set up a Bundle multibinder, but no Bundles to bind by default right now
-        Multibinder.newSetBinder(binder(), Bundle::class.java)
-    }
-}
+private val log = KotlinLogging.logger { }
 
 /**
- * A dropwizard Application that allows Guice configuration of resources and health checks
+ * A dropwizard Application that allows Guice configuration of the application
  */
 class TribeApplication @Inject constructor(
-    private val appConfig: TribeApplicationConfig,
-    private val dropwizardBundles: Set<@JvmSuppressWildcards Bundle>,
-    @Named(APPLICATION_RESOURCES_BIND_NAME) private val jerseyResources: Set<@JvmSuppressWildcards Any>,
-    private val healthChecks: Set<@JvmSuppressWildcards HealthCheck>
+    val appConfig: TribeApplicationConfig,
+    val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
+    val dropwizardBundles: Set<@JvmSuppressWildcards Bundle>,
+    @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME) val jerseyResources: Set<@JvmSuppressWildcards Any>,
+    val servletFilters: Set<@JvmSuppressWildcards Class<out Filter>>,
+    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>
 ) : Application<Configuration>() {
+    val versionHealthCheck: VersionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck
 
-    // Capture the environment on startup so we can access it later if needed
-    var env: Environment? = null
-    val versionHealthCheck: VersionHealthCheck
-
-    init {
-        versionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck
-    }
-
+    /*
+     * statically initializes a TribeApplication via guice using the modules specified in the application.conf
+     */
     companion object {
-        const val APPLICATION_RESOURCES_BIND_NAME = "ApplicationResources"
+        val INSTANCE: TribeApplication
 
-        fun init(): TribeApplication {
+        init {
             val config = TribeApplicationConfig()
-            val builtinModules = listOf(ApplicationModule())
-            val appModules = config.serviceModules.map {
-                Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
-            }
-            val injector = Guice.createInjector(listOf(builtinModules, appModules).flatten())
-            val app = injector.getInstance(TribeApplication::class.java)
-            app.run("server")
-            return app
+            val injector = config.getInjector(listOf(DefaultApplicationModule(), DropwizardApplicationModule()))
+            INSTANCE = injector.getInstance(TribeApplication::class.java)
         }
     }
 
+    /**
+     * returns the application name
+     */
     override fun getName(): String {
         return appConfig.serviceName
     }
 
+    /**
+     * Bootstraps the application
+     */
     override fun initialize(bootstrap: Bootstrap<Configuration>) {
+        bootstrap.configurationFactoryFactory = configurationFactoryFactory
         dropwizardBundles.forEach(bootstrap::addBundle)
-        bootstrap.configurationFactoryFactory =
-                HoconConfigurationFactoryFactory<Configuration>();
     }
 
+    /**
+     * Runs the application
+     */
     override fun run(conf: Configuration, env: Environment) {
-        this.env = env
         jerseyResources.forEach { env.jersey().register(it) }
+        servletFilters.forEach {
+            env.servlets().addFilter(it.simpleName, it)
+                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
+        }
         healthChecks.forEach { env.healthChecks().register(it::class.simpleName, it) }
         log.info(
             "Initializing service {} in environment {} with version info: {} ",
@@ -91,6 +82,9 @@ class TribeApplication @Inject constructor(
     }
 }
 
+/**
+ * Main entry point.  Always calls the 'server' command.
+ */
 fun main(args: Array<String>) {
-    TribeApplication.init()
+    TribeApplication.INSTANCE.run("server")
 }

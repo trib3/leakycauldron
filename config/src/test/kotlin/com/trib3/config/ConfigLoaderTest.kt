@@ -12,12 +12,12 @@ class ConfigLoaderTest {
     @Test
     fun testDefaultLoad() {
         val config = ConfigLoader.load()
-        val test = config.extract<String?>("testval")
+        val testval = config.extract<String?>("testval")
         val env = config.extract<String?>("env")
         val devtest = config.extract<String?>("devtest")
         val overridefinal = config.extract<String?>("final")
         assert(env).isEqualTo("dev")
-        assert(test).isEqualTo("base")
+        assert(testval).isEqualTo("base")
         assert(devtest).isEqualTo("boom")
         assert(overridefinal).isEqualTo("zzz")
     }
@@ -28,13 +28,37 @@ class ConfigLoaderTest {
         ConfigFactory.invalidateCaches()
         try {
             val config = ConfigLoader.load()
-            val test = config.extract<String?>("testval")
+            val testval = config.extract<String?>("testval")
             val env = config.extract<String?>("env")
             val devtest = config.extract<String?>("devtest")
             val overridefinal = config.extract<String?>("final")
             assert(env).isEqualTo("test")
-            assert(test).isEqualTo("override")
+            assert(testval).isEqualTo("override")
             assert(devtest).isNull()
+            assert(overridefinal).isEqualTo("zzz")
+        } finally {
+            if (oldEnv == null) {
+                System.clearProperty("env")
+            } else {
+                System.setProperty("env", oldEnv)
+            }
+            ConfigFactory.invalidateCaches()
+        }
+    }
+
+    @Test
+    fun testMultiEnvOverrideLoad() {
+        val oldEnv = System.setProperty("env", "test,dev")
+        ConfigFactory.invalidateCaches()
+        try {
+            val config = ConfigLoader.load()
+            val testval = config.extract<String?>("testval")
+            val env = config.extract<String?>("env")
+            val devtest = config.extract<String?>("devtest")
+            val overridefinal = config.extract<String?>("final")
+            assert(env).isEqualTo("test,dev")
+            assert(testval).isEqualTo("override")
+            assert(devtest).isEqualTo("boom")
             assert(overridefinal).isEqualTo("zzz")
         } finally {
             if (oldEnv == null) {

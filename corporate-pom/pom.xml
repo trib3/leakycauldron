@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <version.activation>1.1</version.activation>
+        <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.12</version.assertk>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
@@ -22,11 +23,13 @@
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.0.2</version.dropwizard.metrics>
         <version.guice>4.2.2</version.guice>
+        <version.hk2>2.5.0-b32</version.hk2>
         <version.jackson>2.9.6</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.0</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
+        <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.kotlin>1.3.11</version.kotlin>
         <version.kotlin.logging>1.6.22</version.kotlin.logging>
@@ -41,6 +44,8 @@
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
+        <version.servlet>3.1.0</version.servlet>
+        <version.slf4j>1.7.25</version.slf4j>
         <version.testng>6.14.3</version.testng>
         <version.typesafe.config>1.3.3</version.typesafe.config>
         <version.validation>1.1.0.Final</version.validation>
@@ -78,6 +83,11 @@
                 <artifactId>kotlin-logging</artifactId>
                 <version>${version.kotlin.logging}</version>
             </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
 
             <!-- dropwizard -->
             <dependency>
@@ -106,6 +116,11 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-jetty</artifactId>
+                <version>${version.dropwizard}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-healthchecks</artifactId>
                 <version>${version.dropwizard.metrics}</version>
@@ -131,6 +146,63 @@
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>
                 <version>${version.validation}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${version.servlet}</version>
+            </dependency>
+
+            <!-- jersey (and hk2) -->
+            <dependency>
+                <groupId>org.glassfish.hk2</groupId>
+                <artifactId>hk2-api</artifactId>
+                <version>${version.hk2}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>aopalliance-repackaged</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-common</artifactId>
+                <version>${version.jersey}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>aopalliance-repackaged</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-server</artifactId>
+                <version>${version.jersey}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>aopalliance-repackaged</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.argparse4j</groupId>
+                <artifactId>argparse4j</artifactId>
+                <version>${version.argparse4j}</version>
             </dependency>
 
             <!-- jackson -->

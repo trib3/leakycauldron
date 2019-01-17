@@ -30,15 +30,17 @@ import io.github.config4k.extract
  *     for `ghi`: return "klm" unless the GHI_ENV_VAR is set, in which case it will return its value
  *
  */
-class ConfigLoader {
-    companion object {
-        fun load() : Config {
-            val fullConfig = ConfigFactory.load()
-            val env = fullConfig.extract<String?>("env") ?: "dev"
-            val envOverride = fullConfig.extract<Config?>(env) ?: ConfigFactory.empty()
-            val finalOverrides = fullConfig.extract<Config?>("overrides") ?: ConfigFactory.empty()
-
-            return finalOverrides.withFallback(envOverride).withFallback(fullConfig)
-        }
+object ConfigLoader {
+    /**
+     * Loads config from application.conf with environmental and global overrides
+     */
+    fun load(): Config {
+        val fullConfig = ConfigFactory.load()
+        val env = fullConfig.extract("env") ?: "dev"
+        val envOverride = env.split(",").map {
+            fullConfig.extract(it) ?: ConfigFactory.empty()
+        }.reduce { first, second -> first.withFallback(second) }
+        val finalOverrides = fullConfig.extract("overrides") ?: ConfigFactory.empty()
+        return finalOverrides.withFallback(envOverride).withFallback(fullConfig)
     }
 }
