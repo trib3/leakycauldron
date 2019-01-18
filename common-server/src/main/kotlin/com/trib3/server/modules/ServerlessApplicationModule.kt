@@ -1,4 +1,4 @@
-package com.trib3.modules
+package com.trib3.server.modules
 
 /**
  * Default module for running serverless.  Binds jersey AWS dependencies.

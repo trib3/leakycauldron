@@ -1,4 +1,4 @@
-package com.trib3.config.dropwizard
+package com.trib3.server.config.dropwizard
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode

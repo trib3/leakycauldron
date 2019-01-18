@@ -1,4 +1,4 @@
-package com.trib3.logging
+package com.trib3.server.logging
 
 import mu.KotlinLogging
 import org.slf4j.MDC

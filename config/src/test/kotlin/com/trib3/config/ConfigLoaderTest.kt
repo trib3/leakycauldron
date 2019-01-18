@@ -4,7 +4,6 @@ import assertk.assert
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.typesafe.config.ConfigFactory
-import io.github.config4k.extract
 import org.testng.annotations.Test
 
 class ConfigLoaderTest {
@@ -23,6 +22,17 @@ class ConfigLoaderTest {
     }
 
     @Test
+    fun testPathedLoad() {
+        val config = ConfigLoader.load("subobject")
+        val foo = config.extract<String?>("foo")
+        val bar = config.extract<String?>("bar")
+        val devfoo = config.extract<String?>("devfoo")
+        assert(foo).isEqualTo("bar")
+        assert(bar).isEqualTo("bazbam")
+        assert(devfoo).isEqualTo("bam")
+    }
+
+    @Test
     fun testEnvOverrideLoad() {
         val oldEnv = System.setProperty("env", "test")
         ConfigFactory.invalidateCaches()
@@ -36,6 +46,28 @@ class ConfigLoaderTest {
             assert(testval).isEqualTo("override")
             assert(devtest).isNull()
             assert(overridefinal).isEqualTo("zzz")
+        } finally {
+            if (oldEnv == null) {
+                System.clearProperty("env")
+            } else {
+                System.setProperty("env", oldEnv)
+            }
+            ConfigFactory.invalidateCaches()
+        }
+    }
+
+    @Test
+    fun testPathedEnvOverrideLoad() {
+        val oldEnv = System.setProperty("env", "test")
+        ConfigFactory.invalidateCaches()
+        try {
+            val config = ConfigLoader.load("subobject")
+            val foo = config.extract<String?>("foo")
+            val bar = config.extract<String?>("bar")
+            val devfoo = config.extract<String?>("devfoo")
+            assert(foo).isEqualTo("test")
+            assert(bar).isEqualTo("baz")
+            assert(devfoo).isNull()
         } finally {
             if (oldEnv == null) {
                 System.clearProperty("env")

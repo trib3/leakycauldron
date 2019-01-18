@@ -1,4 +1,4 @@
-package com.trib3.modules
+package com.trib3.server.modules
 
 import com.google.inject.AbstractModule
 import com.google.inject.multibindings.Multibinder

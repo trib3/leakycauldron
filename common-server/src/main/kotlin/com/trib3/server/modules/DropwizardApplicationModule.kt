@@ -1,9 +1,9 @@
-package com.trib3.modules
+package com.trib3.server.modules
 
 import com.codahale.metrics.health.HealthCheck
 import com.google.inject.multibindings.Multibinder
-import com.trib3.healthchecks.PingHealthCheck
-import com.trib3.healthchecks.VersionHealthCheck
+import com.trib3.server.healthchecks.PingHealthCheck
+import com.trib3.server.healthchecks.VersionHealthCheck
 import io.dropwizard.Bundle
 
 /**

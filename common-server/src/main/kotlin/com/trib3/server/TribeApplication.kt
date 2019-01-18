@@ -1,11 +1,11 @@
-package com.trib3
+package com.trib3.server
 
 import com.codahale.metrics.health.HealthCheck
-import com.trib3.config.TribeApplicationConfig
-import com.trib3.healthchecks.VersionHealthCheck
-import com.trib3.modules.DefaultApplicationModule
-import com.trib3.modules.DropwizardApplicationModule
-import com.trib3.modules.TribeApplicationModule
+import com.trib3.server.config.TribeApplicationConfig
+import com.trib3.server.healthchecks.VersionHealthCheck
+import com.trib3.server.modules.DefaultApplicationModule
+import com.trib3.server.modules.DropwizardApplicationModule
+import com.trib3.server.modules.TribeApplicationModule
 import io.dropwizard.Application
 import io.dropwizard.Bundle
 import io.dropwizard.Configuration

@@ -1,16 +1,16 @@
-package com.trib3
+package com.trib3.server
 
 import com.amazonaws.serverless.proxy.jersey.JerseyLambdaContainerHandler
 import com.amazonaws.serverless.proxy.model.AwsProxyRequest
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
-import com.trib3.config.TribeApplicationConfig
-import com.trib3.healthchecks.VersionHealthCheck
-import com.trib3.logging.RequestIdFilter
-import com.trib3.modules.DefaultApplicationModule
-import com.trib3.modules.ServerlessApplicationModule
-import com.trib3.modules.TribeApplicationModule
+import com.trib3.server.config.TribeApplicationConfig
+import com.trib3.server.healthchecks.VersionHealthCheck
+import com.trib3.server.logging.RequestIdFilter
+import com.trib3.server.modules.DefaultApplicationModule
+import com.trib3.server.modules.ServerlessApplicationModule
+import com.trib3.server.modules.TribeApplicationModule
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.cli.ConfiguredCommand

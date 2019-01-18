@@ -1,9 +1,9 @@
-package com.trib3.modules
+package com.trib3.server.modules
 
 import com.google.inject.TypeLiteral
 import com.google.inject.multibindings.Multibinder
-import com.trib3.config.dropwizard.HoconConfigurationFactoryFactory
-import com.trib3.logging.RequestIdFilter
+import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import javax.servlet.Filter

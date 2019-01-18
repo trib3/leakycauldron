@@ -16,12 +16,14 @@
         <version.activation>1.1</version.activation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.12</version.assertk>
+        <version.aws.java>2.3.4</version.aws.java>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
         <version.dropwizard>1.3.8</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.0.2</version.dropwizard.metrics>
+        <version.guava>26.0-jre</version.guava>
         <version.guice>4.2.2</version.guice>
         <version.hk2>2.5.0-b32</version.hk2>
         <version.jackson>2.9.6</version.jackson>
@@ -31,6 +33,7 @@
         <version.jaxrs>2.0.1</version.jaxrs>
         <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
+        <version.jooq>3.11.9</version.jooq>
         <version.kotlin>1.3.11</version.kotlin>
         <version.kotlin.logging>1.6.22</version.kotlin.logging>
         <version.maven.clean>3.1.0</version.maven.clean>
@@ -44,6 +47,7 @@
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
+        <version.redshift>1.2.10.1009</version.redshift>
         <version.servlet>3.1.0</version.servlet>
         <version.slf4j>1.7.25</version.slf4j>
         <version.testng>6.14.3</version.testng>
@@ -55,6 +59,10 @@
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
+        </repository>
+        <repository>
+            <id>redshift</id>
+            <url>https://s3.amazonaws.com/redshift-maven-repository/release</url>
         </repository>
     </repositories>
 
@@ -87,6 +95,14 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${version.slf4j}</version>
+            </dependency>
+
+            <!-- utils -->
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${version.guava}</version>
             </dependency>
 
             <!-- dropwizard -->
@@ -222,6 +238,24 @@
                 <version>${version.jackson}</version>
             </dependency>
 
+            <!-- AWS -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>sdk-core</artifactId>
+                <version>${version.aws.java}</version>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>kms</artifactId>
+                <version>${version.aws.java}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <!-- lambda -->
             <dependency>
                 <groupId>com.amazonaws.serverless</groupId>
@@ -289,6 +323,29 @@
                 <version>${version.jackson.hocon}</version>
             </dependency>
 
+            <!-- jooq (and jdbc drivers) -->
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+                <version>${version.jooq}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-meta</artifactId>
+                <version>${version.jooq}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen</artifactId>
+                <version>${version.jooq}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazon.redshift</groupId>
+                <artifactId>redshift-jdbc42</artifactId>
+                <version>${version.redshift}</version>
+                <scope>runtime</scope>
+            </dependency>
+
             <!-- testing -->
             <dependency>
                 <groupId>org.testng</groupId>
@@ -307,6 +364,12 @@
                         <artifactId>kotlin-stdlib-jdk8</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.easymock</groupId>
+                <artifactId>easymock</artifactId>
+                <version>3.4</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
 
@@ -477,7 +540,7 @@
                                             implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     <transformer
                                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <mainClass>com.trib3.TribeApplicationKt</mainClass>
+                                        <mainClass>com.trib3.server.TribeApplicationKt</mainClass>
                                     </transformer>
                                 </transformers>
                             </configuration>

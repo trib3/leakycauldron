@@ -1,9 +1,10 @@
-package com.trib3.config
+package com.trib3.server.config
 
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.Injector
-import io.github.config4k.extract
+import com.trib3.config.ConfigLoader
+import com.trib3.config.extract
 
 /**
  * Application config object that exposes basic things about the main service and
