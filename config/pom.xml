@@ -39,6 +39,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.authzee.kotlinguice4</groupId>
+            <artifactId>kotlin-guice</artifactId>
+        </dependency>
 
         <!-- AWS -->
         <dependency>

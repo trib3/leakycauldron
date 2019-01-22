@@ -57,6 +57,9 @@ class TribeServerlessApp @Inject constructor(
     }
 
     init {
+        if (System.getProperty("java.io.tempdir") == null) {
+            System.setProperty("java.io.tempdir", "/tmp")
+        }
         val bootstrap = Bootstrap(this)
         bootstrap.configurationFactoryFactory = configurationFactoryFactory
         bootstrap.registerMetrics()
