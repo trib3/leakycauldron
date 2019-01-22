@@ -5,6 +5,7 @@ import com.amazonaws.serverless.proxy.model.AwsProxyRequest
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.authzee.kotlinguice4.getInstance
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
@@ -51,7 +52,7 @@ class TribeServerlessApp @Inject constructor(
         init {
             val config = TribeApplicationConfig()
             val injector = config.getInjector(listOf(DefaultApplicationModule(), ServerlessApplicationModule()))
-            INSTANCE = injector.getInstance(TribeServerlessApp::class.java)!!
+            INSTANCE = injector.getInstance<TribeServerlessApp>()!!
         }
     }
 

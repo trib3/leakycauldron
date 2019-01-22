@@ -1,7 +1,6 @@
 package com.trib3.server.modules
 
-import com.google.inject.TypeLiteral
-import com.google.inject.multibindings.Multibinder
+import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
 import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
@@ -14,10 +13,9 @@ import javax.servlet.Filter
 class DefaultApplicationModule : TribeApplicationModule() {
     override fun configure() {
         // bind HOCON configuration parser
-        bind(object : TypeLiteral<ConfigurationFactoryFactory<Configuration>>() {})
-            .to(object : TypeLiteral<HoconConfigurationFactoryFactory<Configuration>>() {})
-        val filterBinder = Multibinder.newSetBinder(binder(),
-            object : TypeLiteral<Class<out Filter>>() {})
+        bind<ConfigurationFactoryFactory<Configuration>>().to<HoconConfigurationFactoryFactory<Configuration>>()
+
+        val filterBinder = KotlinMultibinder.newSetBinder<Class<out Filter>>(kotlinBinder)
         filterBinder.addBinding().toInstance(RequestIdFilter::class.java)
     }
 }

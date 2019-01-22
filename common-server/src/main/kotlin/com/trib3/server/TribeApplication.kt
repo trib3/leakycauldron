@@ -1,5 +1,6 @@
 package com.trib3.server
 
+import com.authzee.kotlinguice4.getInstance
 import com.codahale.metrics.health.HealthCheck
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
@@ -44,7 +45,7 @@ class TribeApplication @Inject constructor(
         init {
             val config = TribeApplicationConfig()
             val injector = config.getInjector(listOf(DefaultApplicationModule(), DropwizardApplicationModule()))
-            INSTANCE = injector.getInstance(TribeApplication::class.java)
+            INSTANCE = injector.getInstance<TribeApplication>()
         }
     }
 

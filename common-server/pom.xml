@@ -113,6 +113,14 @@
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.authzee.kotlinguice4</groupId>
+            <artifactId>kotlin-guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.authzee.kotlinguice4</groupId>
+            <artifactId>kotlin-guice-multibindings</artifactId>
+        </dependency>
 
         <!-- hocon config -->
         <dependency>
