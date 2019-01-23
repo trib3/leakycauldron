@@ -14,7 +14,7 @@ import javax.inject.Inject
 private val log = KotlinLogging.logger { }
 private val base64 = Base64.getDecoder()!!
 
-class KMSStringReader(val kms: KmsClient?) {
+class KMSStringReader(private val kms: KmsClient?) {
     fun getValue(config: Config, path: String): String? {
         if (config.hasPath(path)) {
             val rawValue = config.getString(path)
@@ -55,7 +55,7 @@ class KMSStringReader(val kms: KmsClient?) {
 }
 
 class KMSStringSelectReader
-@Inject constructor(val kms: KmsClient?) {
+@Inject constructor(private val kms: KmsClient?) {
 
     companion object {
         var _INSTANCE: KMSStringSelectReader = KMSStringSelectReader(null)

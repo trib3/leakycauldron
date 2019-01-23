@@ -14,13 +14,13 @@ import javax.validation.Validator
  * A ConfigurationFactory that returns config instantiated by parsing hocon from application.conf
  */
 class HoconConfigurationFactory<T>(
-    val klass: Class<T>,
-    val validator: Validator,
+    private val klass: Class<T>,
+    private val validator: Validator,
     mapperArg: ObjectMapper
-): ConfigurationFactory<T> {
+) : ConfigurationFactory<T> {
 
-    val hoconFactory = HoconFactory()
-    val mapper = mapperArg.copy()
+    private val hoconFactory = HoconFactory()
+    private val mapper = mapperArg.copy()
 
     init {
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

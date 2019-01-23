@@ -6,6 +6,7 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.authzee.kotlinguice4.getInstance
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
@@ -35,12 +36,15 @@ private val log = KotlinLogging.logger { }
  */
 class TribeServerlessApp @Inject constructor(
     val appConfig: TribeApplicationConfig,
-    configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
+    val objectMapper: ObjectMapper,
+    internal val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    jerseyResources: Set<@JvmSuppressWildcards Any>,
-    servletFilters: Set<@JvmSuppressWildcards Class<out Filter>>,
-    versionHealthCheck: VersionHealthCheck
+    internal val jerseyResources: Set<@JvmSuppressWildcards Any>,
+    internal val servletFilters: Set<@JvmSuppressWildcards Class<out Filter>>,
+    internal val versionHealthCheck: VersionHealthCheck
 ) : Application<Configuration>() {
+
+    val bootstrap = Bootstrap(this)
     val proxy: JerseyLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse>
 
     /*
@@ -57,24 +61,33 @@ class TribeServerlessApp @Inject constructor(
     }
 
     init {
-        if (System.getProperty("java.io.tempdir") == null) {
-            System.setProperty("java.io.tempdir", "/tmp")
-        }
-        val bootstrap = Bootstrap(this)
-        bootstrap.configurationFactoryFactory = configurationFactoryFactory
-        bootstrap.registerMetrics()
+        initialize(bootstrap)
 
         ServerlessCommand().run(bootstrap, Namespace(mapOf()))
+        proxy = run()
 
+    }
+
+    override fun getName(): String {
+        return appConfig.serviceName
+    }
+
+    override fun initialize(bootstrap: Bootstrap<Configuration>) {
+        bootstrap.configurationFactoryFactory = configurationFactoryFactory
+        bootstrap.objectMapper = objectMapper
+        bootstrap.registerMetrics()
+    }
+
+    fun run(): JerseyLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> {
         val resourceConfig = DropwizardResourceConfig(bootstrap.metricRegistry)
         jerseyResources.forEach { resourceConfig.register(it) }
 
-        proxy = JerseyLambdaContainerHandler.getAwsProxyHandler(resourceConfig)
+        val newProxy = JerseyLambdaContainerHandler.getAwsProxyHandler(resourceConfig)
 
-        proxy.onStartup {
-            resourceConfig.setContextPath(proxy.servletContext.contextPath);
+        newProxy.onStartup {
+            resourceConfig.setContextPath(newProxy.servletContext.contextPath);
             servletFilters.forEach {
-                proxy.servletContext.addFilter(it.simpleName, it)
+                newProxy.servletContext.addFilter(it.simpleName, it)
                     .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
             }
         }
@@ -85,26 +98,23 @@ class TribeServerlessApp @Inject constructor(
             appConfig.env,
             versionHealthCheck.info()
         )
-    }
-
-    override fun getName(): String {
-        return appConfig.serviceName
+        return newProxy
     }
 
     override fun run(configuration: Configuration?, environment: Environment?) {
-        // Don't actually get called
+        // do nothing
     }
 }
 
 /**
  * Simple command that lets TribeServerless leverage dropwizard to set up basic bootstrap environment
  */
-class ServerlessCommand : ConfiguredCommand<Configuration>(
+class ServerlessCommand() : ConfiguredCommand<Configuration>(
     "serverless",
     "Command that allows dropwizard bootstrap to happen, but runs nothing"
 ) {
     override fun run(bootstrap: Bootstrap<Configuration>?, namespace: Namespace?, configuration: Configuration?) {
-        // Do nothing!
+        // do nothing
     }
 
 }

@@ -9,10 +9,9 @@ import software.amazon.awssdk.services.kms.KmsClient
 import software.amazon.awssdk.services.kms.model.DecryptRequest
 import software.amazon.awssdk.services.kms.model.DecryptResponse
 
+const val ASSERT_VAL = "valvalval"
+
 class ExtensionTest {
-
-    val ASSERT_VAL = "valvalval"
-
     init {
         val fakeKms = EasyMock.mock(KmsClient::class.java)
         EasyMock.expect(fakeKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))

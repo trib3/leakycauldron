@@ -30,6 +30,7 @@
         <version.hk2>2.5.0-b32</version.hk2>
         <version.jackson>2.9.6</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
+        <version.jacoco>0.8.2</version.jacoco>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.0</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
@@ -40,16 +41,19 @@
         <version.kotlin.guice>1.2.0</version.kotlin.guice>
         <version.kotlin.logging>1.6.22</version.kotlin.logging>
         <version.logback>1.2.3</version.logback>
+        <version.maven.buildhelper>3.0.0</version.maven.buildhelper>
         <version.maven.clean>3.1.0</version.maven.clean>
         <version.maven.compiler>3.8.0</version.maven.compiler>
         <version.maven.dependency>3.1.1</version.maven.dependency>
         <version.maven.deploy>3.0.0-M1</version.maven.deploy>
+        <version.maven.enforcer>3.0.0-M2</version.maven.enforcer>
         <version.maven.failsafe>3.0.0-M3</version.maven.failsafe>
         <version.maven.git>2.2.6</version.maven.git>
         <version.maven.install>3.0.0-M1</version.maven.install>
         <version.maven.jar>3.1.1</version.maven.jar>
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
+        <version.maven.source>3.0.1</version.maven.source>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
         <version.postgres>42.2.5</version.postgres>
         <version.redshift>1.2.16.1027</version.redshift>
@@ -105,11 +109,23 @@
                 <groupId>io.github.microutils</groupId>
                 <artifactId>kotlin-logging</artifactId>
                 <version>${version.kotlin.logging}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-stdlib-common</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${version.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${version.slf4j}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -118,7 +134,6 @@
             </dependency>
 
             <!-- utils -->
-
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -149,6 +164,29 @@
                         <groupId>org.glassfish.hk2.external</groupId>
                         <artifactId>javax.inject</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>joda-time</groupId>
+                        <artifactId>joda-time</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.javassist</groupId>
+                        <artifactId>javassist</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-validator</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-jackson</artifactId>
+                <version>${version.dropwizard}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>joda-time</groupId>
+                        <artifactId>joda-time</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -162,9 +200,36 @@
                 <version>${version.dropwizard}</version>
             </dependency>
             <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-testing</artifactId>
+                <version>${version.dropwizard}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>objenesis</artifactId>
+                        <groupId>org.objenesis</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-healthchecks</artifactId>
                 <version>${version.dropwizard.metrics}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlets</artifactId>
+                <version>${version.dropwizard.metrics}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>joda-time</groupId>
+                        <artifactId>joda-time</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>javax.activation</groupId>
@@ -238,6 +303,10 @@
                         <groupId>org.glassfish.hk2.external</groupId>
                         <artifactId>javax.inject</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.javassist</groupId>
+                        <artifactId>javassist</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -271,12 +340,25 @@
             </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
+                <artifactId>regions</artifactId>
+                <version>${version.aws.java}</version>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
                 <artifactId>kms</artifactId>
                 <version>${version.aws.java}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.reactivestreams</groupId>
+                        <artifactId>reactive-streams</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.typesafe.netty</groupId>
+                        <artifactId>netty-reactive-streams-http</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -425,6 +507,10 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-stdlib-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-stdlib-jdk8</artifactId>
                     </exclusion>
                 </exclusions>
@@ -468,6 +554,10 @@
             <groupId>io.github.microutils</groupId>
             <artifactId>kotlin-logging</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
 
         <!-- testing -->
         <dependency>
@@ -477,6 +567,10 @@
         <dependency>
             <groupId>com.willowtreeapps.assertk</groupId>
             <artifactId>assertk-jvm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
         </dependency>
     </dependencies>
 
@@ -496,6 +590,32 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>${version.maven.clean}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${version.maven.enforcer}</version>
+                    <executions>
+                        <execution>
+                            <id>enforcer</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <rules>
+                            <dependencyConvergence/>
+                            <bannedDependencies>
+                                <excludes>
+                                    <exclude>org.glassfish.hk2.external</exclude>
+                                    <exclude>commons-logging:commons-logging</exclude>
+                                    <exclude>com.google.inject.extensions:guice-multibindings</exclude>
+                                </excludes>
+                            </bannedDependencies>
+                        </rules>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>pl.project13.maven</groupId>
@@ -521,6 +641,38 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${version.maven.resources}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${version.maven.buildhelper}</version>
+
+                    <executions>
+                        <execution>
+                            <id>generate-sources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>src/main/kotlin</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>generate-test-sources</id>
+                            <phase>generate-test-sources</phase>
+                            <goals>
+                                <goal>add-test-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>src/test/kotlin</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.jooq</groupId>
@@ -562,13 +714,6 @@
                             <goals>
                                 <goal>compile</goal>
                             </goals>
-                            <configuration>
-                                <sourceDirs>
-                                    <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                                    <sourceDir>${project.basedir}/src/main/java</sourceDir>
-                                    <sourceDir>${project.basedir}/target/generated-sources/jooq</sourceDir>
-                                </sourceDirs>
-                            </configuration>
                         </execution>
 
                         <execution>
@@ -576,12 +721,6 @@
                             <goals>
                                 <goal>test-compile</goal>
                             </goals>
-                            <configuration>
-                                <sourceDirs>
-                                    <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
-                                    <sourceDir>${project.basedir}/src/test/java</sourceDir>
-                                </sourceDirs>
-                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -618,9 +757,78 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${version.jacoco}</version>
+                    <executions>
+                        <execution>
+                            <id>default-prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <propertyName>jacocoArgLineUnit</propertyName>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>default-prepare-agent-integration</id>
+                            <goals>
+                                <goal>prepare-agent-integration</goal>
+                            </goals>
+                            <configuration>
+                                <propertyName>jacocoArgLineIntegration</propertyName>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>default-report</id>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>default-report-integration</id>
+                            <goals>
+                                <goal>report-integration</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>default-check</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <rule>
+                                        <element>BUNDLE</element>
+                                        <limits>
+                                            <limit>
+                                                <counter>LINE</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.60</minimum>
+                                            </limit>
+                                        </limits>
+                                    </rule>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <excludes>
+                            <exclude>**/jooq/**/*.class</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version.maven.surefire}</version>
+                    <configuration>
+                        <argLine>
+                            ${jacocoArgLineUnit}
+                        </argLine>
+                        <forkCount>10</forkCount>
+                        <reuseForks>false</reuseForks>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -727,6 +935,25 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${version.maven.failsafe}</version>
+                    <configuration>
+                        <argLine>
+                            ${jacocoArgLineIntegration}
+                        </argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${version.maven.source}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -744,12 +971,28 @@
         <!-- plugins that all modules should invoke -->
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

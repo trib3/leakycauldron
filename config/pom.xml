@@ -53,6 +53,10 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>kms</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>regions</artifactId>
+        </dependency>
 
         <!-- testing -->
         <dependency>

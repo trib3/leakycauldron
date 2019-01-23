@@ -1,5 +1,6 @@
 package com.trib3.config
 
+import assertk.all
 import assertk.assert
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
@@ -10,15 +11,24 @@ class ConfigLoaderTest {
 
     @Test
     fun testDefaultLoad() {
+        KMSStringSelectReader._INSTANCE = KMSStringSelectReader(null)
         val config = ConfigLoader.load()
         val testval = config.extract<String?>("testval")
         val env = config.extract<String?>("env")
         val devtest = config.extract<String?>("devtest")
         val overridefinal = config.extract<String?>("final")
+        val enc = config.extract<String>("encryptedobject.encryptedval")
         assert(env).isEqualTo("dev")
         assert(testval).isEqualTo("base")
         assert(devtest).isEqualTo("boom")
         assert(overridefinal).isEqualTo("zzz")
+        assert(enc).isEqualTo("KMS(testtesttest)")
+
+        // test case conversion
+        assert(config.extract<String>("lowerCamel")).all {
+            isEqualTo(config.extract<String>("lower-camel"))
+            isEqualTo("test")
+        }
     }
 
     @Test

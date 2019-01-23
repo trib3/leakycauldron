@@ -8,7 +8,7 @@ import org.jooq.DSLContext
 import javax.inject.Singleton
 import javax.sql.DataSource
 
-class DbModule(val configPath: String = "db") : AbstractModule() {
+class DbModule(private val configPath: String = "db") : AbstractModule() {
     override fun configure() {
         install(KMSModule())
     }

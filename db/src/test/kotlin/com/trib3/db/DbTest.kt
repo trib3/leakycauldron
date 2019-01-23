@@ -3,19 +3,28 @@ package com.trib3.db
 import assertk.all
 import assertk.assert
 import assertk.assertions.contains
+import assertk.assertions.isEqualTo
+import com.trib3.db.config.DbConfig
 import com.trib3.db.modules.DbModule
 import org.jooq.DSLContext
+import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import javax.inject.Inject
+import javax.sql.DataSource
 
 /**
  * Test that ensures that the module enables injection of a dslContext that can connect to the database
  * and run simple queries against the information_schema
  */
 @Guice(modules = [DbModule::class])
-class DbTest @Inject constructor(val dslContext: DSLContext) {
+class DbTest
+@Inject constructor(
+    val dbConfig: DbConfig,
+    val dslContext: DSLContext,
+    val dataSource: DataSource
+) {
     @Test
     fun testDb() {
         val tableNames = dslContext
@@ -28,5 +37,30 @@ class DbTest @Inject constructor(val dslContext: DSLContext) {
             contains("sequences")
             contains("views")
         }
+    }
+
+    @Test
+    fun testRawJdbc() {
+        val row = dataSource.connection.use { conn ->
+            conn.createStatement().use { statement ->
+                statement.executeQuery(
+                    """
+                    select table_name from information_schema.tables
+                    where table_schema = 'information_schema'
+                    and table_name = 'tables'
+                    """
+                ).use { rs ->
+                    rs.next(); rs.getString("table_name")
+                }
+            }
+        }
+        assert(row).isEqualTo("tables")
+    }
+
+    @Test
+    fun testConfig() {
+        assert(dbConfig.dataSource).isEqualTo(this.dataSource)
+        assert(dbConfig.dslContext).isEqualTo(this.dslContext)
+        assert(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES_10)
     }
 }
