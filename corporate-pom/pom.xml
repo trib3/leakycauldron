@@ -481,8 +481,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <resources>
             <resource>
                 <filtering>true</filtering>
@@ -525,6 +523,33 @@
                     <version>${version.maven.resources}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.jooq</groupId>
+                    <artifactId>jooq-codegen-maven</artifactId>
+                    <version>${version.jooq}</version>
+                    <executions>
+                        <execution>
+                            <id>jooq-codegen</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <generator>
+                            <name>org.jooq.codegen.DefaultGenerator</name>
+                            <database>
+                                <name>org.jooq.meta.jdbc.JDBCDatabase</name>
+                                <outputSchemaToDefault>true</outputSchemaToDefault>
+                                <inputSchema>public</inputSchema>
+                            </database>
+                            <target>
+                                <!--directory>src/generated/java</directory-->
+                            </target>
+                        </generator>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <artifactId>kotlin-maven-plugin</artifactId>
                     <groupId>org.jetbrains.kotlin</groupId>
                     <version>${version.kotlin}</version>
@@ -537,6 +562,13 @@
                             <goals>
                                 <goal>compile</goal>
                             </goals>
+                            <configuration>
+                                <sourceDirs>
+                                    <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                                    <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                                    <sourceDir>${project.basedir}/target/generated-sources/jooq</sourceDir>
+                                </sourceDirs>
+                            </configuration>
                         </execution>
 
                         <execution>
@@ -544,6 +576,12 @@
                             <goals>
                                 <goal>test-compile</goal>
                             </goals>
+                            <configuration>
+                                <sourceDirs>
+                                    <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                                    <sourceDir>${project.basedir}/src/test/java</sourceDir>
+                                </sourceDirs>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -562,6 +600,20 @@
                         <execution>
                             <id>default-testCompile</id>
                             <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>java-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>java-test-compile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
@@ -719,6 +771,10 @@
                     <plugin>
                         <artifactId>kotlin-maven-plugin</artifactId>
                         <groupId>org.jetbrains.kotlin</groupId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

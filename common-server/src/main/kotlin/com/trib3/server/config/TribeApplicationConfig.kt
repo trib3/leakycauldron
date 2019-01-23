@@ -30,6 +30,7 @@ class TribeApplicationConfig {
         // since we instantiate things before the Application's constructor gets called, bootstrap the
         // logging so that we don't log things we don't want to during instantiation
         BootstrapLogging.bootstrap(Level.WARN)
+        System.setProperty("org.jooq.no-logo", "true")
         val appModules = serviceModules.map {
             Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
         }

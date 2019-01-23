@@ -52,7 +52,7 @@ class TribeServerlessApp @Inject constructor(
         init {
             val config = TribeApplicationConfig()
             val injector = config.getInjector(listOf(DefaultApplicationModule(), ServerlessApplicationModule()))
-            INSTANCE = injector.getInstance<TribeServerlessApp>()!!
+            INSTANCE = injector.getInstance<TribeServerlessApp>()
         }
     }
 
