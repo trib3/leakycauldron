@@ -10,7 +10,7 @@ import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletResponse
 
-private val log = KotlinLogging.logger {  }
+private val log = KotlinLogging.logger { }
 
 /**
  * A Filter that decorates the logging context MDC with a unique
@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger {  }
  * response HTTP headers will include an `X-Request-Id` with the
  * RequestId value in it.
  */
-class RequestIdFilter: Filter {
+class RequestIdFilter : Filter {
 
     companion object {
         const val REQUEST_ID_KEY = "RequestId"
@@ -54,5 +54,4 @@ class RequestIdFilter: Filter {
             }
         }
     }
-
 }

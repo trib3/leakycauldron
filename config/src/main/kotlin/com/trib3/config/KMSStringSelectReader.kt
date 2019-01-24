@@ -64,7 +64,7 @@ class KMSStringSelectReader
     }
 
     init {
-        _INSTANCE = this  // last construction wins
+        _INSTANCE = this // last construction wins
     }
 
     /**

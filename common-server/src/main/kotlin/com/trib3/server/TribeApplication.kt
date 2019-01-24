@@ -21,7 +21,6 @@ import javax.inject.Named
 import javax.servlet.DispatcherType
 import javax.servlet.Filter
 
-
 private val log = KotlinLogging.logger { }
 
 /**

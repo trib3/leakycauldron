@@ -18,5 +18,4 @@ class HoconConfigurationFactoryFactory<T> : ConfigurationFactoryFactory<T> {
             objectMapper
         )
     }
-
 }

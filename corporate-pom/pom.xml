@@ -51,6 +51,7 @@
         <version.maven.git>2.2.6</version.maven.git>
         <version.maven.install>3.0.0-M1</version.maven.install>
         <version.maven.jar>3.1.1</version.maven.jar>
+        <version.maven.ktlint>0.9.16</version.maven.ktlint>
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
         <version.maven.source>3.0.1</version.maven.source>
@@ -649,8 +650,8 @@
 
                     <executions>
                         <execution>
-                            <id>generate-sources</id>
-                            <phase>generate-sources</phase>
+                            <id>kotlin-sources</id>
+                            <phase>initialize</phase>
                             <goals>
                                 <goal>add-source</goal>
                             </goals>
@@ -661,8 +662,8 @@
                             </configuration>
                         </execution>
                         <execution>
-                            <id>generate-test-sources</id>
-                            <phase>generate-test-sources</phase>
+                            <id>kotlin-test-sources</id>
+                            <phase>initialize</phase>
                             <goals>
                                 <goal>add-test-source</goal>
                             </goals>
@@ -695,11 +696,22 @@
                                 <outputSchemaToDefault>true</outputSchemaToDefault>
                                 <inputSchema>public</inputSchema>
                             </database>
-                            <target>
-                                <!--directory>src/generated/java</directory-->
-                            </target>
                         </generator>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.gantsign.maven</groupId>
+                    <artifactId>ktlint-maven-plugin</artifactId>
+                    <version>${version.maven.ktlint}</version>
+                    <executions>
+                        <execution>
+                            <id>format-and-check</id>
+                            <goals>
+                                <goal>format</goal>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>kotlin-maven-plugin</artifactId>
@@ -973,6 +985,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.gantsign.maven</groupId>
+                <artifactId>ktlint-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>pl.project13.maven</groupId>

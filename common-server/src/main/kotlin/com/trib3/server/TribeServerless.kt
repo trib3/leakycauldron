@@ -65,7 +65,6 @@ class TribeServerlessApp @Inject constructor(
 
         ServerlessCommand().run(bootstrap, Namespace(mapOf()))
         proxy = run()
-
     }
 
     override fun getName(): String {
@@ -85,7 +84,7 @@ class TribeServerlessApp @Inject constructor(
         val newProxy = JerseyLambdaContainerHandler.getAwsProxyHandler(resourceConfig)
 
         newProxy.onStartup {
-            resourceConfig.setContextPath(newProxy.servletContext.contextPath);
+            resourceConfig.setContextPath(newProxy.servletContext.contextPath)
             servletFilters.forEach {
                 newProxy.servletContext.addFilter(it.simpleName, it)
                     .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
@@ -109,14 +108,13 @@ class TribeServerlessApp @Inject constructor(
 /**
  * Simple command that lets TribeServerless leverage dropwizard to set up basic bootstrap environment
  */
-class ServerlessCommand() : ConfiguredCommand<Configuration>(
+class ServerlessCommand : ConfiguredCommand<Configuration>(
     "serverless",
     "Command that allows dropwizard bootstrap to happen, but runs nothing"
 ) {
     override fun run(bootstrap: Bootstrap<Configuration>?, namespace: Namespace?, configuration: Configuration?) {
         // do nothing
     }
-
 }
 
 /**
@@ -134,5 +132,4 @@ class TribeServerless : RequestHandler<AwsProxyRequest, AwsProxyResponse> {
             MDC.remove("RequestId")
         }
     }
-
 }

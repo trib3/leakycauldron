@@ -28,6 +28,5 @@ class ExtensionTest {
         val nestedConfig = config.getConfig("encryptedobject")
         assert(nestedConfig.extract<String>("encryptedval")).isEqualTo(ASSERT_VAL)
         assert(nestedConfig.extract<String>("unencryptedval")).isEqualTo(ASSERT_VAL)
-
     }
 }

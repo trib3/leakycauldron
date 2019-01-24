@@ -38,7 +38,7 @@ class VersionHealthCheck : HealthCheck() {
         return info
     }
 
-    override public fun check(): Result {
+    public override fun check(): Result {
         val resultBuilder = Result.builder().withMessage(info)
         return when (healthy) {
             true -> resultBuilder.healthy().build()

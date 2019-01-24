@@ -35,7 +35,7 @@ class TribeApplicationConfig {
             Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
         }
         val injector = Guice.createInjector(listOf(builtinModules, appModules).flatten())
-        injector.getInstance<KMSStringSelectReader>()  // force load of KMS
+        injector.getInstance<KMSStringSelectReader>() // force load of KMS
         return injector
     }
 }
