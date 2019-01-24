@@ -12,7 +12,5 @@ script:
 before_script:
   - "createuser -d tribe"
   - "psql -c 'create database tribe;' -U tribe postgres"
-after_success:
-  - bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
 after_failure:
   - find . -name '*.dump*' -exec echo '=====' \; -exec echo {} \; -exec cat {} \;

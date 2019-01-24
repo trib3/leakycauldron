@@ -826,7 +826,7 @@
                         <argLine>
                             ${jacocoArgLineUnit}
                         </argLine>
-                        <forkCount>10</forkCount>
+                        <forkCount>5</forkCount>
                         <reuseForks>false</reuseForks>
                     </configuration>
                 </plugin>
