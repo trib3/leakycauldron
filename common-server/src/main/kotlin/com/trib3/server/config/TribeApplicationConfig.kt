@@ -22,8 +22,8 @@ class TribeApplicationConfig {
     init {
         val config = ConfigLoader.load()
         env = config.extract("env")
-        serviceName = config.extract("service.name")
-        serviceModules = config.extract("service.modules")
+        serviceName = config.extract("application.name")
+        serviceModules = config.extract("application.modules")
     }
 
     fun getInjector(builtinModules: List<AbstractModule>): Injector {

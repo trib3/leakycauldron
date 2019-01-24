@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.trib3.data-service</groupId>
+        <groupId>com.trib3.pebbles</groupId> <!-- TODO: extract to a common repo -->
         <artifactId>parent</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
