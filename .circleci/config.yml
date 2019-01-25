@@ -13,19 +13,62 @@ jobs:
       MAVEN_OPTS: -Xmx128m
 
     steps:
+      # get code
       - checkout
-
+      # handle dependency caching and run build
       - restore_cache:
           keys:
             - v1-dependencies-{{ .Branch }}-{{ .Revision }}
             - v1-dependencies-{{ .Branch }}
             - v1-dependencies-
-
       - run: mvn install
-
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ .Branch }}-{{ .Revision }}
-
+      # collect test results and upload coverage
+      - run: mkdir -p ~/test_results
+      - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;
+      - store_test_results:
+          path: ~/test_results
+      - store_artifacts:
+          path: ~/test_results
       - run: bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
+      # collect built jars and save to workspace for deploy
+      - run: mkdir -p ~/jars
+      - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
+      - store_artifacts:
+          path: ~/jars
+      - persist_to_workspace:
+          root: ~/jars
+          paths:
+            - .
+
+  deploy:
+    docker:
+      - image: circleci/python:3.6 # more likely to already be on the new host than the java image
+    steps:
+      - attach_workspace:
+          at: ~/jars
+      - run: sudo apt install awscli
+      - run: aws lambda update-function-code --function-name ${AWS_LAMBDA_FUNCTION_NAME} --zip-file fileb://`ls ~/jars/server-*-shaded.jar`
+
+workflows:
+  version: 2
+  build_pipeline:
+    jobs:
+      - build
+      - hold:
+          type: approval
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only: master
+
