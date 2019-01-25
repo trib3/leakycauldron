@@ -9,6 +9,8 @@ import org.jooq.impl.DSL
 import javax.inject.Inject
 import javax.sql.DataSource
 
+private const val POSTGRES_DEFAULT_PORT = 5432
+
 class DbConfig
 @Inject constructor(loader: ConfigLoader, configPath: String) {
     val dialect: SQLDialect
@@ -20,7 +22,7 @@ class DbConfig
 
         val subprotocol = config.extract("subprotocol") ?: "postgresql"
         val host = config.extract("host") ?: "localhost"
-        val port = config.extract("port") ?: 5432
+        val port = config.extract("port") ?: POSTGRES_DEFAULT_PORT
         val schema: String = config.extract("schema") ?: ""
         val driverClassName = config.extract("driverClassName") ?: "org.postgresql.Driver"
         val username = config.extract("user") ?: "tribe"

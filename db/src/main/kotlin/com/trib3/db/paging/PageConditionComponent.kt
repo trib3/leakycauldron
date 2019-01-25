@@ -48,12 +48,12 @@ data class PageConditionComponent<T>(
 
         /**
          * Generates a jooq [Condition] from the current paging state and desired sort direction.
-         * When the sort is [SortDirection.DESC], elements that satisfy the condition will be < the paging state.  To satisfy that condition,
-         * they will be < the first paging state component OR == the first and < the second, OR == the first and second and
-         * < the third, etc etc
-         * When the sort is [SortDirection.ASC], elements that satisfy the condition will be > the paging state.  To satisfy that condition,
-         * they will be > the first paging state component OR == the first and > the second, OR == the first and second and
-         * > the third, etc etc
+         * When the sort is [SortDirection.DESC], elements that satisfy the condition will be < the paging state.
+         * To satisfy that condition, they will be < the first paging state component OR == the first and < the
+         * second, OR == the first and second and < the third, etc etc
+         * When the sort is [SortDirection.ASC], elements that satisfy the condition will be > the paging state.
+         * To satisfy that condition, they will be > the first paging state component OR == the first and > the
+         * second, OR == the first and second and > the third, etc etc
          */
         fun getPageCondition(
             sortDirection: SortDirection,

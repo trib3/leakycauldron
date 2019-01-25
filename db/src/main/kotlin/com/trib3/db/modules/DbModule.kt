@@ -13,7 +13,7 @@ import javax.sql.DataSource
  * Module that exposes a [DbConfig] and that [DbConfig]'s [DataSource] and [DSLContext] for
  * use in applications.  Assumes the database config is in application.conf at "db"
  */
-class DbModule() : AbstractModule() {
+class DbModule : AbstractModule() {
     override fun configure() {
         install(KMSModule())
     }

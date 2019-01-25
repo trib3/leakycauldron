@@ -16,19 +16,13 @@ private val base64 = Base64.getDecoder()!!
 
 class KMSStringReader(private val kms: KmsClient?) {
     fun getValue(config: Config, path: String): String? {
-        if (config.hasPath(path)) {
-            val rawValue = config.getString(path)
-            return process(rawValue, path)
-        }
-
         // If path not present, try converting it to hyphenated case and try again. This is the
         // preferred format for HOCON files.
-        val hyphenPath = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, path)
-        if (config.hasPath(hyphenPath)) {
-            val rawValue = config.getString(hyphenPath)
-            return process(rawValue, hyphenPath)
+        val lookupPath = if (config.hasPath(path)) path else CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, path)
+        if (config.hasPath(lookupPath)) {
+            val rawValue = config.getString(lookupPath)
+            return process(rawValue, lookupPath)
         }
-
         // Else return null
         return null
     }
@@ -58,7 +52,7 @@ class KMSStringSelectReader
 @Inject constructor(private val kms: KmsClient?) {
 
     companion object {
-        var _INSTANCE: KMSStringSelectReader = KMSStringSelectReader(null)
+        private var _INSTANCE: KMSStringSelectReader = KMSStringSelectReader(null)
         val INSTANCE: KMSStringSelectReader
             get() = _INSTANCE
     }
