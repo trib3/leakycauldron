@@ -18,7 +18,7 @@ class ServerlessApplicationModuleTest
 ) {
     @Test
     fun testBindings() {
-        assert(resources.map { it -> it::class }).all {
+        assert(resources.map { it::class }).all {
             contains(ExceptionMapperBinder::class)
             contains(JacksonBinder::class)
         }

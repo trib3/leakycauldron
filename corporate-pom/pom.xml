@@ -30,12 +30,13 @@
         <version.hk2>2.5.0-b32</version.hk2>
         <version.jackson>2.9.6</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
-        <version.jacoco>0.8.2</version.jacoco>
+        <version.jacoco>0.8.3</version.jacoco>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.0</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
         <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
+        <version.jetty>9.4.11.v20180605</version.jetty>
         <version.jooq>3.11.9</version.jooq>
         <version.kotlin>1.3.11</version.kotlin>
         <version.kotlin.guice>1.2.0</version.kotlin.guice>
@@ -60,6 +61,7 @@
         <version.redshift>1.2.16.1027</version.redshift>
         <version.servlet>3.1.0</version.servlet>
         <version.slf4j>1.7.25</version.slf4j>
+        <version.swagger>2.0.6</version.swagger>
         <version.testng>6.14.3</version.testng>
         <version.typesafe.config>1.3.3</version.typesafe.config>
         <version.validation>1.1.0.Final</version.validation>
@@ -140,6 +142,11 @@
                 <artifactId>guava</artifactId>
                 <version>${version.guava}</version>
             </dependency>
+            <dependency>
+                <groupId>net.sourceforge.argparse4j</groupId>
+                <artifactId>argparse4j</artifactId>
+                <version>${version.argparse4j}</version>
+            </dependency>
 
             <!-- dropwizard -->
             <dependency>
@@ -202,13 +209,18 @@
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-servlets</artifactId>
+                <version>${version.dropwizard}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-testing</artifactId>
                 <version>${version.dropwizard}</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <artifactId>objenesis</artifactId>
                         <groupId>org.objenesis</groupId>
+                        <artifactId>objenesis</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.glassfish.hk2.external</groupId>
@@ -310,11 +322,51 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- jetty -->
             <dependency>
-                <groupId>net.sourceforge.argparse4j</groupId>
-                <artifactId>argparse4j</artifactId>
-                <version>${version.argparse4j}</version>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlets</artifactId>
+                <version>${version.jetty}</version>
             </dependency>
+
+            <!-- swagger -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${version.swagger}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-integration</artifactId>
+                <version>${version.swagger}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                        <artifactId>jackson-jaxrs-json-provider</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-jaxrs2</artifactId>
+                <version>${version.swagger}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                        <artifactId>jackson-jaxrs-json-provider</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
 
             <!-- jackson -->
             <dependency>
@@ -350,8 +402,8 @@
                 <version>${version.aws.java}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.reactivestreams</groupId>
@@ -376,8 +428,8 @@
                 <version>${version.aws.serverless}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -714,8 +766,8 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <artifactId>kotlin-maven-plugin</artifactId>
                     <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-plugin</artifactId>
                     <version>${version.kotlin}</version>
                     <configuration>
                         <jvmTarget>1.8</jvmTarget>
@@ -987,10 +1039,6 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>com.github.gantsign.maven</groupId>
-                <artifactId>ktlint-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
@@ -1028,8 +1076,12 @@
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>kotlin-maven-plugin</artifactId>
+                        <groupId>com.github.gantsign.maven</groupId>
+                        <artifactId>ktlint-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
                         <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>

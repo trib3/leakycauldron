@@ -14,16 +14,22 @@ import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
+import io.dropwizard.jersey.DropwizardResourceConfig
 import io.dropwizard.jersey.setup.JerseyEnvironment
 import io.dropwizard.jetty.setup.ServletEnvironment
+import io.dropwizard.setup.AdminEnvironment
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
+import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import org.easymock.EasyMock
 import org.easymock.EasyMock.anyObject
 import org.easymock.EasyMock.anyString
-import org.easymock.EasyMock.eq
+import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.testng.annotations.Test
+import javax.servlet.Filter
 import javax.servlet.FilterRegistration
+import javax.servlet.Servlet
+import javax.servlet.ServletRegistration
 
 class TribeApplicationTest {
     val instance = TribeApplication.INSTANCE
@@ -32,16 +38,25 @@ class TribeApplicationTest {
     fun testFields() {
         assert(instance.name).all {
             isEqualTo("Test")
-            isEqualTo(instance.appConfig.serviceName)
+            isEqualTo(instance.appConfig.appName)
         }
-        assert(instance.healthChecks.map { it -> it::class }).all {
+        assert(instance.healthChecks.map { it::class }).all {
             contains(VersionHealthCheck::class)
             contains(PingHealthCheck::class)
         }
-        assert(instance.servletFilters).all {
+        assert(instance.servletFilterConfigs.map { it.filterClass }).all {
             contains(RequestIdFilter::class.java)
+            contains(CrossOriginFilter::class.java)
+        }
+        assert(instance.adminServlets.map { it.name }).all {
+            contains("SwaggerAssetServlet")
+            contains(OpenApiServlet::class.simpleName)
         }
         assert(instance.versionHealthCheck).isNotNull()
+        assert(instance.appServlets).isNotNull()
+        assert(instance.dropwizardBundles).isNotNull()
+        assert(instance.jerseyResources).isNotNull()
+        assert(instance.jaxrsAppProcessors).isNotNull()
     }
 
     @Test
@@ -61,21 +76,44 @@ class TribeApplicationTest {
         val mockConf = EasyMock.mock(Configuration::class.java)
         val mockEnv = EasyMock.mock(Environment::class.java)
         val mockJersey = EasyMock.mock(JerseyEnvironment::class.java)
+        val mockAdmin = EasyMock.mock(AdminEnvironment::class.java)
         val mockServlet = EasyMock.mock(ServletEnvironment::class.java)
         val mockHealthChecks = EasyMock.mock(HealthCheckRegistry::class.java)
+        val mockServletRegistration = EasyMock.niceMock(ServletRegistration.Dynamic::class.java)
+        val mockFilterRegistration = EasyMock.niceMock(FilterRegistration.Dynamic::class.java)
         EasyMock.expect(mockEnv.jersey()).andReturn(mockJersey).anyTimes()
+        EasyMock.expect(mockJersey.resourceConfig).andReturn(DropwizardResourceConfig()).anyTimes()
+        EasyMock.expect(mockEnv.admin()).andReturn(mockAdmin).anyTimes()
+        EasyMock.expect(mockAdmin.addServlet(anyString(), anyObject<Servlet>()))
+            .andReturn(mockServletRegistration)
+            .anyTimes()
         EasyMock.expect(mockEnv.servlets()).andReturn(mockServlet).anyTimes()
         EasyMock.expect(mockEnv.healthChecks()).andReturn(mockHealthChecks).anyTimes()
-        EasyMock.expect(mockServlet.addFilter(anyString(), eq(RequestIdFilter::class.java))).andReturn(
-            EasyMock.mock(
-                FilterRegistration.Dynamic::class.java
-            )
-        ).once()
-        EasyMock.expect(mockHealthChecks.register(anyString(), anyObject(VersionHealthCheck::class.java))).once()
-        EasyMock.expect(mockHealthChecks.register(anyString(), anyObject(PingHealthCheck::class.java))).once()
+        EasyMock.expect(mockServlet.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
+            .andReturn(mockFilterRegistration).anyTimes()
+        EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<VersionHealthCheck>())).once()
+        EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<PingHealthCheck>())).once()
 
-        EasyMock.replay(mockConf, mockEnv, mockJersey, mockServlet, mockHealthChecks)
+        EasyMock.replay(
+            mockConf,
+            mockEnv,
+            mockAdmin,
+            mockJersey,
+            mockServlet,
+            mockHealthChecks,
+            mockServletRegistration,
+            mockFilterRegistration
+        )
         instance.run(mockConf, mockEnv)
-        EasyMock.verify(mockConf, mockEnv, mockJersey, mockServlet, mockHealthChecks)
+        EasyMock.verify(
+            mockConf,
+            mockEnv,
+            mockAdmin,
+            mockJersey,
+            mockServlet,
+            mockHealthChecks,
+            mockServletRegistration,
+            mockFilterRegistration
+        )
     }
 }

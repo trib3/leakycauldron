@@ -20,7 +20,7 @@ class DropwizardApplicationModuleTest
 ) {
     @Test
     fun testBindings() {
-        assert(healthchecks.map { it -> it::class }).all {
+        assert(healthchecks.map { it::class }).all {
             contains(VersionHealthCheck::class)
             contains(PingHealthCheck::class)
         }

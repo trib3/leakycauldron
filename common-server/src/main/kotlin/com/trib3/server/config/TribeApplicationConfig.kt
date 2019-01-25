@@ -8,6 +8,7 @@ import com.google.inject.Injector
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
 import com.trib3.config.extract
+import com.typesafe.config.Config
 import io.dropwizard.logging.BootstrapLogging
 
 /**
@@ -16,14 +17,20 @@ import io.dropwizard.logging.BootstrapLogging
  */
 class TribeApplicationConfig {
     val env: String
-    val serviceName: String
-    val serviceModules: List<String>
+    val appName: String
+    val appModules: List<String>
+    val corsDomain: String
+    val appPort: Int
+    val adminPort: Int
 
     init {
         val config = ConfigLoader.load()
         env = config.extract("env")
-        serviceName = config.extract("application.name")
-        serviceModules = config.extract("application.modules")
+        appName = config.extract("application.name")
+        appModules = config.extract("application.modules")
+        corsDomain = config.extract("application.domain")
+        appPort = config.extract<List<Config>>("server.applicationConnectors").first().getInt("port")
+        adminPort = config.extract<List<Config>>("server.adminConnectors").first().getInt("port")
     }
 
     fun getInjector(builtinModules: List<AbstractModule>): Injector {
@@ -31,7 +38,7 @@ class TribeApplicationConfig {
         // logging so that we don't log things we don't want to during instantiation
         BootstrapLogging.bootstrap(Level.WARN)
         System.setProperty("org.jooq.no-logo", "true")
-        val appModules = serviceModules.map {
+        val appModules = appModules.map {
             Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
         }
         val injector = Guice.createInjector(listOf(builtinModules, appModules).flatten())

@@ -15,8 +15,8 @@ class TribeApplicationConfigTest {
         val config = TribeApplicationConfig()
         val injector = config.getInjector(listOf())
         assert(config.env).isEqualTo("dev")
-        assert(config.serviceName).isEqualTo("Test")
-        assert(config.serviceModules).contains(KMSModule::class.qualifiedName)
+        assert(config.appName).isEqualTo("Test")
+        assert(config.appModules).contains(KMSModule::class.qualifiedName)
         assert(injector).isNotNull()
         assert(injector.getInstance<KMSStringSelectReader>()).isNotNull()
     }

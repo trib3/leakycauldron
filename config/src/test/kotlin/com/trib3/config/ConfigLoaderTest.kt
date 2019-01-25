@@ -90,7 +90,7 @@ class ConfigLoaderTest {
 
     @Test
     fun testMultiEnvOverrideLoad() {
-        val oldEnv = System.setProperty("env", "test,dev")
+        val oldEnv = System.setProperty("env", "test,dev,unknown")
         ConfigFactory.invalidateCaches()
         try {
             val config = ConfigLoader.load()
@@ -98,7 +98,7 @@ class ConfigLoaderTest {
             val env = config.extract<String?>("env")
             val devtest = config.extract<String?>("devtest")
             val overridefinal = config.extract<String?>("final")
-            assert(env).isEqualTo("test,dev")
+            assert(env).isEqualTo("test,dev,unknown")
             assert(testval).isEqualTo("override")
             assert(devtest).isEqualTo("boom")
             assert(overridefinal).isEqualTo("zzz")

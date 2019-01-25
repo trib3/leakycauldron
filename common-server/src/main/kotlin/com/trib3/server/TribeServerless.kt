@@ -12,6 +12,7 @@ import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.ServerlessApplicationModule
+import com.trib3.server.modules.ServletFilterConfig
 import com.trib3.server.modules.TribeApplicationModule
 import io.dropwizard.Application
 import io.dropwizard.Configuration
@@ -27,7 +28,6 @@ import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Named
 import javax.servlet.DispatcherType
-import javax.servlet.Filter
 
 private val log = KotlinLogging.logger { }
 
@@ -40,7 +40,7 @@ class TribeServerlessApp @Inject constructor(
     internal val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
     internal val jerseyResources: Set<@JvmSuppressWildcards Any>,
-    internal val servletFilters: Set<@JvmSuppressWildcards Class<out Filter>>,
+    internal val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
     internal val versionHealthCheck: VersionHealthCheck
 ) : Application<Configuration>() {
 
@@ -68,7 +68,7 @@ class TribeServerlessApp @Inject constructor(
     }
 
     override fun getName(): String {
-        return appConfig.serviceName
+        return appConfig.appName
     }
 
     override fun initialize(bootstrap: Bootstrap<Configuration>) {
@@ -85,15 +85,16 @@ class TribeServerlessApp @Inject constructor(
 
         newProxy.onStartup {
             resourceConfig.setContextPath(newProxy.servletContext.contextPath)
-            servletFilters.forEach {
-                newProxy.servletContext.addFilter(it.simpleName, it)
-                    .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
+            servletFilterConfigs.forEach {
+                val filter = newProxy.servletContext.addFilter(it.filterClass.simpleName, it.filterClass)
+                filter.initParameters = it.initParameters
+                filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
             }
         }
 
         log.info(
             "Initializing service {} in environment {} with version info: {} ",
-            appConfig.serviceName,
+            appConfig.appName,
             appConfig.env,
             versionHealthCheck.info()
         )

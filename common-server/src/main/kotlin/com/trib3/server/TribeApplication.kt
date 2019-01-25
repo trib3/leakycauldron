@@ -7,11 +7,15 @@ import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.DropwizardApplicationModule
+import com.trib3.server.modules.ServletConfig
+import com.trib3.server.modules.ServletFilterConfig
 import com.trib3.server.modules.TribeApplicationModule
+import com.trib3.server.swagger.JaxrsAppProcessor
 import io.dropwizard.Application
 import io.dropwizard.Bundle
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
+import io.dropwizard.jetty.setup.ServletEnvironment
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import mu.KotlinLogging
@@ -19,7 +23,6 @@ import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Named
 import javax.servlet.DispatcherType
-import javax.servlet.Filter
 
 private val log = KotlinLogging.logger { }
 
@@ -31,9 +34,18 @@ class TribeApplication @Inject constructor(
     val objectMapper: ObjectMapper,
     val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
     val dropwizardBundles: Set<@JvmSuppressWildcards Bundle>,
-    @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME) val jerseyResources: Set<@JvmSuppressWildcards Any>,
-    val servletFilters: Set<@JvmSuppressWildcards Class<out Filter>>,
-    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>
+    val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
+    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
+    val jaxrsAppProcessors: Set<@JvmSuppressWildcards JaxrsAppProcessor>,
+
+    @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
+    val jerseyResources: Set<@JvmSuppressWildcards Any>,
+
+    @Named(TribeApplicationModule.APPLICATION_SERVLETS_BIND_NAME)
+    val appServlets: Set<@JvmSuppressWildcards ServletConfig>,
+
+    @Named(TribeApplicationModule.ADMIN_SERVLETS_BIND_NAME)
+    val adminServlets: Set<@JvmSuppressWildcards ServletConfig>
 ) : Application<Configuration>() {
     val versionHealthCheck: VersionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck
 
@@ -54,7 +66,7 @@ class TribeApplication @Inject constructor(
      * returns the application name
      */
     override fun getName(): String {
-        return appConfig.serviceName
+        return appConfig.appName
     }
 
     /**
@@ -67,18 +79,34 @@ class TribeApplication @Inject constructor(
     }
 
     /**
+     * Add the servlet and all registered mappings to the given environment
+     */
+    private fun addServlet(servletEnv: ServletEnvironment, servletConfig: ServletConfig) {
+        val servlet = servletEnv.addServlet(servletConfig.name, servletConfig.servlet)
+        servletConfig.mappings.forEach { mapping -> servlet.addMapping(mapping) }
+    }
+
+    /**
      * Runs the application
      */
     override fun run(conf: Configuration, env: Environment) {
         jerseyResources.forEach { env.jersey().register(it) }
-        servletFilters.forEach {
-            env.servlets().addFilter(it.simpleName, it)
-                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
+
+        jaxrsAppProcessors.forEach { it.process(env.jersey().resourceConfig) }
+
+        servletFilterConfigs.forEach {
+            val filter = env.servlets().addFilter(it.filterClass.simpleName, it.filterClass)
+            filter.initParameters = it.initParameters
+            filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
         }
+
+        appServlets.forEach { addServlet(env.servlets(), it) }
+        adminServlets.forEach { addServlet(env.admin(), it) }
+
         healthChecks.forEach { env.healthChecks().register(it::class.simpleName, it) }
         log.info(
             "Initializing service {} in environment {} with version info: {} ",
-            appConfig.serviceName,
+            appConfig.appName,
             appConfig.env,
             versionHealthCheck.info()
         )

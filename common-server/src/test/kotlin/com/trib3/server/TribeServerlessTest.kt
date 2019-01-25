@@ -15,6 +15,7 @@ import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
 import io.dropwizard.setup.Bootstrap
 import org.easymock.EasyMock
+import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.testng.annotations.Test
 
 class TribeServerlessTest {
@@ -24,12 +25,14 @@ class TribeServerlessTest {
     fun testFields() {
         assert(instance.name).all {
             isEqualTo("Test")
-            isEqualTo(instance.appConfig.serviceName)
+            isEqualTo(instance.appConfig.appName)
         }
-        assert(instance.servletFilters).all {
+        assert(instance.servletFilterConfigs.map { it.filterClass }).all {
             contains(RequestIdFilter::class.java)
+            contains(CrossOriginFilter::class.java)
         }
         assert(instance.versionHealthCheck).isNotNull()
+        assert(instance.jerseyResources).isNotNull()
     }
 
     @Test
@@ -54,8 +57,8 @@ class TribeServerlessTest {
         val proxy = instance.proxy
         val response = proxy.proxy(mockRequest, mockContext)
         assert(response.statusCode).isEqualTo(404)
-        instance.servletFilters.forEach {
-            assert(proxy.servletContext.getFilterRegistration(it.simpleName)).isNotNull()
+        instance.servletFilterConfigs.forEach {
+            assert(proxy.servletContext.getFilterRegistration(it.filterClass.simpleName)).isNotNull()
         }
     }
 
