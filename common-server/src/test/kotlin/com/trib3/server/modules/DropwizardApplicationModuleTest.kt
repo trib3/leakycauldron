@@ -1,7 +1,8 @@
 package com.trib3.server.modules
 
 import assertk.all
-import assertk.assert
+
+import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEmpty
 import com.codahale.metrics.health.HealthCheck
@@ -20,10 +21,10 @@ class DropwizardApplicationModuleTest
 ) {
     @Test
     fun testBindings() {
-        assert(healthchecks.map { it::class }).all {
+        assertThat(healthchecks.map { it::class }).all {
             contains(VersionHealthCheck::class)
             contains(PingHealthCheck::class)
         }
-        assert(bundles).isEmpty()
+        assertThat(bundles).isEmpty()
     }
 }

@@ -1,6 +1,6 @@
 package com.trib3.config.modules
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isNotNull
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
@@ -14,6 +14,6 @@ class KMSModuleTest
 ) {
     @Test
     fun testBind() {
-        assert(kmsClient).isNotNull()
+        assertThat(kmsClient).isNotNull()
     }
 }

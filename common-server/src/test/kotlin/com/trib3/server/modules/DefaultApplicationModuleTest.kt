@@ -1,7 +1,8 @@
 package com.trib3.server.modules
 
 import assertk.all
-import assertk.assert
+
+import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEmpty
 import assertk.assertions.isFalse
@@ -29,12 +30,12 @@ class DefaultApplicationModuleTest
 ) {
     @Test
     fun testBindings() {
-        assert(resources).isEmpty()
-        assert(configurationFactoryFactory).isInstanceOf(HoconConfigurationFactoryFactory::class)
-        assert(servletFilterConfigs.map { it.filterClass }).all {
+        assertThat(resources).isEmpty()
+        assertThat(configurationFactoryFactory).isInstanceOf(HoconConfigurationFactoryFactory::class)
+        assertThat(servletFilterConfigs.map { it.filterClass }).all {
             contains(RequestIdFilter::class.java)
             contains(CrossOriginFilter::class.java)
         }
-        assert(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
+        assertThat(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
     }
 }

@@ -1,7 +1,8 @@
 package com.trib3.server.modules
 
 import assertk.all
-import assertk.assert
+
+import assertk.assertThat
 import assertk.assertions.contains
 import io.dropwizard.jersey.jackson.JacksonBinder
 import io.dropwizard.setup.ExceptionMapperBinder
@@ -18,7 +19,7 @@ class ServerlessApplicationModuleTest
 ) {
     @Test
     fun testBindings() {
-        assert(resources.map { it::class }).all {
+        assertThat(resources.map { it::class }).all {
             contains(ExceptionMapperBinder::class)
             contains(JacksonBinder::class)
         }

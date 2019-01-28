@@ -1,7 +1,8 @@
 package com.trib3.db
 
 import assertk.all
-import assertk.assert
+
+import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import com.trib3.db.config.DbConfig
@@ -32,7 +33,7 @@ class DbTest
             .where(DSL.field("table_schema").eq("information_schema"))
             .fetch()
             .map { it.get("table_name") }
-        assert(tableNames).all {
+        assertThat(tableNames).all {
             contains("tables")
             contains("sequences")
             contains("views")
@@ -54,13 +55,13 @@ class DbTest
                 }
             }
         }
-        assert(row).isEqualTo("tables")
+        assertThat(row).isEqualTo("tables")
     }
 
     @Test
     fun testConfig() {
-        assert(dbConfig.dataSource).isEqualTo(this.dataSource)
-        assert(dbConfig.dslContext).isEqualTo(this.dslContext)
-        assert(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES_10)
+        assertThat(dbConfig.dataSource).isEqualTo(this.dataSource)
+        assertThat(dbConfig.dslContext).isEqualTo(this.dslContext)
+        assertThat(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES_10)
     }
 }

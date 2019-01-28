@@ -1,6 +1,6 @@
 package com.trib3.server.modules
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.contains
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
@@ -21,6 +21,6 @@ class TribeApplicationModuleTest
 ) {
     @Test
     fun testResourceBound() {
-        assert(bound).contains("arbitraryString".intern())
+        assertThat(bound).contains("arbitraryString".intern())
     }
 }

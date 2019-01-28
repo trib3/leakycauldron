@@ -1,6 +1,6 @@
 package com.trib3.server.config.dropwizard
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.FileConfigurationSourceProvider
@@ -22,7 +22,7 @@ class HoconConfigurationTest {
         )
         val config = factory.build(FileConfigurationSourceProvider(), "ignored")
         // Ensure the admin port is set to hocon's 9080 instead of default 8081
-        assert(
+        assertThat(
             ((config.serverFactory as DefaultServerFactory)
                 .adminConnectors.first() as HttpConnectorFactory)
                 .port

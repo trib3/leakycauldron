@@ -1,7 +1,8 @@
 package com.trib3.config
 
 import assertk.all
-import assertk.assert
+
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.typesafe.config.ConfigFactory
@@ -18,14 +19,14 @@ class ConfigLoaderTest {
         val devtest = config.extract<String?>("devtest")
         val overridefinal = config.extract<String?>("final")
         val enc = config.extract<String>("encryptedobject.encryptedval")
-        assert(env).isEqualTo("dev")
-        assert(testval).isEqualTo("base")
-        assert(devtest).isEqualTo("boom")
-        assert(overridefinal).isEqualTo("zzz")
-        assert(enc).isEqualTo("KMS(testtesttest)")
+        assertThat(env).isEqualTo("dev")
+        assertThat(testval).isEqualTo("base")
+        assertThat(devtest).isEqualTo("boom")
+        assertThat(overridefinal).isEqualTo("zzz")
+        assertThat(enc).isEqualTo("KMS(testtesttest)")
 
         // test case conversion
-        assert(config.extract<String>("lowerCamel")).all {
+        assertThat(config.extract<String>("lowerCamel")).all {
             isEqualTo(config.extract<String>("lower-camel"))
             isEqualTo("test")
         }
@@ -37,9 +38,9 @@ class ConfigLoaderTest {
         val foo = config.extract<String?>("foo")
         val bar = config.extract<String?>("bar")
         val devfoo = config.extract<String?>("devfoo")
-        assert(foo).isEqualTo("bar")
-        assert(bar).isEqualTo("bazbam")
-        assert(devfoo).isEqualTo("bam")
+        assertThat(foo).isEqualTo("bar")
+        assertThat(bar).isEqualTo("bazbam")
+        assertThat(devfoo).isEqualTo("bam")
     }
 
     @Test
@@ -52,10 +53,10 @@ class ConfigLoaderTest {
             val env = config.extract<String?>("env")
             val devtest = config.extract<String?>("devtest")
             val overridefinal = config.extract<String?>("final")
-            assert(env).isEqualTo("test")
-            assert(testval).isEqualTo("override")
-            assert(devtest).isNull()
-            assert(overridefinal).isEqualTo("zzz")
+            assertThat(env).isEqualTo("test")
+            assertThat(testval).isEqualTo("override")
+            assertThat(devtest).isNull()
+            assertThat(overridefinal).isEqualTo("zzz")
         } finally {
             if (oldEnv == null) {
                 System.clearProperty("env")
@@ -75,9 +76,9 @@ class ConfigLoaderTest {
             val foo = config.extract<String?>("foo")
             val bar = config.extract<String?>("bar")
             val devfoo = config.extract<String?>("devfoo")
-            assert(foo).isEqualTo("test")
-            assert(bar).isEqualTo("baz")
-            assert(devfoo).isNull()
+            assertThat(foo).isEqualTo("test")
+            assertThat(bar).isEqualTo("baz")
+            assertThat(devfoo).isNull()
         } finally {
             if (oldEnv == null) {
                 System.clearProperty("env")
@@ -98,10 +99,10 @@ class ConfigLoaderTest {
             val env = config.extract<String?>("env")
             val devtest = config.extract<String?>("devtest")
             val overridefinal = config.extract<String?>("final")
-            assert(env).isEqualTo("test,dev,unknown")
-            assert(testval).isEqualTo("override")
-            assert(devtest).isEqualTo("boom")
-            assert(overridefinal).isEqualTo("zzz")
+            assertThat(env).isEqualTo("test,dev,unknown")
+            assertThat(testval).isEqualTo("override")
+            assertThat(devtest).isEqualTo("boom")
+            assertThat(overridefinal).isEqualTo("zzz")
         } finally {
             if (oldEnv == null) {
                 System.clearProperty("env")

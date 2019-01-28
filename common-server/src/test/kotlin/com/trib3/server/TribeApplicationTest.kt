@@ -1,7 +1,7 @@
 package com.trib3.server
 
 import assertk.all
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
@@ -36,36 +36,36 @@ class TribeApplicationTest {
 
     @Test
     fun testFields() {
-        assert(instance.name).all {
+        assertThat(instance.name).all {
             isEqualTo("Test")
             isEqualTo(instance.appConfig.appName)
         }
-        assert(instance.healthChecks.map { it::class }).all {
+        assertThat(instance.healthChecks.map { it::class }).all {
             contains(VersionHealthCheck::class)
             contains(PingHealthCheck::class)
         }
-        assert(instance.servletFilterConfigs.map { it.filterClass }).all {
+        assertThat(instance.servletFilterConfigs.map { it.filterClass }).all {
             contains(RequestIdFilter::class.java)
             contains(CrossOriginFilter::class.java)
         }
-        assert(instance.adminServlets.map { it.name }).all {
+        assertThat(instance.adminServlets.map { it.name }).all {
             contains("SwaggerAssetServlet")
             contains(OpenApiServlet::class.simpleName)
         }
-        assert(instance.versionHealthCheck).isNotNull()
-        assert(instance.appServlets).isNotNull()
-        assert(instance.dropwizardBundles).isNotNull()
-        assert(instance.jerseyResources).isNotNull()
-        assert(instance.jaxrsAppProcessors).isNotNull()
+        assertThat(instance.versionHealthCheck).isNotNull()
+        assertThat(instance.appServlets).isNotNull()
+        assertThat(instance.dropwizardBundles).isNotNull()
+        assertThat(instance.jerseyResources).isNotNull()
+        assertThat(instance.jaxrsAppProcessors).isNotNull()
     }
 
     @Test
     fun testBootstrap() {
         val bootstrap = Bootstrap<Configuration>(instance)
         instance.initialize(bootstrap)
-        assert(bootstrap.objectMapper).isEqualTo(instance.objectMapper)
-        assert(bootstrap.objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
-        assert(bootstrap.configurationFactoryFactory).all {
+        assertThat(bootstrap.objectMapper).isEqualTo(instance.objectMapper)
+        assertThat(bootstrap.objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
+        assertThat(bootstrap.configurationFactoryFactory).all {
             isEqualTo(instance.configurationFactoryFactory)
             isInstanceOf(HoconConfigurationFactoryFactory::class)
         }
@@ -73,14 +73,16 @@ class TribeApplicationTest {
 
     @Test
     fun testRun() {
-        val mockConf = EasyMock.mock(Configuration::class.java)
-        val mockEnv = EasyMock.mock(Environment::class.java)
-        val mockJersey = EasyMock.mock(JerseyEnvironment::class.java)
-        val mockAdmin = EasyMock.mock(AdminEnvironment::class.java)
-        val mockServlet = EasyMock.mock(ServletEnvironment::class.java)
-        val mockHealthChecks = EasyMock.mock(HealthCheckRegistry::class.java)
-        val mockServletRegistration = EasyMock.niceMock(ServletRegistration.Dynamic::class.java)
-        val mockFilterRegistration = EasyMock.niceMock(FilterRegistration.Dynamic::class.java)
+        val mockConf = EasyMock.mock<Configuration>(Configuration::class.java)
+        val mockEnv = EasyMock.mock<Environment>(Environment::class.java)
+        val mockJersey = EasyMock.mock<JerseyEnvironment>(JerseyEnvironment::class.java)
+        val mockAdmin = EasyMock.mock<AdminEnvironment>(AdminEnvironment::class.java)
+        val mockServlet = EasyMock.mock<ServletEnvironment>(ServletEnvironment::class.java)
+        val mockHealthChecks = EasyMock.mock<HealthCheckRegistry>(HealthCheckRegistry::class.java)
+        val mockServletRegistration =
+            EasyMock.niceMock<ServletRegistration.Dynamic>(ServletRegistration.Dynamic::class.java)
+        val mockFilterRegistration =
+            EasyMock.niceMock<FilterRegistration.Dynamic>(FilterRegistration.Dynamic::class.java)
         EasyMock.expect(mockEnv.jersey()).andReturn(mockJersey).anyTimes()
         EasyMock.expect(mockJersey.resourceConfig).andReturn(DropwizardResourceConfig()).anyTimes()
         EasyMock.expect(mockEnv.admin()).andReturn(mockAdmin).anyTimes()

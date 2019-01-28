@@ -1,6 +1,6 @@
 package com.trib3.server.healthchecks
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
@@ -13,9 +13,9 @@ class VersionHealthCheckTest {
         val check = VersionHealthCheck()
         val info = check.info()
         val result = check.check()
-        assert(info).isEqualTo(result.message)
-        assert(result.isHealthy).isTrue()
-        assert(info).isNotEqualTo("null null")
-        assert(info).doesNotContain("Unable to read version info")
+        assertThat(info).isEqualTo(result.message)
+        assertThat(result.isHealthy).isTrue()
+        assertThat(info).isNotEqualTo("null null")
+        assertThat(info).doesNotContain("Unable to read version info")
     }
 }
