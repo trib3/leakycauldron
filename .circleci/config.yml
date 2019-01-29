@@ -34,6 +34,11 @@ jobs:
       - store_artifacts:
           path: ~/test_results
       - run: bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
+      # collect docs
+      - run: mkdir -p ~/docs
+      - run: find . -type d -name 'dokka' -exec cp -r {} ~/docs/ \;
+      - store_artifacts:
+          path: ~/docs
       # collect built jars and save to workspace for deploy
       - run: mkdir -p ~/jars
       - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
