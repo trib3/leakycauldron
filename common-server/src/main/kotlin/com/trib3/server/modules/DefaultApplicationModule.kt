@@ -3,6 +3,8 @@ package com.trib3.server.modules
 import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.inject.multibindings.ProvidesIntoSet
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
@@ -34,6 +36,8 @@ class DefaultApplicationModule : TribeApplicationModule() {
 
         val mapper = Jackson.newObjectMapper()
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        mapper.registerModule(KotlinModule())
         bind<ObjectMapper>().toInstance(mapper)
 
         // Make sure the resource binder is set up

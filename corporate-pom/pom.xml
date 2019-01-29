@@ -13,6 +13,7 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <version.annotation>1.2</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.13</version.assertk>
         <version.aws.java>2.3.9</version.aws.java>
@@ -31,7 +32,7 @@
         <version.jackson>2.9.6</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.jacoco>0.8.3</version.jacoco>
-        <version.java.release>9</version.java.release>
+        <version.java.release>8</version.java.release>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.1</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
@@ -181,16 +182,8 @@
                         <artifactId>javax.inject</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>joda-time</groupId>
-                        <artifactId>joda-time</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>org.javassist</groupId>
                         <artifactId>javassist</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.hibernate</groupId>
-                        <artifactId>hibernate-validator</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -199,10 +192,6 @@
                 <artifactId>dropwizard-jackson</artifactId>
                 <version>${version.dropwizard}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>joda-time</groupId>
-                        <artifactId>joda-time</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -256,6 +245,12 @@
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
                 <version>${version.jaxb}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${version.annotation}</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
@@ -324,6 +319,17 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.ext</groupId>
+                <artifactId>jersey-bean-validation</artifactId>
+                <version>${version.jersey}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-validator</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <!-- jetty -->
             <dependency>
@@ -385,6 +391,22 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-kotlin</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
+                <version>${version.jackson}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>joda-time</groupId>
+                        <artifactId>joda-time</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- AWS -->
@@ -746,10 +768,12 @@
                         <generator>
                             <name>org.jooq.codegen.DefaultGenerator</name>
                             <database>
-                                <name>org.jooq.meta.jdbc.JDBCDatabase</name>
                                 <outputSchemaToDefault>true</outputSchemaToDefault>
                                 <inputSchema>public</inputSchema>
                             </database>
+                            <generate>
+                                <javaTimeTypes>true</javaTimeTypes>
+                            </generate>
                         </generator>
                     </configuration>
                 </plugin>
