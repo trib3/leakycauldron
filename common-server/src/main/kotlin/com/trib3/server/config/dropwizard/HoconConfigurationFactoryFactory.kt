@@ -1,11 +1,14 @@
 package com.trib3.server.config.dropwizard
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.trib3.config.ConfigLoader
 import io.dropwizard.configuration.ConfigurationFactory
 import io.dropwizard.configuration.ConfigurationFactoryFactory
+import javax.inject.Inject
 import javax.validation.Validator
 
-class HoconConfigurationFactoryFactory<T> : ConfigurationFactoryFactory<T> {
+class HoconConfigurationFactoryFactory<T>
+@Inject constructor(val configLoader: ConfigLoader) : ConfigurationFactoryFactory<T> {
     override fun create(
         klass: Class<T>,
         validator: Validator,
@@ -15,7 +18,8 @@ class HoconConfigurationFactoryFactory<T> : ConfigurationFactoryFactory<T> {
         return HoconConfigurationFactory<T>(
             klass,
             validator,
-            objectMapper
+            objectMapper,
+            configLoader
         )
     }
 }

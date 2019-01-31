@@ -25,4 +25,13 @@ class ServerlessApplicationModule : TribeApplicationModule() {
         )
         resourceBinder().addBinding().toInstance(ExceptionMapperBinder(false))
     }
+
+    // allow multiple installations so that multiple other modules can install this one
+    override fun equals(other: Any?): Boolean {
+        return other is ServerlessApplicationModule
+    }
+
+    override fun hashCode(): Int {
+        return this::class.hashCode()
+    }
 }

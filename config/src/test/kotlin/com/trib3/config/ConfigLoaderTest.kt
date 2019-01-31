@@ -1,7 +1,6 @@
 package com.trib3.config
 
 import assertk.all
-
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
@@ -9,11 +8,11 @@ import com.typesafe.config.ConfigFactory
 import org.testng.annotations.Test
 
 class ConfigLoaderTest {
+    val loader = ConfigLoader(KMSStringSelectReader(null))
 
     @Test
     fun testDefaultLoad() {
-        KMSStringSelectReader._INSTANCE = KMSStringSelectReader(null)
-        val config = ConfigLoader.load()
+        val config = loader.load()
         val testval = config.extract<String?>("testval")
         val env = config.extract<String?>("env")
         val devtest = config.extract<String?>("devtest")
@@ -34,7 +33,7 @@ class ConfigLoaderTest {
 
     @Test
     fun testPathedLoad() {
-        val config = ConfigLoader.load("subobject")
+        val config = loader.load("subobject")
         val foo = config.extract<String?>("foo")
         val bar = config.extract<String?>("bar")
         val devfoo = config.extract<String?>("devfoo")
@@ -48,7 +47,7 @@ class ConfigLoaderTest {
         val oldEnv = System.setProperty("env", "test")
         ConfigFactory.invalidateCaches()
         try {
-            val config = ConfigLoader.load()
+            val config = loader.load()
             val testval = config.extract<String?>("testval")
             val env = config.extract<String?>("env")
             val devtest = config.extract<String?>("devtest")
@@ -72,7 +71,7 @@ class ConfigLoaderTest {
         val oldEnv = System.setProperty("env", "test")
         ConfigFactory.invalidateCaches()
         try {
-            val config = ConfigLoader.load("subobject")
+            val config = loader.load("subobject")
             val foo = config.extract<String?>("foo")
             val bar = config.extract<String?>("bar")
             val devfoo = config.extract<String?>("devfoo")
@@ -94,7 +93,7 @@ class ConfigLoaderTest {
         val oldEnv = System.setProperty("env", "test,dev,unknown")
         ConfigFactory.invalidateCaches()
         try {
-            val config = ConfigLoader.load()
+            val config = loader.load()
             val testval = config.extract<String?>("testval")
             val env = config.extract<String?>("env")
             val devtest = config.extract<String?>("devtest")

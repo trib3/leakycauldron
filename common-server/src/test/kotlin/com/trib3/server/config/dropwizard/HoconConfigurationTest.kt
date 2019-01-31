@@ -2,6 +2,8 @@ package com.trib3.server.config.dropwizard
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.trib3.config.ConfigLoader
+import com.trib3.config.KMSStringSelectReader
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.FileConfigurationSourceProvider
 import io.dropwizard.jackson.Jackson
@@ -13,7 +15,7 @@ import org.testng.annotations.Test
 class HoconConfigurationTest {
     @Test
     fun testHoconFactory() {
-        val factoryFactory = HoconConfigurationFactoryFactory<Configuration>()
+        val factoryFactory = HoconConfigurationFactoryFactory<Configuration>(ConfigLoader(KMSStringSelectReader(null)))
         val factory = factoryFactory.create(
             Configuration::class.java,
             Bootstrap<Configuration>(null).validatorFactory.validator,

@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.authzee.kotlinguice4.getInstance
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.trib3.server.config.BootstrapConfig
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
@@ -54,7 +55,7 @@ class TribeServerlessApp @Inject constructor(
         val INSTANCE: TribeServerlessApp
 
         init {
-            val config = TribeApplicationConfig()
+            val config = BootstrapConfig()
             val injector = config.getInjector(listOf(DefaultApplicationModule(), ServerlessApplicationModule()))
             INSTANCE = injector.getInstance<TribeServerlessApp>()
         }

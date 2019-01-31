@@ -2,6 +2,7 @@ package com.trib3.server.modules
 
 import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.codahale.metrics.health.HealthCheck
+import com.trib3.config.modules.KMSModule
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.swagger.JaxrsAppProcessor
@@ -15,6 +16,7 @@ import io.swagger.v3.jaxrs2.integration.OpenApiServlet
  */
 class DropwizardApplicationModule : TribeApplicationModule() {
     override fun configure() {
+        install(KMSModule())
         // Bind common health checks
         val healthChecks = KotlinMultibinder.newSetBinder<HealthCheck>(kotlinBinder)
         healthChecks.addBinding().to(PingHealthCheck::class.java)
@@ -47,5 +49,14 @@ class DropwizardApplicationModule : TribeApplicationModule() {
 
         // Make sure the app servlet binder is set up
         appServletBinder()
+    }
+
+    // allow multiple installations so that multiple other modules can install this one
+    override fun equals(other: Any?): Boolean {
+        return other is DropwizardApplicationModule
+    }
+
+    override fun hashCode(): Int {
+        return this::class.hashCode()
     }
 }

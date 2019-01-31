@@ -2,6 +2,7 @@ package com.trib3.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import javax.inject.Inject
 
 /**
  * Helper class to allow for loading of config with environment based override support.
@@ -29,7 +30,11 @@ import com.typesafe.config.ConfigFactory
  *     for `ghi`: return "klm" unless the GHI_ENV_VAR is set, in which case it will return its value
  *
  */
-object ConfigLoader {
+class ConfigLoader
+@Inject constructor(
+    // we inject the reader so that it gets initialized but don't use it directly :(
+    private val reader: KMSStringSelectReader
+) {
     /**
      * Loads config from application.conf with environmental and global overrides
      */

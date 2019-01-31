@@ -36,6 +36,10 @@ class DefaultApplicationModuleTest
             contains(RequestIdFilter::class.java)
             contains(CrossOriginFilter::class.java)
         }
+        assertThat(servletFilterConfigs.map { it.name }).all {
+            contains(RequestIdFilter::class.simpleName)
+            contains(CrossOriginFilter::class.simpleName)
+        }
         assertThat(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
     }
 }

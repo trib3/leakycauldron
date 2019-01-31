@@ -40,6 +40,10 @@
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.authzee.kotlinguice4</groupId>
+            <artifactId>kotlin-guice</artifactId>
+        </dependency>
 
         <!-- db -->
         <dependency>

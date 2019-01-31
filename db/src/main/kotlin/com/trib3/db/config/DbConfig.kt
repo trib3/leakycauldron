@@ -6,15 +6,17 @@ import com.zaxxer.hikari.HikariDataSource
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
+import javax.inject.Inject
 import javax.sql.DataSource
 
-class DbConfig(configPath: String) {
+class DbConfig
+@Inject constructor(loader: ConfigLoader, configPath: String) {
     val dialect: SQLDialect
     val dataSource: DataSource
     val dslContext: DSLContext
 
     init {
-        val config = ConfigLoader.load(configPath)
+        val config = loader.load(configPath)
 
         val subprotocol = config.extract("subprotocol") ?: "postgresql"
         val host = config.extract("host") ?: "localhost"

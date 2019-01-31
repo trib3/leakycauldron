@@ -46,7 +46,7 @@ class KMSStringReader(private val kms: KmsClient?) {
             } else {
                 log.warn(
                     "trying to decrypt KMS config value without a configured kmsClient, " +
-                            "returning raw value at path {}", path
+                        "returning raw value at path {}", path
                 )
             }
         }
@@ -64,7 +64,9 @@ class KMSStringSelectReader
     }
 
     init {
-        _INSTANCE = this // last construction wins
+        if (_INSTANCE == null || _INSTANCE.kms == null) {
+            _INSTANCE = this // first non-null kms instance wins
+        }
     }
 
     /**

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.inject.multibindings.ProvidesIntoSet
+import com.trib3.config.modules.KMSModule
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
 import com.trib3.server.logging.RequestIdFilter
@@ -26,6 +27,7 @@ data class ServletFilterConfig(
  */
 class DefaultApplicationModule : TribeApplicationModule() {
     override fun configure() {
+        install(KMSModule())
         // bind HOCON configuration parser
         bind<ConfigurationFactoryFactory<Configuration>>().to<HoconConfigurationFactoryFactory<Configuration>>()
 
@@ -65,5 +67,14 @@ class DefaultApplicationModule : TribeApplicationModule() {
             CrossOriginFilter::class.java,
             paramMap
         )
+    }
+
+    // allow multiple installations so that multiple other modules can install this one
+    override fun equals(other: Any?): Boolean {
+        return other is DefaultApplicationModule
+    }
+
+    override fun hashCode(): Int {
+        return this::class.hashCode()
     }
 }

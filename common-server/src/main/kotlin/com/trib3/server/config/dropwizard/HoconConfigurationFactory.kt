@@ -16,7 +16,8 @@ import javax.validation.Validator
 class HoconConfigurationFactory<T>(
     private val klass: Class<T>,
     private val validator: Validator,
-    mapperArg: ObjectMapper
+    mapperArg: ObjectMapper,
+    private val configLoader: ConfigLoader
 ) : ConfigurationFactory<T> {
 
     private val hoconFactory = HoconFactory()
@@ -37,7 +38,7 @@ class HoconConfigurationFactory<T>(
      * Builds the configuration from the configuration loaded by [ConfigLoader.load()]
      */
     override fun build(): T {
-        val configRoot = ConfigLoader.load().root()
+        val configRoot = configLoader.load().root()
         val node: JsonNode = mapper.readTree(hoconFactory.createParser(configRoot.render()))
         val config = mapper.readValue(TreeTraversingParser(node), klass)
         validator.validate(config)

@@ -3,6 +3,7 @@ package com.trib3.server
 import com.authzee.kotlinguice4.getInstance
 import com.codahale.metrics.health.HealthCheck
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.trib3.server.config.BootstrapConfig
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.modules.DefaultApplicationModule
@@ -56,7 +57,7 @@ class TribeApplication @Inject constructor(
         val INSTANCE: TribeApplication
 
         init {
-            val config = TribeApplicationConfig()
+            val config = BootstrapConfig()
             val injector = config.getInjector(listOf(DefaultApplicationModule(), DropwizardApplicationModule()))
             INSTANCE = injector.getInstance<TribeApplication>()
         }

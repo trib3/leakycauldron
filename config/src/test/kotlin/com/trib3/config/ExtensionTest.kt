@@ -12,17 +12,19 @@ import software.amazon.awssdk.services.kms.model.DecryptResponse
 const val ASSERT_VAL = "valvalval"
 
 class ExtensionTest {
+    val loader: ConfigLoader
+
     init {
         val fakeKms = EasyMock.mock<KmsClient>(KmsClient::class.java)
         EasyMock.expect(fakeKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
             .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build()).anyTimes()
         EasyMock.replay(fakeKms)
-        KMSStringSelectReader(fakeKms)
+        loader = ConfigLoader(KMSStringSelectReader(fakeKms))
     }
 
     @Test
     fun testExtension() {
-        val config = ConfigLoader.load()
+        val config = loader.load()
         assertThat(config.extract<String>("encryptedobject.encryptedval")).isEqualTo(ASSERT_VAL)
         assertThat(config.extract<String>("encryptedobject.unencryptedval")).isEqualTo(ASSERT_VAL)
         val nestedConfig = config.getConfig("encryptedobject")
