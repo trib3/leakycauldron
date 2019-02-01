@@ -55,8 +55,15 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/jars
-      - run: sudo apt install awscli
-      - run: aws lambda update-function-code --function-name ${AWS_LAMBDA_FUNCTION_NAME} --zip-file fileb://`ls ~/jars/server-*-shaded.jar` --publish
+      - run: sudo apt install awscli uuid-runtime
+      - run:
+          name: Deploy to Lambda
+          command: |
+            NEWVERSION=$(aws lambda update-function-code --function-name ${AWS_LAMBDA_FUNCTION_NAME} --zip-file fileb://`ls ~/jars/server-*-shaded.jar` --publish | jq '.Version' -r)
+            aws lambda invoke --function-name ${AWS_LAMBDA_FUNCTION_NAME} --qualifier ${NEWVERSION} --payload '{"path": "/ping", "httpMethod": "GET"}' /dev/stderr > /dev/null
+            aws lambda add-permission   --function-name "arn:aws:lambda:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:function:${AWS_LAMBDA_FUNCTION_NAME}:${NEWVERSION}"   --source-arn "arn:aws:execute-api:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:${AWS_APIGATEWAY_API_ID}/*/*/*"   --principal apigateway.amazonaws.com   --statement-id `uuidgen`   --action lambda:InvokeFunction
+            aws apigateway update-stage --rest-api-id ${AWS_APIGATEWAY_API_ID} --stage-name default --patch-operations op="replace",path=/variables/lambdaVersion,value="${NEWVERSION}"
+            aws apigateway create-deployment --rest-api-id ${AWS_APIGATEWAY_API_ID}  --stage-name default --description "Deploy ${AWS_LAMBDA_FUNCTION_NAME} with version ${NEWVERSION}"
 
 workflows:
   version: 2
@@ -69,11 +76,12 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only:
+                - master
       - deploy:
           requires:
             - hold
           filters:
             branches:
-              only: master
-
+              only:
+                - master
