@@ -4,6 +4,8 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.doesNotContain
+import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEqualTo
 import com.google.inject.AbstractModule
 import com.google.inject.Module
 import com.trib3.db.config.DbConfig
@@ -79,5 +81,12 @@ class NamedDbModuleTest
             doesNotContain("test2")
         }
         assertThat((test2DS as HikariDataSource).jdbcUrl).contains("test2")
+    }
+
+    @Test
+    fun testPropsAndEquals() {
+        assertThat(NamedDbModule("abc").name).isEqualTo("abc")
+        assertThat(NamedDbModule("abc")).isEqualTo(NamedDbModule("abc"))
+        assertThat(NamedDbModule("abc")).isNotEqualTo(NamedDbModule("def"))
     }
 }
