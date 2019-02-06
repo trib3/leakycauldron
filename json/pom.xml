@@ -13,24 +13,9 @@
     </parent>
 
     <groupId>com.trib3</groupId>
-    <artifactId>db</artifactId>
+    <artifactId>json</artifactId>
 
     <dependencies>
-        <!-- hocon config -->
-        <dependency>
-            <groupId>io.github.config4k</groupId>
-            <artifactId>config4k</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.trib3</groupId>
-            <artifactId>config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- guice -->
         <dependency>
             <groupId>javax.inject</groupId>
@@ -45,39 +30,22 @@
             <artifactId>kotlin-guice</artifactId>
         </dependency>
 
-        <!-- db -->
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazon.redshift</groupId>
-            <artifactId>redshift-jdbc42</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
         <!-- jackson -->
         <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-jackson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.trib3</groupId>
-            <artifactId>json</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
 
         <!-- test logging -->

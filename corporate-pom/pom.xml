@@ -56,6 +56,7 @@
         <version.maven.install>3.0.0-M1</version.maven.install>
         <version.maven.jar>3.1.1</version.maven.jar>
         <version.maven.ktlint>0.9.16</version.maven.ktlint>
+        <version.maven.properties>1.0.0</version.maven.properties>
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
         <version.maven.source>3.0.1</version.maven.source>
@@ -647,6 +648,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.trib3</groupId>
+            <artifactId>build-resources</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- testing -->
         <dependency>
@@ -679,6 +686,27 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>${version.maven.clean}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <version>${version.maven.properties}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>set-system-properties</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <properties>
+                            <!-- quiet dokka-maven-plugin logs a little bit -->
+                            <property>
+                                <name>org.slf4j.simpleLogger.log.org.jetbrains.dokka</name>
+                                <value>WARN</value>
+                            </property>
+                        </properties>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -956,6 +984,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${version.maven.jar}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                     <configuration>
                         <archive>
                             <manifest>
@@ -1100,6 +1135,10 @@
 
         <!-- plugins that all modules should invoke -->
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

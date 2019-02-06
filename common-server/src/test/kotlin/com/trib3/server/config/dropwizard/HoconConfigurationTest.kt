@@ -4,9 +4,9 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
+import com.trib3.json.ObjectMapperProvider
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.FileConfigurationSourceProvider
-import io.dropwizard.jackson.Jackson
 import io.dropwizard.jetty.HttpConnectorFactory
 import io.dropwizard.server.DefaultServerFactory
 import io.dropwizard.setup.Bootstrap
@@ -19,7 +19,7 @@ class HoconConfigurationTest {
         val factory = factoryFactory.create(
             Configuration::class.java,
             Bootstrap<Configuration>(null).validatorFactory.validator,
-            Jackson.newObjectMapper(),
+            ObjectMapperProvider().get(),
             "dw"
         )
         val config = factory.build(FileConfigurationSourceProvider(), "ignored")

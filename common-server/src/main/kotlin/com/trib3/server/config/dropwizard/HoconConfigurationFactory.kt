@@ -28,14 +28,14 @@ class HoconConfigurationFactory<T>(
     }
 
     /**
-     * Builds the configuration by delegating to [build()]
+     * Builds the configuration by delegating to [build]
      */
     override fun build(provider: ConfigurationSourceProvider, path: String): T {
         return build()
     }
 
     /**
-     * Builds the configuration from the configuration loaded by [ConfigLoader.load()]
+     * Builds the configuration from the configuration loaded by [ConfigLoader.load]
      */
     override fun build(): T {
         val configRoot = configLoader.load().root()

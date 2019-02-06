@@ -7,6 +7,9 @@ import io.dropwizard.configuration.ConfigurationFactoryFactory
 import javax.inject.Inject
 import javax.validation.Validator
 
+/**
+ * Bootstrap hook to allow dropwizard config to be provided by a [HoconConfigurationFactory]
+ */
 class HoconConfigurationFactoryFactory<T>
 @Inject constructor(val configLoader: ConfigLoader) : ConfigurationFactoryFactory<T> {
     override fun create(

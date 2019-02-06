@@ -54,7 +54,7 @@ private class DSLContextProvider
 
 /**
  * Private module that implements the bindings for [NamedDbModule] and allows for multiple
- * installations of [NamedDbModule]s with different [names]
+ * installations of [NamedDbModule]s with different [name]s
  */
 private class PrivateDbModule(val name: String) : KotlinPrivateModule() {
     override fun configure() {
@@ -69,7 +69,7 @@ private class PrivateDbModule(val name: String) : KotlinPrivateModule() {
 }
 
 /**
- * Similar to [DbModule], but allows for configuration of the [DbConfig]'s [configPath] in the
+ * Similar to [DbModule], but allows for configuration of the [DbConfig]'s configPath in the
  * application.conf
  *
  * The [DbConfig], [DataSource], and [DSLContext] bound by this are @[Named] by the [name],

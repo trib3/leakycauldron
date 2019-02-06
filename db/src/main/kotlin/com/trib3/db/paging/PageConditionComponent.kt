@@ -15,7 +15,7 @@ enum class SortDirection {
 /**
  * Metadata about the state of paging.  Can be generated from a page token element [value],
  * the [field] that the page token element came from, and an [extractor] that can get a
- * properly typed instance from the String [value].  Used to generate the comparison [Conditions]
+ * properly typed instance from the String [value].  Used to generate the comparison [Condition]s
  * in [getPageCondition]
  */
 data class PageConditionComponent<T>(
@@ -48,10 +48,10 @@ data class PageConditionComponent<T>(
 
         /**
          * Generates a jooq [Condition] from the current paging state and desired sort direction.
-         * When the sort is [DESC], elements that satisfy the condition will be < the paging state.  To satisfy that condition,
+         * When the sort is [SortDirection.DESC], elements that satisfy the condition will be < the paging state.  To satisfy that condition,
          * they will be < the first paging state component OR == the first and < the second, OR == the first and second and
          * < the third, etc etc
-         * When the sort is [ASC], elements that satisfy the condition will be > the paging state.  To satisfy that condition,
+         * When the sort is [SortDirection.ASC], elements that satisfy the condition will be > the paging state.  To satisfy that condition,
          * they will be > the first paging state component OR == the first and > the second, OR == the first and second and
          * > the third, etc etc
          */

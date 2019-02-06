@@ -3,8 +3,7 @@ package com.trib3.db.paging
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.trib3.json.ObjectMapperProvider
 import org.testng.annotations.Test
 
 class PageTokenTest {
@@ -23,8 +22,7 @@ class PageTokenTest {
 
     @Test
     fun testSerialization() {
-        val objectMapper = ObjectMapper()
-        objectMapper.registerModule(KotlinModule())
+        val objectMapper = ObjectMapperProvider().get()
         val serialized = objectMapper.writeValueAsString(token)
         val read = objectMapper.readValue(serialized, PageToken::class.java)
         assertThat(read.token).isEqualTo("abc,def")
