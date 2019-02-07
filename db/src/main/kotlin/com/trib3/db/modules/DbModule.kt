@@ -1,5 +1,7 @@
 package com.trib3.db.modules
 
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.health.HealthCheckRegistry
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.trib3.config.ConfigLoader
@@ -20,8 +22,12 @@ class DbModule : AbstractModule() {
 
     @Singleton
     @Provides
-    fun provideDbConfig(loader: ConfigLoader): DbConfig {
-        return DbConfig(loader, "db")
+    fun provideDbConfig(
+        loader: ConfigLoader,
+        healthCheckRegistry: HealthCheckRegistry,
+        metricRegistry: MetricRegistry
+    ): DbConfig {
+        return DbConfig(loader, "db", healthCheckRegistry, metricRegistry)
     }
 
     @Provides

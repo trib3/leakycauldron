@@ -1,5 +1,7 @@
 package com.trib3.db.config
 
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.health.HealthCheckRegistry
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
 import com.zaxxer.hikari.HikariDataSource
@@ -12,7 +14,12 @@ import javax.sql.DataSource
 private const val POSTGRES_DEFAULT_PORT = 5432
 
 class DbConfig
-@Inject constructor(loader: ConfigLoader, configPath: String) {
+@Inject constructor(
+    loader: ConfigLoader,
+    configPath: String,
+    healthCheckRegistry: HealthCheckRegistry,
+    metricRegistry: MetricRegistry
+) {
     val dialect: SQLDialect
     val dataSource: DataSource
     val dslContext: DSLContext
@@ -28,11 +35,16 @@ class DbConfig
         val username = config.extract("user") ?: "tribe"
         val password = config.extract<String?>("password")
 
-        dataSource = HikariDataSource()
-        dataSource.username = username
-        dataSource.password = password
-        dataSource.driverClassName = driverClassName
-        dataSource.jdbcUrl = "jdbc:$subprotocol://$host:$port/$schema"
+        val hds = HikariDataSource()
+        hds.poolName = configPath
+        hds.username = username
+        hds.password = password
+        hds.driverClassName = driverClassName
+        hds.jdbcUrl = "jdbc:$subprotocol://$host:$port/$schema"
+        hds.healthCheckRegistry = healthCheckRegistry
+        hds.metricRegistry = metricRegistry
+
+        dataSource = hds
 
         dialect = config.extract("dialect") ?: SQLDialect.POSTGRES_10
         dslContext = DSL.using(dataSource, dialect)

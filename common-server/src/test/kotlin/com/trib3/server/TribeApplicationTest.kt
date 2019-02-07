@@ -63,6 +63,8 @@ class TribeApplicationTest {
     fun testBootstrap() {
         val bootstrap = Bootstrap<Configuration>(instance)
         instance.initialize(bootstrap)
+        assertThat(bootstrap.metricRegistry).isEqualTo(instance.metricRegistry)
+        assertThat(bootstrap.healthCheckRegistry).isEqualTo(instance.healthCheckRegistry)
         assertThat(bootstrap.objectMapper).isEqualTo(instance.objectMapper)
         assertThat(bootstrap.objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
         assertThat(bootstrap.configurationFactoryFactory).all {
@@ -75,7 +77,7 @@ class TribeApplicationTest {
     fun testRun() {
         val mockConf = EasyMock.mock<Configuration>(Configuration::class.java)
         val mockEnv = EasyMock.mock<Environment>(Environment::class.java)
-        val mockJersey = EasyMock.mock<JerseyEnvironment>(JerseyEnvironment::class.java)
+        val mockJersey = EasyMock.niceMock<JerseyEnvironment>(JerseyEnvironment::class.java)
         val mockAdmin = EasyMock.mock<AdminEnvironment>(AdminEnvironment::class.java)
         val mockServlet = EasyMock.mock<ServletEnvironment>(ServletEnvironment::class.java)
         val mockHealthChecks = EasyMock.mock<HealthCheckRegistry>(HealthCheckRegistry::class.java)

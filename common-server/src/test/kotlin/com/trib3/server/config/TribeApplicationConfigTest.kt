@@ -12,5 +12,6 @@ class TribeApplicationConfigTest {
         val config = TribeApplicationConfig(ConfigLoader(KMSStringSelectReader(null)))
         assertThat(config.env).isEqualTo("dev")
         assertThat(config.appName).isEqualTo("Test")
+        assertThat(config.adminAuthToken).isEqualTo("SECRET")
     }
 }

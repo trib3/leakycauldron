@@ -15,6 +15,7 @@ class TribeApplicationConfig
     val corsDomain: String
     val appPort: Int
     val adminPort: Int
+    val adminAuthToken: String?
 
     init {
         val config = loader.load()
@@ -23,5 +24,6 @@ class TribeApplicationConfig
         corsDomain = config.extract("application.domain")
         appPort = config.extract<List<Config>>("server.applicationConnectors").first().getInt("port")
         adminPort = config.extract<List<Config>>("server.adminConnectors").first().getInt("port")
+        adminAuthToken = config.extract("application.adminAuthToken")
     }
 }

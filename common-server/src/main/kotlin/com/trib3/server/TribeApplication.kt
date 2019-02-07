@@ -1,7 +1,9 @@
 package com.trib3.server
 
 import com.authzee.kotlinguice4.getInstance
+import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
+import com.codahale.metrics.health.HealthCheckRegistry
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.server.config.BootstrapConfig
 import com.trib3.server.config.TribeApplicationConfig
@@ -33,6 +35,8 @@ private val log = KotlinLogging.logger { }
 class TribeApplication @Inject constructor(
     val appConfig: TribeApplicationConfig,
     val objectMapper: ObjectMapper,
+    val metricRegistry: MetricRegistry,
+    val healthCheckRegistry: HealthCheckRegistry,
     val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
     val dropwizardBundles: Set<@JvmSuppressWildcards Bundle>,
     val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
@@ -75,6 +79,8 @@ class TribeApplication @Inject constructor(
      */
     override fun initialize(bootstrap: Bootstrap<Configuration>) {
         bootstrap.objectMapper = objectMapper
+        bootstrap.metricRegistry = metricRegistry
+        bootstrap.healthCheckRegistry = healthCheckRegistry
         bootstrap.configurationFactoryFactory = configurationFactoryFactory
         dropwizardBundles.forEach(bootstrap::addBundle)
     }

@@ -6,6 +6,9 @@ import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.authzee.kotlinguice4.getInstance
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.health.HealthCheck
+import com.codahale.metrics.health.HealthCheckRegistry
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.server.config.BootstrapConfig
 import com.trib3.server.config.TribeApplicationConfig
@@ -38,7 +41,10 @@ private val log = KotlinLogging.logger { }
 class TribeServerlessApp @Inject constructor(
     val appConfig: TribeApplicationConfig,
     val objectMapper: ObjectMapper,
+    val metricRegistry: MetricRegistry,
+    val healthCheckRegistry: HealthCheckRegistry,
     internal val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
+    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
     internal val jerseyResources: Set<@JvmSuppressWildcards Any>,
     internal val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
@@ -73,14 +79,18 @@ class TribeServerlessApp @Inject constructor(
     }
 
     override fun initialize(bootstrap: Bootstrap<Configuration>) {
-        bootstrap.configurationFactoryFactory = configurationFactoryFactory
         bootstrap.objectMapper = objectMapper
+        bootstrap.metricRegistry = metricRegistry
+        bootstrap.healthCheckRegistry = healthCheckRegistry
+        bootstrap.configurationFactoryFactory = configurationFactoryFactory
         bootstrap.registerMetrics()
     }
 
     fun run(): JerseyLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> {
         val resourceConfig = DropwizardResourceConfig(bootstrap.metricRegistry)
         jerseyResources.forEach { resourceConfig.register(it) }
+
+        healthChecks.forEach { healthCheckRegistry.register(it::class.simpleName, it) }
 
         val newProxy = JerseyLambdaContainerHandler.getAwsProxyHandler(resourceConfig)
 

@@ -1,11 +1,18 @@
 package com.trib3.server.modules
 
 import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.health.HealthCheck
+import com.codahale.metrics.health.HealthCheckRegistry
+import com.google.inject.Scopes
 import com.google.inject.multibindings.ProvidesIntoSet
+import com.palominolabs.metrics.guice.MetricsInstrumentationModule
 import com.trib3.config.modules.KMSModule
 import com.trib3.json.modules.ObjectMapperModule
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.healthchecks.PingHealthCheck
+import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
@@ -27,6 +34,10 @@ class DefaultApplicationModule : TribeApplicationModule() {
         install(ObjectMapperModule())
         // bind HOCON configuration parser
         bind<ConfigurationFactoryFactory<Configuration>>().to<HoconConfigurationFactoryFactory<Configuration>>()
+        // Bind common health checks
+        val healthChecks = KotlinMultibinder.newSetBinder<HealthCheck>(kotlinBinder)
+        healthChecks.addBinding().to(PingHealthCheck::class.java)
+        healthChecks.addBinding().to(VersionHealthCheck::class.java)
 
         val filterBinder = KotlinMultibinder.newSetBinder<ServletFilterConfig>(kotlinBinder)
         filterBinder.addBinding().toInstance(
@@ -35,6 +46,12 @@ class DefaultApplicationModule : TribeApplicationModule() {
 
         // Make sure the resource binder is set up
         resourceBinder()
+
+        // set up metrics for guice created instances
+        val registry = MetricRegistry()
+        bind<MetricRegistry>().toInstance(registry)
+        install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
+        bind<HealthCheckRegistry>().`in`(Scopes.SINGLETON)
     }
 
     /**

@@ -2,6 +2,8 @@ package com.trib3.db.modules
 
 import com.authzee.kotlinguice4.KotlinModule
 import com.authzee.kotlinguice4.KotlinPrivateModule
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.health.HealthCheckRegistry
 import com.google.inject.name.Names
 import com.trib3.config.ConfigLoader
 import com.trib3.config.modules.KMSModule
@@ -19,10 +21,12 @@ import javax.sql.DataSource
 private class DbConfigProvider
 @Inject constructor(
     private val loader: ConfigLoader,
-    @Named("configPath") private val configPath: String
+    @Named("configPath") private val configPath: String,
+    private val healthCheckRegistry: HealthCheckRegistry,
+    private val metricRegistry: MetricRegistry
 ) : Provider<DbConfig> {
     override fun get(): DbConfig {
-        return DbConfig(loader, configPath)
+        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry)
     }
 }
 
@@ -32,10 +36,12 @@ private class DbConfigProvider
 private class DataSourceProvider
 @Inject constructor(
     private val loader: ConfigLoader,
-    @Named("configPath") private val configPath: String
+    @Named("configPath") private val configPath: String,
+    private val healthCheckRegistry: HealthCheckRegistry,
+    private val metricRegistry: MetricRegistry
 ) : Provider<DataSource> {
     override fun get(): DataSource {
-        return DbConfig(loader, configPath).dataSource
+        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry).dataSource
     }
 }
 
@@ -45,10 +51,12 @@ private class DataSourceProvider
 private class DSLContextProvider
 @Inject constructor(
     private val loader: ConfigLoader,
-    @Named("configPath") private val configPath: String
+    @Named("configPath") private val configPath: String,
+    private val healthCheckRegistry: HealthCheckRegistry,
+    private val metricRegistry: MetricRegistry
 ) : Provider<DSLContext> {
     override fun get(): DSLContext {
-        return DbConfig(loader, configPath).dslContext
+        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry).dslContext
     }
 }
 

@@ -1,15 +1,17 @@
 package com.trib3.server.modules
 
 import assertk.all
-
 import assertk.assertThat
 import assertk.assertions.contains
-import assertk.assertions.isEmpty
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
+import com.codahale.metrics.health.HealthCheck
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.healthchecks.PingHealthCheck
+import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
@@ -24,13 +26,18 @@ class DefaultApplicationModuleTest
 @Inject constructor(
     val configurationFactoryFactory: ConfigurationFactoryFactory<Configuration>,
     val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
+    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
     val objectMapper: ObjectMapper,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
     val resources: Set<@JvmSuppressWildcards Any>
 ) {
     @Test
     fun testBindings() {
-        assertThat(resources).isEmpty()
+        assertThat(resources).isNotNull()
+        assertThat(healthChecks.map { it::class }).all {
+            contains(VersionHealthCheck::class)
+            contains(PingHealthCheck::class)
+        }
         assertThat(configurationFactoryFactory).isInstanceOf(HoconConfigurationFactoryFactory::class)
         assertThat(servletFilterConfigs.map { it.filterClass }).all {
             contains(RequestIdFilter::class.java)

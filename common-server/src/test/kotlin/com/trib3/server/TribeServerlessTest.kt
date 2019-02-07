@@ -11,9 +11,9 @@ import com.amazonaws.serverless.proxy.model.AwsProxyRequest
 import com.amazonaws.services.lambda.runtime.Context
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.healthchecks.PingHealthCheck
+import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
-import io.dropwizard.Configuration
-import io.dropwizard.setup.Bootstrap
 import org.easymock.EasyMock
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.testng.annotations.Test
@@ -27,6 +27,10 @@ class TribeServerlessTest {
             isEqualTo("Test")
             isEqualTo(instance.appConfig.appName)
         }
+        assertThat(instance.healthChecks.map { it::class }).all {
+            contains(VersionHealthCheck::class)
+            contains(PingHealthCheck::class)
+        }
         assertThat(instance.servletFilterConfigs.map { it.filterClass }).all {
             contains(RequestIdFilter::class.java)
             contains(CrossOriginFilter::class.java)
@@ -37,8 +41,9 @@ class TribeServerlessTest {
 
     @Test
     fun testBootstrap() {
-        val bootstrap = Bootstrap<Configuration>(instance)
-        instance.initialize(bootstrap)
+        val bootstrap = instance.bootstrap
+        assertThat(bootstrap.metricRegistry).isEqualTo(instance.metricRegistry)
+        assertThat(bootstrap.healthCheckRegistry).isEqualTo(instance.healthCheckRegistry)
         assertThat(bootstrap.objectMapper).isEqualTo(instance.objectMapper)
         assertThat(bootstrap.objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
         assertThat(bootstrap.configurationFactoryFactory).all {
