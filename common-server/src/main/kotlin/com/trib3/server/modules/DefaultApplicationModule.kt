@@ -14,6 +14,7 @@ import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.logging.RequestIdFilter
+import com.trib3.server.resources.PingResource
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter
@@ -44,8 +45,8 @@ class DefaultApplicationModule : TribeApplicationModule() {
             ServletFilterConfig(RequestIdFilter::class.java.simpleName, RequestIdFilter::class.java)
         )
 
-        // Make sure the resource binder is set up
-        resourceBinder()
+        // Bind ping resource
+        resourceBinder().addBinding().to(PingResource::class.java)
 
         // set up metrics for guice created instances
         val registry = MetricRegistry()

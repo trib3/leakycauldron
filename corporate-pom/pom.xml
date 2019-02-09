@@ -13,10 +13,10 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <version.annotation>1.2</version.annotation>
+        <version.annotation>1.3.2</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.13</version.assertk>
-        <version.aws.java>2.4.1</version.aws.java>
+        <version.aws.java>2.4.5</version.aws.java>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
@@ -29,14 +29,14 @@
         <version.guava>26.0-jre</version.guava>
         <version.guice>4.2.2</version.guice>
         <version.h2>1.4.197</version.h2>
-        <version.hikaricp>3.3.0</version.hikaricp>
+        <version.hikaricp>3.3.1</version.hikaricp>
         <version.hk2>2.5.0-b32</version.hk2>
         <version.jackson>2.9.6</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.jacoco>0.8.3</version.jacoco>
         <version.java.release>8</version.java.release>
         <version.javax.inject>1</version.javax.inject>
-        <version.jaxb>2.3.1</version.jaxb>
+        <version.jaxb>2.3.2</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
         <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
@@ -58,14 +58,14 @@
         <version.maven.git>2.2.6</version.maven.git>
         <version.maven.install>3.0.0-M1</version.maven.install>
         <version.maven.jar>3.1.1</version.maven.jar>
-        <version.maven.ktlint>0.9.16</version.maven.ktlint>
+        <version.maven.ktlint>0.9.18</version.maven.ktlint>
         <version.maven.properties>1.0.0</version.maven.properties>
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
         <version.maven.source>3.0.1</version.maven.source>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
         <version.postgres>42.2.5</version.postgres>
-        <version.redshift>1.2.16.1027</version.redshift>
+        <version.redshift>1.2.20.1043</version.redshift>
         <version.servlet>3.1.0</version.servlet>
         <version.slf4j>1.7.25</version.slf4j>
         <version.swagger>2.0.6</version.swagger>
@@ -279,8 +279,8 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
                 <version>${version.jaxb}</version>
                 <scope>runtime</scope>
             </dependency>
@@ -398,6 +398,10 @@
                     <exclusion>
                         <groupId>com.fasterxml.jackson.jaxrs</groupId>
                         <artifactId>jackson-jaxrs-json-provider</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -585,6 +589,12 @@
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq</artifactId>
                 <version>${version.jooq}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jooq</groupId>
@@ -769,6 +779,7 @@
                                     <exclude>org.glassfish.hk2.external</exclude>
                                     <exclude>commons-logging:commons-logging</exclude>
                                     <exclude>com.google.inject.extensions:guice-multibindings</exclude>
+                                    <exclude>javax.xml.bind:jaxb-api</exclude>
                                 </excludes>
                             </bannedDependencies>
                         </rules>
