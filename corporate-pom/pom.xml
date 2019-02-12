@@ -26,7 +26,8 @@
         <version.dropwizard.metrics>4.0.2</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.0.2</version.easymock>
-        <version.guava>26.0-jre</version.guava>
+        <version.flyway>5.2.4</version.flyway>
+        <version.guava>27.0.1-jre</version.guava>
         <version.guice>4.2.2</version.guice>
         <version.h2>1.4.197</version.h2>
         <version.hikaricp>3.3.1</version.hikaricp>
@@ -839,6 +840,20 @@
                                     <source>src/test/kotlin</source>
                                 </sources>
                             </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-maven-plugin</artifactId>
+                    <version>${version.flyway}</version>
+                    <executions>
+                        <execution>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>migrate</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
