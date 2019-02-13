@@ -30,6 +30,6 @@ class BootstrapConfig {
         val appModules = appModules.map {
             Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
         }
-        return Guice.createInjector(listOf(builtinModules, appModules).flatten())
+        return Guice.createInjector(builtinModules + appModules)
     }
 }

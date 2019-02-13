@@ -32,6 +32,11 @@ class ModuleFactory : IModuleFactory {
     }
 }
 
+/**
+ * Tests that [NamedDbModule] and [DbModule] can coexist and point
+ * at different databases, with the appropriate [DbConfig], [DataSource]
+ * and [DSLContext] bound to the correct database.
+ */
 @Guice(moduleFactory = ModuleFactory::class)
 class NamedDbModuleTest
 @Inject constructor(
@@ -88,5 +93,6 @@ class NamedDbModuleTest
         assertThat(NamedDbModule("abc").name).isEqualTo("abc")
         assertThat(NamedDbModule("abc")).isEqualTo(NamedDbModule("abc"))
         assertThat(NamedDbModule("abc")).isNotEqualTo(NamedDbModule("def"))
+        assertThat(NamedDbModule("abc")).isNotEqualTo(DbModule())
     }
 }

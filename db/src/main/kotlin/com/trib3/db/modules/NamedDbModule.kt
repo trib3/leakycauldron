@@ -64,7 +64,7 @@ private class DSLContextProvider
  * Private module that implements the bindings for [NamedDbModule] and allows for multiple
  * installations of [NamedDbModule]s with different [name]s
  */
-private class PrivateDbModule(val name: String) : KotlinPrivateModule() {
+private class PrivateDbModule(private val name: String) : KotlinPrivateModule() {
     override fun configure() {
         bindConstant().annotatedWith(Names.named("configPath")).to(name)
         bind<DbConfig>().annotatedWith(Names.named(name)).toProvider(DbConfigProvider::class.java)

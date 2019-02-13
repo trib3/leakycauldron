@@ -66,10 +66,8 @@ data class PageConditionComponent<T>(
                 }
             }.reduceIndexed { listIndex, conditionSoFar, nextCondition ->
                 val priorEqualityCondition = pagingState.subList(0, listIndex)
-                    .map {
-                        it.eq()
-                    }
-                    .reduce { a, b -> a.and(b) }
+                    .map(PageConditionComponent<out Any>::eq)
+                    .reduce(Condition::and)
                 conditionSoFar.or(priorEqualityCondition.and(nextCondition))
             }
         }

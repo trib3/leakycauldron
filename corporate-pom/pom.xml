@@ -66,6 +66,7 @@
         <version.maven.source>3.0.1</version.maven.source>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
         <version.postgres>42.2.5</version.postgres>
+        <version.postgres.embedded>0.13.1</version.postgres.embedded>
         <version.redshift>1.2.20.1043</version.redshift>
         <version.servlet>3.1.0</version.servlet>
         <version.slf4j>1.7.25</version.slf4j>
@@ -289,7 +290,6 @@
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
                 <version>${version.annotation}</version>
-                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>javax.ws.rs</groupId>
@@ -612,6 +612,11 @@
                 <artifactId>HikariCP</artifactId>
                 <version>${version.hikaricp}</version>
             </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${version.flyway}</version>
+            </dependency>
 
             <!-- jdbc drivers -->
             <dependency>
@@ -660,6 +665,12 @@
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${version.h2}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.opentable.components</groupId>
+                <artifactId>otj-pg-embedded</artifactId>
+                <version>${version.postgres.embedded}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
