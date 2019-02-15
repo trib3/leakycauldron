@@ -50,9 +50,16 @@ class ConfigLoader
     }
 
     /**
+     * Loads config from [path] inside [fullConfig] with environmental and global overrides
+     */
+    fun load(fullConfig: Config, path: String): Config {
+        return load(fullConfig).getConfig(path)
+    }
+
+    /**
      * Applies environmental and global overrides to the config
      */
-    private fun load(fullConfig: Config): Config {
+    internal fun load(fullConfig: Config): Config {
         val env = fullConfig.extract("env") ?: "dev"
         val envOverride = env.split(",").map {
             fullConfig.extract(it) ?: ConfigFactory.empty()

@@ -4,8 +4,8 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import com.codahale.metrics.jvm.JvmAttributeGaugeSet
-import com.trib3.config.modules.KMSModule
 import com.trib3.server.healthchecks.PingHealthCheck
+import com.trib3.server.modules.DefaultApplicationModule
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import java.lang.management.ManagementFactory
@@ -14,7 +14,7 @@ import javax.ws.rs.core.GenericType
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
-@Guice(modules = [KMSModule::class])
+@Guice(modules = [DefaultApplicationModule::class])
 class AdminResourceTest
 @Inject constructor(val adminResource: AdminResource) : ResourceTestBase<AdminResource>() {
     val adminAuthToken = adminResource.appConfig.adminAuthToken

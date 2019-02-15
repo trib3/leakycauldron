@@ -11,24 +11,32 @@ private val log = KotlinLogging.logger { }
  */
 class VersionHealthCheck : HealthCheck() {
     companion object {
-        private fun readInfo(): String {
-            try {
+        private fun readVersion(): Pair<String, Boolean> {
+            return try {
                 val loader = this::class.java.classLoader
                 val info = loader.getResource("package-info.txt").readText().trim()
                 val gitProps = Properties()
                 loader.getResourceAsStream("$info.git.properties").use {
                     gitProps.load(it)
                 }
-                return gitProps.getProperty("git.build.version") + " " + gitProps.getProperty("git.commit.id.abbrev")
+                val mavenVersion = gitProps.getProperty("git.build.version")
+                val gitBranch = gitProps.getProperty("git.branch")
+                val gitCommit = gitProps.getProperty("git.commit.id.abbrev")
+                "$mavenVersion $gitBranch-$gitCommit" to true
             } catch (e: Throwable) {
                 log.error("Unable to read version info: ${e.message}", e)
-                healthy = false
-                return "Unable to read version info: ${e.message}"
+                "Unable to read version info: ${e.message}" to false
             }
         }
 
-        var healthy = true
-        val info = readInfo()
+        private val info: String
+        private val healthy: Boolean
+
+        init {
+            val versionInfo = readVersion()
+            info = versionInfo.first
+            healthy = versionInfo.second
+        }
     }
 
     /**
