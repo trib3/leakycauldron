@@ -11,9 +11,9 @@ import com.trib3.config.modules.KMSModule
 import com.trib3.json.modules.ObjectMapperModule
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
-import com.trib3.server.logging.RequestIdFilter
 import com.trib3.server.resources.PingResource
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
@@ -64,8 +64,7 @@ class DefaultApplicationModule : TribeApplicationModule() {
     fun provideCorsFilter(appConfig: TribeApplicationConfig): ServletFilterConfig {
         val corsDomain =
             "https?://*.?${appConfig.corsDomain}," +
-                "https?://*.?${appConfig.corsDomain}:${appConfig.appPort}," +
-                "https?://*.?${appConfig.corsDomain}:${appConfig.adminPort}"
+                "https?://*.?${appConfig.corsDomain}:${appConfig.appPort}"
         val paramMap = mapOf(
             CrossOriginFilter.ALLOWED_ORIGINS_PARAM to corsDomain,
             CrossOriginFilter.ALLOWED_METHODS_PARAM to "GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD",

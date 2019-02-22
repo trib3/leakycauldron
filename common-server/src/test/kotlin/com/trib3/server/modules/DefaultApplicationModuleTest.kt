@@ -10,9 +10,9 @@ import com.codahale.metrics.health.HealthCheck
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
-import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter

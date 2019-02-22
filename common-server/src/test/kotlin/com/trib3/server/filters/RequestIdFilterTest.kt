@@ -1,4 +1,4 @@
-package com.trib3.server.logging
+package com.trib3.server.filters
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo

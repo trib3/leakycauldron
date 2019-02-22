@@ -30,7 +30,7 @@ class SwaggerInitializer
         SwaggerContextBuilder()
             .openApiConfiguration(
                 SwaggerConfiguration().openAPI(
-                    OpenAPI().servers(listOf(Server().url("http://${appConfig.corsDomain}:${appConfig.appPort}")))
+                    OpenAPI().servers(listOf(Server().url("http://${appConfig.corsDomain}:${appConfig.appPort}/app")))
                 )
             )
             .application(application)

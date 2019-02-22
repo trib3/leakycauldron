@@ -21,6 +21,7 @@ abstract class TribeApplicationModule : KotlinModule() {
         const val APPLICATION_RESOURCES_BIND_NAME = "ApplicationResources"
         const val APPLICATION_SERVLETS_BIND_NAME = "ApplicationServlets"
         const val ADMIN_SERVLETS_BIND_NAME = "AdminServlets"
+        const val ADMIN_SERVLET_FILTERS_BIND_NAME = "AdminFilters"
     }
 
     /**

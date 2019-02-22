@@ -40,6 +40,8 @@ class TribeApplication @Inject constructor(
     val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
     val dropwizardBundles: Set<@JvmSuppressWildcards Bundle>,
     val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
+    @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
+    val adminServletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
     val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
     val jaxrsAppProcessors: Set<@JvmSuppressWildcards JaxrsAppProcessor>,
 
@@ -103,6 +105,12 @@ class TribeApplication @Inject constructor(
 
         servletFilterConfigs.forEach {
             val filter = env.servlets().addFilter(it.filterClass.simpleName, it.filterClass)
+            filter.initParameters = it.initParameters
+            filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
+        }
+
+        adminServletFilterConfigs.forEach {
+            val filter = env.admin().addFilter(it.filterClass.simpleName, it.filterClass)
             filter.initParameters = it.initParameters
             filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
         }

@@ -8,7 +8,7 @@ import com.trib3.json.ObjectMapperProvider
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.FileConfigurationSourceProvider
 import io.dropwizard.jetty.HttpConnectorFactory
-import io.dropwizard.server.DefaultServerFactory
+import io.dropwizard.server.SimpleServerFactory
 import io.dropwizard.setup.Bootstrap
 import org.testng.annotations.Test
 
@@ -23,10 +23,10 @@ class HoconConfigurationTest {
             "dw"
         )
         val config = factory.build(FileConfigurationSourceProvider(), "ignored")
-        // Ensure the admin port is set to hocon's 9080 instead of default 8081
+        // Ensure the admin port is set to test hocon's 9080 instead of default 8080
         assertThat(
-            ((config.serverFactory as DefaultServerFactory)
-                .adminConnectors.first() as HttpConnectorFactory)
+            ((config.serverFactory as SimpleServerFactory)
+                .connector as HttpConnectorFactory)
                 .port
         ).isEqualTo(9080)
     }

@@ -2,7 +2,6 @@ package com.trib3.server.config
 
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
-import com.typesafe.config.Config
 import javax.inject.Inject
 
 /**
@@ -14,7 +13,6 @@ class TribeApplicationConfig
     val appName: String
     val corsDomain: String
     val appPort: Int
-    val adminPort: Int
     val adminAuthToken: String?
 
     init {
@@ -22,8 +20,7 @@ class TribeApplicationConfig
         env = config.extract("env")
         appName = config.extract("application.name")
         corsDomain = config.extract("application.domain")
-        appPort = config.extract<List<Config>>("server.applicationConnectors").first().getInt("port")
-        adminPort = config.extract<List<Config>>("server.adminConnectors").first().getInt("port")
+        appPort = config.extract<Int>("server.connector.port")
         adminAuthToken = config.extract("application.adminAuthToken")
     }
 }

@@ -10,9 +10,10 @@ import assertk.assertions.isNotNull
 import com.codahale.metrics.health.HealthCheckRegistry
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.filters.AdminAuthFilter
+import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
-import com.trib3.server.logging.RequestIdFilter
 import io.dropwizard.Configuration
 import io.dropwizard.jersey.DropwizardResourceConfig
 import io.dropwizard.jersey.setup.JerseyEnvironment
@@ -48,6 +49,7 @@ class TribeApplicationTest {
             contains(RequestIdFilter::class.java)
             contains(CrossOriginFilter::class.java)
         }
+        assertThat(instance.adminServletFilterConfigs.map { it.filterClass }).contains(AdminAuthFilter::class.java)
         assertThat(instance.adminServlets.map { it.name }).all {
             contains("SwaggerAssetServlet")
             contains(OpenApiServlet::class.simpleName)
@@ -94,6 +96,8 @@ class TribeApplicationTest {
         EasyMock.expect(mockEnv.servlets()).andReturn(mockServlet).anyTimes()
         EasyMock.expect(mockEnv.healthChecks()).andReturn(mockHealthChecks).anyTimes()
         EasyMock.expect(mockServlet.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
+            .andReturn(mockFilterRegistration).anyTimes()
+        EasyMock.expect(mockAdmin.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
             .andReturn(mockFilterRegistration).anyTimes()
         EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<VersionHealthCheck>())).once()
         EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<PingHealthCheck>())).once()

@@ -1,4 +1,4 @@
-package com.trib3.server.logging
+package com.trib3.server.filters
 
 import mu.KotlinLogging
 import org.slf4j.MDC
@@ -30,8 +30,7 @@ class RequestIdFilter : Filter {
     override fun init(filterConfig: FilterConfig?) {
     }
 
-    override fun destroy() {
-    }
+    override fun destroy() = Unit
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         val currentMDC: String? = MDC.get(REQUEST_ID_KEY)

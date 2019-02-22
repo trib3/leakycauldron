@@ -12,8 +12,8 @@ import com.codahale.metrics.health.HealthCheckRegistry
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.server.config.BootstrapConfig
 import com.trib3.server.config.TribeApplicationConfig
+import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.VersionHealthCheck
-import com.trib3.server.logging.RequestIdFilter
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.ServerlessApplicationModule
 import com.trib3.server.modules.ServletFilterConfig
