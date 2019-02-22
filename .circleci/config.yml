@@ -39,9 +39,10 @@ jobs:
       - run: find . -type d -name 'dokka' -exec cp -r {} ~/docs/ \;
       - store_artifacts:
           path: ~/docs
-      # collect built jars and save to workspace for deploy
+      # collect built packages and save to workspace for deploy
       - run: mkdir -p ~/jars
       - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
+      - run: find . -type f -regex ".*/target/.*zip" -exec cp {} ~/jars/ \;
       - store_artifacts:
           path: ~/jars
       - persist_to_workspace:
@@ -55,16 +56,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/jars
-      - run: sudo apt install awscli uuid-runtime
+      - run: sudo apt install awscli 
       - run:
-          name: Deploy to Lambda
+          name: Deploy to elasticbeanstalk
           command: |
-            NEWVERSION=$(aws lambda update-function-code --function-name ${AWS_LAMBDA_FUNCTION_NAME} --zip-file fileb://`ls ~/jars/server-*-shaded.jar` --publish | jq '.Version' -r)
-            aws lambda invoke --function-name ${AWS_LAMBDA_FUNCTION_NAME} --qualifier ${NEWVERSION} --payload '{"path": "/ping", "httpMethod": "GET"}' /dev/stderr > /dev/null
-            aws lambda add-permission   --function-name "arn:aws:lambda:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:function:${AWS_LAMBDA_FUNCTION_NAME}:${NEWVERSION}"   --source-arn "arn:aws:execute-api:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:${AWS_APIGATEWAY_API_ID}/*/*/*"   --principal apigateway.amazonaws.com   --statement-id `uuidgen`   --action lambda:InvokeFunction
-            aws apigateway update-stage --rest-api-id ${AWS_APIGATEWAY_API_ID} --stage-name default --patch-operations op="replace",path=/variables/lambdaVersion,value="${NEWVERSION}"
-            aws apigateway create-deployment --rest-api-id ${AWS_APIGATEWAY_API_ID}  --stage-name default --description "Deploy ${AWS_LAMBDA_FUNCTION_NAME} with version ${NEWVERSION}"
-
+            aws s3 cp `ls ~/jars/server-*-elasticbeanstalk.zip` s3://elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID}/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}.zip
+            aws elasticbeanstalk create-application-version --application-name ${CIRCLE_PROJECT_REPONAME} --version-label ${CIRCLE_BUILD_NUM}  --source-bundle S3Bucket=elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID},S3Key=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}.zip
+            aws elasticbeanstalk update-environment --application-name ${CIRCLE_PROJECT_REPONAME} --environment-name "${CIRCLE_PROJECT_REPONAME}-prod" --version-label ${CIRCLE_BUILD_NUM}
 workflows:
   version: 2
   build_pipeline:

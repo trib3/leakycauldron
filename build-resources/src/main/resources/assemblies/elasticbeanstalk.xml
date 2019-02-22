@@ -1,0 +1,32 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd"
+>
+    <id>elasticbeanstalk</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <dependencySets>
+        <dependencySet>
+            <includes>
+                <include>com.trib3:build-resources</include>
+            </includes>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <includes>
+                    <include>.ebextensions/**</include>
+                </includes>
+            </unpackOptions>
+            <outputDirectory></outputDirectory>
+        </dependencySet>
+    </dependencySets>
+    <files>
+        <file>
+            <source>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</source>
+            <outputDirectory></outputDirectory>
+        </file>
+    </files>
+</assembly>
