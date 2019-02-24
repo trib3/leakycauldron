@@ -15,8 +15,8 @@ import com.trib3.server.modules.ServletFilterConfig
 import com.trib3.server.modules.TribeApplicationModule
 import com.trib3.server.swagger.JaxrsAppProcessor
 import io.dropwizard.Application
-import io.dropwizard.Bundle
 import io.dropwizard.Configuration
+import io.dropwizard.ConfiguredBundle
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import io.dropwizard.jetty.setup.ServletEnvironment
 import io.dropwizard.setup.Bootstrap
@@ -38,7 +38,7 @@ class TribeApplication @Inject constructor(
     val metricRegistry: MetricRegistry,
     val healthCheckRegistry: HealthCheckRegistry,
     val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
-    val dropwizardBundles: Set<@JvmSuppressWildcards Bundle>,
+    val dropwizardBundles: Set<@JvmSuppressWildcards ConfiguredBundle<Configuration>>,
     val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
     @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
     val adminServletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,

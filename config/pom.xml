@@ -58,12 +58,6 @@
             <artifactId>regions</artifactId>
         </dependency>
 
-        <!-- testing -->
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-        </dependency>
-
         <!-- test logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>

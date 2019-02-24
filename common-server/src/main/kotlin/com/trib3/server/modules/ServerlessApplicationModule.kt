@@ -3,7 +3,7 @@ package com.trib3.server.modules
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.modules.KMSModule
 import com.trib3.server.resources.AdminResource
-import io.dropwizard.jersey.jackson.JacksonBinder
+import io.dropwizard.jersey.jackson.JacksonFeature
 import io.dropwizard.setup.ExceptionMapperBinder
 
 /**
@@ -14,7 +14,7 @@ class ServerlessApplicationModule : TribeApplicationModule() {
     override fun configure() {
         val resourceBinder = resourceBinder()
         resourceBinder.addBinding().toConstructor(
-            JacksonBinder::class.java.getConstructor(ObjectMapper::class.java)
+            JacksonFeature::class.java.getConstructor(ObjectMapper::class.java)
         )
         resourceBinder.addBinding().toInstance(ExceptionMapperBinder(false))
         resourceBinder.addBinding().to<AdminResource>()

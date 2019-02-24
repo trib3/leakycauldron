@@ -7,7 +7,8 @@ import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.AdminAuthFilter
 import com.trib3.server.swagger.JaxrsAppProcessor
 import com.trib3.server.swagger.SwaggerInitializer
-import io.dropwizard.Bundle
+import io.dropwizard.Configuration
+import io.dropwizard.ConfiguredBundle
 import io.dropwizard.servlets.assets.AssetServlet
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import javax.inject.Named
@@ -56,7 +57,7 @@ class DropwizardApplicationModule : TribeApplicationModule() {
         KotlinMultibinder.newSetBinder<JaxrsAppProcessor>(kotlinBinder).addBinding().to<SwaggerInitializer>()
 
         // Set up a Bundle multibinder, but no Bundles to bind by default right now
-        KotlinMultibinder.newSetBinder<Bundle>(kotlinBinder)
+        KotlinMultibinder.newSetBinder<ConfiguredBundle<Configuration>>(kotlinBinder)
 
         // Make sure the app servlet binder is set up
         appServletBinder()
