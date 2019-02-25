@@ -3,10 +3,6 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:11-jdk
-      - image: circleci/postgres:10
-        environment:
-          POSTGRES_USER: tribe
-          POSTGRES_DB: tribe
 
     working_directory: ~/repo
     environment:
