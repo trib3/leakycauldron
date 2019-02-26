@@ -131,6 +131,6 @@ class TribeApplication @Inject constructor(
 /**
  * Main entry point.  Always calls the 'server' command.
  */
-fun main(args: Array<String>) {
+fun main() {
     TribeApplication.INSTANCE.run("server")
 }
