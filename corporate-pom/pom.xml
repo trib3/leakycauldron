@@ -13,6 +13,11 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <skip.checks>false</skip.checks>
+        <skip.docs>false</skip.docs>
+        <skip.source>false</skip.source>
+        <skip.tests>false</skip.tests>
+
         <version.annotation>1.3.2</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.13</version.assertk>
@@ -809,6 +814,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <skip>${skip.checks}</skip>
                         <rules>
                             <dependencyConvergence/>
                             <bannedDependencies>
@@ -932,6 +938,9 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <skip>${skip.checks}</skip>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.github.ozsie</groupId>
@@ -953,6 +962,7 @@
                         </dependency>
                     </dependencies>
                     <configuration>
+                        <skip>${skip.checks}</skip>
                         <configResource>detekt-config.yml</configResource>
                     </configuration>
                 </plugin>
@@ -1068,6 +1078,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <skip>${skip.tests}</skip>
                         <excludes>
                             <exclude>**/jooq/**/*.class</exclude>
                         </excludes>
@@ -1078,6 +1089,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version.maven.surefire}</version>
                     <configuration>
+                        <skip>${skip.tests}</skip>
                         <argLine>
                             ${jacocoArgLineUnit}
                         </argLine>
@@ -1098,6 +1110,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <skip>${skip.docs}</skip>
                         <reportNotDocumented>false</reportNotDocumented>
                         <jdkVersion>${version.java.release}</jdkVersion>
                         <sourceDirectories>
@@ -1213,6 +1226,7 @@
                                 <goal>check</goal>
                             </goals>
                             <configuration>
+                                <skip>${skip.checks}</skip>
                                 <fail>true</fail>
                             </configuration>
                         </execution>
@@ -1223,6 +1237,7 @@
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${version.maven.dependency}</version>
                     <configuration>
+                        <skip>${skip.checks}</skip>
                         <failOnWarning>true</failOnWarning>
                         <ignoreNonCompile>true</ignoreNonCompile>
                         <!-- deps that we pull into all projects -->
@@ -1271,6 +1286,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <skip>${skip.checks}</skip>
                         <argLine>
                             ${jacocoArgLineIntegration}
                         </argLine>
@@ -1289,6 +1305,9 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <skipSource>${skip.source}</skipSource>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1380,6 +1399,45 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>fast</id>
+            <activation>
+                <property>
+                    <name>fast</name>
+                </property>
+            </activation>
+            <properties>
+                <skip.docs>true</skip.docs>
+                <skip.source>true</skip.source>
+            </properties>
+        </profile>
+        <profile>
+            <id>faster</id>
+            <activation>
+                <property>
+                    <name>faster</name>
+                </property>
+            </activation>
+            <properties>
+                <skip.docs>true</skip.docs>
+                <skip.source>true</skip.source>
+                <skip.checks>true</skip.checks>
+            </properties>
+        </profile>
+        <profile>
+            <id>fastest</id>
+            <activation>
+                <property>
+                    <name>fastest</name>
+                </property>
+            </activation>
+            <properties>
+                <skip.docs>true</skip.docs>
+                <skip.source>true</skip.source>
+                <skip.checks>true</skip.checks>
+                <skip.tests>true</skip.tests>
+            </properties>
         </profile>
     </profiles>
 
