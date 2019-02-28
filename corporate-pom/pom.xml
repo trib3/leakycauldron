@@ -1113,6 +1113,12 @@
                         <skip>${skip.docs}</skip>
                         <reportNotDocumented>false</reportNotDocumented>
                         <jdkVersion>${version.java.release}</jdkVersion>
+                        <perPackageOptions>
+                            <packageOption>
+                                <prefix>com</prefix>
+                                <includeNonPublic>true</includeNonPublic>
+                            </packageOption>
+                        </perPackageOptions>
                         <sourceDirectories>
                             <dir>${project.basedir}/src/main/kotlin</dir>
                         </sourceDirectories>

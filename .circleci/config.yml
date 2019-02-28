@@ -6,7 +6,7 @@ jobs:
 
     working_directory: ~/repo
     environment:
-      MAVEN_OPTS: -Xmx128m
+      MAVEN_OPTS: -Xmx512m
 
     steps:
       # get code
@@ -52,7 +52,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/jars
-      - run: sudo apt install awscli 
+      - run: sudo apt install awscli
       - run:
           name: Deploy to elasticbeanstalk
           command: |
