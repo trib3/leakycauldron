@@ -63,8 +63,10 @@ class DefaultApplicationModule : TribeApplicationModule() {
     @ProvidesIntoSet
     fun provideCorsFilter(appConfig: TribeApplicationConfig): ServletFilterConfig {
         val corsDomain =
-            "https?://*.?${appConfig.corsDomain}," +
-                "https?://*.?${appConfig.corsDomain}:${appConfig.appPort}"
+            appConfig.corsDomains.map {
+                "https?://*.?$it," +
+                    "https?://*.?$it:${appConfig.appPort}"
+            }.joinToString(",")
         val paramMap = mapOf(
             CrossOriginFilter.ALLOWED_ORIGINS_PARAM to corsDomain,
             CrossOriginFilter.ALLOWED_METHODS_PARAM to "GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD",

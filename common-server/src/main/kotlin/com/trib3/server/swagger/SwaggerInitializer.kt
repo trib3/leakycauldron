@@ -1,6 +1,7 @@
 package com.trib3.server.swagger
 
 import com.trib3.server.config.TribeApplicationConfig
+import io.swagger.v3.jaxrs2.integration.JaxrsApplicationScanner
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import io.swagger.v3.oas.integration.SwaggerConfiguration
@@ -29,9 +30,17 @@ class SwaggerInitializer
         val ctxId = OpenApiContext.OPENAPI_CONTEXT_ID_PREFIX + "servlet." + OpenApiServlet::class.simpleName
         SwaggerContextBuilder()
             .openApiConfiguration(
-                SwaggerConfiguration().openAPI(
-                    OpenAPI().servers(listOf(Server().url("http://${appConfig.corsDomain}:${appConfig.appPort}/app")))
-                )
+                SwaggerConfiguration()
+                    .openAPI(
+                        OpenAPI().servers(
+                            listOf(
+                                Server().url("https://${appConfig.corsDomains[0]}/app"),
+                                Server().url("http://${appConfig.corsDomains[0]}/app"),
+                                Server().url("http://${appConfig.corsDomains[0]}:${appConfig.appPort}/app")
+                            )
+                        )
+                    )
+                    .scannerClass(JaxrsApplicationScanner::class.qualifiedName)
             )
             .application(application)
             .ctxId(ctxId)

@@ -11,7 +11,7 @@ class TribeApplicationConfig
 @Inject constructor(loader: ConfigLoader) {
     val env: String
     val appName: String
-    val corsDomain: String
+    val corsDomains: List<String>
     val appPort: Int
     val adminAuthToken: String?
 
@@ -19,7 +19,7 @@ class TribeApplicationConfig
         val config = loader.load()
         env = config.extract("env")
         appName = config.extract("application.name")
-        corsDomain = config.extract("application.domain")
+        corsDomains = config.extract("application.domains")
         appPort = config.extract<Int>("server.connector.port")
         adminAuthToken = config.extract("application.adminAuthToken")
     }
