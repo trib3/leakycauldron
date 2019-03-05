@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.trib3.json.jackson.ThreeTenExtraModule
 import io.dropwizard.jackson.Jackson
 import java.util.concurrent.TimeUnit
 import javax.inject.Provider
@@ -21,6 +22,7 @@ class ObjectMapperProvider : Provider<ObjectMapper> {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         mapper.registerModule(KotlinModule())
         mapper.registerModule(MetricsModule(TimeUnit.SECONDS, TimeUnit.SECONDS, false))
+        mapper.registerModule(ThreeTenExtraModule())
         return mapper
     }
 }

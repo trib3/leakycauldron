@@ -9,9 +9,7 @@ import java.time.YearMonth
  */
 class YearMonthConverter : AbstractConverter<LocalDate, YearMonth>(LocalDate::class.java, YearMonth::class.java) {
     override fun from(sqlDate: LocalDate?): YearMonth? {
-        return sqlDate?.let {
-            YearMonth.from(it)
-        }
+        return sqlDate?.let(YearMonth::from)
     }
 
     override fun to(yearMonth: YearMonth?): LocalDate? {

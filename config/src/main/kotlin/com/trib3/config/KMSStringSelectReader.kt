@@ -58,6 +58,7 @@ class KMSStringSelectReader
     }
 
     init {
+        @Suppress("SENSELESS_COMPARISON") // _INSTANCE _should_ never be null, but is at bootstrap
         if (_INSTANCE == null || _INSTANCE.kms == null) {
             _INSTANCE = this // first non-null kms instance wins
         }
