@@ -17,6 +17,20 @@ jobs:
             - v1-dependencies-{{ .Branch }}-{{ .Revision }}
             - v1-dependencies-{{ .Branch }}
             - v1-dependencies-
+      - run:
+          name: Set Maven Version
+          command: |
+            BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//')
+            if [ "$CIRCLE_BRANCH" = "master" ]; then
+              NEW_PROJECT_VERSION=${BASE_VERSION}.${CIRCLE_BUILD_NUM}
+            else
+              NEW_PROJECT_VERSION=${BASE_VERSION}-${CIRCLE_BRANCH}-SNAPSHOT
+            fi
+            for i in build-resources corporate-pom; do
+               cd $i
+               mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
+               cd ..
+            done
       - run: mvn install
       - save_cache:
           paths:
@@ -39,6 +53,18 @@ jobs:
       - run: mkdir -p ~/jars
       - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
       - run: find . -type f -regex ".*/target/.*zip" -exec cp {} ~/jars/ \;
+      - run:
+          name: Notify of Pending Deployment
+          command: |
+            CURRENT_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec)
+            git fetch --tags
+            PREVIOUS_VERSION=$(git tag | sort -V | tail -n 1)
+            git log --pretty=format:'* %s\r\n' ${PREVIOUS_VERSION}..HEAD | sed 's/"/\\"/g'|tr -d '\n' > ~/jars/release-notes.txt
+            RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
+            if [ "${CIRCLE_BRANCH}" = "master" -a "${SLACK_NOTIFICATION_WEBHOOK}" != "" ]; then
+              WORKFLOW_URL="https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
+              curl -X POST -d "payload={\"attachments\":[{ \"mrkdwn_in\":[\"text\"], \"color\":\"#439FE0\", \"fallback\":\"Deploy Ready Notification\", \"pretext\":\"Deploy Ready Notification\", \"text\":\"*Project* \`${CIRCLE_PROJECT_REPONAME}\`\n*Branch* \`${CIRCLE_BRANCH}\`\n*Version* \`${CURRENT_VERSION}\`\nClick <$WORKFLOW_URL|here> to approve the deploy\nRelease Notes:\n\`\`\`\n${RELEASE_NOTES}\n\`\`\`\"}]}" ${SLACK_NOTIFICATION_WEBHOOK}
+            fi
       - store_artifacts:
           path: ~/jars
       - persist_to_workspace:
@@ -54,11 +80,21 @@ jobs:
           at: ~/jars
       - run: sudo apt install awscli
       - run:
-          name: Deploy to elasticbeanstalk
+          name: Deploy to Elastic Beanstalk
           command: |
-            aws s3 cp `ls ~/jars/server-*-elasticbeanstalk.zip` s3://elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID}/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}.zip
-            aws elasticbeanstalk create-application-version --application-name ${CIRCLE_PROJECT_REPONAME} --version-label ${CIRCLE_BUILD_NUM}  --source-bundle S3Bucket=elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID},S3Key=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}.zip
-            aws elasticbeanstalk update-environment --application-name ${CIRCLE_PROJECT_REPONAME} --environment-name "${CIRCLE_PROJECT_REPONAME}-prod" --version-label ${CIRCLE_BUILD_NUM}
+            CURRENT_VERSION=$(ls ~/jars/server-*-elasticbeanstalk.zip | sed 's/^.*jars\/server-\(.*\)-elasticbeanstalk\.zip$/\1/')
+            aws s3 cp `ls ~/jars/server-*-elasticbeanstalk.zip` s3://elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID}/${CIRCLE_PROJECT_REPONAME}-${CURRENT_VERSION}.zip
+            aws elasticbeanstalk create-application-version --application-name ${CIRCLE_PROJECT_REPONAME} --version-label ${CURRENT_VERSION}  --source-bundle S3Bucket=elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID},S3Key=${CIRCLE_PROJECT_REPONAME}-${CURRENT_VERSION}.zip
+            aws elasticbeanstalk update-environment --application-name ${CIRCLE_PROJECT_REPONAME} --environment-name "${CIRCLE_PROJECT_REPONAME}-prod" --version-label ${CURRENT_VERSION}
+      - run:
+          name: Create Release Notes
+          command: |
+            CURRENT_VERSION=$(ls ~/jars/server-*-elasticbeanstalk.zip | sed 's/^.*jars\/server-\(.*\)-elasticbeanstalk\.zip$/\1/')
+            RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
+            if [ "${GITHUB_AUTH_TOKEN}" != "" -a "${RELEASE_NOTES}" != "" ]; then
+              curl -H "Authorization: bearer ${GITHUB_AUTH_TOKEN}" -X POST "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases" -X POST -d "{\"tag_name\":\"${CURRENT_VERSION}\", \"target_commitish\":\"${CIRCLE_SHA1}\", \"body\": \"${RELEASE_NOTES}\"}"
+            fi
+
 workflows:
   version: 2
   build_pipeline:
