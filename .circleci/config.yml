@@ -6,7 +6,7 @@ jobs:
 
     working_directory: ~/repo
     environment:
-      MAVEN_OPTS: -Xmx512m
+      MAVEN_OPTS: -Xmx2048m
 
     steps:
       # get code

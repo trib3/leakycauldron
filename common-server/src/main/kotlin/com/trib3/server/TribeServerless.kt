@@ -97,9 +97,10 @@ class TribeServerlessApp @Inject constructor(
         newProxy.onStartup {
             resourceConfig.setContextPath(newProxy.servletContext.contextPath)
             servletFilterConfigs.forEach {
-                val filter = newProxy.servletContext.addFilter(it.filterClass.simpleName, it.filterClass)
-                filter.initParameters = it.initParameters
-                filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
+                newProxy.servletContext.addFilter(it.filterClass.simpleName, it.filterClass)?.also { filter ->
+                    filter.initParameters = it.initParameters
+                    filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
+                }
             }
         }
 

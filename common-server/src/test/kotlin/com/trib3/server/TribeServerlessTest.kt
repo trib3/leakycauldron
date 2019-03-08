@@ -53,7 +53,7 @@ class TribeServerlessTest {
     }
 
     @Test
-    fun testRun() {
+    fun testRunAndEntry() {
         val mockRequest = EasyMock.niceMock<AwsProxyRequest>(AwsProxyRequest::class.java)
         EasyMock.expect(mockRequest.path).andReturn("/").anyTimes()
         EasyMock.expect(mockRequest.httpMethod).andReturn("GET").anyTimes()
@@ -65,17 +65,8 @@ class TribeServerlessTest {
         instance.servletFilterConfigs.forEach {
             assertThat(proxy.servletContext.getFilterRegistration(it.filterClass.simpleName)).isNotNull()
         }
-    }
-
-    @Test
-    fun testLambdaEntry() {
         val lambda = TribeServerless()
-        val mockRequest = EasyMock.niceMock<AwsProxyRequest>(AwsProxyRequest::class.java)
-        EasyMock.expect(mockRequest.path).andReturn("/").anyTimes()
-        EasyMock.expect(mockRequest.httpMethod).andReturn("GET").anyTimes()
-        val mockContext = EasyMock.niceMock<Context>(Context::class.java)
-        EasyMock.replay(mockRequest, mockContext)
-        val response = lambda.handleRequest(mockRequest, mockContext)
-        assertThat(response.statusCode).isEqualTo(404)
+        val lambdaResponse = lambda.handleRequest(mockRequest, mockContext)
+        assertThat(lambdaResponse.statusCode).isEqualTo(404)
     }
 }
