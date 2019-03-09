@@ -20,6 +20,7 @@ test-pattern: # Configure exclusions for test sources
     - 'TooManyFunctions'
     - 'ForEachOnRange'
     - 'LongMethod' # ADDITION FROM DEFAULT
+    - 'LargeClass' # ADDITION FROM DEFAULT
 
 build:
   maxIssues: 0  # CHANGE FROM DEFAULT OF 10
