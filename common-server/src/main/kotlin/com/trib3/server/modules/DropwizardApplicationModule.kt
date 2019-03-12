@@ -40,6 +40,19 @@ class DropwizardApplicationModule : TribeApplicationModule() {
             )
         )
 
+        adminServletBinder().addBinding().toInstance(
+            ServletConfig(
+                "GraphiQLAssetServlet",
+                AssetServlet(
+                    "graphiql",
+                    "/graphiql",
+                    "index.html",
+                    Charsets.UTF_8
+                ),
+                listOf("/graphiql")
+            )
+        )
+
         KotlinMultibinder.newSetBinder<JaxrsAppProcessor>(kotlinBinder).addBinding().to<SwaggerInitializer>()
 
         // Set up a Bundle multibinder, but no Bundles to bind by default right now
