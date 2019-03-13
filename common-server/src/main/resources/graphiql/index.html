@@ -22,8 +22,6 @@
 
 
 
-
-
     </style>
 
     <!--
@@ -107,7 +105,7 @@
       function graphQLFetcher(graphQLParams) {
         // This example expects a GraphQL server at the path /graphql.
         // Change this to point wherever you host your GraphQL server.
-        return fetch('http://localhost:8080/app/graphql', {
+        return fetch('/app/graphql', {
           method: 'post',
           headers: {
             'Accept': 'application/json',
@@ -141,7 +139,6 @@
         }),
         document.getElementById('graphiql')
       );
-
 
 
 
