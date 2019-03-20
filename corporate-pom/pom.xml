@@ -21,22 +21,22 @@
         <version.annotation>1.3.2</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.13</version.assertk>
-        <version.aws.java>2.5.2</version.aws.java>
+        <version.aws.java>2.5.12</version.aws.java>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
-        <version.dokka>0.9.17</version.dokka>
+        <version.dokka>0.9.18</version.dokka>
         <version.dropwizard>1.3.9</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.0.5</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.0.2</version.easymock>
         <version.flyway>5.2.4</version.flyway>
-        <version.graphql-kotlin>0.2.6</version.graphql-kotlin>
-        <version.graphql-java>9.2</version.graphql-java>
+        <version.graphql-kotlin>0.2.8</version.graphql-kotlin>
+        <version.graphql-java>12.0</version.graphql-java>
         <version.graphql-java.tools>5.2.4</version.graphql-java.tools>
         <version.graphql-java.servlet>6.1.3</version.graphql-java.servlet>
-        <version.guava>27.0.1-jre</version.guava>
+        <version.guava>27.1-jre</version.guava>
         <version.guice>4.2.2</version.guice>
         <version.h2>1.4.197</version.h2>
         <version.hikaricp>3.3.1</version.hikaricp>
@@ -51,7 +51,7 @@
         <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.14.v20181114</version.jetty>
-        <version.jooq>3.11.9</version.jooq>
+        <version.jooq>3.11.10</version.jooq>
         <version.kotlin>1.3.21</version.kotlin>
         <version.kotlin.guice>1.2.0</version.kotlin.guice>
         <version.kotlin.logging>1.6.25</version.kotlin.logging>
@@ -69,7 +69,7 @@
         <version.maven.git>2.2.6</version.maven.git>
         <version.maven.install>3.0.0-M1</version.maven.install>
         <version.maven.jar>3.1.1</version.maven.jar>
-        <version.maven.ktlint>0.9.18</version.maven.ktlint>
+        <version.maven.ktlint>0.9.22</version.maven.ktlint>
         <version.maven.properties>1.0.0</version.maven.properties>
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
