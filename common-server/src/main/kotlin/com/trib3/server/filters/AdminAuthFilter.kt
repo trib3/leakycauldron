@@ -40,7 +40,7 @@ class AdminAuthFilter : Filter {
         }
         // boom
         if (response is HttpServletResponse) {
-            response.setHeader("WWW-Authenticate", "Basic realm=\"${realm}\"")
+            response.setHeader("WWW-Authenticate", "Basic realm=\"$realm\"")
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
         }
         throw IllegalArgumentException("Invalid credentials")
