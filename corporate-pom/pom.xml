@@ -25,6 +25,7 @@
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
+        <version.detekt>1.0.0-RC14</version.detekt>
         <version.dokka>0.9.18</version.dokka>
         <version.dropwizard>1.3.9</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
@@ -56,6 +57,7 @@
         <version.kotlin.guice>1.2.0</version.kotlin.guice>
         <version.kotlin.logging>1.6.25</version.kotlin.logging>
         <version.logback>1.2.3</version.logback>
+        <version.maven.antrun>1.8</version.maven.antrun>
         <version.maven.assembly>3.1.1</version.maven.assembly>
         <version.maven.buildhelper>3.0.0</version.maven.buildhelper>
         <version.maven.clean>3.1.0</version.maven.clean>
@@ -63,7 +65,6 @@
         <version.maven.dependency>3.1.1</version.maven.dependency>
         <version.maven.dependencyscope>0.8</version.maven.dependencyscope>
         <version.maven.deploy>3.0.0-M1</version.maven.deploy>
-        <version.maven.detekt>1.0.0.RC9.2</version.maven.detekt>
         <version.maven.enforcer>3.0.0-M2</version.maven.enforcer>
         <version.maven.failsafe>3.0.0-M3</version.maven.failsafe>
         <version.maven.git>2.2.6</version.maven.git>
@@ -102,14 +103,6 @@
         </repository>
     </repositories>
     <pluginRepositories>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-ozsie-maven</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/ozsie/maven</url>
-        </pluginRepository>
         <pluginRepository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
@@ -996,28 +989,48 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>com.github.ozsie</groupId>
-                    <artifactId>detekt-maven-plugin</artifactId>
-                    <version>${version.maven.detekt}</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${version.maven.antrun}</version>
                     <executions>
                         <execution>
+                            <id>detekt</id>
                             <phase>verify</phase>
                             <goals>
-                                <goal>check</goal>
+                                <goal>run</goal>
                             </goals>
+                            <configuration>
+                                <skip>${skip.checks}</skip>
+                                <target name="detekt">
+                                    <java taskname="detekt" dir="${basedir}"
+                                          fork="true"
+                                          failonerror="true"
+                                          classname="io.gitlab.arturbosch.detekt.cli.Main"
+                                          classpathref="maven.plugin.classpath">
+
+                                        <arg value="--input"/>
+                                        <arg value="${basedir}/src/main/kotlin"/>
+                                        <arg value="--filters"/>
+                                        <arg value=".*/target/.*,.*/resources/.*"/>
+                                        <arg value="--config-resource"/>
+                                        <arg value="detekt-config.yml"/>
+                                    </java>
+                                </target>
+                            </configuration>
                         </execution>
                     </executions>
                     <dependencies>
+                        <dependency>
+                            <groupId>io.gitlab.arturbosch.detekt</groupId>
+                            <artifactId>detekt-cli</artifactId>
+                            <version>${version.detekt}</version>
+                        </dependency>
                         <dependency>
                             <groupId>com.trib3</groupId>
                             <artifactId>build-resources</artifactId>
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
-                    <configuration>
-                        <skip>${skip.checks}</skip>
-                        <configResource>detekt-config.yml</configResource>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jetbrains.kotlin</groupId>
@@ -1449,8 +1462,8 @@
                         <artifactId>ktlint-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
-                        <groupId>com.github.ozsie</groupId>
-                        <artifactId>detekt-maven-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.jetbrains.kotlin</groupId>
