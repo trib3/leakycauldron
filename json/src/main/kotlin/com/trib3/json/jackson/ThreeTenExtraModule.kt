@@ -21,11 +21,11 @@ class ThreeTenExtraModule : SimpleModule {
             val loader = this::class.java.classLoader
             val pkg = "com.trib3"
             val artifact = "json"
-            VERSION = loader.getResourceAsStream("$pkg/$artifact.git.properties").use {
+            VERSION = loader.getResourceAsStream("$pkg/$artifact.git.properties")?.use {
                 val gitProps = Properties()
                 gitProps.load(it)
                 VersionUtil.parseVersion(gitProps.getProperty("git.build.version"), pkg, artifact)
-            }
+            } ?: Version.unknownVersion()
         }
     }
 
