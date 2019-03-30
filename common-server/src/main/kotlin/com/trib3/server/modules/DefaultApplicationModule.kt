@@ -14,6 +14,7 @@ import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
+import com.trib3.server.resources.GraphqlResource
 import com.trib3.server.resources.PingResource
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
@@ -45,8 +46,13 @@ class DefaultApplicationModule : TribeApplicationModule() {
             ServletFilterConfig(RequestIdFilter::class.java.simpleName, RequestIdFilter::class.java)
         )
 
-        // Bind ping resource
+        // Bind ping and graphql resources
         resourceBinder().addBinding().to(PingResource::class.java)
+        resourceBinder().addBinding().to(GraphqlResource::class.java)
+        // Ensure graphql binders are set up
+        graphqlPackagesBinder()
+        graphqlQueriesBinder()
+        graphqlMutationsBinder()
 
         // set up metrics for guice created instances
         val registry = MetricRegistry()
