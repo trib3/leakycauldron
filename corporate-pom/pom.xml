@@ -21,7 +21,7 @@
         <version.annotation>1.3.2</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.13</version.assertk>
-        <version.aws.java>2.5.12</version.aws.java>
+        <version.aws.java>2.5.25</version.aws.java>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
@@ -33,7 +33,7 @@
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.0.2</version.easymock>
         <version.flyway>5.2.4</version.flyway>
-        <version.graphql-kotlin>0.2.8</version.graphql-kotlin>
+        <version.graphql-kotlin>0.2.13</version.graphql-kotlin>
         <version.graphql-java>12.0</version.graphql-java>
         <version.graphql-java.tools>5.2.4</version.graphql-java.tools>
         <version.graphql-java.servlet>6.1.3</version.graphql-java.servlet>
@@ -52,10 +52,10 @@
         <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.14.v20181114</version.jetty>
-        <version.jooq>3.11.10</version.jooq>
-        <version.kotlin>1.3.21</version.kotlin>
+        <version.jooq>3.11.11</version.jooq>
+        <version.kotlin>1.3.30</version.kotlin>
         <version.kotlin.guice>1.2.0</version.kotlin.guice>
-        <version.kotlin.logging>1.6.25</version.kotlin.logging>
+        <version.kotlin.logging>1.6.26</version.kotlin.logging>
         <version.logback>1.2.3</version.logback>
         <version.maven.antrun>1.8</version.maven.antrun>
         <version.maven.assembly>3.1.1</version.maven.assembly>
@@ -70,7 +70,7 @@
         <version.maven.git>2.2.6</version.maven.git>
         <version.maven.install>3.0.0-M1</version.maven.install>
         <version.maven.jar>3.1.1</version.maven.jar>
-        <version.maven.ktlint>0.9.22</version.maven.ktlint>
+        <version.maven.ktlint>0.9.24</version.maven.ktlint>
         <version.maven.properties>1.0.0</version.maven.properties>
         <version.maven.resources>3.1.0</version.maven.resources>
         <version.maven.shade>3.2.1</version.maven.shade>
@@ -82,7 +82,7 @@
         <version.servlet>3.1.0</version.servlet>
         <version.slf4j>1.7.26</version.slf4j>
         <version.swagger>2.0.7</version.swagger>
-        <version.testng>7.0.0-SNAPSHOT</version.testng>
+        <version.testng>7.0.0-beta5</version.testng>
         <version.threeten>1.5.0</version.threeten>
         <version.typesafe.config>1.3.3</version.typesafe.config>
         <version.validation>1.1.0.Final</version.validation>
@@ -96,10 +96,6 @@
         <repository>
             <id>redshift</id>
             <url>https://s3.amazonaws.com/redshift-maven-repository/release</url>
-        </repository>
-        <repository>
-            <id>central-snapshot</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -675,6 +671,12 @@
                 <artifactId>testng</artifactId>
                 <version>${version.testng}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.inject</groupId>
+                        <artifactId>guice</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.willowtreeapps.assertk</groupId>
