@@ -12,6 +12,8 @@ import assertk.assertions.prop
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.json.ObjectMapperProvider
+import com.trib3.server.graphql.GraphRequest
+import com.trib3.server.graphql.SanitizedGraphQLError
 import graphql.ExecutionResult
 import graphql.GraphQLError
 import org.testng.annotations.Test

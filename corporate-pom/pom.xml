@@ -1523,6 +1523,7 @@
                 <skip.source>true</skip.source>
                 <skip.checks>true</skip.checks>
                 <skip.tests>true</skip.tests>
+                <maven.test.skip>true</maven.test.skip>
             </properties>
         </profile>
     </profiles>
