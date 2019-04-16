@@ -7,6 +7,7 @@ import com.expedia.graphql.toSchema
 import com.trib3.server.graphql.CustomDataFetcherExceptionHandler
 import com.trib3.server.graphql.DateTimeHooks
 import com.trib3.server.graphql.GraphRequest
+import com.trib3.server.graphql.RequestIdInstrumentation
 import com.trib3.server.modules.TribeApplicationModule.Companion.GRAPHQL_MUTATIONS_BIND_NAME
 import com.trib3.server.modules.TribeApplicationModule.Companion.GRAPHQL_PACKAGES_BIND_NAME
 import com.trib3.server.modules.TribeApplicationModule.Companion.GRAPHQL_QUERIES_BIND_NAME
@@ -39,12 +40,12 @@ open class GraphqlResource
     @Named(GRAPHQL_MUTATIONS_BIND_NAME)
     mutations: Set<@JvmSuppressWildcards Any>
 ) {
-    private val graphql: GraphQL?
+    private val graphQL: GraphQL?
 
     init {
         val config =
             SchemaGeneratorConfig(graphQLPackages.toList(), hooks = DateTimeHooks())
-        graphql = if (queries.isNotEmpty()) {
+        graphQL = if (queries.isNotEmpty()) {
             GraphQL.newGraphQL(
                 toSchema(
                     config,
@@ -53,6 +54,7 @@ open class GraphqlResource
                 )
             )
                 .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
+                .instrumentation(RequestIdInstrumentation())
                 .build()
         } else {
             null
@@ -66,10 +68,10 @@ open class GraphqlResource
     @Path("/graphql")
     @Timed
     open fun graphQl(query: GraphRequest): Response {
-        check(graphql != null) {
+        check(graphQL != null) {
             "Graphql not configured!"
         }
-        val result = graphql.execute(
+        val result = graphQL.execute(
             ExecutionInput.newExecutionInput()
                 .query(query.query)
                 .variables(query.variables ?: mapOf())
