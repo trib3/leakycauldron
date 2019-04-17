@@ -365,7 +365,7 @@ performance:
   ForEachOnRange:
     active: true
   SpreadOperator:
-    active: true
+    active: false # CHANGED FROM DEFAULT OF true
   UnnecessaryTemporaryInstantiation:
     active: true
 
