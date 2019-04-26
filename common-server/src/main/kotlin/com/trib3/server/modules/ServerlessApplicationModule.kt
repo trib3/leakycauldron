@@ -12,22 +12,12 @@ import io.dropwizard.setup.ExceptionMapperBinder
  */
 class ServerlessApplicationModule : TribeApplicationModule() {
     override fun configure() {
-//        resourceBinder().addBinding().toInstance(object : AbstractBinder() {
-//            override fun configure() {
-//                bindFactory(AwsProxyServletContextFactory::class.java)!!
-//                    .to(ServletContext::class.java).`in`(RequestScoped::class.java)
-//                bindFactory(AwsProxyServletRequestFactory::class.java)!!
-//                    .to(HttpServletRequest::class.java).`in`(RequestScoped::class.java)
-//                bindFactory(AwsProxyServletResponseFactory::class.java)!!
-//                    .to(HttpServletResponse::class.java).`in`(RequestScoped::class.java)
-//            }
-//        })
         val resourceBinder = resourceBinder()
         resourceBinder.addBinding().toConstructor(
             JacksonBinder::class.java.getConstructor(ObjectMapper::class.java)
         )
         resourceBinder.addBinding().toInstance(ExceptionMapperBinder(false))
-        resourceBinder.addBinding().to(AdminResource::class.java)
+        resourceBinder.addBinding().to<AdminResource>()
         install(KMSModule())
     }
 

@@ -38,8 +38,8 @@ class DefaultApplicationModule : TribeApplicationModule() {
         bind<ConfigurationFactoryFactory<Configuration>>().to<HoconConfigurationFactoryFactory<Configuration>>()
         // Bind common health checks
         val healthChecks = KotlinMultibinder.newSetBinder<HealthCheck>(kotlinBinder)
-        healthChecks.addBinding().to(PingHealthCheck::class.java)
-        healthChecks.addBinding().to(VersionHealthCheck::class.java)
+        healthChecks.addBinding().to<PingHealthCheck>()
+        healthChecks.addBinding().to<VersionHealthCheck>()
 
         val filterBinder = KotlinMultibinder.newSetBinder<ServletFilterConfig>(kotlinBinder)
         filterBinder.addBinding().toInstance(
@@ -47,8 +47,8 @@ class DefaultApplicationModule : TribeApplicationModule() {
         )
 
         // Bind ping and graphql resources
-        resourceBinder().addBinding().to(PingResource::class.java)
-        resourceBinder().addBinding().to(GraphqlResource::class.java)
+        resourceBinder().addBinding().to<PingResource>()
+        resourceBinder().addBinding().to<GraphqlResource>()
         // Ensure graphql binders are set up
         graphqlPackagesBinder()
         graphqlQueriesBinder()

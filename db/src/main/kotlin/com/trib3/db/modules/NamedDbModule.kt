@@ -67,9 +67,9 @@ private class DSLContextProvider
 private class PrivateDbModule(private val name: String) : KotlinPrivateModule() {
     override fun configure() {
         bindConstant().annotatedWith(Names.named("configPath")).to(name)
-        bind<DbConfig>().annotatedWith(Names.named(name)).toProvider(DbConfigProvider::class.java)
-        bind<DataSource>().annotatedWith(Names.named(name)).toProvider(DataSourceProvider::class.java)
-        bind<DSLContext>().annotatedWith(Names.named(name)).toProvider(DSLContextProvider::class.java)
+        bind<DbConfig>().annotatedWith(Names.named(name)).toProvider<DbConfigProvider>()
+        bind<DataSource>().annotatedWith(Names.named(name)).toProvider<DataSourceProvider>()
+        bind<DSLContext>().annotatedWith(Names.named(name)).toProvider<DSLContextProvider>()
         expose<DbConfig>().annotatedWith(Names.named(name))
         expose<DataSource>().annotatedWith(Names.named(name))
         expose<DSLContext>().annotatedWith(Names.named(name))

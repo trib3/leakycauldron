@@ -1,7 +1,7 @@
 package com.trib3.server.modules
 
 import com.authzee.kotlinguice4.KotlinModule
-import com.google.inject.multibindings.Multibinder
+import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.google.inject.name.Names
 import javax.servlet.Servlet
 
@@ -31,11 +31,9 @@ abstract class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for jersey resources
      */
-    fun resourceBinder(): Multibinder<Any> {
-        // Can't use KotlinMultibinder to do a named binding, so just use ::class.java notation
-        return Multibinder.newSetBinder(
-            binder(),
-            Any::class.java,
+    fun resourceBinder(): KotlinMultibinder<Any> {
+        return KotlinMultibinder.newAnnotatedSetBinder(
+            kotlinBinder,
             Names.named(APPLICATION_RESOURCES_BIND_NAME)
         )
     }
@@ -43,11 +41,9 @@ abstract class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for app servlets
      */
-    fun appServletBinder(): Multibinder<ServletConfig> {
-        // Can't use KotlinMultibinder to do a named binding, so just use ::class.java notation
-        return Multibinder.newSetBinder(
-            binder(),
-            ServletConfig::class.java,
+    fun appServletBinder(): KotlinMultibinder<ServletConfig> {
+        return KotlinMultibinder.newAnnotatedSetBinder(
+            kotlinBinder,
             Names.named(APPLICATION_SERVLETS_BIND_NAME)
         )
     }
@@ -55,11 +51,9 @@ abstract class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for admin servlets
      */
-    fun adminServletBinder(): Multibinder<ServletConfig> {
-        // Can't use KotlinMultibinder to do a named binding, so just use ::class.java notation
-        return Multibinder.newSetBinder(
-            binder(),
-            ServletConfig::class.java,
+    fun adminServletBinder(): KotlinMultibinder<ServletConfig> {
+        return KotlinMultibinder.newAnnotatedSetBinder(
+            kotlinBinder,
             Names.named(ADMIN_SERVLETS_BIND_NAME)
         )
     }
@@ -67,10 +61,9 @@ abstract class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for graphql packages
      */
-    fun graphqlPackagesBinder(): Multibinder<String> {
-        return Multibinder.newSetBinder(
-            binder(),
-            String::class.java,
+    fun graphqlPackagesBinder(): KotlinMultibinder<String> {
+        return KotlinMultibinder.newAnnotatedSetBinder(
+            kotlinBinder,
             Names.named(GRAPHQL_PACKAGES_BIND_NAME)
         )
     }
@@ -78,10 +71,9 @@ abstract class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for graphql packages
      */
-    fun graphqlQueriesBinder(): Multibinder<Any> {
-        return Multibinder.newSetBinder(
-            binder(),
-            Any::class.java,
+    fun graphqlQueriesBinder(): KotlinMultibinder<Any> {
+        return KotlinMultibinder.newAnnotatedSetBinder(
+            kotlinBinder,
             Names.named(GRAPHQL_QUERIES_BIND_NAME)
         )
     }
@@ -89,10 +81,9 @@ abstract class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for graphql packages
      */
-    fun graphqlMutationsBinder(): Multibinder<Any> {
-        return Multibinder.newSetBinder(
-            binder(),
-            Any::class.java,
+    fun graphqlMutationsBinder(): KotlinMultibinder<Any> {
+        return KotlinMultibinder.newAnnotatedSetBinder(
+            kotlinBinder,
             Names.named(GRAPHQL_MUTATIONS_BIND_NAME)
         )
     }
