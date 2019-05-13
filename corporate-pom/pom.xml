@@ -20,20 +20,20 @@
 
         <version.annotation>1.3.2</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
-        <version.assertk>0.13</version.assertk>
-        <version.aws.java>2.5.31</version.aws.java>
+        <version.assertk>0.14</version.assertk>
+        <version.aws.java>2.5.41</version.aws.java>
         <version.aws.lambda>1.1.0</version.aws.lambda>
         <version.aws.serverless>0.9.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.0.0-RC14</version.detekt>
         <version.dokka>0.9.18</version.dokka>
-        <version.dropwizard>1.3.9</version.dropwizard>
+        <version.dropwizard>1.3.11</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.0.5</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.0.2</version.easymock>
         <version.flyway>5.2.4</version.flyway>
-        <version.graphql-kotlin>0.2.13</version.graphql-kotlin>
+        <version.graphql-kotlin>0.3.0</version.graphql-kotlin>
         <version.graphql-java>12.0</version.graphql-java>
         <version.graphql-java.tools>5.2.4</version.graphql-java.tools>
         <version.graphql-java.servlet>6.1.3</version.graphql-java.servlet>
@@ -44,14 +44,14 @@
         <version.hk2>2.5.0-b32</version.hk2>
         <version.jackson>2.9.8</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
-        <version.jacoco>0.8.3</version.jacoco>
+        <version.jacoco>0.8.4</version.jacoco>
         <version.java.release>8</version.java.release>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.2</version.jaxb>
         <version.jaxrs>2.0.1</version.jaxrs>
         <version.jersey>2.25.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>9.4.14.v20181114</version.jetty>
+        <version.jetty>9.4.18.v20190429</version.jetty>
         <version.jooq>3.11.11</version.jooq>
         <version.kotlin>1.3.31</version.kotlin>
         <version.kotlin.guice>1.3.0</version.kotlin.guice>
@@ -67,9 +67,9 @@
         <version.maven.deploy>3.0.0-M1</version.maven.deploy>
         <version.maven.enforcer>3.0.0-M2</version.maven.enforcer>
         <version.maven.failsafe>3.0.0-M3</version.maven.failsafe>
-        <version.maven.git>2.2.6</version.maven.git>
+        <version.maven.git>3.0.0</version.maven.git>
         <version.maven.install>3.0.0-M1</version.maven.install>
-        <version.maven.jar>3.1.1</version.maven.jar>
+        <version.maven.jar>3.1.2</version.maven.jar>
         <version.maven.ktlint>0.9.24</version.maven.ktlint>
         <version.maven.properties>1.0.0</version.maven.properties>
         <version.maven.resources>3.1.0</version.maven.resources>
@@ -200,6 +200,12 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-configuration</artifactId>
                 <version>${version.dropwizard}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
@@ -432,6 +438,10 @@
                     <exclusion>
                         <groupId>javax.xml.bind</groupId>
                         <artifactId>jaxb-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -733,6 +743,10 @@
                     <exclusion>
                         <groupId>com.fasterxml.jackson.datatype</groupId>
                         <artifactId>jackson-datatype-jdk8</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
