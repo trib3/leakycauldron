@@ -8,6 +8,8 @@ import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import com.amazonaws.serverless.proxy.model.AwsProxyRequest
+import com.amazonaws.serverless.proxy.model.AwsProxyRequestContext
+import com.amazonaws.serverless.proxy.model.Headers
 import com.amazonaws.services.lambda.runtime.Context
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
@@ -54,12 +56,18 @@ class TribeServerlessTest {
 
     @Test
     fun testRunAndEntry() {
+        val mockProxyRequest = EasyMock.niceMock<AwsProxyRequestContext>(AwsProxyRequestContext::class.java)
         val mockRequest = EasyMock.niceMock<AwsProxyRequest>(AwsProxyRequest::class.java)
+        val mockHeaders = EasyMock.niceMock<Headers>(Headers::class.java)
         EasyMock.expect(mockRequest.path).andReturn("/").anyTimes()
         EasyMock.expect(mockRequest.httpMethod).andReturn("GET").anyTimes()
+        EasyMock.expect(mockRequest.requestContext).andReturn(mockProxyRequest).anyTimes()
+        EasyMock.expect(mockRequest.multiValueHeaders).andReturn(mockHeaders).anyTimes()
+        EasyMock.expect(mockHeaders.keys).andReturn(mutableSetOf()).anyTimes()
         val mockContext = EasyMock.niceMock<Context>(Context::class.java)
-        EasyMock.replay(mockRequest, mockContext)
+        EasyMock.replay(mockRequest, mockContext, mockProxyRequest, mockHeaders)
         val proxy = instance.proxy
+        proxy.setLogFormatter(null)
         val response = proxy.proxy(mockRequest, mockContext)
         assertThat(response.statusCode).isEqualTo(404)
         instance.servletFilterConfigs.forEach {

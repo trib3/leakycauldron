@@ -22,8 +22,8 @@
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.17</version.assertk>
         <version.aws.java>2.5.54</version.aws.java>
-        <version.aws.lambda>1.1.0</version.aws.lambda>
-        <version.aws.serverless>0.9.1</version.aws.serverless>
+        <version.aws.lambda>1.2.0</version.aws.lambda>
+        <version.aws.serverless>1.3.1</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.0.0-RC14</version.detekt>
         <version.dokka>0.9.18</version.dokka>
