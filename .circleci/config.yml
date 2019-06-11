@@ -18,20 +18,42 @@ jobs:
             - v1-dependencies-{{ .Branch }}
             - v1-dependencies-
       - run:
-          name: Set Maven Version
+          name: Setup GPG
           command: |
-            BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//')
+            echo $GPG_KEY | sed 's/\$/\n/g' |  gpg --import
+      - run:
+          name: Maven Setup
+          command: |
+            mkdir -p ~/.m2
+            echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
+            if [ "$CIRCLE_BRANCH" = "master" ]; then
+                set +o pipefail # it's ok to keep going if grep doesn't match anything 
+                REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+                set -o pipefail
+                if [ -n "$REPOID" ]; then
+                    echo "Cleaning existing $REPOID"
+                    mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID
+                fi
+            fi
+            cd build-resources && BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
             if [ "$CIRCLE_BRANCH" = "master" ]; then
               NEW_PROJECT_VERSION=${BASE_VERSION}.${CIRCLE_BUILD_NUM}
             else
               NEW_PROJECT_VERSION=${BASE_VERSION}-${CIRCLE_BRANCH}-SNAPSHOT
             fi
-            for i in build-resources corporate-pom; do
+            for i in build-resources parent-pom; do
                cd $i
                mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
                cd ..
             done
-      - run: mvn install
+      - run:
+          name: Maven Build
+          command: |
+            if [ "$CIRCLE_BRANCH" = "master" ]; then
+              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO}
+            else
+              mvn install #deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO}
+            fi
       - save_cache:
           paths:
             - ~/.m2
@@ -53,8 +75,9 @@ jobs:
       - run: mkdir -p ~/jars
       - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
       - run: find . -type f -regex ".*/target/.*zip" -exec cp {} ~/jars/ \;
+      - run: find . -type f -regex ".*/target/.*asc" -exec cp {} ~/jars/ \;
       - run:
-          name: Notify of Pending Deployment
+          name: Notify of new master build
           command: |
             CURRENT_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec)
             git fetch --tags
@@ -63,7 +86,7 @@ jobs:
             RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
             if [ "${CIRCLE_BRANCH}" = "master" -a "${SLACK_NOTIFICATION_WEBHOOK}" != "" ]; then
               WORKFLOW_URL="https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
-              curl -X POST -d "payload={\"attachments\":[{ \"mrkdwn_in\":[\"text\"], \"color\":\"#439FE0\", \"fallback\":\"Deploy Ready Notification\", \"pretext\":\"Deploy Ready Notification\", \"text\":\"*Project* \`${CIRCLE_PROJECT_REPONAME}\`\n*Branch* \`${CIRCLE_BRANCH}\`\n*Version* \`${CURRENT_VERSION}\`\nClick <$WORKFLOW_URL|here> to approve the deploy\nRelease Notes:\n\`\`\`\n${RELEASE_NOTES}\n\`\`\`\"}]}" ${SLACK_NOTIFICATION_WEBHOOK}
+              curl -X POST -d "payload={\"attachments\":[{ \"mrkdwn_in\":[\"text\"], \"color\":\"#439FE0\", \"fallback\":\"Library master build notification\", \"pretext\":\"Library master build notification\", \"text\":\"*Project* \`${CIRCLE_PROJECT_REPONAME}\`\n*Branch* \`${CIRCLE_BRANCH}\`\n*Version* \`${CURRENT_VERSION}\`\nClick <$WORKFLOW_URL|here> to finalize release\nRelease Notes:\n\`\`\`\n${RELEASE_NOTES}\n\`\`\`\"}]}" ${SLACK_NOTIFICATION_WEBHOOK}
             fi
       - store_artifacts:
           path: ~/jars
@@ -74,22 +97,18 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3.6 # more likely to already be on the new host than the java image
+      - image: circleci/openjdk:11-jdk
     steps:
       - attach_workspace:
           at: ~/jars
-      - run: sudo apt install awscli
       - run:
-          name: Deploy to Elastic Beanstalk
+          name: Complete release
           command: |
-            CURRENT_VERSION=$(ls ~/jars/server-*-elasticbeanstalk.zip | sed 's/^.*jars\/server-\(.*\)-elasticbeanstalk\.zip$/\1/')
-            aws s3 cp `ls ~/jars/server-*-elasticbeanstalk.zip` s3://elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID}/${CIRCLE_PROJECT_REPONAME}-${CURRENT_VERSION}.zip
-            aws elasticbeanstalk create-application-version --application-name ${CIRCLE_PROJECT_REPONAME} --version-label ${CURRENT_VERSION}  --source-bundle S3Bucket=elasticbeanstalk-${AWS_DEFAULT_REGION}-${AWS_ACCOUNT_ID},S3Key=${CIRCLE_PROJECT_REPONAME}-${CURRENT_VERSION}.zip
-            aws elasticbeanstalk update-environment --application-name ${CIRCLE_PROJECT_REPONAME} --environment-name "${CIRCLE_PROJECT_REPONAME}-prod" --version-label ${CURRENT_VERSION}
-      - run:
-          name: Create Release Notes
-          command: |
-            CURRENT_VERSION=$(ls ~/jars/server-*-elasticbeanstalk.zip | sed 's/^.*jars\/server-\(.*\)-elasticbeanstalk\.zip$/\1/')
+            mkdir -p ~/.m2
+            echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
+            REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DautoReleaseAfterClose=false
+            CURRENT_VERSION=$(ls ~/jars/build-resources-*.jar | sed 's/^.*jars\/build-resources-\(.*\)\.jar$/\1/')
             RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
             if [ "${GITHUB_AUTH_TOKEN}" != "" -a "${RELEASE_NOTES}" != "" ]; then
               curl -H "Authorization: bearer ${GITHUB_AUTH_TOKEN}" -X POST "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases" -X POST -d "{\"tag_name\":\"${CURRENT_VERSION}\", \"target_commitish\":\"${CIRCLE_SHA1}\", \"body\": \"${RELEASE_NOTES}\"}"
