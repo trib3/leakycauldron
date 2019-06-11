@@ -6,14 +6,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.trib3.pebbles</groupId> <!-- TODO: extract to a common repo -->
-        <artifactId>parent</artifactId>
+        <groupId>com.trib3</groupId>
+        <artifactId>leakycauldron</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>com.trib3</groupId>
-    <artifactId>common-server</artifactId>
+    <artifactId>server</artifactId>
 
     <dependencies>
         <!-- dropwizard -->
@@ -164,7 +164,7 @@
         <dependency>
             <groupId>com.trib3</groupId>
             <artifactId>json</artifactId>
-            <version>${project.version}</version>
+            <version>${version.leakycauldron}</version>
         </dependency>
 
         <!-- lambda -->
@@ -219,7 +219,7 @@
         <dependency>
             <groupId>com.trib3</groupId>
             <artifactId>config</artifactId>
-            <version>${project.version}</version>
+            <version>${version.leakycauldron}</version>
         </dependency>
 
         <!-- logging -->
