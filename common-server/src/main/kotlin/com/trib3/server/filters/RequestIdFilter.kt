@@ -27,8 +27,7 @@ class RequestIdFilter : Filter {
         const val REQUEST_ID_HEADER = "X-Request-Id"
     }
 
-    override fun init(filterConfig: FilterConfig?) {
-    }
+    override fun init(filterConfig: FilterConfig?) = Unit
 
     override fun destroy() = Unit
 

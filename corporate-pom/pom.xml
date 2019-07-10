@@ -25,7 +25,7 @@
         <version.aws.lambda>1.2.0</version.aws.lambda>
         <version.aws.serverless>1.3.2</version.aws.serverless>
         <version.config4k>0.4.1</version.config4k>
-        <version.detekt>1.0.0-RC14</version.detekt>
+        <version.detekt>1.0.0-RC16</version.detekt>
         <version.dokka>0.9.18</version.dokka>
         <version.dropwizard>2.0.0-rc4</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
@@ -1099,7 +1099,7 @@
 
                                         <arg value="--input"/>
                                         <arg value="${basedir}/src/main/kotlin"/>
-                                        <arg value="--filters"/>
+                                        <arg value="--excludes"/>
                                         <arg value=".*/target/.*,.*/resources/.*"/>
                                         <arg value="--config-resource"/>
                                         <arg value="detekt-config.yml"/>

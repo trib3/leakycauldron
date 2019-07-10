@@ -4,10 +4,10 @@ import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
 import com.codahale.metrics.jvm.ThreadDump
-import com.google.inject.Inject
 import com.trib3.server.config.TribeApplicationConfig
 import java.lang.management.ManagementFactory
 import java.util.SortedMap
+import javax.inject.Inject
 import javax.ws.rs.GET
 import javax.ws.rs.NotAuthorizedException
 import javax.ws.rs.Path
