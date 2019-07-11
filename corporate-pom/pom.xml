@@ -353,6 +353,12 @@
                 <artifactId>jakarta.xml.bind-api</artifactId>
                 <version>${version.jaxb}</version>
                 <scope>runtime</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>jakarta.activation</groupId>
+                        <artifactId>jakarta.activation-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>jakarta.annotation</groupId>
@@ -958,6 +964,7 @@
                                     <exclude>javax.el:javax.el-api</exclude>
                                     <exclude>org.glassfish:javax.el</exclude>
                                     <exclude>jakarta.el:jakarta.el-api</exclude> <!-- el impl includes el-api -->
+                                    <exclude>jakarta.activation:jakarta.activation-api</exclude> <!-- use com.sun -->
                                 </excludes>
                             </bannedDependencies>
                         </rules>
