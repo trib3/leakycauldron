@@ -52,7 +52,7 @@ jobs:
             if [ "$CIRCLE_BRANCH" = "master" ]; then
               mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO}
             else
-              mvn install #deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO}
+              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO}
             fi
       - save_cache:
           paths:

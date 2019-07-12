@@ -1610,8 +1610,7 @@
             <id>CI</id>
             <activation>
                 <property>
-                    <name>env.CI</name>
-                    <value>true</value>
+                    <name>env.GPG_KEY</name>
                 </property>
             </activation>
             <build>
