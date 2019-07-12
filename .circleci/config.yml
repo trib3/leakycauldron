@@ -109,7 +109,7 @@ jobs:
             REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
             mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID 
             mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID 
-            CURRENT_VERSION=$(ls ~/jars/build-resources-*.jar | sed 's/^.*jars\/build-resources-\(.*\)\.jar$/\1/')
+            CURRENT_VERSION=$(ls ~/jars/build-resources-*.pom.asc | sed 's/^.*jars\/build-resources-\(.*\)\.pom.asc$/\1/')
             RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
             if [ "${GITHUB_AUTH_TOKEN}" != "" -a "${RELEASE_NOTES}" != "" ]; then
               curl -H "Authorization: bearer ${GITHUB_AUTH_TOKEN}" -X POST "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases" -X POST -d "{\"tag_name\":\"${CURRENT_VERSION}\", \"target_commitish\":\"${CIRCLE_SHA1}\", \"body\": \"${RELEASE_NOTES}\"}"
