@@ -3,6 +3,7 @@ package com.trib3.server.modules
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.isEqualTo
 import io.dropwizard.jersey.jackson.JacksonFeature
 import io.dropwizard.setup.ExceptionMapperBinder
 import org.testng.annotations.Guice
@@ -22,5 +23,10 @@ class ServerlessApplicationModuleTest
             contains(ExceptionMapperBinder::class)
             contains(JacksonFeature::class)
         }
+    }
+
+    @Test
+    fun testModuleEquals() {
+        assertThat(ServerlessApplicationModule()).isEqualTo(ServerlessApplicationModule())
     }
 }

@@ -25,6 +25,51 @@ class RequestIdFilter : Filter {
     companion object {
         const val REQUEST_ID_KEY = "RequestId"
         const val REQUEST_ID_HEADER = "X-Request-Id"
+
+        /**
+         * Convenience function for ensuring a block of code executes with a RequestId set in the MDC.
+         *
+         * @param requestId the RequestId to set, defaults to a new random UUID
+         * @param block the block of code to execute
+         */
+        fun <T> withRequestId(requestId: String = UUID.randomUUID().toString(), block: () -> T): T {
+            val createdId = createRequestId(requestId)
+            try {
+                return block()
+            } finally {
+                if (createdId) {
+                    clearRequestId()
+                }
+            }
+        }
+
+        /**
+         * Set a new RequestId in the MDC, if one is not already set.  If one is already set, ignore the new one.
+         *
+         * @return whether or not weve set a new RequestId
+         */
+        fun createRequestId(requestId: String): Boolean {
+            val currentMDC: String? = getRequestId()
+            if (currentMDC == null) {
+                MDC.put(REQUEST_ID_KEY, requestId)
+                return true
+            }
+            return false
+        }
+
+        /**
+         * Return the current MDC's RequestId, if set
+         */
+        fun getRequestId(): String? {
+            return MDC.get(REQUEST_ID_KEY)
+        }
+
+        /**
+         * Remove any RequestId set from the MDC
+         */
+        fun clearRequestId() {
+            MDC.remove(REQUEST_ID_KEY)
+        }
     }
 
     override fun init(filterConfig: FilterConfig?) = Unit
@@ -32,24 +77,12 @@ class RequestIdFilter : Filter {
     override fun destroy() = Unit
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-        val currentMDC: String? = MDC.get(REQUEST_ID_KEY)
-        if (currentMDC == null) {
-            MDC.put(REQUEST_ID_KEY, UUID.randomUUID().toString())
-        }
-        try {
+        withRequestId {
             when (response) {
-                is HttpServletResponse -> {
-                    response.setHeader(REQUEST_ID_HEADER, MDC.get(REQUEST_ID_KEY))
-                }
-                else -> {
-                    log.warn("Couldn't set request id header for {}", response::class.java)
-                }
+                is HttpServletResponse -> response.setHeader(REQUEST_ID_HEADER, getRequestId())
+                else -> log.warn("Couldn't set request id header for {}", response::class.java)
             }
             chain.doFilter(request, response)
-        } finally {
-            if (currentMDC == null) {
-                MDC.remove(REQUEST_ID_KEY)
-            }
         }
     }
 }

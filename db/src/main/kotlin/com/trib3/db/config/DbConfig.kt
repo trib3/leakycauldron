@@ -34,6 +34,7 @@ class DbConfig
         val driverClassName = config.extract("driverClassName") ?: "org.postgresql.Driver"
         val username = config.extract("user") ?: "tribe"
         val password = config.extract<String?>("password")
+        val autoCommit = config.extract("autocommit") ?: false
 
         val hds = HikariDataSource()
         hds.poolName = configPath
@@ -43,6 +44,7 @@ class DbConfig
         hds.jdbcUrl = "jdbc:$subprotocol://$host:$port/$schema"
         hds.healthCheckRegistry = healthCheckRegistry
         hds.metricRegistry = metricRegistry
+        hds.isAutoCommit = autoCommit
 
         dataSource = hds
 

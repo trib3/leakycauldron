@@ -4,6 +4,7 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
 import com.trib3.db.config.DbConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -40,6 +41,7 @@ class DbModuleTest
         assertThat(dataSource.username).isEqualTo("tribe")
         assertThat(dataSource.healthCheckRegistry).isNotNull()
         assertThat(dataSource.metricRegistry).isNotNull()
+        assertThat(dataSource.isAutoCommit).isFalse()
     }
 
     @Test
