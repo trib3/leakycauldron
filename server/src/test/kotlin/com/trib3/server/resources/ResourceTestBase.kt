@@ -2,6 +2,8 @@ package com.trib3.server.resources
 
 import com.trib3.json.ObjectMapperProvider
 import io.dropwizard.testing.common.Resource
+import org.glassfish.jersey.test.inmemory.InMemoryTestContainerFactory
+import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 
@@ -22,10 +24,16 @@ abstract class ResourceTestBase<T> {
 
     abstract fun getResource(): T
 
+    open fun getContainerFactory(): TestContainerFactory {
+        return InMemoryTestContainerFactory()
+    }
+
     @BeforeClass
     open fun setUpClass() {
         val resourceBuilder = Builder()
+        resourceBuilder.setTestContainerFactory(getContainerFactory())
         resourceBuilder.addResource(getResource())
+        System.setProperty("jersey.config.test.container.port", "0")
         resource = resourceBuilder.buildResource()
         resource.before()
     }

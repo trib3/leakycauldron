@@ -15,16 +15,13 @@ import java.util.concurrent.CompletableFuture
 class RequestIdInstrumentation : SimpleInstrumentation() {
     override fun instrumentExecutionResult(
         executionResult: ExecutionResult,
-        parameters: InstrumentationExecutionParameters
+        parameters: InstrumentationExecutionParameters?
     ): CompletableFuture<ExecutionResult> {
-        val existingExtensions = executionResult.extensions ?: mapOf()
-
         return CompletableFuture.completedFuture(
-            ExecutionResultImpl(
-                executionResult.getData(),
-                executionResult.errors,
-                existingExtensions + (RequestIdFilter.REQUEST_ID_KEY to MDC.get(RequestIdFilter.REQUEST_ID_KEY))
-            )
+            ExecutionResultImpl.newExecutionResult()
+                .from(executionResult)
+                .addExtension(RequestIdFilter.REQUEST_ID_KEY, RequestIdFilter.getRequestId())
+                .build()
         )
     }
 }

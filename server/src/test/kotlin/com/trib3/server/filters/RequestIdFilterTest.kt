@@ -3,6 +3,8 @@ package com.trib3.server.filters
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEmpty
+import assertk.assertions.isNull
+import assertk.assertions.isTrue
 import org.easymock.EasyMock
 import org.slf4j.MDC
 import org.testng.annotations.AfterClass
@@ -72,5 +74,22 @@ class RequestIdFilterTest {
             assertThat(MDC.get(RequestIdFilter.REQUEST_ID_KEY)).isNotEmpty()
         }
         EasyMock.verify(mockResponse)
+    }
+
+    @Test
+    fun testCompanionMethods() {
+        val testRequestId = "TESTTEST"
+        RequestIdFilter.withRequestId(testRequestId) {
+            assertThat(RequestIdFilter.getRequestId()).isEqualTo(testRequestId)
+        }
+        assertThat(RequestIdFilter.getRequestId()).isNull()
+        val set = RequestIdFilter.createRequestId(testRequestId)
+        assertThat(set).isTrue()
+        try {
+            assertThat(RequestIdFilter.getRequestId()).isEqualTo(testRequestId)
+        } finally {
+            RequestIdFilter.clearRequestId()
+        }
+        assertThat(RequestIdFilter.getRequestId()).isNull()
     }
 }

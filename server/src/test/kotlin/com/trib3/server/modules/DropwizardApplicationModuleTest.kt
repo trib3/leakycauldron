@@ -2,6 +2,7 @@ package com.trib3.server.modules
 
 import assertk.assertThat
 import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import io.dropwizard.Configuration
 import io.dropwizard.ConfiguredBundle
@@ -21,5 +22,10 @@ class DropwizardApplicationModuleTest
     fun testBindings() {
         assertThat(bundles).isEmpty()
         assertThat(adminFilters).isNotNull()
+    }
+
+    @Test
+    fun testModuleEquals() {
+        assertThat(DropwizardApplicationModule()).isEqualTo(DropwizardApplicationModule())
     }
 }

@@ -97,6 +97,8 @@ class TribeApplicationTest {
         EasyMock.expect(mockEnv.healthChecks()).andReturn(mockHealthChecks).anyTimes()
         EasyMock.expect(mockServlet.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
             .andReturn(mockFilterRegistration).anyTimes()
+        EasyMock.expect(mockServlet.addServlet(anyString(), EasyMock.anyObject<Servlet>()))
+            .andReturn(mockServletRegistration).anyTimes()
         EasyMock.expect(mockAdmin.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
             .andReturn(mockFilterRegistration).anyTimes()
         EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<VersionHealthCheck>())).once()

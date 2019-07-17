@@ -20,6 +20,7 @@ Example config:
         user: dbuser
         password: dbpass
         driverClassName: org.postgresql.Driver
+        autoCommit: false
     }
 ```
 
@@ -41,6 +42,7 @@ section to `application.conf` explicitly:
 * `DB_USER`:  database user name, defaults to `tribe`
 * `DB_PASSWORD`:  database password, defaults to no password
 * `DB_DRIVER_CLASS_NAME`:  jdbc driver, defaults to `org.postgresql.Driver`
+* `DB_AUTOCOMMTI`: connection autocommit status, defaults to `false`
 
 NamedDbModule
 -------------
