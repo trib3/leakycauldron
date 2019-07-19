@@ -6,6 +6,8 @@ import assertk.assertions.isInstanceOf
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.GraphQL
 import org.easymock.EasyMock
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.testng.annotations.Test
 
 class GraphQLWebSocketCreatorTest {
@@ -16,7 +18,13 @@ class GraphQLWebSocketCreatorTest {
         val creator = GraphQLWebSocketCreator(graphQL, mapper)
         assertThat(creator.graphQL).isEqualTo(graphQL)
         assertThat(creator.objectMapper).isEqualTo(mapper)
-        val socket = creator.createWebSocket(null, null)
+
+        val request = EasyMock.mock<ServletUpgradeRequest>(ServletUpgradeRequest::class.java)
+        val response = EasyMock.mock<ServletUpgradeResponse>(ServletUpgradeResponse::class.java)
+        EasyMock.expect(response.setAcceptedSubProtocol("graphql-ws")).once()
+        EasyMock.replay(graphQL, request, response)
+        val socket = creator.createWebSocket(request, response)
+        EasyMock.verify(response)
         assertThat(socket).isInstanceOf(GraphQLWebSocket::class)
         assertThat((socket as GraphQLWebSocket).graphQL).isEqualTo(graphQL)
         assertThat(socket.objectMapper).isEqualTo(mapper)
