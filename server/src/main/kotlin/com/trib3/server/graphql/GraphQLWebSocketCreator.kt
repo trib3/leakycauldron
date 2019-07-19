@@ -16,7 +16,8 @@ class GraphQLWebSocketCreator
     @Nullable val graphQL: GraphQL?,
     val objectMapper: ObjectMapper
 ) : WebSocketCreator {
-    override fun createWebSocket(req: ServletUpgradeRequest?, resp: ServletUpgradeResponse?): Any {
+    override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
+        resp.acceptedSubProtocol = "graphql-ws"
         return GraphQLWebSocket(graphQL, objectMapper)
     }
 }
