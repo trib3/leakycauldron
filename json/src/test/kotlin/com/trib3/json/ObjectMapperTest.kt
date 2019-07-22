@@ -1,8 +1,10 @@
 package com.trib3.json
 
+import assertk.all
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
@@ -54,7 +56,7 @@ class ObjectMapperTest
         assertThat(mapper.readValue<YearQuarter>("\"\"")).isNull()
         assertThat {
             mapper.readValue<YearQuarter>("123")
-        }.thrownError {
+        }.isFailure().all {
             isInstanceOf(JsonMappingException::class)
             message().isNotNull().contains("Expected VALUE_STRING for YearQuarter but saw")
         }
@@ -76,7 +78,7 @@ class ObjectMapperTest
         assertThat(mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"2010-Q1\":\"2011-Q2\"}")).isEqualTo(map)
         assertThat {
             mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"abc\": \"2011-Q2\"}")
-        }.thrownError {
+        }.isFailure().all {
             isInstanceOf(JsonMappingException::class)
             message().isNotNull().contains("Unexpected quarter")
         }
