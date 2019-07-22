@@ -2,7 +2,9 @@ package com.trib3.server.filters
 
 import assertk.assertThat
 import assertk.assertions.hasMessage
+import assertk.assertions.isFailure
 import assertk.assertions.isFalse
+import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import org.easymock.EasyMock
 import org.testng.annotations.Test
@@ -44,7 +46,7 @@ class AdminAuthFilterTest {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.doesNotThrowAnyException()
+        }.isSuccess()
         assertThat(proceeded).isTrue()
     }
 
@@ -74,9 +76,8 @@ class AdminAuthFilterTest {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.thrownError {
-            hasMessage("Invalid credentials")
-        }
+        }.isFailure().hasMessage("Invalid credentials")
+
         assertThat(proceeded).isFalse()
         EasyMock.verify(mockResponse)
     }
@@ -104,9 +105,7 @@ class AdminAuthFilterTest {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.thrownError {
-            hasMessage("Invalid credentials")
-        }
+        }.isFailure().hasMessage("Invalid credentials")
         assertThat(proceeded).isFalse()
         EasyMock.verify(mockResponse)
     }
@@ -132,9 +131,7 @@ class AdminAuthFilterTest {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.thrownError {
-            hasMessage("Invalid credentials")
-        }
+        }.isFailure().hasMessage("Invalid credentials")
         assertThat(proceeded).isFalse()
         EasyMock.verify(mockResponse)
     }

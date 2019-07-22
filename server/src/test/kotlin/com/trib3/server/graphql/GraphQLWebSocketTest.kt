@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.message
@@ -359,7 +360,7 @@ class GraphQLWebSocketTest {
                  "id": "unconfiguredquery", 
                  "payload": {"query": "query { q }"}}""".trimIndent()
             )
-        }.thrownError { message().isNotNull().contains("not configured") }
+        }.isFailure().message().isNotNull().contains("not configured")
     }
 
     @Test

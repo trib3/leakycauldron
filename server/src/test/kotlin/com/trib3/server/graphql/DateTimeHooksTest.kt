@@ -2,7 +2,9 @@ package com.trib3.server.graphql
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
+import assertk.assertions.isSuccess
 import com.expedia.graphql.SchemaGeneratorConfig
 import com.expedia.graphql.TopLevelObject
 import com.expedia.graphql.toSchema
@@ -58,24 +60,18 @@ class DateTimeHooksTest {
         assertThat(result["quarter"]).isEqualTo("2019-Q2")
         assertThat {
             graphQL.execute("""query {quarter(q:123)}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
         assertThat {
             graphQL.execute("""query {quarter(q:"123")}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             YEAR_QUARTER_SCALAR.coercing.serialize(123)
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             YEAR_QUARTER_SCALAR.coercing.serialize(YearQuarter.of(2019, 2))
-        }.returnedValue {
-            isEqualTo("2019-Q2")
-        }
+        }.isSuccess().isEqualTo("2019-Q2")
     }
 
     @Test
@@ -94,24 +90,19 @@ class DateTimeHooksTest {
         assertThat(result["month"]).isEqualTo("2019-02")
         assertThat {
             graphQL.execute("""query {month(m:123)}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             graphQL.execute("""query {month(m:"123")}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             YEAR_MONTH_SCALAR.coercing.serialize(123)
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             YEAR_MONTH_SCALAR.coercing.serialize(YearMonth.of(2019, 10))
-        }.returnedValue {
-            isEqualTo("2019-10")
-        }
+        }.isSuccess().isEqualTo("2019-10")
     }
 
     @Test
@@ -131,24 +122,19 @@ class DateTimeHooksTest {
         assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01")
         assertThat {
             graphQL.execute("""query {localDateTime(l:123)}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             graphQL.execute("""query {localDateTime(l:"123")}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             LOCAL_DATETIME_SCALAR.coercing.serialize(123)
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             LOCAL_DATETIME_SCALAR.coercing.serialize(LocalDateTime.of(2019, 10, 31, 1, 1))
-        }.returnedValue {
-            isEqualTo("2019-10-31T01:01")
-        }
+        }.isSuccess().isEqualTo("2019-10-31T01:01")
     }
 
     @Test
@@ -168,24 +154,19 @@ class DateTimeHooksTest {
         assertThat(result["localDate"]).isEqualTo("2019-10-31")
         assertThat {
             graphQL.execute("""query {localDate(l:123)}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             graphQL.execute("""query {localDate(l:"123")}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             LOCAL_DATE_SCALAR.coercing.serialize(123)
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             LOCAL_DATE_SCALAR.coercing.serialize(LocalDate.of(2019, 10, 31))
-        }.returnedValue {
-            isEqualTo("2019-10-31")
-        }
+        }.isSuccess().isEqualTo("2019-10-31")
     }
 
     @Test
@@ -205,24 +186,19 @@ class DateTimeHooksTest {
         assertThat(result["localTime"]).isEqualTo("01:01")
         assertThat {
             graphQL.execute("""query {localTime(l:123)}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             graphQL.execute("""query {localTime(l:"123")}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             LOCAL_TIME_SCALAR.coercing.serialize(123)
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             LOCAL_TIME_SCALAR.coercing.serialize(LocalTime.of(1, 1))
-        }.returnedValue {
-            isEqualTo("01:01")
-        }
+        }.isSuccess().isEqualTo("01:01")
     }
 
     @Test
@@ -242,25 +218,21 @@ class DateTimeHooksTest {
         assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T00:01-07:00")
         assertThat {
             graphQL.execute("""query {offsetDateTime(o:123)}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             graphQL.execute("""query {offsetDateTime(o:"123")}""")
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             OFFSET_DATETIME_SCALAR.coercing.serialize(123)
-        }.thrownError {
-            isInstanceOf(CoercingSerializeException::class)
-        }
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
         assertThat {
             OFFSET_DATETIME_SCALAR.coercing.serialize(
-                OffsetDateTime.of(2019, 10, 31, 1, 1, 31, 129, ZoneOffset.ofHours(-7)))
-        }.returnedValue {
-            isEqualTo("2019-10-31T01:01:31.000000129-07:00")
-        }
+                OffsetDateTime.of(2019, 10, 31, 1, 1, 31, 129, ZoneOffset.ofHours(-7))
+            )
+        }.isSuccess().isEqualTo("2019-10-31T01:01:31.000000129-07:00")
     }
 
     @Test
