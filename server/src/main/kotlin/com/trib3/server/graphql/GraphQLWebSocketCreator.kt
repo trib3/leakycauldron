@@ -14,10 +14,11 @@ import javax.inject.Inject
 class GraphQLWebSocketCreator
 @Inject constructor(
     @Nullable val graphQL: GraphQL?,
-    val objectMapper: ObjectMapper
+    val objectMapper: ObjectMapper,
+    val graphQLConfig: GraphQLConfig
 ) : WebSocketCreator {
     override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
-        resp.acceptedSubProtocol = "graphql-ws"
-        return GraphQLWebSocket(graphQL, objectMapper)
+        resp.acceptedSubProtocol = graphQLConfig.webSocketSubProtocol
+        return GraphQLWebSocket(graphQL, objectMapper, graphQLConfig.keepAliveIntervalSeconds)
     }
 }

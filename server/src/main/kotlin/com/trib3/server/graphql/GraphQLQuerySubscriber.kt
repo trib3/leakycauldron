@@ -4,6 +4,7 @@ import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionResult
 import org.reactivestreams.Subscriber
 import org.reactivestreams.Subscription
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Reactive subscriber for consuming published graphql streaming events and sending them to the socket
@@ -16,10 +17,11 @@ class GraphQLQuerySubscriber(val socket: GraphQLWebSocket, val messageId: String
     Subscriber<ExecutionResult> {
 
     private lateinit var subscription: Subscription
+    private val resultCount = AtomicInteger(0)
 
     override fun onComplete() {
         RequestIdFilter.withRequestId(loggingRequestId) {
-            socket.onQueryFinished(this)
+            socket.onQueryFinished(this, resultCount.get())
         }
     }
 
@@ -35,13 +37,14 @@ class GraphQLQuerySubscriber(val socket: GraphQLWebSocket, val messageId: String
             val instrumentedResult = RequestIdInstrumentation()
                 .instrumentExecutionResult(result, null).get()
             socket.sendMessage(OperationType.GQL_DATA, messageId, instrumentedResult)
+            resultCount.incrementAndGet()
             subscription.request(1)
         }
     }
 
     override fun onError(cause: Throwable) {
         RequestIdFilter.withRequestId(loggingRequestId) {
-            socket.onQueryFinished(this, cause)
+            socket.onQueryFinished(this, resultCount.get(), cause)
         }
     }
 

@@ -4,6 +4,8 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.trib3.config.ConfigLoader
+import com.trib3.config.KMSStringSelectReader
 import graphql.GraphQL
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
@@ -15,7 +17,7 @@ class GraphQLWebSocketCreatorTest {
     fun testSocketCreation() {
         val graphQL = EasyMock.mock<GraphQL>(GraphQL::class.java)
         val mapper = ObjectMapper()
-        val creator = GraphQLWebSocketCreator(graphQL, mapper)
+        val creator = GraphQLWebSocketCreator(graphQL, mapper, GraphQLConfig(ConfigLoader(KMSStringSelectReader(null))))
         assertThat(creator.graphQL).isEqualTo(graphQL)
         assertThat(creator.objectMapper).isEqualTo(mapper)
 
@@ -28,6 +30,7 @@ class GraphQLWebSocketCreatorTest {
         assertThat(socket).isInstanceOf(GraphQLWebSocket::class)
         assertThat((socket as GraphQLWebSocket).graphQL).isEqualTo(graphQL)
         assertThat(socket.objectMapper).isEqualTo(mapper)
+        assertThat(socket.keepAliveIntervalSeconds).isEqualTo(creator.graphQLConfig.keepAliveIntervalSeconds)
         // mapper writes without pretty printing, writer writes with pretty printing
         assertThat(socket.objectMapper.writeValueAsString(mapOf("a" to "b"))).isEqualTo("""{"a":"b"}""")
         assertThat(socket.objectWriter.writeValueAsString(mapOf("a" to "b"))).isEqualTo(
