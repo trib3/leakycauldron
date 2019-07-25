@@ -7,13 +7,16 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import assertk.assertions.message
 import com.expedia.graphql.SchemaGeneratorConfig
 import com.expedia.graphql.TopLevelObject
 import com.expedia.graphql.toSchema
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.json.ObjectMapperProvider
+import graphql.ExecutionInput
 import graphql.GraphQL
+import io.reactivex.Scheduler
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.schedulers.Schedulers
 import org.easymock.EasyMock
@@ -22,9 +25,7 @@ import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.common.WebSocketRemoteEndpoint
 import org.reactivestreams.Publisher
 import org.testng.annotations.Test
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
+import java.util.concurrent.CountDownLatch
 
 class SocketQuery {
     fun q(): List<String> {
@@ -42,7 +43,7 @@ class SocketQuery {
 
 class SocketSubscription {
     fun s(): Publisher<String> {
-        return listOf("1", "2", "3").toFlowable().subscribeOn(Schedulers.io())
+        return listOf("1", "2", "3").toFlowable()
     }
 
     fun e(): Publisher<String> {
@@ -57,7 +58,7 @@ class SocketSubscription {
                 value += 1
                 return if (toReturn == "3") throw IllegalStateException("forced exception") else toReturn
             }
-        }.toFlowable().subscribeOn(Schedulers.io())
+        }.toFlowable()
     }
 
     fun inf(): Publisher<String> {
@@ -72,7 +73,7 @@ class SocketSubscription {
                 value += 1
                 return toReturn
             }
-        }.toFlowable().subscribeOn(Schedulers.io())
+        }.toFlowable()
     }
 }
 
@@ -88,9 +89,18 @@ class GraphQLWebSocketTest {
     ).build()
     val mapper = ObjectMapperProvider().get()
 
+    /**
+     * get a socket configured with the test graphQL and object mapper
+     * default to using the "trampoline" (ie, current thread) scheduler
+     * so that we don't have to deal with multiple threads unless necessary
+     */
+    private fun getSocket(scheduler: Scheduler = Schedulers.trampoline()): GraphQLWebSocket {
+        return GraphQLWebSocket(graphQL, mapper, scheduler = scheduler)
+    }
+
     @Test
     fun testSocketQuery() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -122,7 +132,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testSocketVariableQuery() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -150,9 +160,9 @@ class GraphQLWebSocketTest {
         socket.onWebSocketConnect(mockSession)
         socket.onWebSocketText(
             """
-            {"type": "start", 
-            "id": "simplequery", 
-            "payload": {"query": "query(${'$'}len:Int!) { v(len: ${'$'}len) }", 
+            {"type": "start",
+            "id": "simplequery",
+            "payload": {"query": "query(${'$'}len:Int!) { v(len: ${'$'}len) }",
                         "variables": {"len": 3}}}""".trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
@@ -160,7 +170,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testSocketQueryError() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -193,18 +203,32 @@ class GraphQLWebSocketTest {
     }
 
     @Test
+    fun testSocketExecutionError() {
+        val mockGraphQL = EasyMock.mock<GraphQL>(GraphQL::class.java)
+        val socket = GraphQLWebSocket(mockGraphQL, mapper, scheduler = Schedulers.trampoline())
+        val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
+        val mockSession = EasyMock.mock<Session>(Session::class.java)
+        EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
+        EasyMock.expect(mockGraphQL.execute(EasyMock.anyObject<ExecutionInput>()))
+            .andThrow(IllegalStateException("ExecutionError"))
+        EasyMock.expect(
+            mockRemote.sendString(
+                EasyMock.and(
+                    EasyMock.contains(""""type" : "error""""),
+                    EasyMock.contains(""""id" : "executionerror"""")
+                )
+            )
+        ).once()
+
+        EasyMock.replay(mockRemote, mockSession, mockGraphQL)
+        socket.onWebSocketConnect(mockSession)
+        socket.onWebSocketText("""{"type": "start", "id": "executionerror", "payload": {"query": "invalid!"}}""")
+        EasyMock.verify(mockRemote, mockSession, mockGraphQL)
+    }
+
+    @Test
     fun testSocketSubscription() {
-        val lock = ReentrantLock()
-        val condition = lock.newCondition()
-        // override the socket to signal the test that it's complete
-        val socket = object : GraphQLWebSocket(graphQL, mapper) {
-            override fun onQueryFinished(subscriber: GraphQLQuerySubscriber, cause: Throwable?) {
-                super.onQueryFinished(subscriber, cause)
-                lock.withLock {
-                    condition.signal()
-                }
-            }
-        }
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -251,32 +275,19 @@ class GraphQLWebSocketTest {
         ).once()
 
         EasyMock.replay(mockRemote, mockSession)
-        lock.withLock {
-            socket.onWebSocketConnect(mockSession)
-            socket.onWebSocketText(
-                """
-                {"type": "start",
-                 "id": "simplesubscription", 
-                 "payload": {"query": "subscription { s }"}}""".trimIndent()
-            )
-            condition.await(1, TimeUnit.SECONDS)
-        }
+        socket.onWebSocketConnect(mockSession)
+        socket.onWebSocketText(
+            """
+            {"type": "start",
+             "id": "simplesubscription",
+             "payload": {"query": "subscription { s }"}}""".trimIndent()
+        )
         EasyMock.verify(mockRemote, mockSession)
     }
 
     @Test
     fun testSocketSubscriptionError() {
-        val lock = ReentrantLock()
-        val condition = lock.newCondition()
-        // override the socket to signal the test that it's complete
-        val socket = object : GraphQLWebSocket(graphQL, mapper) {
-            override fun onQueryFinished(subscriber: GraphQLQuerySubscriber, cause: Throwable?) {
-                super.onQueryFinished(subscriber, cause)
-                lock.withLock {
-                    condition.signal()
-                }
-            }
-        }
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -312,22 +323,20 @@ class GraphQLWebSocketTest {
         ).once()
 
         EasyMock.replay(mockRemote, mockSession)
-        lock.withLock {
-            socket.onWebSocketConnect(mockSession)
-            socket.onWebSocketText(
-                """
-                {"type": "start", 
-                 "id": "errorsubscription", 
-                 "payload": {"query": "subscription { e }"}}""".trimIndent()
-            )
-            condition.await(1, TimeUnit.SECONDS)
-        }
+        socket.onWebSocketConnect(mockSession)
+        socket.onWebSocketText(
+            """
+            {"type": "start",
+             "id": "errorsubscription",
+             "payload": {"query": "subscription { e }"}}""".trimIndent()
+        )
         EasyMock.verify(mockRemote, mockSession)
     }
 
     @Test
     fun testGenericErrors() {
-        val socket = GraphQLWebSocket(null, mapper)
+        val socket = GraphQLWebSocket(null, mapper) // unconfigured graphQL instance
+        assertThat(socket.scheduler).isEqualTo(Schedulers.io())
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -347,8 +356,7 @@ class GraphQLWebSocketTest {
         socket.onWebSocketText(
             """
             {"type": "unknown",
-             "id": "unknownoperation"}
-        """.trimIndent()
+             "id": "unknownoperation"}""".trimIndent()
         )
         socket.onWebSocketError(IllegalStateException("boom"))
         EasyMock.verify(mockRemote, mockSession)
@@ -356,8 +364,8 @@ class GraphQLWebSocketTest {
         assertThat {
             socket.onWebSocketText(
                 """
-                {"type": "start", 
-                 "id": "unconfiguredquery", 
+                {"type": "start",
+                 "id": "unconfiguredquery",
                  "payload": {"query": "query { q }"}}""".trimIndent()
             )
         }.isFailure().message().isNotNull().contains("not configured")
@@ -365,7 +373,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testConnectAck() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -373,6 +381,14 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 EasyMock.and(
                     EasyMock.contains(""""type" : "connection_ack""""),
+                    EasyMock.contains(""""id" : "connect"""")
+                )
+            )
+        ).once()
+        EasyMock.expect(
+            mockRemote.sendString(
+                EasyMock.and(
+                    EasyMock.contains(""""type" : "ka""""),
                     EasyMock.contains(""""id" : "connect"""")
                 )
             )
@@ -387,7 +403,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testRequestTerminate() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -403,17 +419,62 @@ class GraphQLWebSocketTest {
     }
 
     @Test
+    fun testWebSocketClose() {
+        // use Schedulers.computation() since we're using the infinite subscription stream
+        // and want to be able to call `onWebSocketClose` while the query is running
+        val socket = getSocket(Schedulers.computation())
+        val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
+        val mockSession = EasyMock.mock<Session>(Session::class.java)
+        EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
+        EasyMock.expect(mockRemote.sendString(EasyMock.anyString())).anyTimes()
+        EasyMock.replay(mockRemote, mockSession)
+        socket.onWebSocketConnect(mockSession)
+        socket.onWebSocketText("""{"type": "connection_init", "id": "connect"}""")
+        val keepAliveInterval = socket.keepAliveInterval
+        assertThat(keepAliveInterval).isNotNull()
+        socket.onWebSocketText("""{"type": "connection_init", "id": "connect"}""")
+        assertThat(socket.keepAliveInterval).isEqualTo(keepAliveInterval)
+        socket.onWebSocketText("""{"type": "start", "id": "run", "payload": {"query": "subscription {inf}"}}""")
+        assertThat(socket.runningQuerySubscriber).isNotNull()
+        socket.onWebSocketClose(StatusCode.NORMAL, "externally closed")
+        assertThat(socket.session).isNull()
+        assertThat(socket.keepAliveInterval).isNull()
+        assertThat(socket.runningQuerySubscriber).isNull()
+        EasyMock.verify(mockRemote, mockSession)
+    }
+
+    @Test
+    fun testKeepAlive() {
+        val socket = getSocket()
+        val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
+        val mockSession = EasyMock.mock<Session>(Session::class.java)
+        val keepAliveCallbacks = KeepAliveCallbacks(socket, "katest")
+        EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
+        EasyMock.expect(
+            mockRemote.sendString(
+                EasyMock.and(
+                    EasyMock.contains(""""type" : "ka""""),
+                    EasyMock.contains(""""id" : "katest"""")
+                )
+            )
+        ).once()
+        EasyMock.replay(mockRemote, mockSession)
+        socket.onWebSocketConnect(mockSession)
+        keepAliveCallbacks.onInterval(1)
+        keepAliveCallbacks.onError(IllegalStateException())
+        EasyMock.verify(mockRemote, mockSession)
+    }
+
+    @Test
     fun testStopQuery() {
-        val lock = ReentrantLock()
-        val condition = lock.newCondition()
+        val latch = CountDownLatch(1)
         // override the socket to signal the test that it's sent at least one data message
-        val socket = object : GraphQLWebSocket(graphQL, mapper) {
+        // and use Schedulers.computation() since we're using the infinite subscription stream
+        val socket = object : GraphQLWebSocket(graphQL, mapper, scheduler = Schedulers.computation()) {
             override fun sendMessage(message: OperationMessage<*>) {
                 super.sendMessage(message)
                 if (message.type == OperationType.GQL_DATA) {
-                    lock.withLock {
-                        condition.signal()
-                    }
+                    latch.countDown()
                 }
             }
         }
@@ -460,24 +521,31 @@ class GraphQLWebSocketTest {
         ).once()
         EasyMock.replay(mockRemote, mockSession)
         socket.onWebSocketConnect(mockSession)
-        lock.withLock {
-            socket.onWebSocketText(
-                """
-                {"type": "start", 
-                 "id": "longsubscription", 
-                 "payload": {"query": "subscription { inf }"}}""".trimIndent()
-            )
-            socket.onWebSocketText(
-                """
-                {"type": "start",
-                 "id": "secondquery",
-                 "payload": {"query": "subscription { s }"}}""".trimIndent()
-            )
-            condition.await(1, TimeUnit.SECONDS)
-        }
         socket.onWebSocketText(
             """
-            {"type": "stop", 
+            {"type": "start",
+             "id": "longsubscription",
+             "payload": {"query": "subscription { inf }"}}""".trimIndent()
+        )
+        socket.onWebSocketText(
+            """
+            {"type": "start",
+             "id": "secondquery",
+             "payload": {"query": "subscription { s }"}}""".trimIndent()
+        )
+        assertThat {
+            socket.onQueryFinished(
+                GraphQLQuerySubscriber(socket, "notactuallyrunning", "test"),
+                0
+            )
+        }.isFailure()
+            .message()
+            .isNotNull()
+            .isEqualTo("Query notactuallyrunning but we don't think it's running")
+        latch.await()
+        socket.onWebSocketText(
+            """
+            {"type": "stop",
              "id": "longsubscription"}""".trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
@@ -485,7 +553,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testStopWrongQuery() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -510,7 +578,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testStartWithoutId() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -535,7 +603,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testBadMessage() {
-        val socket = GraphQLWebSocket(graphQL, mapper)
+        val socket = getSocket()
         val mockRemote = EasyMock.mock<WebSocketRemoteEndpoint>(WebSocketRemoteEndpoint::class.java)
         val mockSession = EasyMock.mock<Session>(Session::class.java)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()

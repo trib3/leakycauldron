@@ -23,7 +23,9 @@ and have:
   * java8 time and threeten-extra [Scalars](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/graphql/DateTimeHooks.kt)
   * [Request Ids](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/graphql/RequestIdInstrumentation.kt) 
     attached to the GraphQL response extensions
-  * Any guice bound Query or Mutation Resolvers
+  * Any guice bound Query, Subscription or Mutation Resolvers
+  * Supports websockets using the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
+  * Supports subscriptions via [ReactiveX](http://reactivex.io/) for any Resolvers that return a `Publisher<T>`
 * Admin:
   * The dropwizard `/admin` servlet will be [password protected](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/filters/AdminAuthFilter.kt)
     with a password set from the `application.adminAuthToken` configuration variable 
@@ -67,19 +69,20 @@ class ExampleApplicationModule : TribeApplicationModule() {
 ##### GraphQL Resolvers
 [`TribeApplicationModule`](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/modules/TribeApplicationModule.kt)
 provides methods that expose multi-binders for configuring GraphQL resolvers.  Any model
-classes must be added to the `graphqlPackagesBinder()` to allow [GraphQL Kotlin](https://github.com/ExpediaDotCom/graphql-kotlin/)
-to use them.  Query Resolver implementations can be added to the `graphqlQueriesBinder()`
-and Mutations to the `graphqlMutationsBinder()` 
+classes must be added to the `graphQLPackagesBinder()` to allow [GraphQL Kotlin](https://github.com/ExpediaDotCom/graphql-kotlin/)
+to use them.  Query Resolver implementations can be added to the `graphQLQueriesBinder()`
+, Subscriptions to the `graphQLSubscriptionsBinder()`, and Mutations to the `graphQLMutationsBinder()` 
 
 ```kotlin
 class ExampleApplicationModule : TribeApplicationModule() {
     override fun configure() {
         // ...
-        graphqlPackagesBinder().addBinding().toInstance("com.example.api")
-        graphqlPackagesBinder().addBinding().toInstance("com.example.server.graphql")
+        graphQLPackagesBinder().addBinding().toInstance("com.example.api")
+        graphQLPackagesBinder().addBinding().toInstance("com.example.server.graphql")
 
-        graphqlQueriesBinder().addBinding().to<com.example.server.graphql.Query>()
-        graphqlMutationsBinder().addBinding().to<com.example.server.graphql.Mutation>()
+        graphQLQueriesBinder().addBinding().to<com.example.server.graphql.Query>()
+        graphQLMutationsBinder().addBinding().to<com.example.server.graphql.Mutation>()
+        graphQLSubscriptionsBinder().addBinding().to<com.example.server.graphql.Subscription>()
         // ...
     }
 }
