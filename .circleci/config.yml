@@ -50,9 +50,9 @@ jobs:
           name: Maven Build
           command: |
             if [ "$CIRCLE_BRANCH" = "master" ]; then
-              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO}
+              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} -U
             else
-              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO}
+              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} -U
             fi
       - save_cache:
           paths:
@@ -112,7 +112,7 @@ jobs:
             CURRENT_VERSION=$(ls ~/jars/build-resources-*.pom.asc | sed 's/^.*jars\/build-resources-\(.*\)\.pom.asc$/\1/')
             RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
             if [ "${GITHUB_AUTH_TOKEN}" != "" -a "${RELEASE_NOTES}" != "" ]; then
-              curl -H "Authorization: bearer ${GITHUB_AUTH_TOKEN}" -X POST "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases" -X POST -d "{\"tag_name\":\"${CURRENT_VERSION}\", \"target_commitish\":\"${CIRCLE_SHA1}\", \"body\": \"${RELEASE_NOTES}\"}"
+              curl -H "Authorization: bearer ${GITHUB_AUTH_TOKEN}" -X POST "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases" -X POST -d "{\"tag_name\":\"${CURRENT_VERSION}\", \"name\":\"${CURRENT_VERSION}\", \"target_commitish\":\"${CIRCLE_SHA1}\", \"body\": \"${RELEASE_NOTES}\"}"
             fi
 
 workflows:
