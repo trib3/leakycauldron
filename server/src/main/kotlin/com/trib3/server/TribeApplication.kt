@@ -1,6 +1,5 @@
 package com.trib3.server
 
-import com.authzee.kotlinguice4.getInstance
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
@@ -14,6 +13,7 @@ import com.trib3.server.modules.ServletConfig
 import com.trib3.server.modules.ServletFilterConfig
 import com.trib3.server.modules.TribeApplicationModule
 import com.trib3.server.swagger.JaxrsAppProcessor
+import dev.misfitlabs.kotlinguice4.getInstance
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.ConfiguredBundle

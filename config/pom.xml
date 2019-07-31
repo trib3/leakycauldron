@@ -40,7 +40,7 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.authzee.kotlinguice4</groupId>
+            <groupId>dev.misfitlabs.kotlinguice4</groupId>
             <artifactId>kotlin-guice</artifactId>
         </dependency>
 

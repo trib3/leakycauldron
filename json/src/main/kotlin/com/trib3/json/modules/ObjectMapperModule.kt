@@ -1,8 +1,8 @@
 package com.trib3.json.modules
 
-import com.authzee.kotlinguice4.KotlinModule
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.json.ObjectMapperProvider
+import dev.misfitlabs.kotlinguice4.KotlinModule
 
 /**
  * Module for getting correctly configured [ObjectMapper]s

@@ -1,12 +1,12 @@
 package com.trib3.server.modules
 
-import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.google.inject.Provides
 import com.trib3.config.modules.KMSModule
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.AdminAuthFilter
 import com.trib3.server.swagger.JaxrsAppProcessor
 import com.trib3.server.swagger.SwaggerInitializer
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.Configuration
 import io.dropwizard.ConfiguredBundle
 import io.dropwizard.servlets.assets.AssetServlet
