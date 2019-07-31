@@ -1,6 +1,5 @@
 package com.trib3.server.modules
 
-import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
@@ -15,6 +14,7 @@ import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.resources.PingResource
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter

@@ -5,7 +5,6 @@ import com.amazonaws.serverless.proxy.model.AwsProxyRequest
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
-import com.authzee.kotlinguice4.getInstance
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
@@ -18,6 +17,7 @@ import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.ServletFilterConfig
 import com.trib3.server.modules.TribeApplicationModule
+import dev.misfitlabs.kotlinguice4.getInstance
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.cli.ConfiguredCommand
