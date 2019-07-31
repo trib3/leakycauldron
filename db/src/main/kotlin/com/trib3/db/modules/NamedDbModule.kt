@@ -1,13 +1,13 @@
 package com.trib3.db.modules
 
-import com.authzee.kotlinguice4.KotlinModule
-import com.authzee.kotlinguice4.KotlinPrivateModule
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheckRegistry
 import com.google.inject.name.Names
 import com.trib3.config.ConfigLoader
 import com.trib3.config.modules.KMSModule
 import com.trib3.db.config.DbConfig
+import dev.misfitlabs.kotlinguice4.KotlinModule
+import dev.misfitlabs.kotlinguice4.KotlinPrivateModule
 import org.jooq.DSLContext
 import java.util.Objects
 import javax.inject.Inject

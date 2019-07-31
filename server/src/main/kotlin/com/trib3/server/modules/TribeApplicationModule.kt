@@ -1,8 +1,8 @@
 package com.trib3.server.modules
 
-import com.authzee.kotlinguice4.KotlinModule
-import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.google.inject.name.Names
+import dev.misfitlabs.kotlinguice4.KotlinModule
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import javax.servlet.Servlet
 
 data class ServletConfig(

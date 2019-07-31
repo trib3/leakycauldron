@@ -1,8 +1,8 @@
 package com.trib3.graphql.modules
 
-import com.authzee.kotlinguice4.multibindings.KotlinMultibinder
 import com.google.inject.name.Names
 import com.trib3.server.modules.TribeApplicationModule
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 
 /**
  * Base class for GraphQL application guice modules.  Provides
