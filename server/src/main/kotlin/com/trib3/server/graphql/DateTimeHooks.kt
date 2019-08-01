@@ -11,8 +11,41 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.Year
 import java.time.YearMonth
 import kotlin.reflect.KType
+
+internal val YEAR_SCALAR = GraphQLScalarType.newScalar()
+    .name("Year")
+    .description("Year, for example 2019")
+    .coercing(object : Coercing<Year, String> {
+        private fun parse(input: String): Year {
+            return try {
+                Year.parse(input)
+            } catch (e: Exception) {
+                throw CoercingSerializeException("can't parse $input", e)
+            }
+        }
+
+        override fun parseValue(input: Any): Year {
+            return parse(input.toString())
+        }
+
+        override fun parseLiteral(input: Any): Year {
+            return when (input) {
+                is StringValue -> parse(input.value)
+                else -> throw CoercingSerializeException("can't parse $input")
+            }
+        }
+
+        override fun serialize(dataFetcherResult: Any): String {
+            return when (dataFetcherResult) {
+                is Year -> dataFetcherResult.toString()
+                else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
+            }
+        }
+    })
+    .build()
 
 internal val YEAR_MONTH_SCALAR = GraphQLScalarType.newScalar()
     .name("Month")
@@ -80,8 +113,10 @@ internal val YEAR_QUARTER_SCALAR = GraphQLScalarType.newScalar()
 
 internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
     .name("LocalDateTime")
-    .description("Year + Month + Day Of Month + Time (Hour:Minute + Optional(Second:Milliseconds)), " +
-        "for example 2019-10-31T12:31:45.129")
+    .description(
+        "Year + Month + Day Of Month + Time (Hour:Minute + Optional(Second:Milliseconds)), " +
+            "for example 2019-10-31T12:31:45.129"
+    )
     .coercing(object : Coercing<LocalDateTime, String> {
         private fun parse(input: String): LocalDateTime {
             return try {
@@ -177,8 +212,10 @@ internal val LOCAL_TIME_SCALAR = GraphQLScalarType.newScalar()
 
 internal val OFFSET_DATETIME_SCALAR = GraphQLScalarType.newScalar()
     .name("OffsetDateTime")
-    .description("Year + Month + Day Of Month + Time (Hour:Minute + Optional(Second.Milliseconds)) " +
-        "+ Offset, for example 2019-10-31T12:31:45.129-07:00")
+    .description(
+        "Year + Month + Day Of Month + Time (Hour:Minute + Optional(Second.Milliseconds)) " +
+            "+ Offset, for example 2019-10-31T12:31:45.129-07:00"
+    )
     .coercing(object : Coercing<OffsetDateTime, String> {
         private fun parse(input: String): OffsetDateTime {
             return try {
@@ -214,6 +251,7 @@ internal val OFFSET_DATETIME_SCALAR = GraphQLScalarType.newScalar()
 class DateTimeHooks : SchemaGeneratorHooks {
     override fun willGenerateGraphQLType(type: KType): GraphQLType? {
         return when (type.classifier) {
+            Year::class -> YEAR_SCALAR
             YearMonth::class -> YEAR_MONTH_SCALAR
             YearQuarter::class -> YEAR_QUARTER_SCALAR
             LocalDateTime::class -> LOCAL_DATETIME_SCALAR
