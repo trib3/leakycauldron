@@ -17,10 +17,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.time.ZoneOffset
 
 class DateTimeQuery {
+    fun year(y: Year): Year {
+        return y.plusYears(1)
+    }
+
     fun quarter(q: YearQuarter): YearQuarter {
         return q.plusQuarters(1)
     }
@@ -53,6 +58,36 @@ class DateTimeHooksTest {
         GraphQL.newGraphQL(
             toSchema(config, listOf(TopLevelObject(DateTimeQuery())))
         ).build()
+
+    @Test
+    fun testYear() {
+        val result = graphQL.execute("""query {year(y:"2019")}""").getData<Map<String, String>>()
+        assertThat(result["year"]).isEqualTo("2020")
+        assertThat {
+            graphQL.execute("""query {year(y:123)}""")
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+        assertThat {
+            graphQL.execute("""query {year(y:"123")}""")
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
+        assertThat {
+            YEAR_SCALAR.coercing.serialize(123)
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
+        assertThat {
+            YEAR_SCALAR.coercing.serialize(Year.of(2019))
+        }.isSuccess().isEqualTo("2019")
+    }
+
+    @Test
+    fun testYearVariable() {
+        val result = graphQL.execute(
+            ExecutionInput.newExecutionInput()
+                .query("""query(${'$'}input: Year!) {year(y:${'$'}input)}""")
+                .variables(mapOf("input" to "2019")).build()
+        ).getData<Map<String, String>>()
+        assertThat(result["year"]).isEqualTo("2020")
+    }
 
     @Test
     fun testQuarter() {
