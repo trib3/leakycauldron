@@ -107,7 +107,7 @@
         <version.postgres.embedded>0.13.1</version.postgres.embedded>
         <version.reactivestreams>1.0.2</version.reactivestreams>
         <version.redshift>1.2.27.1051</version.redshift>
-        <version.rxjava>2.2.10</version.rxjava>
+        <version.rxjava>2.2.11</version.rxjava>
         <version.rxkotlin>2.4.0</version.rxkotlin>
         <version.servlet>4.0.2</version.servlet>
         <version.slf4j>1.7.26</version.slf4j>
