@@ -1,6 +1,10 @@
 package com.trib3.server.graphql
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonValue
 import graphql.ExecutionResult
 import kotlin.reflect.KClass
@@ -15,6 +19,24 @@ import kotlin.reflect.full.memberProperties
 data class OperationMessage<T : Any>(
     val type: OperationType<T>?,
     val id: String?,
+
+    @JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
+        property = "type"
+    )
+    @JsonSubTypes(
+        Type(name = "start", value = GraphRequest::class),
+        Type(name = "data", value = ExecutionResult::class),
+        Type(name = "error", value = String::class),
+        Type(name = "connection_init", value = Nothing::class),
+        Type(name = "connection_terminate", value = Nothing::class),
+        Type(name = "connection_ack", value = Nothing::class),
+        Type(name = "connection_error", value = String::class),
+        Type(name = "stop", value = Nothing::class),
+        Type(name = "complete", value = Nothing::class),
+        Type(name = "ka", value = Nothing::class)
+    )
     val payload: T? = null
 )
 
@@ -23,6 +45,7 @@ data class OperationMessage<T : Any>(
  */
 data class OperationType<T : Any>(
     @get:JsonValue val type: String,
+    @JsonIgnore
     val payloadType: KClass<T>
 ) {
     companion object {
@@ -32,7 +55,7 @@ data class OperationType<T : Any>(
         val GQL_STOP = OperationType("stop", Nothing::class)
         val GQL_CONNECTION_TERMINATE = OperationType("connection_terminate", Nothing::class)
         // server -> client
-        val GQL_CONNECTION_ERROR = OperationType("error", Nothing::class)
+        val GQL_CONNECTION_ERROR = OperationType("connection_error", String::class)
         val GQL_CONNECTION_ACK = OperationType("connection_ack", Nothing::class)
         val GQL_DATA = OperationType("data", ExecutionResult::class)
         val GQL_ERROR = OperationType("error", String::class)
