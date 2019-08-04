@@ -19,6 +19,7 @@ class ObjectMapperProvider : Provider<ObjectMapper> {
     override fun get(): ObjectMapper {
         val mapper = Jackson.newObjectMapper()
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        mapper.disable(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY)
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         mapper.registerModule(KotlinModule())
         mapper.registerModule(MetricsModule(TimeUnit.SECONDS, TimeUnit.SECONDS, false))
