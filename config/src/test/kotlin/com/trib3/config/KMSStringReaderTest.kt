@@ -2,6 +2,7 @@ package com.trib3.config
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.trib3.testing.LeakyMock
 import com.typesafe.config.ConfigFactory
 import org.easymock.EasyMock
 import org.testng.annotations.Test
@@ -20,8 +21,8 @@ class KMSStringReaderTest {
 
     @Test
     fun testFakeKMS() {
-        val mockKms = EasyMock.createMock<KmsClient>(KmsClient::class.java)
-        EasyMock.expect(mockKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
+        val mockKms = LeakyMock.mock<KmsClient>()
+        EasyMock.expect(mockKms.decrypt(EasyMock.anyObject<DecryptRequest>()))
             .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String("bleh")).build()).anyTimes()
         EasyMock.replay(mockKms)
         val reader = KMSStringReader(mockKms)

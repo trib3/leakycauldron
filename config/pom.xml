@@ -58,13 +58,15 @@
             <artifactId>regions</artifactId>
         </dependency>
 
-        <!-- test logging -->
+        <!-- test -->
+        <dependency>
+            <groupId>com.trib3</groupId>
+            <artifactId>testing</artifactId>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
 </project>

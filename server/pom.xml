@@ -275,6 +275,10 @@
 
         <!-- test -->
         <dependency>
+            <groupId>com.trib3</groupId>
+            <artifactId>testing</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
         </dependency>

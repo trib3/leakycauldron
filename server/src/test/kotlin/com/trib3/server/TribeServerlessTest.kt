@@ -16,6 +16,7 @@ import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
+import com.trib3.testing.LeakyMock
 import org.easymock.EasyMock
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.testng.annotations.Test
@@ -56,15 +57,15 @@ class TribeServerlessTest {
 
     @Test
     fun testRunAndEntry() {
-        val mockProxyRequest = EasyMock.niceMock<AwsProxyRequestContext>(AwsProxyRequestContext::class.java)
-        val mockRequest = EasyMock.niceMock<AwsProxyRequest>(AwsProxyRequest::class.java)
-        val mockHeaders = EasyMock.niceMock<Headers>(Headers::class.java)
+        val mockProxyRequest = LeakyMock.niceMock<AwsProxyRequestContext>()
+        val mockRequest = LeakyMock.niceMock<AwsProxyRequest>()
+        val mockHeaders = LeakyMock.niceMock<Headers>()
         EasyMock.expect(mockRequest.path).andReturn("/").anyTimes()
         EasyMock.expect(mockRequest.httpMethod).andReturn("GET").anyTimes()
         EasyMock.expect(mockRequest.requestContext).andReturn(mockProxyRequest).anyTimes()
         EasyMock.expect(mockRequest.multiValueHeaders).andReturn(mockHeaders).anyTimes()
         EasyMock.expect(mockHeaders.keys).andReturn(mutableSetOf()).anyTimes()
-        val mockContext = EasyMock.niceMock<Context>(Context::class.java)
+        val mockContext = LeakyMock.niceMock<Context>()
         EasyMock.replay(mockRequest, mockContext, mockProxyRequest, mockHeaders)
         val proxy = instance.proxy
         proxy.setLogFormatter(null)

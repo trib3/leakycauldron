@@ -39,6 +39,7 @@
     <modules>
         <module>build-resources</module>
         <module>parent-pom</module>
+        <module>testing</module>
         <module>config</module>
         <module>json</module>
         <module>db</module>

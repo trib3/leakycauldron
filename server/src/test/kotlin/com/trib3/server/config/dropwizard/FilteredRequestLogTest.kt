@@ -6,6 +6,7 @@ import assertk.assertions.isNotEmpty
 import ch.qos.logback.access.spi.IAccessEvent
 import ch.qos.logback.core.AppenderBase
 import com.google.common.collect.ImmutableList
+import com.trib3.testing.LeakyMock
 import io.dropwizard.logging.AppenderFactory
 import org.easymock.EasyMock
 import org.eclipse.jetty.server.Request
@@ -33,8 +34,8 @@ class FilteredRequestLogTest {
                     }.also { it.start() }
                 })
         val logger = factory.build("test")
-        val mockRequest = EasyMock.niceMock<Request>(Request::class.java)
-        val mockResponse = EasyMock.niceMock<Response>(Response::class.java)
+        val mockRequest = LeakyMock.niceMock<Request>()
+        val mockResponse = LeakyMock.niceMock<Response>()
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() + 200).anyTimes()
         EasyMock.expect(mockResponse.status).andReturn(HttpServletResponse.SC_OK).anyTimes()
@@ -62,8 +63,8 @@ class FilteredRequestLogTest {
                     }.also { it.start() }
                 })
         val logger = factory.build("test")
-        val mockRequest = EasyMock.niceMock<Request>(Request::class.java)
-        val mockResponse = EasyMock.niceMock<Response>(Response::class.java)
+        val mockRequest = LeakyMock.niceMock<Request>()
+        val mockResponse = LeakyMock.niceMock<Response>()
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() - 300).anyTimes()
         EasyMock.expect(mockResponse.status).andReturn(HttpServletResponse.SC_OK).anyTimes()
@@ -91,8 +92,8 @@ class FilteredRequestLogTest {
                     }.also { it.start() }
                 })
         val logger = factory.build("test")
-        val mockRequest = EasyMock.niceMock<Request>(Request::class.java)
-        val mockResponse = EasyMock.niceMock<Response>(Response::class.java)
+        val mockRequest = LeakyMock.niceMock<Request>()
+        val mockResponse = LeakyMock.niceMock<Response>()
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() + 200).anyTimes()
         EasyMock.expect(mockResponse.status).andReturn(HttpServletResponse.SC_SERVICE_UNAVAILABLE).anyTimes()
@@ -120,8 +121,8 @@ class FilteredRequestLogTest {
                     }.also { it.start() }
                 })
         val logger = factory.build("test")
-        val mockRequest = EasyMock.niceMock<Request>(Request::class.java)
-        val mockResponse = EasyMock.niceMock<Response>(Response::class.java)
+        val mockRequest = LeakyMock.niceMock<Request>()
+        val mockResponse = LeakyMock.niceMock<Response>()
         EasyMock.replay(mockRequest, mockResponse)
         logger.log(mockRequest, mockResponse)
         assertThat(events).isNotEmpty()
