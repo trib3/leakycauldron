@@ -965,6 +965,12 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>com.trib3</groupId>
+                <artifactId>testing</artifactId>
+                <version>${version.leakycauldron}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${version.h2}</version>
@@ -1441,6 +1447,7 @@
                         </argLine>
                         <parallel>methods</parallel>
                         <threadCount>10</threadCount>
+                        <trimStackTrace>false</trimStackTrace>
                     </configuration>
                 </plugin>
                 <plugin>

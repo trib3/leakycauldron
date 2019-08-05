@@ -14,6 +14,7 @@ import com.trib3.server.filters.AdminAuthFilter
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
+import com.trib3.testing.LeakyMock
 import io.dropwizard.Configuration
 import io.dropwizard.jersey.DropwizardResourceConfig
 import io.dropwizard.jersey.setup.JerseyEnvironment
@@ -23,8 +24,6 @@ import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import org.easymock.EasyMock
-import org.easymock.EasyMock.anyObject
-import org.easymock.EasyMock.anyString
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.testng.annotations.Test
 import javax.servlet.Filter
@@ -77,32 +76,33 @@ class TribeApplicationTest {
 
     @Test
     fun testRun() {
-        val mockConf = EasyMock.mock<Configuration>(Configuration::class.java)
-        val mockEnv = EasyMock.mock<Environment>(Environment::class.java)
-        val mockJersey = EasyMock.niceMock<JerseyEnvironment>(JerseyEnvironment::class.java)
-        val mockAdmin = EasyMock.mock<AdminEnvironment>(AdminEnvironment::class.java)
-        val mockServlet = EasyMock.mock<ServletEnvironment>(ServletEnvironment::class.java)
-        val mockHealthChecks = EasyMock.mock<HealthCheckRegistry>(HealthCheckRegistry::class.java)
+        val mockConf = LeakyMock.mock<Configuration>()
+        val mockEnv = LeakyMock.mock<Environment>()
+        val mockJersey = LeakyMock.niceMock<JerseyEnvironment>()
+        val mockAdmin = LeakyMock.mock<AdminEnvironment>()
+        val mockServlet = LeakyMock.mock<ServletEnvironment>()
+        val mockHealthChecks = LeakyMock.mock<HealthCheckRegistry>()
         val mockServletRegistration =
-            EasyMock.niceMock<ServletRegistration.Dynamic>(ServletRegistration.Dynamic::class.java)
+            LeakyMock.niceMock<ServletRegistration.Dynamic>()
         val mockFilterRegistration =
-            EasyMock.niceMock<FilterRegistration.Dynamic>(FilterRegistration.Dynamic::class.java)
+            LeakyMock.niceMock<FilterRegistration.Dynamic>()
         EasyMock.expect(mockEnv.jersey()).andReturn(mockJersey).anyTimes()
         EasyMock.expect(mockJersey.resourceConfig).andReturn(DropwizardResourceConfig()).anyTimes()
         EasyMock.expect(mockEnv.admin()).andReturn(mockAdmin).anyTimes()
-        EasyMock.expect(mockAdmin.addServlet(anyString(), anyObject<Servlet>()))
+        EasyMock.expect(mockAdmin.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
             .andReturn(mockServletRegistration)
             .anyTimes()
         EasyMock.expect(mockEnv.servlets()).andReturn(mockServlet).anyTimes()
         EasyMock.expect(mockEnv.healthChecks()).andReturn(mockHealthChecks).anyTimes()
-        EasyMock.expect(mockServlet.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
+        EasyMock.expect(mockServlet.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
             .andReturn(mockFilterRegistration).anyTimes()
-        EasyMock.expect(mockServlet.addServlet(anyString(), EasyMock.anyObject<Servlet>()))
+        EasyMock.expect(mockServlet.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
             .andReturn(mockServletRegistration).anyTimes()
-        EasyMock.expect(mockAdmin.addFilter(anyString(), EasyMock.anyObject<Class<out Filter>>()))
+        EasyMock.expect(mockAdmin.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
             .andReturn(mockFilterRegistration).anyTimes()
-        EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<VersionHealthCheck>())).once()
-        EasyMock.expect(mockHealthChecks.register(anyString(), anyObject<PingHealthCheck>())).once()
+        EasyMock.expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<VersionHealthCheck>()))
+            .once()
+        EasyMock.expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<PingHealthCheck>())).once()
 
         EasyMock.replay(
             mockConf,

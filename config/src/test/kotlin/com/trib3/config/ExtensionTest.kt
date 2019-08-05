@@ -2,6 +2,7 @@ package com.trib3.config
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.trib3.testing.LeakyMock
 import org.easymock.EasyMock
 import org.testng.annotations.Test
 import software.amazon.awssdk.core.SdkBytes
@@ -15,7 +16,7 @@ class ExtensionTest {
     val loader: ConfigLoader
 
     init {
-        val fakeKms = EasyMock.mock<KmsClient>(KmsClient::class.java)
+        val fakeKms = LeakyMock.mock<KmsClient>()
         EasyMock.expect(fakeKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
             .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build()).anyTimes()
         EasyMock.replay(fakeKms)

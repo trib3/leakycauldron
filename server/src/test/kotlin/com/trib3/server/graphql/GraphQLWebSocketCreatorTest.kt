@@ -6,6 +6,7 @@ import assertk.assertions.isInstanceOf
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
+import com.trib3.testing.LeakyMock
 import graphql.GraphQL
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
@@ -15,15 +16,15 @@ import org.testng.annotations.Test
 class GraphQLWebSocketCreatorTest {
     @Test
     fun testSocketCreation() {
-        val graphQL = EasyMock.mock<GraphQL>(GraphQL::class.java)
+        val graphQL = LeakyMock.mock<GraphQL>()
         val mapper = ObjectMapper()
         val creator = GraphQLWebSocketCreator(graphQL, mapper, GraphQLConfig(ConfigLoader(KMSStringSelectReader(null))))
         assertThat(creator.graphQL).isEqualTo(graphQL)
         assertThat(creator.objectMapper).isEqualTo(mapper)
         assertThat(creator.graphQLConfig.keepAliveIntervalSeconds).isEqualTo(GraphQLConfigTest.DEFAULT_KEEPALIVE)
 
-        val request = EasyMock.mock<ServletUpgradeRequest>(ServletUpgradeRequest::class.java)
-        val response = EasyMock.mock<ServletUpgradeResponse>(ServletUpgradeResponse::class.java)
+        val request = LeakyMock.mock<ServletUpgradeRequest>()
+        val response = LeakyMock.mock<ServletUpgradeResponse>()
         EasyMock.expect(response.setAcceptedSubProtocol("graphql-ws")).once()
         EasyMock.replay(graphQL, request, response)
         val socket = creator.createWebSocket(request, response)

@@ -9,7 +9,7 @@ private val log = KotlinLogging.logger { }
 /**
  * A simple HealthCheck that returns runtime version information
  */
-class VersionHealthCheck : HealthCheck() {
+open class VersionHealthCheck : HealthCheck() {
     companion object {
         private fun readVersion(): Pair<String, Boolean> {
             return try {

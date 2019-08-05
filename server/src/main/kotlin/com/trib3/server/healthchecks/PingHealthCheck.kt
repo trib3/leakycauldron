@@ -5,7 +5,7 @@ import com.codahale.metrics.health.HealthCheck
 /**
  * A simple HealthCheck that always returns healthy
  */
-class PingHealthCheck : HealthCheck() {
+open class PingHealthCheck : HealthCheck() {
     public override fun check(): Result {
         return Result.healthy("pong")
     }
