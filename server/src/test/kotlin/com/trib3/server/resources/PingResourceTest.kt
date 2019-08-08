@@ -2,6 +2,7 @@ package com.trib3.server.resources
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.trib3.testing.server.ResourceTestBase
 import org.testng.annotations.Test
 
 class PingResourceTest : ResourceTestBase<PingResource>() {

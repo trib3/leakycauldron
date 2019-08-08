@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -48,6 +48,7 @@
         <version.aws.java>2.7.18</version.aws.java>
         <version.aws.lambda>1.2.0</version.aws.lambda>
         <version.aws.serverless>1.3.2</version.aws.serverless>
+        <version.commons-io>2.6</version.commons-io>
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.0.0-RC16</version.detekt>
         <version.dokka>0.9.18</version.dokka>
@@ -784,6 +785,11 @@
                 <artifactId>aws-lambda-java-core</artifactId>
                 <version>${version.aws.lambda}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${version.commons-io}</version>
+            </dependency>
 
             <!-- guice -->
             <dependency>
@@ -981,6 +987,16 @@
                 <artifactId>otj-pg-embedded</artifactId>
                 <version>${version.postgres.embedded}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- graphQL -->

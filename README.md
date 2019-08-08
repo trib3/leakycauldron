@@ -45,6 +45,10 @@ This contains the parent pom to be used for all maven projects at Tribe.
 This contains classes and [Guice](https://github.com/google/guice) modules for configuring 
 [Jackson](https://github.com/FasterXML/jackson) objects to work with Tribe codebases.
 
+* [`/testing`](https://github.com/trib3/leakycauldron/tree/master/testing)
+
+This contains classes that enhance writing unit tests.
+
 * [`/config`](https://github.com/trib3/leakycauldron/tree/master/config)
 
 This contains classes for parsing [HOCON](https://github.com/lightbend/config) application.conf
