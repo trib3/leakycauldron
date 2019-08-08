@@ -1,4 +1,4 @@
-package com.trib3.db
+package com.trib3.testing.db
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import org.flywaydb.core.Flyway
@@ -12,19 +12,6 @@ import javax.sql.DataSource
 /**
  * Base class that provides access to an embedded postgres instance [DataSource]
  * for running tests.  Will run any accessible flyway migrations during [setUp].
- *
- * Note that test-scoped dependencies are NOT transitive, so if you extend this
- * class make sure that the following dependencies are available in your module,
- * in test or compile scopes:
- *
- * <dependency>
- *     <groupId>com.opentable.components</groupId>
- *     <artifactId>otj-pg-embedded</artifactId>
- * </dependency>
- * <dependency>
- *     <groupId>org.flywaydb</groupId>
- *     <artifactId>flyway-core</artifactId>
- * </dependency>
  */
 open class DAOTestBase {
     lateinit var dataSource: DataSource

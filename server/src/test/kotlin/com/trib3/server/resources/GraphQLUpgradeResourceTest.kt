@@ -7,6 +7,8 @@ import com.expedia.graphql.TopLevelObject
 import com.expedia.graphql.toSchema
 import com.trib3.server.graphql.CustomDataFetcherExceptionHandler
 import com.trib3.server.graphql.RequestIdInstrumentation
+import com.trib3.testing.server.JettyWebTestContainerFactory
+import com.trib3.testing.server.ResourceTestBase
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
 import org.eclipse.jetty.http.HttpStatus

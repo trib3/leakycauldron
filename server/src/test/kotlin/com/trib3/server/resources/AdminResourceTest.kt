@@ -6,6 +6,7 @@ import assertk.assertions.isEqualTo
 import com.codahale.metrics.jvm.JvmAttributeGaugeSet
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.modules.DefaultApplicationModule
+import com.trib3.testing.server.ResourceTestBase
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import java.lang.management.ManagementFactory

@@ -1,4 +1,4 @@
-package com.trib3.server.resources
+package com.trib3.testing.server
 
 import org.eclipse.jetty.server.ServerConnector
 import org.glassfish.jersey.client.ClientConfig
@@ -16,7 +16,7 @@ import javax.ws.rs.core.UriBuilder
  * Equivalent of GrizzlyWebTestContainerFactory, but using jetty instead of grizzly.
  */
 class JettyWebTestContainerFactory : TestContainerFactory {
-    private class JettyWebTestContainer(var uri: URI, context: DeploymentContext) : TestContainer {
+    private class JettyWebTestContainer(private var uri: URI, context: DeploymentContext) : TestContainer {
         val server = JettyWebContainerFactory.create(
             UriBuilder.fromUri(uri).path(context.contextPath).build(),
             ServletContainer(context.resourceConfig),

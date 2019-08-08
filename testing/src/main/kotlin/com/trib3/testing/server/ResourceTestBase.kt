@@ -1,4 +1,4 @@
-package com.trib3.server.resources
+package com.trib3.testing.server
 
 import com.trib3.json.ObjectMapperProvider
 import io.dropwizard.testing.common.Resource

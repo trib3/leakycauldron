@@ -1,6 +1,27 @@
-testing
+Testing
 =======
 Classes that enhance writing unit tests.
+
+### TestBase classes
+
+#### DAOTestBase
+Base class for writing DAO tests.  Uses [OpenTable Embedded PostgreSQL](https://github.com/opentable/otj-pg-embedded/)
+to set up a [jOOQ](https://www.jooq.org) `DSLContext` and a jdbc `DataSource` that can 
+be used by tests, and runs any [Flyway](https://flywaydb.org) migrations found on the 
+classpath.
+
+#### ResourceTestBase
+Base class for writing Resource tests.  Implement `getResource()` to return the
+JAX-RS resource being tested.  Uses an `InMemoryTestContainer` by default, but can be 
+overriden by implementing `getContainerFactory()`.
+
+
+### Utility classes
+
+#### JettyWebTestContainerFactory
+A `TestContainerFactory` that supports servlet features (eg, injection of 
+`@Context HttpServletRequest` params, etc) on top of a [Jetty](https://www.eclipse.org/jetty/) 
+web server.
 
 #### LeakyMock
 Enhancements to [EasyMock](http://easymock.org/) for a more usable kotlin experience.  Makes mock
