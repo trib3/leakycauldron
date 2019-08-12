@@ -1,4 +1,4 @@
-package com.trib3.server
+package com.trib3.lambda
 
 import assertk.all
 import assertk.assertThat

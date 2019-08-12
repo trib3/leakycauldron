@@ -62,5 +62,9 @@ JDBC `DataSource`s into application data access code.
 * [`/server`](https://github.com/trib3/leakycauldron/tree/master/server)
 
 This contains classes for setting up a configurable [Dropwizard](https://dropwizard.io) based 
-application for running locally that can also be deployed to 
+application.
+
+* [`/lambda`](https://github.com/trib3/leakycauldron/tree/master/lambda)
+
+This contains classes that allow an application to be deployed to 
 [AWS Lambda](https://aws.amazon.com/lambda/).

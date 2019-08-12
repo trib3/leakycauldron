@@ -1,4 +1,4 @@
-package com.trib3.server.resources
+package com.trib3.lambda.resources
 
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
