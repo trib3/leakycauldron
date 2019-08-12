@@ -1,9 +1,10 @@
-package com.trib3.server.modules
+package com.trib3.lambda.modules
 
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import com.trib3.server.modules.TribeApplicationModule
 import io.dropwizard.jersey.jackson.JacksonFeature
 import io.dropwizard.setup.ExceptionMapperBinder
 import org.testng.annotations.Guice
