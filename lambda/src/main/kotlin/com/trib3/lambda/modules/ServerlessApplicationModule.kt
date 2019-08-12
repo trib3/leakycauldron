@@ -1,8 +1,9 @@
-package com.trib3.server.modules
+package com.trib3.lambda.modules
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.modules.KMSModule
-import com.trib3.server.resources.AdminResource
+import com.trib3.lambda.resources.AdminResource
+import com.trib3.server.modules.TribeApplicationModule
 import io.dropwizard.jersey.jackson.JacksonFeature
 import io.dropwizard.setup.ExceptionMapperBinder
 

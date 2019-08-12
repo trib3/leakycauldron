@@ -44,5 +44,6 @@
         <module>json</module>
         <module>db</module>
         <module>server</module>
+        <module>lambda</module>
     </modules>
 </project>
