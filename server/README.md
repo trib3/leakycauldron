@@ -19,19 +19,11 @@ and have:
   * [Request Ids](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/filters/RequestIdFilter.kt) 
     attached to HTTP headers
   * Any guice bound JAX-RS Resources
-* GraphQL endpoints:
-  * java8 time and threeten-extra [Scalars](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/graphql/DateTimeHooks.kt)
-  * [Request Ids](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/graphql/RequestIdInstrumentation.kt) 
-    attached to the GraphQL response extensions
-  * Any guice bound Query, Subscription or Mutation Resolvers
-  * Supports websockets using the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
-  * Supports subscriptions via [ReactiveX](http://reactivex.io/) for any Resolvers that return a `Publisher<T>`
 * Admin:
   * The dropwizard `/admin` servlet will be [password protected](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/filters/AdminAuthFilter.kt)
     with a password set from the `application.adminAuthToken` configuration variable 
     (or `ADMIN_AUTH_TOKEN` environment variable)
   * [Swagger UI](https://github.com/swagger-api/swagger-ui) available at `/admin/swagger`
-  * [GraphiQL](https://github.com/graphql/graphiql) available at `/admin/graphiql`
 
 #### Configuration
 Configuration is done primarily though Guice.  [`TribeApplicationModule`](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/modules/TribeApplicationModule.kt)
@@ -67,26 +59,7 @@ class ExampleApplicationModule : TribeApplicationModule() {
 ```
 
 ##### GraphQL Resolvers
-[`TribeApplicationModule`](https://github.com/trib3/leakycauldron/blob/master/server/src/main/kotlin/com/trib3/server/modules/TribeApplicationModule.kt)
-provides methods that expose multi-binders for configuring GraphQL resolvers.  Any model
-classes must be added to the `graphQLPackagesBinder()` to allow [GraphQL Kotlin](https://github.com/ExpediaDotCom/graphql-kotlin/)
-to use them.  Query Resolver implementations can be added to the `graphQLQueriesBinder()`
-, Subscriptions to the `graphQLSubscriptionsBinder()`, and Mutations to the `graphQLMutationsBinder()` 
-
-```kotlin
-class ExampleApplicationModule : TribeApplicationModule() {
-    override fun configure() {
-        // ...
-        graphQLPackagesBinder().addBinding().toInstance("com.example.api")
-        graphQLPackagesBinder().addBinding().toInstance("com.example.server.graphql")
-
-        graphQLQueriesBinder().addBinding().to<com.example.server.graphql.Query>()
-        graphQLMutationsBinder().addBinding().to<com.example.server.graphql.Mutation>()
-        graphQLSubscriptionsBinder().addBinding().to<com.example.server.graphql.Subscription>()
-        // ...
-    }
-}
-```
+To add [GraphQL](https://graphql.org) support, see [graphql](https://github.com/trib3/leakycauldron/blob/master/graphql)
 
 #### Execution
 Running a downstream application is most easily done by using a shaded `.jar`:
