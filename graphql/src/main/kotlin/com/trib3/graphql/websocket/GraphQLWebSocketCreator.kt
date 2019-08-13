@@ -1,6 +1,7 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.trib3.graphql.GraphQLConfig
 import graphql.GraphQL
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable

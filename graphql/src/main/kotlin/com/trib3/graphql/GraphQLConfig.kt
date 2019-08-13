@@ -1,4 +1,4 @@
-package com.trib3.server.graphql
+package com.trib3.graphql
 
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract

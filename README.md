@@ -64,6 +64,10 @@ JDBC `DataSource`s into application data access code.
 This contains classes for setting up a configurable [Dropwizard](https://dropwizard.io) based 
 application.
 
+* [`/graphql`](https://github.com/trib3/leakycauldron/tree/master/graphql)
+
+This contains classes for adding [GraphQL](https://graphql.org) support to an application.
+
 * [`/lambda`](https://github.com/trib3/leakycauldron/tree/master/lambda)
 
 This contains classes that allow an application to be deployed to 

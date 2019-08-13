@@ -1,7 +1,7 @@
-package com.trib3.server.resources
+package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
-import com.trib3.server.graphql.GraphRequest
+import com.trib3.graphql.execution.GraphQLRequest
 import graphql.ExecutionInput
 import graphql.GraphQL
 import org.eclipse.jetty.http.HttpStatus
@@ -41,7 +41,7 @@ open class GraphQLResource
     @POST
     @Path("/graphql")
     @Timed
-    open fun graphQL(query: GraphRequest): Response {
+    open fun graphQL(query: GraphQLRequest): Response {
         check(graphQL != null) {
             "graphQL not configured!"
         }
