@@ -1,4 +1,4 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.execution
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo

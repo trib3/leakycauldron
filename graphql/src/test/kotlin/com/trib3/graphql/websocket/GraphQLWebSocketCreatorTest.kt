@@ -1,4 +1,4 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.websocket
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -6,6 +6,8 @@ import assertk.assertions.isInstanceOf
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
+import com.trib3.graphql.GraphQLConfig
+import com.trib3.graphql.GraphQLConfigTest
 import com.trib3.testing.LeakyMock
 import graphql.GraphQL
 import org.easymock.EasyMock

@@ -1,4 +1,4 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.execution
 
 import graphql.GraphQLError
 import graphql.execution.DataFetcherExceptionHandler
