@@ -1,4 +1,4 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.websocket
 
 import assertk.assertThat
 import assertk.assertions.contains
@@ -11,6 +11,7 @@ import com.expedia.graphql.TopLevelObject
 import com.expedia.graphql.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
+import com.trib3.graphql.GraphQLConfig
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
 import graphql.ExecutionInput

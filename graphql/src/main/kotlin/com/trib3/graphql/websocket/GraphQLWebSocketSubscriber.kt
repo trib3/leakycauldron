@@ -1,5 +1,7 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.websocket
 
+import com.trib3.graphql.GraphQLConfig
+import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionInput
 import graphql.ExecutionResult
@@ -25,7 +27,7 @@ private val log = KotlinLogging.logger {}
  *
  * Handling some WebSocket events results in new rx subscriptions (eg, starting a query or
  * a keepalive timer).  The handlers for those subscriptions must inject back into the
- * original subscription via [adapter.emitter] if they need to modify the subscriber's state
+ * original subscription via `adapter.emitter` if they need to modify the subscriber's state
  * or send data to the WebSocket client.
  */
 class GraphQLWebSocketSubscriber(
@@ -82,6 +84,7 @@ class GraphQLWebSocketSubscriber(
                     // Query finished messages from downstream subscriptions
                     OperationType.GQL_COMPLETE,
                     OperationType.GQL_ERROR -> {
+                        log.info("Query ${message.id} completed: $message")
                         queries.remove(message.id)?.dispose()
                         handleClientBoundMessage(message)
                     }
@@ -161,13 +164,13 @@ class GraphQLWebSocketSubscriber(
         check(!queries.containsKey(messageId)) {
             "Query with id $messageId already running!"
         }
-        check(message.payload is GraphRequest) {
+        check(message.payload is GraphQLRequest) {
             "Invalid payload for query"
         }
         check(graphQL != null) {
             "graphQL not configured!"
         }
-        val payload = message.payload as GraphRequest
+        val payload = message.payload as GraphQLRequest
         val executionQuery = ExecutionInput.newExecutionInput()
             .query(payload.query)
             .variables(payload.variables ?: mapOf())

@@ -44,6 +44,7 @@
         <module>json</module>
         <module>db</module>
         <module>server</module>
+        <module>graphql</module>
         <module>lambda</module>
     </modules>
 </project>

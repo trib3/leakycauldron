@@ -1,4 +1,4 @@
-package com.trib3.server.graphql
+package com.trib3.graphql.websocket
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -6,6 +6,7 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionResult
 import org.testng.annotations.Test
@@ -18,7 +19,7 @@ class GraphQLWebSocketProtocolTest {
     fun testOperationTypeRawDeserialization() {
         val start = OperationType.getOperationType("start")
         assertThat(start).isEqualTo(OperationType.GQL_START)
-        assertThat(start?.payloadType).isEqualTo(GraphRequest::class)
+        assertThat(start?.payloadType).isEqualTo(GraphQLRequest::class)
     }
 
     @Test
@@ -50,11 +51,11 @@ class GraphQLWebSocketProtocolTest {
         )
         assertThat(start.type).isEqualTo(OperationType.GQL_START)
         assertThat(start.id).isEqualTo("123")
-        assertThat(start.payload).isNotNull().isInstanceOf(GraphRequest::class)
-        assertThat((start.payload as GraphRequest).query).isEqualTo("hi")
-        assertThat((start.payload as GraphRequest).variables).isNotNull().isInstanceOf(Map::class)
+        assertThat(start.payload).isNotNull().isInstanceOf(GraphQLRequest::class)
+        assertThat((start.payload as GraphQLRequest).query).isEqualTo("hi")
+        assertThat((start.payload as GraphQLRequest).variables).isNotNull().isInstanceOf(Map::class)
             .isEqualTo(mapOf<String, Any?>())
-        assertThat((start.payload as GraphRequest).operationName).isEqualTo("boo")
+        assertThat((start.payload as GraphQLRequest).operationName).isEqualTo("boo")
     }
 
     @Test
@@ -62,7 +63,7 @@ class GraphQLWebSocketProtocolTest {
         val objectExample = mapOf(
             Nothing::class to null,
             String::class to "message",
-            GraphRequest::class to GraphRequest("query {q}", mapOf(), null),
+            GraphQLRequest::class to GraphQLRequest("query {q}", mapOf(), null),
             ExecutionResult::class to null // only need to support serialization right now, not round trip
         )
         for (t in OperationType.Companion::class.memberProperties

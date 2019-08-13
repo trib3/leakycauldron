@@ -22,11 +22,6 @@ abstract class TribeApplicationModule : KotlinModule() {
         const val APPLICATION_SERVLETS_BIND_NAME = "ApplicationServlets"
         const val ADMIN_SERVLETS_BIND_NAME = "AdminServlets"
         const val ADMIN_SERVLET_FILTERS_BIND_NAME = "AdminFilters"
-
-        const val GRAPHQL_PACKAGES_BIND_NAME = "graphQLPackages"
-        const val GRAPHQL_QUERIES_BIND_NAME = "graphQLQueries"
-        const val GRAPHQL_MUTATIONS_BIND_NAME = "graphQLMutations"
-        const val GRAPHQL_SUBSCRIPTIONS_BIND_NAME = "graphQLSubscriptions"
     }
 
     /**
@@ -56,46 +51,6 @@ abstract class TribeApplicationModule : KotlinModule() {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(ADMIN_SERVLETS_BIND_NAME)
-        )
-    }
-
-    /**
-     * Binder for graphql packages
-     */
-    fun graphQLPackagesBinder(): KotlinMultibinder<String> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
-            kotlinBinder,
-            Names.named(GRAPHQL_PACKAGES_BIND_NAME)
-        )
-    }
-
-    /**
-     * Binder for graphql queries
-     */
-    fun graphQLQueriesBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
-            kotlinBinder,
-            Names.named(GRAPHQL_QUERIES_BIND_NAME)
-        )
-    }
-
-    /**
-     * Binder for graphql mutations
-     */
-    fun graphQLMutationsBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
-            kotlinBinder,
-            Names.named(GRAPHQL_MUTATIONS_BIND_NAME)
-        )
-    }
-
-    /**
-     * Binder for graphql subscriptions
-     */
-    fun graphQLSubscriptionsBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
-            kotlinBinder,
-            Names.named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
         )
     }
 }
