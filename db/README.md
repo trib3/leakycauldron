@@ -12,7 +12,7 @@ Configures a `DataSource` and a `DSLContext` from the `db` section of config, us
 Example config:
 ```hocon
     db {
-        dialect: POSTGRES_10
+        dialect: POSTGRES
         subprotocol: postgresql
         host: localhost
         port: 5432
@@ -34,7 +34,7 @@ class DAO
 
 The following environment variables can be used to specify config without adding a `db`
 section to `application.conf` explicitly:
-* `DB_DIALECT`:  jOOQ dialect to use, defaults to `POSTGRES_10`
+* `DB_DIALECT`:  jOOQ dialect to use, defaults to `POSTGRES`
 * `DB_SUBPROTOCOL`:  jdbc subprotocol to use, defaults to `postgresql`
 * `DB_HOST`:  database hostname, defaults to `localhost`
 * `DB_PORT`:  database port, defaults to `5432` (default postgres port)
@@ -52,7 +52,7 @@ instead of `DbModule` to specify different configuration for each database.
 Example config:
 ```hocon
     postgres {
-        dialect: POSTGRES_10
+        dialect: POSTGRES
         subprotocol: postgresql
         host: localhost
         port: 5432
