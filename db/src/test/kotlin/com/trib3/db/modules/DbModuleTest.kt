@@ -36,7 +36,7 @@ class DbModuleTest
             isEqualTo(ctxDataSource)
         }
         assertThat(dbConfig.dslContext).isEqualTo(this.dslContext)
-        assertThat(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES_10)
+        assertThat(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES)
         assertThat((dataSource as HikariDataSource).jdbcUrl).contains("localhost:5432")
         assertThat(dataSource.username).isEqualTo("tribe")
         assertThat(dataSource.healthCheckRegistry).isNotNull()

@@ -48,7 +48,7 @@ class DbConfig
 
         dataSource = hds
 
-        dialect = config.extract("dialect") ?: SQLDialect.POSTGRES_10
+        dialect = config.extract("dialect") ?: SQLDialect.POSTGRES
         dslContext = DSL.using(dataSource, dialect)
     }
 }

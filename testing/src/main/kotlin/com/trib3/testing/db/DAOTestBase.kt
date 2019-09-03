@@ -27,7 +27,7 @@ open class DAOTestBase {
                 .setOutputRedirector(ProcessBuilder.Redirect.DISCARD)
                 .start()
             dataSource = postgres.postgresDatabase
-            ctx = DSL.using(dataSource, SQLDialect.POSTGRES_10)
+            ctx = DSL.using(dataSource, SQLDialect.POSTGRES)
             val flyway = Flyway.configure().dataSource(dataSource).load()
             flyway.migrate()
         }
