@@ -111,7 +111,7 @@
         <version.redshift>1.2.27.1051</version.redshift>
         <version.rxjava>2.2.12</version.rxjava>
         <version.rxkotlin>2.4.0</version.rxkotlin>
-        <version.servlet>4.0.2</version.servlet>
+        <version.servlet>4.0.3</version.servlet>
         <version.slf4j>1.7.28</version.slf4j>
         <version.swagger>2.0.9</version.swagger>
         <version.testng>7.0.0</version.testng>
