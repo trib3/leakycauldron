@@ -52,7 +52,7 @@
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.0.1</version.detekt>
         <version.dokka>0.9.18</version.dokka>
-        <version.dropwizard>2.0.0-rc9</version.dropwizard>
+        <version.dropwizard>2.0.0-rc10</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.1.0</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
@@ -66,7 +66,7 @@
         <version.guice>4.2.2</version.guice>
         <version.h2>1.4.199</version.h2>
         <version.hikaricp>3.4.0</version.hikaricp>
-        <version.hk2>2.5.0</version.hk2>
+        <version.hk2>2.6.1</version.hk2>
         <version.jackson>2.9.9</version.jackson>
         <version.jackson.databind>2.9.9.3</version.jackson.databind>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
@@ -75,7 +75,7 @@
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.2</version.jaxb>
         <version.jaxrs>2.1.6</version.jaxrs>
-        <version.jersey>2.29</version.jersey>
+        <version.jersey>2.29.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.20.v20190813</version.jetty>
         <version.jooq>3.11.12</version.jooq>
@@ -480,6 +480,10 @@
                     <exclusion>
                         <groupId>javax.validation</groupId>
                         <artifactId>validation-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish</groupId>
+                        <artifactId>jakarta.el</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
