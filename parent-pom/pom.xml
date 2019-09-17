@@ -65,7 +65,7 @@
         <version.guava>28.0-jre</version.guava>
         <version.guice>4.2.2</version.guice>
         <version.h2>1.4.199</version.h2>
-        <version.hikaricp>3.3.1</version.hikaricp>
+        <version.hikaricp>3.4.0</version.hikaricp>
         <version.hk2>2.5.0</version.hk2>
         <version.jackson>2.9.9</version.jackson>
         <version.jackson.databind>2.9.9.3</version.jackson.databind>
