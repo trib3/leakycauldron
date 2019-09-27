@@ -8,6 +8,7 @@ import assertk.assertions.isSuccess
 import com.expedia.graphql.SchemaGeneratorConfig
 import com.expedia.graphql.TopLevelObject
 import com.expedia.graphql.toSchema
+import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionInput
 import graphql.GraphQL
 import graphql.schema.CoercingSerializeException
@@ -52,8 +53,16 @@ class DateTimeQuery {
 }
 
 class DateTimeHooksTest {
+    val hooks = DateTimeHooks()
     val config =
-        SchemaGeneratorConfig(listOf(), hooks = DateTimeHooks())
+        SchemaGeneratorConfig(
+            listOf(),
+            hooks = hooks,
+            dataFetcherFactoryProvider = ObjectMapperKotlinDataFetcherFactoryProvider(
+                ObjectMapperProvider().get(),
+                hooks
+            )
+        )
     val graphQL =
         GraphQL.newGraphQL(
             toSchema(config, listOf(TopLevelObject(DateTimeQuery())))
@@ -250,7 +259,7 @@ class DateTimeHooksTest {
     fun testOffsetDateTime() {
         val result = graphQL.execute("""query {offsetDateTime(o:"2019-10-30T00:01-07:00")}""")
             .getData<Map<String, String>>()
-        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T00:01-07:00")
+        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01Z")
         assertThat {
             graphQL.execute("""query {offsetDateTime(o:123)}""")
         }.isFailure().isInstanceOf(CoercingSerializeException::class)
@@ -277,6 +286,6 @@ class DateTimeHooksTest {
                 .query("""query(${'$'}input: OffsetDateTime!) {offsetDateTime(o:${'$'}input)}""")
                 .variables(mapOf("input" to "2019-10-30T00:01-07:00")).build()
         ).getData<Map<String, String>>()
-        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T00:01-07:00")
+        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01Z")
     }
 }

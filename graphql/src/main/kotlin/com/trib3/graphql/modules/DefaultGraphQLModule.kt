@@ -3,9 +3,11 @@ package com.trib3.graphql.modules
 import com.expedia.graphql.SchemaGeneratorConfig
 import com.expedia.graphql.TopLevelObject
 import com.expedia.graphql.toSchema
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.Provides
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.DateTimeHooks
+import com.trib3.graphql.execution.ObjectMapperKotlinDataFetcherFactoryProvider
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
 import com.trib3.graphql.websocket.GraphQLWebSocketCreator
@@ -55,9 +57,15 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         @Named(GRAPHQL_MUTATIONS_BIND_NAME)
         mutations: Set<@JvmSuppressWildcards Any>,
         @Named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
-        subscriptions: Set<@JvmSuppressWildcards Any>
+        subscriptions: Set<@JvmSuppressWildcards Any>,
+        mapper: ObjectMapper
     ): GraphQL? {
-        val config = SchemaGeneratorConfig(graphQLPackages.toList(), hooks = DateTimeHooks())
+        val hooks = DateTimeHooks()
+        val config = SchemaGeneratorConfig(
+            graphQLPackages.toList(),
+            hooks = hooks,
+            dataFetcherFactoryProvider = ObjectMapperKotlinDataFetcherFactoryProvider(mapper, hooks)
+        )
         return if (queries.isNotEmpty()) {
             GraphQL.newGraphQL(
                 toSchema(
