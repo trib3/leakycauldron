@@ -6,6 +6,7 @@ import assertk.assertions.isNotNull
 import assertk.assertions.size
 import com.trib3.config.modules.KMSModule
 import com.trib3.graphql.resources.GraphQLResource
+import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.modules.TribeApplicationModule
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
@@ -38,7 +39,8 @@ class GraphQLApplicationModuleTest
             setOf(),
             setOf(DummyQuery()),
             setOf(),
-            setOf()
+            setOf(),
+            ObjectMapperProvider().get()
         )
         assertThat(graphQLInstance).isNotNull()
     }

@@ -81,7 +81,7 @@ class GraphQLWebSocketProtocolTest {
         }
     }
 
-    @Test(enabled = false) // https://github.com/FasterXML/jackson-databind/issues/2404
+    @Test
     fun testNoPayloadMessage() {
         val json = """{"type": "connection_init", "id": "123"}"""
         val message = mapper.readValue<OperationMessage<*>>(json)
