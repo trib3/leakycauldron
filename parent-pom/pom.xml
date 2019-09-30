@@ -47,7 +47,7 @@
         <version.assertk>0.20</version.assertk>
         <version.aws.java>2.9.5</version.aws.java>
         <version.aws.lambda>1.2.0</version.aws.lambda>
-        <version.aws.serverless>1.3.2</version.aws.serverless>
+        <version.aws.serverless>1.4</version.aws.serverless>
         <version.commons-io>2.6</version.commons-io>
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.0.1</version.detekt>
