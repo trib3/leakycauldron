@@ -1,8 +1,8 @@
 package com.trib3.graphql.modules
 
-import com.expedia.graphql.SchemaGeneratorConfig
-import com.expedia.graphql.TopLevelObject
-import com.expedia.graphql.toSchema
+import com.expediagroup.graphql.SchemaGeneratorConfig
+import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.Provides
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
