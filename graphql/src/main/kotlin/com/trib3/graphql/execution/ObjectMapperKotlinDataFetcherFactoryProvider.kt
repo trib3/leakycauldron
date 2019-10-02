@@ -1,8 +1,8 @@
 package com.trib3.graphql.execution
 
-import com.expedia.graphql.execution.FunctionDataFetcher
-import com.expedia.graphql.execution.KotlinDataFetcherFactoryProvider
-import com.expedia.graphql.hooks.SchemaGeneratorHooks
+import com.expediagroup.graphql.execution.FunctionDataFetcher
+import com.expediagroup.graphql.execution.KotlinDataFetcherFactoryProvider
+import com.expediagroup.graphql.hooks.SchemaGeneratorHooks
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetcherFactories
 import graphql.schema.DataFetcherFactory
