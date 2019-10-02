@@ -5,9 +5,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isSuccess
-import com.expedia.graphql.SchemaGeneratorConfig
-import com.expedia.graphql.TopLevelObject
-import com.expedia.graphql.toSchema
+import com.expediagroup.graphql.SchemaGeneratorConfig
+import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.toSchema
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionInput
 import graphql.GraphQL

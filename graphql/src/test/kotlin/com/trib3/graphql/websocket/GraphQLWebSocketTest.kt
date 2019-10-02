@@ -6,9 +6,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
-import com.expedia.graphql.SchemaGeneratorConfig
-import com.expedia.graphql.TopLevelObject
-import com.expedia.graphql.toSchema
+import com.expediagroup.graphql.SchemaGeneratorConfig
+import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
 import com.trib3.graphql.GraphQLConfig
@@ -72,6 +72,11 @@ class SocketSubscription {
 
             override fun next(): String {
                 val toReturn = value.toString()
+                if (value > 1) {
+                    // add a delay so we don't flood the queue with too many messages before
+                    // a stop command can be processed in a reasonable amount of time
+                    Thread.sleep(20)
+                }
                 value += 1
                 return toReturn
             }

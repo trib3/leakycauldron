@@ -11,9 +11,9 @@ import assertk.assertions.isNotNull
 import assertk.assertions.message
 import assertk.assertions.prop
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
-import com.expedia.graphql.SchemaGeneratorConfig
-import com.expedia.graphql.TopLevelObject
-import com.expedia.graphql.toSchema
+import com.expediagroup.graphql.SchemaGeneratorConfig
+import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.GraphQLRequest

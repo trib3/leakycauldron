@@ -2,9 +2,9 @@ package com.trib3.graphql.resources
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.expedia.graphql.SchemaGeneratorConfig
-import com.expedia.graphql.TopLevelObject
-import com.expedia.graphql.toSchema
+import com.expediagroup.graphql.SchemaGeneratorConfig
+import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.toSchema
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.testing.server.JettyWebTestContainerFactory
