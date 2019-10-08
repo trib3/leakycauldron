@@ -16,10 +16,15 @@ import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
 import graphql.ExecutionInput
 import graphql.GraphQL
-import io.reactivex.Scheduler
-import io.reactivex.rxkotlin.toFlowable
-import io.reactivex.schedulers.Schedulers
-import io.reactivex.schedulers.TestScheduler
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.reactive.asPublisher
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
@@ -45,7 +50,7 @@ class SocketQuery {
 
 class SocketSubscription {
     fun s(): Publisher<String> {
-        return listOf("1", "2", "3").toFlowable()
+        return flowOf("1", "2", "3").asPublisher()
     }
 
     fun e(): Publisher<String> {
@@ -60,7 +65,7 @@ class SocketSubscription {
                 value += 1
                 return if (toReturn == "3") throw IllegalStateException("forced exception") else toReturn
             }
-        }.toFlowable()
+        }.asFlow().asPublisher()
     }
 
     fun inf(): Publisher<String> {
@@ -80,10 +85,11 @@ class SocketSubscription {
                 value += 1
                 return toReturn
             }
-        }.toFlowable()
+        }.asFlow().asPublisher()
     }
 }
 
+@UseExperimental(ExperimentalCoroutinesApi::class)
 class GraphQLWebSocketTest {
 
     val testGraphQL = GraphQL.newGraphQL(
@@ -104,18 +110,21 @@ class GraphQLWebSocketTest {
      */
     private fun getSocket(
         graphQL: GraphQL? = testGraphQL,
-        scheduler: Scheduler = Schedulers.trampoline(),
-        keepAliveScheduler: Scheduler = Schedulers.computation()
-    ): GraphQLWebSocketSubscriber {
-        val subscriber = GraphQLWebSocketSubscriber(
+        dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
+        keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default
+    ): GraphQLWebSocketConsumer {
+        val channel = Channel<OperationMessage<*>>()
+        val adapter = GraphQLWebSocketAdapter(channel, mapper)
+        val consumer = GraphQLWebSocketConsumer(
             graphQL,
             config,
-            scheduler,
-            keepAliveScheduler
+            channel,
+            adapter,
+            dispatcher,
+            keepAliveDispatcher
         )
-        GraphQLWebSocketCreator(graphQL, mapper, config)
-            .createWebSocket(subscriber, scheduler)
-        return subscriber
+        consumer.launchConsumer()
+        return consumer
     }
 
     @Test
@@ -350,8 +359,8 @@ class GraphQLWebSocketTest {
     @Test
     fun testGenericErrors() {
         val socket = getSocket(null) // unconfigured graphQL instance
-        assertThat(socket.scheduler).isEqualTo(Schedulers.trampoline())
-        assertThat(socket.keepAliveScheduler).isEqualTo(Schedulers.computation())
+        assertThat(socket.dispatcher).isEqualTo(Dispatchers.Unconfined)
+        assertThat(socket.keepAliveDispatcher).isEqualTo(Dispatchers.Default)
         assertThat(socket.graphQLConfig).isEqualTo(config)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
@@ -416,19 +425,23 @@ class GraphQLWebSocketTest {
                  "payload": {"query": "query { q }"}}""".trimIndent()
         )
         socket.adapter.onWebSocketError(IllegalStateException("boom"))
-        socket.onNext(
-            OperationMessage(OperationType("unknown", Nothing::class), "invalidtype", null)
-        )
-        socket.onNext(
-            OperationMessage(OperationType.GQL_START, "badpayload", null)
-        )
+        runBlocking {
+            socket.handleMessage(
+                OperationMessage(OperationType("unknown", Nothing::class), "invalidtype", null),
+                this
+            )
+            socket.handleMessage(
+                OperationMessage(OperationType.GQL_START, "badpayload", null),
+                this
+            )
+        }
         EasyMock.verify(mockRemote, mockSession)
     }
 
     @Test
     fun testConnectAckAndKeepAlive() {
-        val testScheduler = TestScheduler()
-        val socket = getSocket(keepAliveScheduler = testScheduler)
+        val testDispatcher = TestCoroutineDispatcher()
+        val socket = getSocket(keepAliveDispatcher = testDispatcher)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -472,7 +485,7 @@ class GraphQLWebSocketTest {
         socket.adapter.onWebSocketConnect(mockSession)
         socket.adapter.onWebSocketText("""{"type": "connection_init", "id": "connect", "payload": null}""")
         socket.adapter.onWebSocketText("""{"type": "connection_init", "id": "connect2", "payload": null}""")
-        testScheduler.advanceTimeBy(config.keepAliveIntervalSeconds + 1, TimeUnit.SECONDS)
+        testDispatcher.advanceTimeBy((config.keepAliveIntervalSeconds + 1) * 1000)
         EasyMock.verify(mockRemote, mockSession)
     }
 
@@ -494,9 +507,9 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testWebSocketClose() {
-        // use Schedulers.computation() since we're using the infinite subscription stream
+        // use Dispatchers.Default since we're using the infinite subscription stream
         // and want to be able to call `onWebSocketClose` while the query is running
-        val socket = getSocket(scheduler = Schedulers.computation())
+        val socket = getSocket(dispatcher = Dispatchers.Default)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -505,17 +518,17 @@ class GraphQLWebSocketTest {
         socket.adapter.onWebSocketConnect(mockSession)
         socket.adapter.onWebSocketText("""{"type": "connection_init", "id": "connect", "payload":null}""")
         socket.adapter.onWebSocketText("""{"type": "start", "id": "run", "payload": {"query": "subscription {inf}"}}""")
-        assertThat(socket.isDisposed).isFalse()
+        assertThat(socket.channel.isClosedForSend).isFalse()
         socket.adapter.onWebSocketClose(StatusCode.NORMAL, "externally closed")
         assertThat(socket.adapter.session).isNull()
-        assertThat(socket.isDisposed).isTrue()
+        assertThat(socket.channel.isClosedForSend).isTrue()
         EasyMock.verify(mockRemote, mockSession)
     }
 
     @Test
     fun testStopQuery() {
-        // and use Schedulers.computation() since we're using the infinite subscription stream
-        val socket = getSocket(scheduler = Schedulers.computation())
+        // and use Dispatchers.Default since we're using the infinite subscription stream
+        val socket = getSocket(dispatcher = Dispatchers.Default)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         // use these to signal the test that certain steps have been accomplished
