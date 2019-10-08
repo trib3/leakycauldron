@@ -32,7 +32,7 @@ class RequestIdFilter : Filter {
          * @param requestId the RequestId to set, defaults to a new random UUID
          * @param block the block of code to execute
          */
-        fun <T> withRequestId(requestId: String? = null, block: () -> T): T {
+        inline fun <T> withRequestId(requestId: String? = null, block: () -> T): T {
             val createdId = createRequestId(requestId ?: UUID.randomUUID().toString())
             try {
                 return block()

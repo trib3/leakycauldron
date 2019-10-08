@@ -3,6 +3,7 @@ package com.trib3.graphql.websocket
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.ConfigLoader
 import com.trib3.config.KMSStringSelectReader
@@ -33,6 +34,7 @@ class GraphQLWebSocketCreatorTest {
         EasyMock.verify(response)
         assertThat(socket).isInstanceOf(GraphQLWebSocketAdapter::class)
         assertThat((socket as GraphQLWebSocketAdapter).objectMapper).isEqualTo(mapper)
+        assertThat(socket.channel).isNotNull()
         // mapper writes without pretty printing, writer writes with pretty printing
         assertThat(socket.objectMapper.writeValueAsString(mapOf("a" to "b"))).isEqualTo("""{"a":"b"}""")
         assertThat(socket.objectWriter.writeValueAsString(mapOf("a" to "b"))).isEqualTo(
