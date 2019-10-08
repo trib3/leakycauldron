@@ -2,7 +2,8 @@ package com.trib3.graphql.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.reactivex.FlowableEmitter
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
@@ -11,11 +12,11 @@ private val log = KotlinLogging.logger {}
 
 /**
  * [WebSocketAdapter] implementation that bridges incoming WebSocket events into
- * the rx [FlowableEmitter] to be handled by an rx subscriber, and provides access
+ * a coroutine [Channel] to be handled by a consumer, and provides access
  * to the [remote] for sending messages to the client.
  */
 class GraphQLWebSocketAdapter(
-    val emitter: FlowableEmitter<OperationMessage<*>>,
+    val channel: Channel<OperationMessage<*>>,
     val objectMapper: ObjectMapper
 ) : WebSocketAdapter() {
     val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()!!
@@ -30,16 +31,16 @@ class GraphQLWebSocketAdapter(
     }
 
     /**
-     * Parse incoming messages as [OperationMessage]s, then send them to rx
+     * Parse incoming messages as [OperationMessage]s, then send them to the channel consumer
      */
-    override fun onWebSocketText(message: String) {
+    override fun onWebSocketText(message: String) = runBlocking {
         try {
             val operation = objectMapper.readValue<OperationMessage<*>>(message)
             // Only send client->server messages downstream, otherwise queue an error to be sent back
             if (operation.type in CLIENT_SOURCED_MESSAGES) {
-                emitter.onNext(operation)
+                channel.send(operation)
             } else {
-                emitter.onNext(
+                channel.send(
                     OperationMessage(
                         OperationType.GQL_ERROR,
                         operation.id,
@@ -50,7 +51,7 @@ class GraphQLWebSocketAdapter(
         } catch (error: Throwable) {
             // Don't kill the socket because of a bad message, just queue an error to be sent back
             log.error("Error parsing message: ${error.message}", error)
-            emitter.onNext(
+            channel.send(
                 OperationMessage(
                     OperationType.GQL_ERROR,
                     null,
@@ -61,20 +62,20 @@ class GraphQLWebSocketAdapter(
     }
 
     /**
-     * Notify rx that the stream is finished
+     * Notify channel that the stream is finished
      */
     override fun onWebSocketClose(statusCode: Int, reason: String?) {
         log.debug("WebSocket close $statusCode $reason")
         super.onWebSocketClose(statusCode, reason)
-        emitter.onComplete()
+        channel.close()
     }
 
     /**
-     * notify rx the stream has errored unrecoverably
+     * notify channel the stream has errored unrecoverably
      */
     override fun onWebSocketError(cause: Throwable) {
         log.error("WebSocket error ${cause.message}", cause)
-        emitter.onError(cause)
+        channel.close(cause)
         session?.close(StatusCode.SERVER_ERROR, cause.message)
     }
 
