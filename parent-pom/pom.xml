@@ -52,7 +52,7 @@
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.1.1</version.detekt>
         <version.dokka>0.10.0</version.dokka>
-        <version.dropwizard>2.0.0-rc10</version.dropwizard>
+        <version.dropwizard>2.0.0-rc11</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.1.0</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
@@ -77,7 +77,7 @@
         <version.jaxrs>2.1.6</version.jaxrs>
         <version.jersey>2.29.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>9.4.20.v20190813</version.jetty>
+        <version.jetty>9.4.21.v20190926</version.jetty>
         <version.jooq>3.11.12</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.kotlin>1.3.50</version.kotlin>
@@ -114,7 +114,7 @@
         <version.rxkotlin>2.4.0</version.rxkotlin>
         <version.servlet>4.0.3</version.servlet>
         <version.slf4j>1.7.28</version.slf4j>
-        <version.swagger>2.0.9</version.swagger>
+        <version.swagger>2.0.10</version.swagger>
         <version.testng>7.0.0</version.testng>
         <version.threeten>1.5.0</version.threeten>
         <version.typesafe.config>1.4.0</version.typesafe.config>
@@ -301,6 +301,10 @@
                     <exclusion>
                         <groupId>javax.activation</groupId>
                         <artifactId>javax.activation-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>jakarta.activation</groupId>
+                        <artifactId>jakarta.activation-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -647,6 +651,10 @@
                         <artifactId>jackson-dataformat-yaml</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-jsr310</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>com.fasterxml.jackson.jaxrs</groupId>
                         <artifactId>jackson-jaxrs-json-provider</artifactId>
                     </exclusion>
@@ -672,6 +680,10 @@
                     <exclusion>
                         <groupId>com.fasterxml.jackson.dataformat</groupId>
                         <artifactId>jackson-dataformat-yaml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-jsr310</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>com.fasterxml.jackson.jaxrs</groupId>
