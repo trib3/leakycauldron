@@ -70,7 +70,7 @@
         <version.jackson>2.10.0</version.jackson>
         <version.jackson.databind>${version.jackson}</version.jackson.databind>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
-        <version.jacoco>0.8.4</version.jacoco>
+        <version.jacoco>0.8.5</version.jacoco>
         <version.java.release>8</version.java.release>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.2</version.jaxb>
