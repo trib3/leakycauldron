@@ -107,7 +107,7 @@
         <version.maven.source>3.1.0</version.maven.source>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
         <version.postgres>42.2.8</version.postgres>
-        <version.postgres.embedded>0.13.2</version.postgres.embedded>
+        <version.postgres.embedded>0.13.3</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>1.2.27.1051</version.redshift>
         <version.rxjava>2.2.13</version.rxjava>
