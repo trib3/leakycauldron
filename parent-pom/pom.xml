@@ -45,7 +45,7 @@
         <version.annotation>1.3.5</version.annotation>
         <version.argparse4j>0.8.1</version.argparse4j>
         <version.assertk>0.20</version.assertk>
-        <version.aws.java>2.9.26</version.aws.java>
+        <version.aws.java>2.10.0</version.aws.java>
         <version.aws.lambda>1.2.0</version.aws.lambda>
         <version.aws.serverless>1.4</version.aws.serverless>
         <version.commons-io>2.6</version.commons-io>
