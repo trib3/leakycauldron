@@ -137,10 +137,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""q" : [ "1", "2", "3" ]"""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "simplequery"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "simplequery"""")
                 )
             )
         ).once()
@@ -171,10 +169,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""v" : [ "1", "2", "3" ]"""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "simplequery"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "simplequery"""")
                 )
             )
         ).once()
@@ -259,10 +255,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""s" : "1""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "simplesubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "simplesubscription"""")
                 )
             )
         ).once()
@@ -270,10 +264,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""s" : "2""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "simplesubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "simplesubscription"""")
                 )
             )
         ).once()
@@ -281,10 +273,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""s" : "3""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "simplesubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "simplesubscription"""")
                 )
             )
         ).once()
@@ -318,10 +308,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""e" : "1""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "errorsubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "errorsubscription"""")
                 )
             )
         ).once()
@@ -329,10 +317,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""e" : "2""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "errorsubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "errorsubscription"""")
                 )
             )
         ).once()
@@ -377,10 +363,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""type" : "error""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""id" : "unconfiguredquery""""),
-                        LeakyMock.contains("not configured")
-                    )
+                    LeakyMock.contains(""""id" : "unconfiguredquery""""),
+                    LeakyMock.contains("not configured")
                 )
             )
         ).once()
@@ -388,10 +372,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""type" : "error""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""id" : "invalidtype""""),
-                        LeakyMock.contains(""""payload" : "Unknown message type"""")
-                    )
+                    LeakyMock.contains(""""id" : "invalidtype""""),
+                    LeakyMock.contains(""""payload" : "Unknown message type"""")
                 )
             )
         ).once()
@@ -399,10 +381,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""type" : "error""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""id" : "badpayload""""),
-                        LeakyMock.contains(""""payload" : "Invalid payload for query"""")
-                    )
+                    LeakyMock.contains(""""id" : "badpayload""""),
+                    LeakyMock.contains(""""payload" : "Invalid payload for query"""")
                 )
             )
         ).once()
@@ -473,10 +453,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""payload" : "Already connected!""""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "connection_error""""),
-                        LeakyMock.contains(""""id" : "connect2"""")
-                    )
+                    LeakyMock.contains(""""type" : "connection_error""""),
+                    LeakyMock.contains(""""id" : "connect2"""")
                 )
             )
         ).once()
@@ -540,10 +518,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""inf" : """"),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "data""""),
-                        LeakyMock.contains(""""id" : "longsubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "data""""),
+                    LeakyMock.contains(""""id" : "longsubscription"""")
                 )
             )
         ).andAnswer { data.countDown() }.atLeastOnce() // notify that data has been sent
@@ -551,10 +527,8 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains("""already running"""),
-                    LeakyMock.and(
-                        LeakyMock.contains(""""type" : "error""""),
-                        LeakyMock.contains(""""id" : "longsubscription"""")
-                    )
+                    LeakyMock.contains(""""type" : "error""""),
+                    LeakyMock.contains(""""id" : "longsubscription"""")
                 )
             )
         ).andAnswer { secondQueryErrored.countDown() }.once()
