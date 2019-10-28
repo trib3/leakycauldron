@@ -3,6 +3,7 @@ package com.trib3.testing
 import org.easymock.Capture
 import org.easymock.EasyMock
 import org.easymock.EasyMockSupport
+import org.easymock.internal.LastControl
 
 /**
  * Extension function to add a `mock<T>()` method to [EasyMockSupport]
@@ -125,19 +126,21 @@ class LeakyMock {
         }
 
         /**
-         * Expect an object that matches both given expectations, and return the first one
+         * Expect an object that matches all given expectations, and return the first one
          */
-        fun <T> and(first: T, second: T): T {
-            EasyMock.and(first, second)
-            return first
+        fun <T> and(vararg args: T): T {
+            check(args.isNotEmpty()) { "Must pass at least one argument to LeakyMock.and()" }
+            LastControl.reportAnd(args.size)
+            return args.first()
         }
 
         /**
-         * Expect an object that matches either of the given expectations, and return the first one
+         * Expect an object that matches any of the given expectations, and return the first one
          */
-        fun <T> or(first: T, second: T): T {
-            EasyMock.or(first, second)
-            return first
+        fun <T> or(vararg args: T): T {
+            check(args.isNotEmpty()) { "Must pass at least one argument to LeakyMock.or()" }
+            LastControl.reportOr(args.size)
+            return args.first()
         }
 
         /**
