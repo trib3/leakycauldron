@@ -6,7 +6,7 @@ jobs:
 
     working_directory: ~/repo
     environment:
-      MAVEN_OPTS: -Xmx2048m
+      JAVA_TOOL_OPTIONS: -XX:MaxRAM=2g
 
     steps:
       # get code
