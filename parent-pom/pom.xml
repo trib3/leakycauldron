@@ -100,7 +100,7 @@
         <version.maven.git>3.0.1</version.maven.git>
         <version.maven.gpg>1.6</version.maven.gpg>
         <version.maven.install>3.0.0-M1</version.maven.install>
-        <version.maven.jar>3.1.2</version.maven.jar>
+        <version.maven.jar>3.2.0</version.maven.jar>
         <version.maven.ktlint>1.2.3</version.maven.ktlint>
         <version.maven.properties>1.0.0</version.maven.properties>
         <version.maven.resources>3.1.0</version.maven.resources>
