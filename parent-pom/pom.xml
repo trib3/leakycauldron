@@ -84,7 +84,7 @@
         <version.kotlin>1.3.50</version.kotlin>
         <version.kotlin.coroutines>1.3.2</version.kotlin.coroutines>
         <version.kotlin.guice>1.4.1</version.kotlin.guice>
-        <version.kotlin.logging>1.7.6</version.kotlin.logging>
+        <version.kotlin.logging>1.7.8</version.kotlin.logging>
         <version.leakycauldron>${project.version}</version.leakycauldron>
         <version.logback>1.2.3</version.logback>
         <version.maven.antrun>1.8</version.maven.antrun>
