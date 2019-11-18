@@ -115,7 +115,7 @@
         <version.rxkotlin>2.4.0</version.rxkotlin>
         <version.servlet>4.0.3</version.servlet>
         <version.slf4j>1.7.29</version.slf4j>
-        <version.swagger>2.0.10</version.swagger>
+        <version.swagger>2.1.0</version.swagger>
         <version.testng>7.0.0</version.testng>
         <version.threeten>1.5.0</version.threeten>
         <version.typesafe.config>1.4.0</version.typesafe.config>
