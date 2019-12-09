@@ -55,7 +55,7 @@
         <version.dokka>0.10.0</version.dokka>
         <version.dropwizard>2.0.0-rc13</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
-        <version.dropwizard.metrics>4.1.1</version.dropwizard.metrics>
+        <version.dropwizard.metrics>4.1.2</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.1</version.easymock>
         <version.flyway>6.1.0</version.flyway>
