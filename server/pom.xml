@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.trib3</groupId>
         <artifactId>leakycauldron</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

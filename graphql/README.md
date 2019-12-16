@@ -8,7 +8,8 @@ to a [server](https://github.com/trib3/leakycauldron/blob/master/server) applica
     attached to the GraphQL response extensions
   * Any guice bound Query, Subscription or Mutation Resolvers
   * Supports websockets using the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
-  * Supports subscriptions via [ReactiveX](http://reactivex.io/) for any Resolvers that return a `Publisher<T>`
+  * Supports subscriptions via [coroutine](https://github.com/kotlin/kotlinx.coroutines/) Flows 
+    for any Resolvers that return a `Publisher<T>`
 * Admin:
   * [GraphiQL](https://github.com/graphql/graphiql) available at `/admin/graphiql`
 

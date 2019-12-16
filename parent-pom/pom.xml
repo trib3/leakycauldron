@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -111,8 +111,6 @@
         <version.postgres.embedded>0.13.3</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>1.2.27.1051</version.redshift>
-        <version.rxjava>2.2.15</version.rxjava>
-        <version.rxkotlin>2.4.0</version.rxkotlin>
         <version.servlet>4.0.3</version.servlet>
         <version.slf4j>1.7.29</version.slf4j>
         <version.swagger>2.1.0</version.swagger>
@@ -876,16 +874,6 @@
                 <groupId>org.reactivestreams</groupId>
                 <artifactId>reactive-streams</artifactId>
                 <version>${version.reactivestreams}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.reactivex.rxjava2</groupId>
-                <artifactId>rxjava</artifactId>
-                <version>${version.rxjava}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.reactivex.rxjava2</groupId>
-                <artifactId>rxkotlin</artifactId>
-                <version>${version.rxkotlin}</version>
             </dependency>
 
             <!-- coroutines -->
