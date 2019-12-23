@@ -58,7 +58,7 @@
         <version.dropwizard.metrics>4.1.2</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.1</version.easymock>
-        <version.flyway>6.1.1</version.flyway>
+        <version.flyway>6.1.3</version.flyway>
         <version.graphql-kotlin>1.4.2</version.graphql-kotlin>
         <version.graphql-java>13.0</version.graphql-java>
         <version.graphql-java.tools>5.2.4</version.graphql-java.tools>
