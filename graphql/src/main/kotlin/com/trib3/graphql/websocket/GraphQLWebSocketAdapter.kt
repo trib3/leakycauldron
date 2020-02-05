@@ -2,10 +2,13 @@ package com.trib3.graphql.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 
 private val log = KotlinLogging.logger {}
@@ -15,10 +18,11 @@ private val log = KotlinLogging.logger {}
  * a coroutine [Channel] to be handled by a consumer, and provides access
  * to the [remote] for sending messages to the client.
  */
-class GraphQLWebSocketAdapter(
+open class GraphQLWebSocketAdapter(
     val channel: Channel<OperationMessage<*>>,
-    val objectMapper: ObjectMapper
-) : WebSocketAdapter() {
+    val objectMapper: ObjectMapper,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+) : WebSocketAdapter(), CoroutineScope by CoroutineScope(dispatcher) {
     val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()!!
 
     companion object {
@@ -44,7 +48,7 @@ class GraphQLWebSocketAdapter(
                     OperationMessage(
                         OperationType.GQL_ERROR,
                         operation.id,
-                        "Invalid message type ${operation.type}"
+                        "Invalid message `$message`"
                     )
                 )
             }
@@ -55,7 +59,7 @@ class GraphQLWebSocketAdapter(
                 OperationMessage(
                     OperationType.GQL_ERROR,
                     null,
-                    error.message
+                    "Invalid message `$message`"
                 )
             )
         }
@@ -65,18 +69,18 @@ class GraphQLWebSocketAdapter(
      * Notify channel that the stream is finished
      */
     override fun onWebSocketClose(statusCode: Int, reason: String?) {
-        log.debug("WebSocket close $statusCode $reason")
+        val msg = "WebSocket close $statusCode $reason"
+        log.debug(msg)
         super.onWebSocketClose(statusCode, reason)
         channel.close()
+        cancel(msg)
     }
 
     /**
-     * notify channel the stream has errored unrecoverably
+     * Just log the error, and rely on the [onWebSocketClose] callback to clean up
      */
     override fun onWebSocketError(cause: Throwable) {
         log.error("WebSocket error ${cause.message}", cause)
-        channel.close(cause)
-        session?.close(StatusCode.SERVER_ERROR, cause.message)
     }
 
     /**

@@ -6,17 +6,18 @@ import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -27,10 +28,116 @@ import kotlinx.coroutines.yield
 import mu.KotlinLogging
 import org.eclipse.jetty.websocket.api.StatusCode
 import org.reactivestreams.Publisher
-import java.util.concurrent.ConcurrentHashMap
-import javax.annotation.Nullable
 
 private val log = KotlinLogging.logger {}
+
+/**
+ * Base class for child coroutines of the [GraphQLWebSocketConsumer].  Allows
+ * for sending messages back to the main coroutine channel for doing things like
+ * sending messages back to the WebSocket client
+ */
+@UseExperimental(ExperimentalCoroutinesApi::class)
+abstract class GraphQLCoroutine(private val channel: Channel<OperationMessage<*>>) {
+    abstract suspend fun run()
+    /**
+     * Send the [message] to the [channel] to be processed in the main coroutine
+     */
+    suspend fun queueMessage(message: OperationMessage<*>) {
+        if (!channel.isClosedForSend) {
+            channel.send(message)
+        }
+    }
+}
+
+/**
+ * Coroutine that sends a keepalive ping over the websocket every [GraphQLConfig.keepAliveIntervalSeconds]
+ * seconds until it gets canceled by its parent
+ */
+class KeepAliveCoroutine(
+    private val graphQLConfig: GraphQLConfig,
+    channel: Channel<OperationMessage<*>>,
+    private val message: OperationMessage<*>
+) : GraphQLCoroutine(channel) {
+    override suspend fun run() {
+        while (true) {
+            delay(graphQLConfig.keepAliveIntervalSeconds * 1000)
+            log.trace("WebSocket connection keepalive ping")
+            queueMessage(
+                OperationMessage(
+                    OperationType.GQL_CONNECTION_KEEP_ALIVE,
+                    message.id
+                )
+            )
+        }
+    }
+}
+
+/**
+ * Coroutine that runs a GraphQL query and emits data messages to be sent back to the WebSocket client.
+ * On completion of the query will send a GQL_COMPLETE message back.  On any error will send a GQL_ERROR.
+ */
+@UseExperimental(ExperimentalCoroutinesApi::class)
+class QueryCoroutine(
+    private val graphQL: GraphQL,
+    channel: Channel<OperationMessage<*>>,
+    private val messageId: String,
+    payload: GraphQLRequest
+) : GraphQLCoroutine(channel) {
+    private val executionQuery = ExecutionInput.newExecutionInput()
+        .query(payload.query)
+        .variables(payload.variables ?: mapOf())
+        .operationName(payload.operationName)
+        .build()
+
+    override suspend fun run() {
+        try {
+            val result = graphQL.execute(executionQuery)
+            // if result data is a Publisher, collect it as a flow
+            // if it's not, just collect the result itself
+            val flow = try {
+                result.getData<Publisher<ExecutionResult>>().asFlow()
+            } catch (e: Exception) {
+                flowOf(result)
+            }
+            flow.onEach {
+                yield() // allow for cancellations to abort the coroutine
+                queueMessage(
+                    OperationMessage(OperationType.GQL_DATA, messageId, it)
+                )
+            }.catch {
+                onChildError(messageId, it)
+            }.onCompletion { maybeException ->
+                // Only send complete if there's no exception
+                if (maybeException == null) {
+                    yield() // allow for cancellations to abort the coroutine
+                    queueMessage(OperationMessage(OperationType.GQL_COMPLETE, messageId))
+                }
+            }.collect()
+        } catch (e: Throwable) {
+            onChildError(messageId, e)
+        }
+    }
+
+    /**
+     * On any errors during the query execution, send an error message to the client, but leave
+     * the WebSocket open for further use (ie, recoverable errors shouldn't get thrown).
+     * Rethrows any CancellationExceptions used for coroutine shutdown.
+     */
+    private suspend fun onChildError(messageId: String?, cause: Throwable) {
+        if (cause is CancellationException) {
+            log.trace("Rethrowing cancellation")
+            throw cause
+        }
+        log.error("Downstream error ${cause.message}", cause)
+        queueMessage(
+            OperationMessage(
+                OperationType.GQL_ERROR,
+                messageId,
+                cause.message
+            )
+        )
+    }
+}
 
 /**
  * Coroutine based consumer that listens for events on coming from the WebSocket managed
@@ -39,33 +146,28 @@ private val log = KotlinLogging.logger {}
  *
  * Handling some WebSocket events launches a child coroutine (eg, starting a query or
  * a keepalive timer).  The handlers for those subscriptions must inject back into the
- * original coroutine via `queueMessage` if they need to modify the subscriber's state
- * or send data to the WebSocket client.
+ * original coroutine via the [channel] if they need to send data to the WebSocket client.
+ * Handlers for WebSocket events that don't launch child coroutines may use the [adapter]
+ * to send data directly back to the WebSocket client.
  */
-@UseExperimental(ExperimentalCoroutinesApi::class)
+@UseExperimental(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class GraphQLWebSocketConsumer(
-    @Nullable val graphQL: GraphQL?,
+    val graphQL: GraphQL,
     val graphQLConfig: GraphQLConfig,
     val channel: Channel<OperationMessage<*>>,
     val adapter: GraphQLWebSocketAdapter,
-    val dispatcher: CoroutineDispatcher = Dispatchers.IO, // default to io dispatcher for actual work
     val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default // default to default for the KA interval
 ) {
     private var keepAliveStarted = false // only allow one keepalive coroutine to launch
-    private val jobs = ConcurrentHashMap<String, Job>() // will contain child queries that are currently running
+    private val queries = mutableMapOf<String, Job>() // will contain child queries that are currently running
 
     /**
-     * Launches a coroutine to consume WebSocket API events from
-     * the [channel]
+     * Consume WebSocket API events from the [channel], should be called from a
+     * coroutine launched in the adapter's scope
      */
-    fun launchConsumer() {
-        // use GlobalScope to release the calling thread
-        GlobalScope.launch(dispatcher) {
-            for (message in channel) {
-                handleMessage(message, this)
-            }
-            // fully consumed the channel, close any children that are still running
-            cancel()
+    suspend fun consume(scope: CoroutineScope) {
+        channel.consumeAsFlow().collect {
+            handleMessage(it, scope)
         }
     }
 
@@ -79,7 +181,7 @@ class GraphQLWebSocketConsumer(
                 when (message.type) {
                     // Connection control messages from the client
                     OperationType.GQL_CONNECTION_INIT -> handleConnectionInit(message, scope)
-                    OperationType.GQL_CONNECTION_TERMINATE -> handleConnectionTerminate(message, scope)
+                    OperationType.GQL_CONNECTION_TERMINATE -> handleConnectionTerminate(message)
 
                     // Query control messages from the client
                     OperationType.GQL_START -> handleQueryStart(message, scope)
@@ -90,7 +192,7 @@ class GraphQLWebSocketConsumer(
                     OperationType.GQL_ERROR -> {
                         log.info("Query ${message.id} completed: $message")
                         if (message.id != null) {
-                            jobs.remove(message.id)?.cancel()
+                            queries.remove(message.id)?.cancel()
                         }
                         handleClientBoundMessage(message)
                     }
@@ -113,6 +215,10 @@ class GraphQLWebSocketConsumer(
                     )
                 }
             } catch (error: Throwable) {
+                if (error is CancellationException) {
+                    log.trace("Rethrowing cancellation")
+                    throw error
+                }
                 log.error("Error processing message ${error.message}", error)
                 adapter.sendMessage(OperationType.GQL_ERROR, message.id, error.message)
             }
@@ -129,17 +235,9 @@ class GraphQLWebSocketConsumer(
             adapter.sendMessage(OperationType.GQL_CONNECTION_ACK, message.id)
             adapter.sendMessage(OperationType.GQL_CONNECTION_KEEP_ALIVE, message.id)
             keepAliveStarted = true
+            val keepAliveCoroutine = KeepAliveCoroutine(graphQLConfig, channel, message)
             scope.launch(keepAliveDispatcher + MDCContext()) {
-                while (true) {
-                    delay(graphQLConfig.keepAliveIntervalSeconds * 1000)
-                    log.trace("WebSocket connection keepalive ping")
-                    queueMessage(
-                        OperationMessage(
-                            OperationType.GQL_CONNECTION_KEEP_ALIVE,
-                            message.id
-                        )
-                    )
-                }
+                keepAliveCoroutine.run()
             }
         } else {
             adapter.sendMessage(OperationType.GQL_CONNECTION_ERROR, message.id, "Already connected!")
@@ -147,13 +245,12 @@ class GraphQLWebSocketConsumer(
     }
 
     /**
-     * Process an [OperationType.GQL_CONNECTION_TERMINATE] message.  Cancelling the connection's coroutine
-     * will dispose of any child coroutines and close the WebSocket
+     * Process an [OperationType.GQL_CONNECTION_TERMINATE] message.  Closes the WebSocket session
+     * which will close the socket and cancel all associated coroutines.
      */
-    private fun handleConnectionTerminate(message: OperationMessage<*>, scope: CoroutineScope) {
+    private fun handleConnectionTerminate(message: OperationMessage<*>) {
         log.info("WebSocket connection termination requested by message ${message.id}!")
         adapter.session?.close(StatusCode.NORMAL, "Termination Requested")
-        scope.cancel()
     }
 
     /**
@@ -166,48 +263,18 @@ class GraphQLWebSocketConsumer(
         check(messageId != null) {
             "Must pass a message id to start a query"
         }
-        check(!jobs.containsKey(messageId)) {
+        check(!queries.containsKey(messageId)) {
             "Query with id $messageId already running!"
         }
         check(message.payload is GraphQLRequest) {
             "Invalid payload for query"
         }
-        check(graphQL != null) {
-            "graphQL not configured!"
-        }
-        val payload = message.payload
-        val executionQuery = ExecutionInput.newExecutionInput()
-            .query(payload.query)
-            .variables(payload.variables ?: mapOf())
-            .operationName(payload.operationName)
-            .build()
+        val queryCoroutine = QueryCoroutine(graphQL, channel, message.id, message.payload)
 
-        val job = scope.launch(dispatcher + MDCContext()) {
-            try {
-                val result = graphQL.execute(executionQuery)
-                // if result data is a Publisher, collect it as a flow
-                // if it's not, just collect the result itself
-                val flow = try {
-                    result.getData<Publisher<ExecutionResult>>().asFlow()
-                } catch (e: Exception) {
-                    flowOf(result)
-                }
-                flow.onEach {
-                    yield() // allow for cancellations to abort the coroutine
-                    queueMessage(OperationMessage(OperationType.GQL_DATA, messageId, it))
-                }.catch {
-                    onChildError(messageId, it)
-                }.onCompletion { maybeException ->
-                    // Only send complete if there's no exception and we still think we're processing this query
-                    if (maybeException == null && jobs[messageId] != null) {
-                        queueMessage(OperationMessage(OperationType.GQL_COMPLETE, messageId))
-                    }
-                }.collect()
-            } catch (e: Exception) {
-                onChildError(messageId, e)
-            }
+        val job = scope.launch(MDCContext()) {
+            queryCoroutine.run()
         }
-        jobs[messageId] = job
+        queries[messageId] = job
     }
 
     /**
@@ -218,12 +285,12 @@ class GraphQLWebSocketConsumer(
      * before the query was stopped.
      */
     private fun handleQueryStop(message: OperationMessage<*>) {
-        val toStop = jobs[message.id]
+        val toStop = queries[message.id]
         if (toStop != null) {
             log.info("Stopping WebSocket query: ${message.id}!")
             toStop.cancel()
             handleClientBoundMessage(OperationMessage(OperationType.GQL_COMPLETE, message.id))
-            jobs.remove(message.id)
+            queries.remove(message.id)
         } else {
             handleClientBoundMessage(OperationMessage(OperationType.GQL_ERROR, message.id, "Query not running"))
         }
@@ -235,29 +302,5 @@ class GraphQLWebSocketConsumer(
     private fun handleClientBoundMessage(message: OperationMessage<*>) {
         log.trace("WebSocket connection sending $message")
         adapter.sendMessage(message)
-    }
-
-    /**
-     * On errors from child coroutines, send an error message to the client, but leave
-     * the WebSocket open for further use (ie, recoverable errors shouldn't get thrown).
-     */
-    private suspend fun onChildError(messageId: String?, cause: Throwable) {
-        log.error("Downstream error ${cause.message}", cause)
-        queueMessage(
-            OperationMessage(
-                OperationType.GQL_ERROR,
-                messageId,
-                cause.message
-            )
-        )
-    }
-
-    /**
-     * Send the [message] to the [channel] to be processed in the main coroutine
-     */
-    private suspend fun queueMessage(message: OperationMessage<*>) {
-        if (!channel.isClosedForSend) {
-            channel.send(message)
-        }
     }
 }
