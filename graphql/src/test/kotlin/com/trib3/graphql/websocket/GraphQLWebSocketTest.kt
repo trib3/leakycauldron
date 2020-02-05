@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.expediagroup.graphql.SchemaGeneratorConfig
@@ -22,6 +23,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asPublisher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -105,25 +107,26 @@ class GraphQLWebSocketTest {
 
     /**
      * get a socket configured with the test graphQL and object mapper
-     * default to using the "trampoline" (ie, current thread) scheduler
+     * default to using the "Unconfined" (ie, current thread) scheduler
      * so that we don't have to deal with multiple threads unless necessary
      */
     private fun getSocket(
-        graphQL: GraphQL? = testGraphQL,
+        graphQL: GraphQL = testGraphQL,
         dispatcher: CoroutineDispatcher = Dispatchers.Unconfined,
         keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default
     ): GraphQLWebSocketConsumer {
         val channel = Channel<OperationMessage<*>>()
-        val adapter = GraphQLWebSocketAdapter(channel, mapper)
+        val adapter = GraphQLWebSocketAdapter(channel, mapper, dispatcher)
         val consumer = GraphQLWebSocketConsumer(
             graphQL,
             config,
             channel,
             adapter,
-            dispatcher,
             keepAliveDispatcher
         )
-        consumer.launchConsumer()
+        adapter.launch {
+            consumer.consume(this)
+        }
         return consumer
     }
 
@@ -344,8 +347,8 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGenericErrors() {
-        val socket = getSocket(null) // unconfigured graphQL instance
-        assertThat(socket.dispatcher).isEqualTo(Dispatchers.Unconfined)
+        val socket = getSocket()
+        assertThat(socket.graphQL).isNotNull()
         assertThat(socket.keepAliveDispatcher).isEqualTo(Dispatchers.Default)
         assertThat(socket.graphQLConfig).isEqualTo(config)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
@@ -356,15 +359,6 @@ class GraphQLWebSocketTest {
                 LeakyMock.and(
                     LeakyMock.contains(""""type" : "error""""),
                     LeakyMock.contains(""""id" : "unknownoperation"""")
-                )
-            )
-        ).once()
-        EasyMock.expect(
-            mockRemote.sendString(
-                LeakyMock.and(
-                    LeakyMock.contains(""""type" : "error""""),
-                    LeakyMock.contains(""""id" : "unconfiguredquery""""),
-                    LeakyMock.contains("not configured")
                 )
             )
         ).once()
@@ -386,7 +380,6 @@ class GraphQLWebSocketTest {
                 )
             )
         ).once()
-        EasyMock.expect(mockSession.close(EasyMock.eq(StatusCode.SERVER_ERROR), LeakyMock.contains("boom"))).once()
         EasyMock.expect(mockSession.close(EasyMock.anyInt(), LeakyMock.anyString())).anyTimes()
 
         EasyMock.replay(mockRemote, mockSession)
@@ -398,13 +391,6 @@ class GraphQLWebSocketTest {
              "id": "unknownoperation",
              "payload": null}""".trimIndent()
         )
-        socket.adapter.onWebSocketText(
-            """
-                {"type": "start",
-                 "id": "unconfiguredquery",
-                 "payload": {"query": "query { q }"}}""".trimIndent()
-        )
-        socket.adapter.onWebSocketError(IllegalStateException("boom"))
         runBlocking {
             socket.handleMessage(
                 OperationMessage(OperationType("unknown", Nothing::class), "invalidtype", null),
@@ -415,6 +401,10 @@ class GraphQLWebSocketTest {
                 this
             )
         }
+        socket.adapter.onWebSocketError(IllegalStateException("boom"))
+        socket.adapter.onWebSocketClose(StatusCode.SERVER_ERROR, "boom")
+        assertThat(socket.channel.isClosedForReceive).isTrue()
+        assertThat(socket.channel.isClosedForSend).isTrue()
         EasyMock.verify(mockRemote, mockSession)
     }
 
@@ -630,7 +620,7 @@ class GraphQLWebSocketTest {
             mockRemote.sendString(
                 LeakyMock.and(
                     LeakyMock.contains(""""type" : "error""""),
-                    LeakyMock.contains(""""payload" : "Unrecognized token""")
+                    LeakyMock.contains(""""payload" : "Invalid message""")
                 )
             )
         ).once()

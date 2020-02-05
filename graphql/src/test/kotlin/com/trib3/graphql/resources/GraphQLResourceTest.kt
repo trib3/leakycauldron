@@ -5,10 +5,7 @@ import assertk.assertions.contains
 import assertk.assertions.doesNotContain
 import assertk.assertions.hasRootCause
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
-import assertk.assertions.isNotNull
-import assertk.assertions.message
 import assertk.assertions.prop
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.expediagroup.graphql.SchemaGeneratorConfig
@@ -60,13 +57,6 @@ class GraphQLResourceTest {
             WebSocketCreator { _, _ -> null }
         )
     val objectMapper = ObjectMapperProvider().get()
-    @Test
-    fun testNotConfigured() {
-        val notConfiguredResource = GraphQLResource(null, WebSocketCreator { _, _ -> null })
-        assertThat {
-            notConfiguredResource.graphQL(GraphQLRequest("", null, null))
-        }.isFailure().message().isNotNull().contains("not configured")
-    }
 
     @Test
     fun testSimpleQuery() {

@@ -7,7 +7,6 @@ import graphql.GraphQL
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
-import javax.annotation.Nullable
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -27,7 +26,7 @@ import javax.ws.rs.core.Response
 @Produces(MediaType.APPLICATION_JSON)
 open class GraphQLResource
 @Inject constructor(
-    @Nullable private val graphQL: GraphQL?,
+    private val graphQL: GraphQL,
     creator: WebSocketCreator
 ) {
     private val webSocketFactory = WebSocketServerFactory().apply {
@@ -42,9 +41,6 @@ open class GraphQLResource
     @Path("/graphql")
     @Timed
     open fun graphQL(query: GraphQLRequest): Response {
-        check(graphQL != null) {
-            "graphQL not configured!"
-        }
         val result = graphQL.execute(
             ExecutionInput.newExecutionInput()
                 .query(query.query)

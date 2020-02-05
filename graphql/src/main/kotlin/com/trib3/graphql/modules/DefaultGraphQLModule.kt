@@ -59,29 +59,25 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         @Named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
         subscriptions: Set<@JvmSuppressWildcards Any>,
         mapper: ObjectMapper
-    ): GraphQL? {
+    ): GraphQL {
         val hooks = DateTimeHooks()
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
             hooks = hooks,
             dataFetcherFactoryProvider = ObjectMapperKotlinDataFetcherFactoryProvider(mapper, hooks)
         )
-        return if (queries.isNotEmpty()) {
-            GraphQL.newGraphQL(
-                toSchema(
-                    config,
-                    queries.toList().map { TopLevelObject(it) },
-                    mutations.toList().map { TopLevelObject(it) },
-                    subscriptions.toList().map { TopLevelObject(it) }
-                )
+        return GraphQL.newGraphQL(
+            toSchema(
+                config,
+                queries.toList().map { TopLevelObject(it) },
+                mutations.toList().map { TopLevelObject(it) },
+                subscriptions.toList().map { TopLevelObject(it) }
             )
-                .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
-                .subscriptionExecutionStrategy(SubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
-                .instrumentation(RequestIdInstrumentation())
-                .build()
-        } else {
-            null
-        }
+        )
+            .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
+            .subscriptionExecutionStrategy(SubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
+            .instrumentation(RequestIdInstrumentation())
+            .build()
     }
 
     // allow multiple installations so that multiple other modules can install this one
