@@ -50,7 +50,7 @@
         <version.aws.serverless>1.4</version.aws.serverless>
         <version.classgraph>4.8.60</version.classgraph>
         <version.commons-io>2.6</version.commons-io>
-        <version.config4k>0.4.1</version.config4k>
+        <version.config4k>0.4.2</version.config4k>
         <version.detekt>1.5.0</version.detekt>
         <version.dokka>0.10.0</version.dokka>
         <version.dropwizard>2.0.0</version.dropwizard>
