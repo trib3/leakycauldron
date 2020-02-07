@@ -28,11 +28,13 @@ jobs:
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             if [ "$CIRCLE_BRANCH" = "master" ]; then
                 set +o pipefail # it's ok to keep going if grep doesn't match anything 
-                REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+                REPOIDS=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
                 set -o pipefail
-                if [ -n "$REPOID" ]; then
-                    echo "Cleaning existing $REPOID"
-                    mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID
+                if [ -n "$REPOIDS" ]; then
+                    echo "Cleaning existing $REPOIDS"
+                    for REPOID in $REPOIDS; do 
+                        mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID
+                    done
                 fi
             fi
             cd build-resources && BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
