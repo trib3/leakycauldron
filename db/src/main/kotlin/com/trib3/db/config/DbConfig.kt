@@ -35,6 +35,12 @@ class DbConfig
         val username = config.extract("user") ?: "tribe"
         val password = config.extract<String?>("password")
         val autoCommit = config.extract("autocommit") ?: false
+        val connectionTimeout = config.extract<Long?>("connectionTimeout")
+        val idleTimeout = config.extract<Long?>("idleTimeout")
+        val maxLifetime = config.extract<Long?>("maxLifetime")
+        val connectionTestQuery = config.extract<String?>("connectionTestQuery")
+        val minimumIdle = config.extract<Int?>("minimumIdle")
+        val maximumPoolSize = config.extract<Int?>("maximumPoolSize")
 
         val hds = HikariDataSource()
         hds.poolName = configPath
@@ -45,6 +51,24 @@ class DbConfig
         hds.healthCheckRegistry = healthCheckRegistry
         hds.metricRegistry = metricRegistry
         hds.isAutoCommit = autoCommit
+        if (connectionTimeout != null) {
+            hds.connectionTimeout = connectionTimeout
+        }
+        if (idleTimeout != null) {
+            hds.idleTimeout = idleTimeout
+        }
+        if (maxLifetime != null) {
+            hds.maxLifetime = maxLifetime
+        }
+        if (connectionTestQuery != null) {
+            hds.connectionTestQuery = connectionTestQuery
+        }
+        if (minimumIdle != null) {
+            hds.minimumIdle = minimumIdle
+        }
+        if (maximumPoolSize != null) {
+            hds.maximumPoolSize = maximumPoolSize
+        }
 
         dataSource = hds
 
