@@ -42,6 +42,13 @@ class DbModuleTest
         assertThat(dataSource.healthCheckRegistry).isNotNull()
         assertThat(dataSource.metricRegistry).isNotNull()
         assertThat(dataSource.isAutoCommit).isFalse()
+        // these settings are set in config to be slightly different than hikariCP defaults
+        assertThat(dataSource.connectionTimeout).isEqualTo(30001)
+        assertThat(dataSource.idleTimeout).isEqualTo(600001)
+        assertThat(dataSource.maxLifetime).isEqualTo(1800001)
+        assertThat(dataSource.connectionTestQuery).isEqualTo("select 1")
+        assertThat(dataSource.minimumIdle).isEqualTo(11)
+        assertThat(dataSource.maximumPoolSize).isEqualTo(11)
     }
 
     @Test
