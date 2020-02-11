@@ -259,7 +259,8 @@ class GraphQLWebSocketTest {
                 LeakyMock.and(
                     LeakyMock.contains(""""s" : "1""""),
                     LeakyMock.contains(""""type" : "data""""),
-                    LeakyMock.contains(""""id" : "simplesubscription"""")
+                    LeakyMock.contains(""""id" : "simplesubscription""""),
+                    LeakyMock.contains(""""RequestId" : "simplesubscription"""")
                 )
             )
         ).once()
@@ -268,7 +269,8 @@ class GraphQLWebSocketTest {
                 LeakyMock.and(
                     LeakyMock.contains(""""s" : "2""""),
                     LeakyMock.contains(""""type" : "data""""),
-                    LeakyMock.contains(""""id" : "simplesubscription"""")
+                    LeakyMock.contains(""""id" : "simplesubscription""""),
+                    LeakyMock.contains(""""RequestId" : "simplesubscription"""")
                 )
             )
         ).once()
@@ -277,7 +279,8 @@ class GraphQLWebSocketTest {
                 LeakyMock.and(
                     LeakyMock.contains(""""s" : "3""""),
                     LeakyMock.contains(""""type" : "data""""),
-                    LeakyMock.contains(""""id" : "simplesubscription"""")
+                    LeakyMock.contains(""""id" : "simplesubscription""""),
+                    LeakyMock.contains(""""RequestId" : "simplesubscription"""")
                 )
             )
         ).once()

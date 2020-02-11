@@ -5,6 +5,7 @@ import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionInput
 import graphql.ExecutionResult
+import graphql.ExecutionResultImpl
 import graphql.GraphQL
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -101,8 +102,18 @@ class QueryCoroutine(
             }
             flow.onEach {
                 yield() // allow for cancellations to abort the coroutine
+                // Ensure we have RequestId instrumented.  Seems like this shouldn't be needed?
+                // Possibly related to https://github.com/graphql-java/graphql-java/issues/1568
+                val instrumented = ExecutionResultImpl.newExecutionResult()
+                    .from(it)
+                    .addExtension(RequestIdFilter.REQUEST_ID_KEY, RequestIdFilter.getRequestId())
+                    .build()
                 queueMessage(
-                    OperationMessage(OperationType.GQL_DATA, messageId, it)
+                    OperationMessage(
+                        OperationType.GQL_DATA,
+                        messageId,
+                        instrumented
+                    )
                 )
             }.catch {
                 onChildError(messageId, it)
