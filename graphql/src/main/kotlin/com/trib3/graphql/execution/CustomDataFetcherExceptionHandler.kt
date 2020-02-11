@@ -19,7 +19,7 @@ class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
         val sourceLocation = handlerParameters.sourceLocation
         val path = handlerParameters.path
         val error: GraphQLError = SanitizedGraphQLError(path, exception, sourceLocation)
-        log.warn(error.message, exception)
+        log.error("Error in data fetching: ${error.message}", exception)
         return DataFetcherExceptionHandlerResult.newResult().error(error).build()
     }
 }
