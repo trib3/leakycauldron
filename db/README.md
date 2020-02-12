@@ -43,6 +43,12 @@ section to `application.conf` explicitly:
 * `DB_PASSWORD`:  database password, defaults to no password
 * `DB_DRIVER_CLASS_NAME`:  jdbc driver, defaults to `org.postgresql.Driver`
 * `DB_AUTOCOMMTI`: connection autocommit status, defaults to `false`
+* `DB_CONNECT_TIMEOUT`: connection timeout, defaults to `30000` 
+* `DB_IDLE_TIMEOUT`: connection idle timeout, defaults to `600000`
+* `DB_MAX_LIFETIME`: connection max lifetime, defaults to `1800000`
+* `DB_CONNECTION_TEST_QUERY`: connection timeout, defaults to `null`
+* `DB_MINIMUM_IDLE`: min number of idle connections, defaults to `10`
+* `DB_MAXIMUM_POOL_SIZE`: max number of total connections, defaults to `10`
 
 NamedDbModule
 -------------
