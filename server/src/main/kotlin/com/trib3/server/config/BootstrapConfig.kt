@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.trib3.config.ConfigLoader
-import com.trib3.config.KMSStringSelectReader
 import com.trib3.config.extract
 import io.dropwizard.logging.BootstrapLogging
 
@@ -18,7 +17,7 @@ class BootstrapConfig {
     val appModules: List<String>
 
     init {
-        val config = ConfigLoader(KMSStringSelectReader(null)).load()
+        val config = ConfigLoader().load()
         appModules = config.extract("application.modules")
     }
 

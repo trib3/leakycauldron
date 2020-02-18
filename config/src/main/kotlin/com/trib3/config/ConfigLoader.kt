@@ -33,8 +33,12 @@ import javax.inject.Inject
 class ConfigLoader
 @Inject constructor(
     // we inject the reader so that it gets initialized but don't use it directly :(
-    private val reader: KMSStringSelectReader
+    private val reader: KMSStringSelectReader,
+    private val defaultPath: String = "" // usually only specified for tests
 ) {
+    // convenience constructor for tests
+    constructor(defaultPath: String = "") : this(KMSStringSelectReader(null), defaultPath)
+
     /**
      * Loads config from application.conf with environmental and global overrides
      */
@@ -65,6 +69,13 @@ class ConfigLoader
             fullConfig.extract(it) ?: ConfigFactory.empty()
         }.reduce { first, second -> first.withFallback(second) }
         val finalOverrides = fullConfig.extract("overrides") ?: ConfigFactory.empty()
-        return finalOverrides.withFallback(envOverride).withFallback(fullConfig)
+        val fallbacks = envOverride.withFallback(fullConfig)
+        // always have overrides take precedence, then fallback to defaultPath if there is one,
+        // then fallback to env overrides, then fallback to fullConfig
+        return if (defaultPath.isNotEmpty()) {
+            finalOverrides.withFallback(fullConfig.getConfig(defaultPath)).withFallback(fallbacks)
+        } else {
+            finalOverrides.withFallback(fallbacks)
+        }
     }
 }

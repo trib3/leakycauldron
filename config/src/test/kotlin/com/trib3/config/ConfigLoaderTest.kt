@@ -8,7 +8,7 @@ import com.typesafe.config.ConfigFactory
 import org.testng.annotations.Test
 
 class ConfigLoaderTest {
-    val loader = ConfigLoader(KMSStringSelectReader(null))
+    val loader = ConfigLoader()
 
     @Test
     fun testDefaultLoad() {
@@ -53,6 +53,15 @@ class ConfigLoaderTest {
         assertThat(env).isEqualTo("test")
         assertThat(testval).isEqualTo("override")
         assertThat(devtest).isNull()
+        assertThat(overridefinal).isEqualTo("zzz")
+    }
+
+    @Test
+    fun testDefaultPathOverrideLoad() {
+        val config = ConfigLoader("test").load()
+        val testval = config.extract<String?>("testval")
+        val overridefinal = config.extract<String?>("final")
+        assertThat(testval).isEqualTo("override")
         assertThat(overridefinal).isEqualTo("zzz")
     }
 

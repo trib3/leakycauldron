@@ -1,6 +1,7 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
+import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import graphql.ExecutionInput
 import graphql.GraphQL
@@ -27,10 +28,23 @@ import javax.ws.rs.core.Response
 open class GraphQLResource
 @Inject constructor(
     private val graphQL: GraphQL,
+    private val graphQLConfig: GraphQLConfig,
     creator: WebSocketCreator
 ) {
-    private val webSocketFactory = WebSocketServerFactory().apply {
+    internal val webSocketFactory = WebSocketServerFactory().apply {
         this.creator = creator
+        if (graphQLConfig.asyncWriteTimeout != null) {
+            this.policy.asyncWriteTimeout = graphQLConfig.asyncWriteTimeout
+        }
+        if (graphQLConfig.idleTimeout != null) {
+            this.policy.idleTimeout = graphQLConfig.idleTimeout
+        }
+        if (graphQLConfig.maxBinaryMessageSize != null) {
+            this.policy.maxBinaryMessageSize = graphQLConfig.maxBinaryMessageSize
+        }
+        if (graphQLConfig.maxTextMessageSize != null) {
+            this.policy.maxTextMessageSize = graphQLConfig.maxTextMessageSize
+        }
         this.start()
     }
 

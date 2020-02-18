@@ -11,7 +11,6 @@ import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
 import com.expediagroup.graphql.toSchema
 import com.trib3.config.ConfigLoader
-import com.trib3.config.KMSStringSelectReader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
@@ -103,7 +102,7 @@ class GraphQLWebSocketTest {
         )
     ).build()
     val mapper = ObjectMapperProvider().get()
-    val config = GraphQLConfig(ConfigLoader(KMSStringSelectReader(null)))
+    val config = GraphQLConfig(ConfigLoader())
 
     /**
      * get a socket configured with the test graphQL and object mapper

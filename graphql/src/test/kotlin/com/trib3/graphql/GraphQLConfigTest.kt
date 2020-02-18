@@ -2,8 +2,8 @@ package com.trib3.graphql
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import com.trib3.config.ConfigLoader
-import com.trib3.config.KMSStringSelectReader
 import org.testng.annotations.Test
 
 class GraphQLConfigTest {
@@ -13,8 +13,16 @@ class GraphQLConfigTest {
 
     @Test
     fun testConfig() {
-        val config = GraphQLConfig(ConfigLoader(KMSStringSelectReader(null)))
+        val config = GraphQLConfig(ConfigLoader())
         assertThat(config.keepAliveIntervalSeconds).isEqualTo(DEFAULT_KEEPALIVE)
         assertThat(config.webSocketSubProtocol).isEqualTo("graphql-ws")
+        for (i in listOf(
+            config.asyncWriteTimeout,
+            config.idleTimeout,
+            config.maxBinaryMessageSize,
+            config.maxTextMessageSize
+        )) {
+            assertThat(i).isNull()
+        }
     }
 }

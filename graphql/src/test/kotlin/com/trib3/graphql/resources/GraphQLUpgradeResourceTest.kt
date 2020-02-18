@@ -5,6 +5,8 @@ import assertk.assertions.isEqualTo
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
 import com.expediagroup.graphql.toSchema
+import com.trib3.config.ConfigLoader
+import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.testing.server.JettyWebTestContainerFactory
@@ -47,6 +49,7 @@ class GraphQLUpgradeResourceTest : ResourceTestBase<GraphQLResource>() {
     val rawResource =
         GraphQLResource(
             graphQL,
+            GraphQLConfig(ConfigLoader()),
             WebSocketCreator { request, _ ->
                 if (request.queryString != null && request.queryString.contains("fail")) {
                     null
