@@ -12,6 +12,8 @@ import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
 import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.trib3.config.ConfigLoader
+import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.RequestIdInstrumentation
@@ -54,9 +56,18 @@ class GraphQLResourceTest {
                 .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
                 .instrumentation(RequestIdInstrumentation())
                 .build(),
+            GraphQLConfig(ConfigLoader("GraphQLResourceTest")),
             WebSocketCreator { _, _ -> null }
         )
     val objectMapper = ObjectMapperProvider().get()
+
+    @Test
+    fun testPolicy() {
+        assertThat(resource.webSocketFactory.policy.asyncWriteTimeout).isEqualTo(100000)
+        assertThat(resource.webSocketFactory.policy.idleTimeout).isEqualTo(200000)
+        assertThat(resource.webSocketFactory.policy.maxBinaryMessageSize).isEqualTo(300000)
+        assertThat(resource.webSocketFactory.policy.maxTextMessageSize).isEqualTo(400000)
+    }
 
     @Test
     fun testSimpleQuery() {

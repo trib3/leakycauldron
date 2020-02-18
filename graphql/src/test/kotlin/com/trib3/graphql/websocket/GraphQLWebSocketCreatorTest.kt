@@ -6,7 +6,6 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.ConfigLoader
-import com.trib3.config.KMSStringSelectReader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.GraphQLConfigTest
 import com.trib3.testing.LeakyMock
@@ -21,7 +20,7 @@ class GraphQLWebSocketCreatorTest {
     fun testSocketCreation() {
         val graphQL = LeakyMock.mock<GraphQL>()
         val mapper = ObjectMapper()
-        val creator = GraphQLWebSocketCreator(graphQL, mapper, GraphQLConfig(ConfigLoader(KMSStringSelectReader(null))))
+        val creator = GraphQLWebSocketCreator(graphQL, mapper, GraphQLConfig(ConfigLoader()))
         assertThat(creator.graphQL).isEqualTo(graphQL)
         assertThat(creator.objectMapper).isEqualTo(mapper)
         assertThat(creator.graphQLConfig.keepAliveIntervalSeconds).isEqualTo(GraphQLConfigTest.DEFAULT_KEEPALIVE)
