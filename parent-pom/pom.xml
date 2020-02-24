@@ -76,7 +76,7 @@
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.2</version.jaxb>
         <version.jaxrs>2.1.6</version.jaxrs>
-        <version.jersey>2.30</version.jersey>
+        <version.jersey>2.30.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.26.v20200117</version.jetty>
         <version.jooq>3.13.0</version.jooq>
