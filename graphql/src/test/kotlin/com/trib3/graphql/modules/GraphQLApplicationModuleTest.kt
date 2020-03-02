@@ -19,7 +19,13 @@ class DummyQuery {
     }
 }
 
-@Guice(modules = [DefaultGraphQLModule::class, KMSModule::class])
+class DummyModule : GraphQLApplicationModule() {
+    override fun configureApplication() {
+        graphQLQueriesBinder().addBinding().to<DummyQuery>()
+    }
+}
+
+@Guice(modules = [DefaultGraphQLModule::class, KMSModule::class, DummyModule::class])
 class GraphQLApplicationModuleTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)

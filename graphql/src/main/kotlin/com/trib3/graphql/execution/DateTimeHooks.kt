@@ -1,6 +1,6 @@
 package com.trib3.graphql.execution
 
-import com.expediagroup.graphql.hooks.SchemaGeneratorHooks
+import com.expediagroup.graphql.hooks.FlowSubscriptionSchemaGeneratorHooks
 import graphql.language.StringValue
 import graphql.schema.Coercing
 import graphql.schema.CoercingSerializeException
@@ -248,7 +248,7 @@ internal val OFFSET_DATETIME_SCALAR = GraphQLScalarType.newScalar()
 /**
  * Schema generator hooks implementation that defines scalars for java.time (and threeten-extras) objects
  */
-class DateTimeHooks : SchemaGeneratorHooks {
+class DateTimeHooks : FlowSubscriptionSchemaGeneratorHooks() {
     override fun willGenerateGraphQLType(type: KType): GraphQLType? {
         return when (type.classifier) {
             Year::class -> YEAR_SCALAR

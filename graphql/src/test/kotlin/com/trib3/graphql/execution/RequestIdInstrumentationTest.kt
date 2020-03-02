@@ -9,7 +9,11 @@ import graphql.GraphQL
 import org.slf4j.MDC
 import org.testng.annotations.Test
 
-class Query
+class Query {
+    fun test(): String {
+        return "test"
+    }
+}
 
 class RequestIdInstrumentationTest {
     val config =
