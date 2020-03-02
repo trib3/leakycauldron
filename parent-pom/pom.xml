@@ -74,7 +74,7 @@
         <version.jacoco>0.8.5</version.jacoco>
         <version.java.release>8</version.java.release>
         <version.javax.inject>1</version.javax.inject>
-        <version.jaxb>2.3.2</version.jaxb>
+        <version.jaxb>2.3.3</version.jaxb>
         <version.jaxrs>2.1.6</version.jaxrs>
         <version.jersey>2.30.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
