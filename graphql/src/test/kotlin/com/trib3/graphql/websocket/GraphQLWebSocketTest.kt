@@ -9,6 +9,8 @@ import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.execution.FlowSubscriptionExecutionStrategy
+import com.expediagroup.graphql.hooks.FlowSubscriptionSchemaGeneratorHooks
 import com.expediagroup.graphql.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
@@ -20,18 +22,17 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.reactive.asPublisher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.common.WebSocketRemoteEndpoint
-import org.reactivestreams.Publisher
 import org.testng.annotations.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -51,11 +52,11 @@ class SocketQuery {
 }
 
 class SocketSubscription {
-    fun s(): Publisher<String> {
-        return flowOf("1", "2", "3").asPublisher()
+    fun s(): Flow<String> {
+        return flowOf("1", "2", "3")
     }
 
-    fun e(): Publisher<String> {
+    fun e(): Flow<String> {
         return object : Iterator<String> {
             var value = 1
             override fun hasNext(): Boolean {
@@ -67,11 +68,11 @@ class SocketSubscription {
                 value += 1
                 return if (toReturn == "3") throw IllegalStateException("forced exception") else toReturn
             }
-        }.asFlow().asPublisher()
+        }.asFlow()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun inf(): Publisher<String> {
+    fun inf(): Flow<String> {
         return object : Iterator<String> {
             var value = 1
             override fun hasNext(): Boolean {
@@ -88,7 +89,7 @@ class SocketSubscription {
                 value += 1
                 return toReturn
             }
-        }.asFlow().flowOn(Dispatchers.IO).asPublisher()
+        }.asFlow().flowOn(Dispatchers.IO)
     }
 }
 
@@ -97,12 +98,14 @@ class GraphQLWebSocketTest {
 
     val testGraphQL = GraphQL.newGraphQL(
         toSchema(
-            SchemaGeneratorConfig(listOf()),
+            SchemaGeneratorConfig(listOf(), hooks = FlowSubscriptionSchemaGeneratorHooks()),
             listOf(TopLevelObject(SocketQuery())),
             listOf(),
             listOf(TopLevelObject(SocketSubscription()))
         )
-    ).build()
+    )
+        .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy())
+        .build()
     val mapper = ObjectMapperProvider().get()
     val config = GraphQLConfig(ConfigLoader())
 

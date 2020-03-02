@@ -16,6 +16,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -23,12 +24,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.yield
 import mu.KotlinLogging
 import org.eclipse.jetty.websocket.api.StatusCode
-import org.reactivestreams.Publisher
 
 private val log = KotlinLogging.logger {}
 
@@ -96,7 +95,7 @@ class QueryCoroutine(
             // if result data is a Publisher, collect it as a flow
             // if it's not, just collect the result itself
             val flow = try {
-                result.getData<Publisher<ExecutionResult>>().asFlow()
+                result.getData<Flow<ExecutionResult>>() ?: flowOf(result)
             } catch (e: Exception) {
                 flowOf(result)
             }
@@ -116,6 +115,7 @@ class QueryCoroutine(
                     )
                 )
             }.catch {
+                yield() // allow for cancellations to abort the coroutine
                 onChildError(messageId, it)
             }.onCompletion { maybeException ->
                 // Only send complete if there's no exception

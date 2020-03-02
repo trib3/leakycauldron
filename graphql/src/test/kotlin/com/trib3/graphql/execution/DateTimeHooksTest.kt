@@ -7,6 +7,7 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isSuccess
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.toSchema
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionInput
@@ -58,9 +59,8 @@ class DateTimeHooksTest {
         SchemaGeneratorConfig(
             listOf(),
             hooks = hooks,
-            dataFetcherFactoryProvider = ObjectMapperKotlinDataFetcherFactoryProvider(
-                ObjectMapperProvider().get(),
-                hooks
+            dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(
+                ObjectMapperProvider().get()
             )
         )
     val graphQL =
