@@ -37,7 +37,7 @@ private val log = KotlinLogging.logger {}
  * for sending messages back to the main coroutine channel for doing things like
  * sending messages back to the WebSocket client
  */
-@UseExperimental(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 abstract class GraphQLCoroutine(private val channel: Channel<OperationMessage<*>>) {
     abstract suspend fun run()
     /**
@@ -77,7 +77,7 @@ class KeepAliveCoroutine(
  * Coroutine that runs a GraphQL query and emits data messages to be sent back to the WebSocket client.
  * On completion of the query will send a GQL_COMPLETE message back.  On any error will send a GQL_ERROR.
  */
-@UseExperimental(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class QueryCoroutine(
     private val graphQL: GraphQL,
     channel: Channel<OperationMessage<*>>,
@@ -161,7 +161,7 @@ class QueryCoroutine(
  * Handlers for WebSocket events that don't launch child coroutines may use the [adapter]
  * to send data directly back to the WebSocket client.
  */
-@UseExperimental(ExperimentalCoroutinesApi::class, FlowPreview::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class GraphQLWebSocketConsumer(
     val graphQL: GraphQL,
     val graphQLConfig: GraphQLConfig,
