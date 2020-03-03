@@ -90,7 +90,7 @@ class SocketSubscription {
     }
 }
 
-@UseExperimental(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class GraphQLWebSocketTest {
 
     val testGraphQL = GraphQL.newGraphQL(
