@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asPublisher
 import kotlinx.coroutines.runBlocking
@@ -69,6 +70,7 @@ class SocketSubscription {
         }.asFlow().asPublisher()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun inf(): Publisher<String> {
         return object : Iterator<String> {
             var value = 1
@@ -86,7 +88,7 @@ class SocketSubscription {
                 value += 1
                 return toReturn
             }
-        }.asFlow().asPublisher()
+        }.asFlow().flowOn(Dispatchers.IO).asPublisher()
     }
 }
 
