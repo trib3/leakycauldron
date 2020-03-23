@@ -3,7 +3,8 @@ build:
 
 complexity:
   LongParameterList:
-    threshold: 10 # CHANGE FROM DEFAULT OF 6
+    functionThreshold: 10 # CHANGE FROM DEFAULT OF 6
+    constructorThreshold: 10 # CHANGE FROM DEFAULT OF 7
   TooManyFunctions:
     ignorePrivate: true # CHANGE FROM DEFAULT OF false
 
