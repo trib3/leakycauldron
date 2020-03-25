@@ -13,6 +13,7 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.Year
 import java.time.YearMonth
+import java.util.UUID
 import kotlin.reflect.KType
 
 internal val YEAR_SCALAR = GraphQLScalarType.newScalar()
@@ -245,10 +246,42 @@ internal val OFFSET_DATETIME_SCALAR = GraphQLScalarType.newScalar()
     })
     .build()
 
+internal val UUID_SCALAR = GraphQLScalarType.newScalar()
+    .name("UUID")
+    .description("String representation of a UUID")
+    .coercing(object : Coercing<UUID, String> {
+        private fun parse(input: String): UUID {
+            try {
+                return UUID.fromString(input)
+            } catch (e: Exception) {
+                throw CoercingSerializeException("can't parse $input", e)
+            }
+        }
+
+        override fun parseValue(input: Any): UUID {
+            return parse(input.toString())
+        }
+
+        override fun parseLiteral(input: Any): UUID {
+            return when (input) {
+                is StringValue -> parse(input.value)
+                else -> throw CoercingSerializeException("can't parse $input")
+            }
+        }
+
+        override fun serialize(dataFetcherResult: Any): String {
+            return when (dataFetcherResult) {
+                is UUID -> dataFetcherResult.toString()
+                else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
+            }
+        }
+    })
+    .build()
+
 /**
  * Schema generator hooks implementation that defines scalars for java.time (and threeten-extras) objects
  */
-class DateTimeHooks : FlowSubscriptionSchemaGeneratorHooks() {
+class LeakyCauldronHooks : FlowSubscriptionSchemaGeneratorHooks() {
     override fun willGenerateGraphQLType(type: KType): GraphQLType? {
         return when (type.classifier) {
             Year::class -> YEAR_SCALAR
@@ -258,6 +291,7 @@ class DateTimeHooks : FlowSubscriptionSchemaGeneratorHooks() {
             LocalDate::class -> LOCAL_DATE_SCALAR
             LocalTime::class -> LOCAL_TIME_SCALAR
             OffsetDateTime::class -> OFFSET_DATETIME_SCALAR
+            UUID::class -> UUID_SCALAR
             else -> null
         }
     }

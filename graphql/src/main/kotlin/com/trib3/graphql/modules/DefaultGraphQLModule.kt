@@ -8,7 +8,7 @@ import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.Provides
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
-import com.trib3.graphql.execution.DateTimeHooks
+import com.trib3.graphql.execution.LeakyCauldronHooks
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
 import com.trib3.graphql.websocket.GraphQLWebSocketCreator
@@ -60,7 +60,7 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         subscriptions: Set<@JvmSuppressWildcards Any>,
         mapper: ObjectMapper
     ): GraphQL {
-        val hooks = DateTimeHooks()
+        val hooks = LeakyCauldronHooks()
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
             hooks = hooks,
