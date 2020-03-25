@@ -49,6 +49,7 @@ section to `application.conf` explicitly:
 * `DB_CONNECTION_TEST_QUERY`: connection timeout, defaults to `null`
 * `DB_MINIMUM_IDLE`: min number of idle connections, defaults to `10`
 * `DB_MAXIMUM_POOL_SIZE`: max number of total connections, defaults to `10`
+* `DB_URL`: raw jdbc URL to use instead of `subprotocol`/`host`/`port`/`schema`, defaults to `null`
 
 NamedDbModule
 -------------
@@ -89,5 +90,23 @@ class PostgresDAO
 class MysqlDAO
 @Inject constructor(@Named("mysql") val ctx: DSLContext) {
    // ...
+}
+```
+
+FlywayModule
+------------
+To run [Flyway](https://flywaydb.org) migrations at server startup, install the `FlywayModule`.
+It will run a Flyway instance with default configurations against the `DbModule`'s `DataSource`.
+
+To further configure Flyway, bind a `FluentConfiguration` in one of your application module, for example:
+```kotlin
+class MyApplicationPersistenceModule : KotlinModule() {
+    override fun configure() {
+        install(FlywayModule())
+        bind<FluentConfiguration>().toInstance(
+            Flyway.configure().sqlMigrationSuffixes(".sql", ".postgresql")
+                .locations("db/schema") // ... etc
+        )
+    }
 }
 ```

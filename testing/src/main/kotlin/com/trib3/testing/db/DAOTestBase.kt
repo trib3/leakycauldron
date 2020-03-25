@@ -2,6 +2,7 @@ package com.trib3.testing.db
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
@@ -19,6 +20,15 @@ open class DAOTestBase {
     private lateinit var postgres: EmbeddedPostgres
     private var inited: Boolean = false
 
+    /**
+     * By default use a flyway with default configuration
+     * pointing at the postgres [DataSource].  Subclasses
+     * can override for additional configuration.
+     */
+    open fun getFlywayConfiguration(): FluentConfiguration {
+        return Flyway.configure().dataSource(dataSource)
+    }
+
     @BeforeClass
     open fun setUp() {
         if (!inited) {
@@ -28,8 +38,7 @@ open class DAOTestBase {
                 .start()
             dataSource = postgres.postgresDatabase
             ctx = DSL.using(dataSource, SQLDialect.POSTGRES)
-            val flyway = Flyway.configure().dataSource(dataSource).load()
-            flyway.migrate()
+            getFlywayConfiguration().load().migrate()
         }
     }
 

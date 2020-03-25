@@ -41,13 +41,14 @@ class DbConfig
         val connectionTestQuery = config.extract<String?>("connectionTestQuery")
         val minimumIdle = config.extract<Int?>("minimumIdle")
         val maximumPoolSize = config.extract<Int?>("maximumPoolSize")
+        val url = config.extract<String?>("url")
 
         val hds = HikariDataSource()
         hds.poolName = configPath
         hds.username = username
         hds.password = password
         hds.driverClassName = driverClassName
-        hds.jdbcUrl = "jdbc:$subprotocol://$host:$port/$schema"
+        hds.jdbcUrl = url ?: "jdbc:$subprotocol://$host:$port/$schema"
         hds.healthCheckRegistry = healthCheckRegistry
         hds.metricRegistry = metricRegistry
         hds.isAutoCommit = autoCommit
