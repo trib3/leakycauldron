@@ -27,6 +27,7 @@ class ModuleFactory : IModuleFactory {
                 install(DbModule())
                 install(NamedDbModule("test"))
                 install(NamedDbModule("test2"))
+                install(NamedDbModule("test3"))
             }
         }
     }
@@ -50,7 +51,11 @@ class NamedDbModuleTest
 
     @Named("test2") val test2DbConfig: DbConfig,
     @Named("test2") val test2DataSource: DataSource,
-    @Named("test2") val test2DSLContext: DSLContext
+    @Named("test2") val test2DSLContext: DSLContext,
+
+    @Named("test3") val test3DbConfig: DbConfig,
+    @Named("test3") val test3DataSource: DataSource,
+    @Named("test3") val test3DSLContext: DSLContext
 ) {
     @Test
     fun testConfigs() {
@@ -60,6 +65,8 @@ class NamedDbModuleTest
             doesNotContain("test2")
         }
         assertThat((test2DbConfig.dataSource as HikariDataSource).jdbcUrl).contains("test2")
+        assertThat((test3DbConfig.dataSource as HikariDataSource).jdbcUrl)
+            .isEqualTo("jdbc:postgres://test3:12345/test3")
     }
 
     @Test
@@ -70,6 +77,7 @@ class NamedDbModuleTest
             doesNotContain("test2")
         }
         assertThat((test2DataSource as HikariDataSource).jdbcUrl).contains("test2")
+        assertThat((test3DataSource as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
     }
 
     @Test
@@ -80,12 +88,15 @@ class NamedDbModuleTest
             (testDSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
         val test2DS =
             (test2DSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
+        val test3DS =
+            (test3DSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
         assertThat((defaultDS as HikariDataSource).jdbcUrl).contains("localhost")
         assertThat((testDS as HikariDataSource).jdbcUrl).all {
             contains("test")
             doesNotContain("test2")
         }
         assertThat((test2DS as HikariDataSource).jdbcUrl).contains("test2")
+        assertThat((test3DS as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
     }
 
     @Test
