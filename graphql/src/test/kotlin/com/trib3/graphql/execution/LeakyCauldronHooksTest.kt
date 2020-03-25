@@ -22,8 +22,9 @@ import java.time.OffsetDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.ZoneOffset
+import java.util.UUID
 
-class DateTimeQuery {
+class HooksQuery {
     fun year(y: Year): Year {
         return y.plusYears(1)
     }
@@ -51,10 +52,18 @@ class DateTimeQuery {
     fun offsetDateTime(o: OffsetDateTime): OffsetDateTime {
         return o.plusDays(1)
     }
+
+    fun newuuid(): UUID {
+        return UUID.randomUUID()
+    }
+
+    fun existinguuid(uuid: UUID): String {
+        return uuid.toString()
+    }
 }
 
-class DateTimeHooksTest {
-    val hooks = DateTimeHooks()
+class LeakyCauldronHooksTest {
+    val hooks = LeakyCauldronHooks()
     val config =
         SchemaGeneratorConfig(
             listOf(),
@@ -65,7 +74,7 @@ class DateTimeHooksTest {
         )
     val graphQL =
         GraphQL.newGraphQL(
-            toSchema(config, listOf(TopLevelObject(DateTimeQuery())))
+            toSchema(config, listOf(TopLevelObject(HooksQuery())))
         ).build()
 
     @Test
@@ -287,5 +296,44 @@ class DateTimeHooksTest {
                 .variables(mapOf("input" to "2019-10-30T00:01-07:00")).build()
         ).getData<Map<String, String>>()
         assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01Z")
+    }
+
+    @Test
+    fun testUUIDGeneration() {
+        val result = graphQL.execute("""query { newuuid }""")
+            .getData<Map<String, String>>()
+        assertThat {
+            UUID.fromString(result["newuuid"])
+        }.isSuccess()
+    }
+
+    @Test
+    fun testUUIDInput() {
+        val uuid = UUID.randomUUID()
+        val result = graphQL.execute("""query { existinguuid(uuid:"$uuid") }""")
+            .getData<Map<String, String>>()
+        assertThat(result["existinguuid"]).isEqualTo(uuid.toString())
+        assertThat {
+            graphQL.execute("""query {existinguuid(uuid:123)}""")
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
+        assertThat {
+            graphQL.execute("""query {existinguuid(uuid:"123")}""")
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+
+        assertThat {
+            UUID_SCALAR.coercing.serialize(123)
+        }.isFailure().isInstanceOf(CoercingSerializeException::class)
+    }
+
+    @Test
+    fun testUUIDVariable() {
+        val uuid = UUID.randomUUID()
+        val result = graphQL.execute(
+            ExecutionInput.newExecutionInput()
+                .query("""query(${'$'}input: UUID!) { existinguuid(uuid:${'$'}input) }""")
+                .variables(mapOf("input" to uuid.toString())).build()
+        ).getData<Map<String, String>>()
+        assertThat(result["existinguuid"]).isEqualTo(uuid.toString())
     }
 }

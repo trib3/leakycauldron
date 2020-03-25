@@ -3,7 +3,7 @@ Graphql
 Provides the application infrastructure for adding [GraphQL](https://graphql.org) support 
 to a [server](https://github.com/trib3/leakycauldron/blob/master/server) application.
 * GraphQL endpoints:
-  * java8 time and threeten-extra [Scalars](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/execution/DateTimeHooks.kt)
+  * UUID, java8 time, and threeten-extra [Scalars](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/execution/LeakyCauldronHooks.kt)
   * [Request Ids](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/execution/RequestIdInstrumentation.kt) 
     attached to the GraphQL response extensions
   * Any guice bound Query, Subscription or Mutation Resolvers
