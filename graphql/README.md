@@ -10,6 +10,8 @@ to a [server](https://github.com/trib3/leakycauldron/blob/master/server) applica
   * Supports websockets using the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
   * Supports subscriptions via [coroutine](https://github.com/kotlin/kotlinx.coroutines/) Flows 
     for any Resolvers that return a `Publisher<T>`
+  * Supports [Dropwizard Authentication](https://www.dropwizard.io/en/latest/manual/auth.html) Principals
+    passed through to Resolvers via [GraphQLContext](https://github.com/ExpediaGroup/graphql-kotlin/blob/master/graphql-kotlin-schema-generator/src/main/kotlin/com/expediagroup/graphql/execution/GraphQLContext.kt)
 * Admin:
   * [GraphiQL](https://github.com/graphql/graphiql) available at `/admin/graphiql`
 
@@ -35,6 +37,48 @@ class ExampleApplicationModule : GraphQLApplicationModule() {
         graphQLMutationsBinder().addBinding().to<com.example.server.graphql.Mutation>()
         graphQLSubscriptionsBinder().addBinding().to<com.example.server.graphql.Subscription>()
         // ...
+    }
+}
+```
+
+#### Auth
+If Dropwizard Authentication is setup per the [server README](https://github.com/trib3/leakycauldron/blob/master/server/README.md#auth),
+GraphQL resolver methods can receive the principal inside the GraphQL context of type
+`GraphQLResourceContext`.  Resolver methods can write to the `cookie` field of the context 
+object they receive in order to set cookies on the client (useful when, for example, using
+a `CookieTokenAuthFilter` for auth).
+
+```kotlin
+class ExampleLoginMutations : GraphQLQueryResolver {
+    fun login(context: GraphQLResourceContext, email: String, pass: String): Boolean {
+        if (context.principal == null) {
+            // log in!
+            val userSession = authenticate(email, pass)
+            if (userSession == null) {
+                return false
+            }
+            // cookie will be set in response
+            context.cookie = NewCookie("example-app-session-id", userSession.id)
+        } else {
+            // already logged in
+        }
+        return true
+    }
+
+    fun logout(context: GraphQLResourceContext): Boolean {
+        if (context.principal != null) {
+            deleteSession(context.principal)
+            context.cookie =
+                NewCookie(
+                    Cookie("example-app-session-id", ""),
+                    null,
+                    -1,
+                    Date(0), // 1970
+                    false,
+                    false
+                )
+        }
+        return true
     }
 }
 ```

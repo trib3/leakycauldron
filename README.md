@@ -11,6 +11,17 @@ Leaky Cauldron contains a collection of libraries used for building kotlin servi
 
 It's where [drop]wizards get their guice!
 
+Versioning
+----------
+Release version are of the form `X.Y.Z` where:
+ * `X`: Major version, incremented when a subjectively "major" change happens
+ * `Y`: Minor version, incremented when a breaking, backwards incompatible change happens
+ * `Z`: Build version, incremented for every build
+
+To uptake all new features and bugfixes without breaking changes, downstream projects can depend
+on a version range of the form `[X.Y.1,X.W-SNAPSHOT)`, where `W = Y + 1`
+(eg. `[1.7.1,1.8-SNAPSHOT)` for `1.7.*`).
+
 Getting Started
 ---------------
 #### Install jdk and maven
