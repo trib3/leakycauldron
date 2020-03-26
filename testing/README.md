@@ -13,7 +13,8 @@ classpath.
 #### ResourceTestBase
 Base class for writing Resource tests.  Implement `getResource()` to return the
 JAX-RS resource being tested.  Uses an `InMemoryTestContainer` by default, but can be 
-overriden by implementing `getContainerFactory()`.
+overriden by implementing `getContainerFactory()`.  If additional jersey resources need
+to be added to the container, override `buildAdditionalResources()` to configure them.
 
 
 ### Utility classes

@@ -16,8 +16,11 @@ import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.resources.PingResource
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.Configuration
+import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature
+import java.security.Principal
 import javax.servlet.Filter
 
 data class ServletFilterConfig(
@@ -53,6 +56,10 @@ class DefaultApplicationModule : TribeApplicationModule() {
         bind<MetricRegistry>().toInstance(registry)
         install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
         bind<HealthCheckRegistry>().`in`(Scopes.SINGLETON)
+
+        // Ensure @Auth annotations can be used as long as downstream binds an AuthDynamicFeature implementation
+        resourceBinder().addBinding().toInstance(RolesAllowedDynamicFeature::class.java)
+        resourceBinder().addBinding().toInstance(AuthValueFactoryProvider.Binder(Principal::class.java))
     }
 
     /**

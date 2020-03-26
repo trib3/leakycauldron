@@ -1,5 +1,6 @@
 package com.trib3.graphql.websocket
 
+import com.expediagroup.graphql.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.server.filters.RequestIdFilter
@@ -39,6 +40,7 @@ private val log = KotlinLogging.logger {}
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class GraphQLCoroutine(private val channel: Channel<OperationMessage<*>>) {
     abstract suspend fun run()
+
     /**
      * Send the [message] to the [channel] to be processed in the main coroutine
      */
@@ -79,6 +81,7 @@ class KeepAliveCoroutine(
 @OptIn(ExperimentalCoroutinesApi::class)
 class QueryCoroutine(
     private val graphQL: GraphQL,
+    context: GraphQLContext,
     channel: Channel<OperationMessage<*>>,
     private val messageId: String,
     payload: GraphQLRequest
@@ -87,6 +90,7 @@ class QueryCoroutine(
         .query(payload.query)
         .variables(payload.variables ?: mapOf())
         .operationName(payload.operationName)
+        .context(context)
         .build()
 
     override suspend fun run() {
@@ -165,6 +169,7 @@ class QueryCoroutine(
 class GraphQLWebSocketConsumer(
     val graphQL: GraphQL,
     val graphQLConfig: GraphQLConfig,
+    val context: GraphQLContext,
     val channel: Channel<OperationMessage<*>>,
     val adapter: GraphQLWebSocketAdapter,
     val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default // default to default for the KA interval
@@ -280,7 +285,7 @@ class GraphQLWebSocketConsumer(
         check(message.payload is GraphQLRequest) {
             "Invalid payload for query"
         }
-        val queryCoroutine = QueryCoroutine(graphQL, channel, message.id, message.payload)
+        val queryCoroutine = QueryCoroutine(graphQL, context, channel, message.id, message.payload)
 
         val job = scope.launch(MDCContext()) {
             queryCoroutine.run()

@@ -11,12 +11,12 @@ import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.LeakyCauldronHooks
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
-import com.trib3.graphql.websocket.GraphQLWebSocketCreator
+import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
+import com.trib3.graphql.websocket.GraphQLWebSocketCreatorFactory
 import com.trib3.server.modules.ServletConfig
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
 import io.dropwizard.servlets.assets.AssetServlet
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import javax.inject.Named
 
 /**
@@ -26,7 +26,7 @@ import javax.inject.Named
  */
 class DefaultGraphQLModule : GraphQLApplicationModule() {
     override fun configureApplication() {
-        bind<WebSocketCreator>().to<GraphQLWebSocketCreator>()
+        bind<GraphQLContextWebSocketCreatorFactory>().to<GraphQLWebSocketCreatorFactory>()
         resourceBinder().addBinding().to<GraphQLResource>()
         // Ensure graphql binders are set up
         graphQLPackagesBinder()
