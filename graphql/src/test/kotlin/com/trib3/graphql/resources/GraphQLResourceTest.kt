@@ -10,6 +10,7 @@ import assertk.assertions.prop
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
+import com.expediagroup.graphql.execution.GraphQLContext
 import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.config.ConfigLoader
@@ -18,6 +19,7 @@ import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.execution.SanitizedGraphQLError
+import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionResult
 import graphql.GraphQL
@@ -25,6 +27,7 @@ import graphql.GraphQLError
 import graphql.execution.AsyncExecutionStrategy
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.testng.annotations.Test
+import java.util.Optional
 
 class TestQuery : GraphQLQueryResolver {
     fun test(value: String): String {
@@ -57,7 +60,11 @@ class GraphQLResourceTest {
                 .instrumentation(RequestIdInstrumentation())
                 .build(),
             GraphQLConfig(ConfigLoader("GraphQLResourceTest")),
-            WebSocketCreator { _, _ -> null }
+            object : GraphQLContextWebSocketCreatorFactory {
+                override fun getCreator(context: GraphQLContext): WebSocketCreator {
+                    return WebSocketCreator { _, _ -> null }
+                }
+            }
         )
     val objectMapper = ObjectMapperProvider().get()
 
@@ -71,7 +78,7 @@ class GraphQLResourceTest {
 
     @Test
     fun testSimpleQuery() {
-        val result = resource.graphQL(GraphQLRequest("query {test(value:\"123\")}", null, null))
+        val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {test(value:\"123\")}", null, null))
         val graphQLResult = result.entity as ExecutionResult
         assertThat(graphQLResult.getData<Map<String, String>>()["test"]).isEqualTo("123")
     }
@@ -79,6 +86,7 @@ class GraphQLResourceTest {
     @Test
     fun testVariablesQuery() {
         val result = resource.graphQL(
+            Optional.empty(),
             GraphQLRequest(
                 "query(${'$'}val:String!) {test(value:${'$'}val)}",
                 mapOf("val" to "123"),
@@ -91,7 +99,7 @@ class GraphQLResourceTest {
 
     @Test
     fun testErrorQuery() {
-        val result = resource.graphQL(GraphQLRequest("query {error}", mapOf(), null))
+        val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {error}", mapOf(), null))
         val graphQLResult = result.entity as ExecutionResult
         assertThat(graphQLResult.errors.first()).prop(GraphQLError::getMessage).isEqualTo("an error was thrown")
         assertThat(graphQLResult.errors.first()).isInstanceOf(SanitizedGraphQLError::class)
@@ -103,7 +111,7 @@ class GraphQLResourceTest {
 
     @Test
     fun testUnknownErrorQuery() {
-        val result = resource.graphQL(GraphQLRequest("query {unknownError}", mapOf(), null))
+        val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {unknownError}", mapOf(), null))
         val graphQLResult = result.entity as ExecutionResult
         assertThat(graphQLResult.errors.first()).prop(GraphQLError::getMessage)
             .contains("Exception while fetching data")

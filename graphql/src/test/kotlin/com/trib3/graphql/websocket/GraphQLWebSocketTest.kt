@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
@@ -14,6 +15,7 @@ import com.expediagroup.graphql.hooks.FlowSubscriptionSchemaGeneratorHooks
 import com.expediagroup.graphql.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
+import com.trib3.graphql.resources.GraphQLResourceContext
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
 import graphql.ExecutionInput
@@ -124,6 +126,7 @@ class GraphQLWebSocketTest {
         val consumer = GraphQLWebSocketConsumer(
             graphQL,
             config,
+            GraphQLResourceContext(null),
             channel,
             adapter,
             keepAliveDispatcher
@@ -358,6 +361,7 @@ class GraphQLWebSocketTest {
         assertThat(socket.graphQL).isNotNull()
         assertThat(socket.keepAliveDispatcher).isEqualTo(Dispatchers.Default)
         assertThat(socket.graphQLConfig).isEqualTo(config)
+        assertThat(socket.context).isInstanceOf(GraphQLResourceContext::class)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
