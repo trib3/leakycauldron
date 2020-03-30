@@ -82,6 +82,11 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-core</artifactId>
+        </dependency>
+
         <!-- flyway bundle -->
         <dependency>
             <groupId>io.dropwizard</groupId>
