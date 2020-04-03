@@ -3,25 +3,54 @@ package com.trib3.json
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.message
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.google.inject.multibindings.MapBinder
+import com.google.inject.name.Names
 import com.trib3.json.modules.ObjectMapperModule
+import dev.misfitlabs.kotlinguice4.KotlinModule
+import dev.misfitlabs.kotlinguice4.typeLiteral
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import org.threeten.extra.YearQuarter
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
-private data class SimpleBean(val foo: String, val bar: Int, val maybe: String?, val date: LocalDate?)
+private data class SimpleBean(
+    val foo: String,
+    val bar: Int,
+    val maybe: String?,
+    val date: LocalDate?,
+    val ignoreMe: String? = null
+)
 
-@Guice(modules = [ObjectMapperModule::class])
+private abstract class SimpleMixin(
+    @JsonIgnore
+    val ignoreMe: String? = null
+)
+
+private class SimpleMixinModule : KotlinModule() {
+    override fun configure() {
+        MapBinder.newMapBinder(
+            binder(),
+            typeLiteral<KClass<*>>(),
+            typeLiteral<KClass<*>>(),
+            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS)
+        ).addBinding(SimpleBean::class).toInstance(SimpleMixin::class)
+    }
+}
+
+@Guice(modules = [ObjectMapperModule::class, SimpleMixinModule::class])
 class ObjectMapperTest
 @Inject constructor(val mapper: ObjectMapper) {
 
@@ -29,7 +58,9 @@ class ObjectMapperTest
     fun testMapper() {
         val bean = SimpleBean("hahaha", 3, "yes", LocalDate.of(2019, 1, 1))
         val stringRep = mapper.writeValueAsString(bean)
-        assertThat(stringRep.contains("\"date\": \"2019-01-01\""))
+        assertThat(stringRep).contains("\"date\":\"2019-01-01\"")
+        assertThat(stringRep).doesNotContain("ignoreMe")
+        assertThat(ObjectMapperProvider().get().writeValueAsString(bean)).contains("ignoreMe")
         val roundTrip = mapper.readValue<SimpleBean>(stringRep)
         assertThat(bean).isEqualTo(roundTrip)
     }
