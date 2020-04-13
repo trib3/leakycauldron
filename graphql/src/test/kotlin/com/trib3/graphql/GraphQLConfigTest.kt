@@ -8,7 +8,7 @@ import org.testng.annotations.Test
 
 class GraphQLConfigTest {
     companion object {
-        val DEFAULT_KEEPALIVE = 15L
+        const val DEFAULT_KEEPALIVE = 15L
     }
 
     @Test
@@ -17,7 +17,6 @@ class GraphQLConfigTest {
         assertThat(config.keepAliveIntervalSeconds).isEqualTo(DEFAULT_KEEPALIVE)
         assertThat(config.webSocketSubProtocol).isEqualTo("graphql-ws")
         for (i in listOf(
-            config.asyncWriteTimeout,
             config.idleTimeout,
             config.maxBinaryMessageSize,
             config.maxTextMessageSize

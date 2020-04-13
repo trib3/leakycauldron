@@ -49,9 +49,6 @@ open class GraphQLResource
     private val creatorFactory: GraphQLContextWebSocketCreatorFactory
 ) {
     internal val webSocketFactory = WebSocketServerFactory().apply {
-        if (graphQLConfig.asyncWriteTimeout != null) {
-            this.policy.asyncWriteTimeout = graphQLConfig.asyncWriteTimeout
-        }
         if (graphQLConfig.idleTimeout != null) {
             this.policy.idleTimeout = graphQLConfig.idleTimeout
         }
