@@ -70,7 +70,6 @@ class GraphQLResourceTest {
 
     @Test
     fun testPolicy() {
-        assertThat(resource.webSocketFactory.policy.asyncWriteTimeout).isEqualTo(100000)
         assertThat(resource.webSocketFactory.policy.idleTimeout).isEqualTo(200000)
         assertThat(resource.webSocketFactory.policy.maxBinaryMessageSize).isEqualTo(300000)
         assertThat(resource.webSocketFactory.policy.maxTextMessageSize).isEqualTo(400000)
