@@ -97,7 +97,6 @@ class ResultQueryFlowTest {
                 }.isFailure().isInstanceOf(RuntimeException::class.java).hasMessage("cancelled")
             }
             launch {
-                // delay(200)
                 iterateLatch.await() // wait for collection to start
                 collectJob.cancel()
             }

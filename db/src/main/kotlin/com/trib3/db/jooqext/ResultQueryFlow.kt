@@ -1,7 +1,9 @@
 package com.trib3.db.jooqext
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -23,6 +25,7 @@ private val log = KotlinLogging.logger {}
  * Will run an additional coroutine launched with the passed [coroutineContext] that monitors the
  * fetch-ing coroutine for cancellation, and calls [ResultQuery.cancel] when that occurs.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext = Dispatchers.IO): Flow<T> {
     val query = this
     return flow {
@@ -30,7 +33,7 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
             val fetchJob = async(coroutineContext) {
                 query.fetchLazy()
             }
-            launch(coroutineContext) {
+            launch(coroutineContext, CoroutineStart.ATOMIC) {
                 // wait until the fetch job is cancelled or complete before doing anything
                 log.trace("fetch monitor awaiting job cancellation or completion")
                 val cancelException = try {
