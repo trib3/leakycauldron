@@ -3,8 +3,9 @@ package com.trib3.graphql.websocket
 import com.expediagroup.graphql.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
+import com.trib3.graphql.execution.toExecutionInput
+import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.server.filters.RequestIdFilter
-import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.ExecutionResultImpl
 import graphql.GraphQL
@@ -84,14 +85,10 @@ class QueryCoroutine(
     context: GraphQLContext,
     channel: Channel<OperationMessage<*>>,
     private val messageId: String,
-    payload: GraphQLRequest
+    payload: GraphQLRequest,
+    dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
 ) : GraphQLCoroutine(channel) {
-    private val executionQuery = ExecutionInput.newExecutionInput()
-        .query(payload.query)
-        .variables(payload.variables ?: mapOf())
-        .operationName(payload.operationName)
-        .context(context)
-        .build()
+    private val executionQuery = payload.toExecutionInput(context, dataLoaderRegistryFactory)
 
     override suspend fun run() {
         try {
@@ -172,7 +169,8 @@ class GraphQLWebSocketConsumer(
     val context: GraphQLContext,
     val channel: Channel<OperationMessage<*>>,
     val adapter: GraphQLWebSocketAdapter,
-    val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default // default to default for the KA interval
+    val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default, // default to default for the KA interval
+    private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
 ) {
     private var keepAliveStarted = false // only allow one keepalive coroutine to launch
     private val queries = mutableMapOf<String, Job>() // will contain child queries that are currently running
@@ -285,7 +283,14 @@ class GraphQLWebSocketConsumer(
         check(message.payload is GraphQLRequest) {
             "Invalid payload for query"
         }
-        val queryCoroutine = QueryCoroutine(graphQL, context, channel, message.id, message.payload)
+        val queryCoroutine = QueryCoroutine(
+            graphQL,
+            context,
+            channel,
+            message.id,
+            message.payload,
+            dataLoaderRegistryFactory
+        )
 
         val job = scope.launch(MDCContext()) {
             queryCoroutine.run()

@@ -22,8 +22,11 @@ import dev.misfitlabs.kotlinguice4.typeLiteral
 import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
+import graphql.execution.instrumentation.ChainedInstrumentation
+import graphql.execution.instrumentation.Instrumentation
 import io.dropwizard.servlets.assets.AssetServlet
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -34,12 +37,18 @@ import kotlin.reflect.KClass
 class DefaultGraphQLModule : GraphQLApplicationModule() {
     override fun configureApplication() {
         bind<GraphQLContextWebSocketCreatorFactory>().to<GraphQLWebSocketCreatorFactory>()
+        // by default, null DataLoaderRegistryFactory is configured, applications can
+        // override this by setting a binding
+        dataLoaderRegistryFactoryBinder()
+            .setDefault().toProvider(Provider { null })
+
         resourceBinder().addBinding().to<GraphQLResource>()
         // Ensure graphql binders are set up
         graphQLPackagesBinder()
         graphQLQueriesBinder()
         graphQLMutationsBinder()
         graphQLSubscriptionsBinder()
+        graphQLInstrumentationsBinder()
 
         adminServletBinder().addBinding().toInstance(
             ServletConfig(
@@ -72,6 +81,7 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         mutations: Set<@JvmSuppressWildcards Any>,
         @Named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
         subscriptions: Set<@JvmSuppressWildcards Any>,
+        instrumentations: Set<@JvmSuppressWildcards Instrumentation>,
         mapper: ObjectMapper
     ): GraphQL {
         val hooks = LeakyCauldronHooks()
@@ -90,7 +100,7 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         )
             .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
             .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
-            .instrumentation(RequestIdInstrumentation())
+            .instrumentation(ChainedInstrumentation(listOf(RequestIdInstrumentation()) + instrumentations.toList()))
             .build()
     }
 

@@ -47,10 +47,13 @@ open class VersionHealthCheck : HealthCheck() {
     }
 
     public override fun check(): Result {
-        val resultBuilder = Result.builder().withMessage(info)
-        return when (healthy) {
-            true -> resultBuilder.healthy().build()
-            else -> resultBuilder.unhealthy().build()
-        }
+        return Result.builder().withMessage(info)
+            .let { builder ->
+                if (healthy) {
+                    builder.healthy()
+                } else {
+                    builder.unhealthy()
+                }
+            }.build()
     }
 }
