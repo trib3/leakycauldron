@@ -1,8 +1,24 @@
 package com.trib3.graphql.modules
 
 import com.google.inject.name.Names
+import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.server.modules.TribeApplicationModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
+import graphql.execution.instrumentation.Instrumentation
+import org.dataloader.DataLoaderRegistry
+
+/**
+ * Function that takes a [GraphQLRequest] and an optional context
+ * and returns a [DataLoaderRegistry] with registered [org.dataloader.DataLoader]s
+ *
+ * Invoked per GraphQL request to allow for batching of data fetchers
+ */
+typealias DataLoaderRegistryFactory = Function2<
+    @JvmSuppressWildcards GraphQLRequest,
+    @JvmSuppressWildcards Any?,
+    @JvmSuppressWildcards DataLoaderRegistry
+    >
 
 /**
  * Base class for GraphQL application guice modules.  Provides
@@ -67,5 +83,21 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
             kotlinBinder,
             Names.named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
         )
+    }
+
+    /**
+     * Optional binder for the dataLoaderRegistryFactory
+     */
+    fun dataLoaderRegistryFactoryBinder(): KotlinOptionalBinder<DataLoaderRegistryFactory> {
+        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
+    }
+
+    /**
+     * Binder for graphql Instrumentations.  RequestIdInstrumentation
+     * will be registered by default, but additional ones can be registered
+     * via this binder.
+     */
+    fun graphQLInstrumentationsBinder(): KotlinMultibinder<Instrumentation> {
+        return KotlinMultibinder.newSetBinder(kotlinBinder)
     }
 }

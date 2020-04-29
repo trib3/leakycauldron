@@ -74,11 +74,11 @@ class AdminResource
     @Produces(MediaType.TEXT_PLAIN)
     fun getThreads(@QueryParam("key") key: String?): Response {
         checkAccess(key)
-        val responseBuilder = Response.ok()
-        threadDumper?.let {
-            val output = StreamingOutput { output -> it.dump(output) }
-            responseBuilder.entity(output)
-        }
-        return responseBuilder.build()
+        return Response.ok()
+            .let { builder ->
+                threadDumper?.let { tDumper ->
+                    builder.entity(StreamingOutput { output -> tDumper.dump(output) })
+                } ?: builder
+            }.build()
     }
 }

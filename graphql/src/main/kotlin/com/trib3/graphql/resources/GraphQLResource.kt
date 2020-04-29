@@ -4,14 +4,16 @@ import com.codahale.metrics.annotation.Timed
 import com.expediagroup.graphql.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
+import com.trib3.graphql.execution.toExecutionInput
+import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
-import graphql.ExecutionInput
 import graphql.GraphQL
 import io.dropwizard.auth.Auth
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 import java.security.Principal
 import java.util.Optional
+import javax.annotation.Nullable
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -46,7 +48,8 @@ open class GraphQLResource
 @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
-    private val creatorFactory: GraphQLContextWebSocketCreatorFactory
+    private val creatorFactory: GraphQLContextWebSocketCreatorFactory,
+    @Nullable val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
 ) {
     internal val webSocketFactory = WebSocketServerFactory().apply {
         if (graphQLConfig.idleTimeout != null) {
@@ -70,20 +73,17 @@ open class GraphQLResource
     open fun graphQL(@Auth principal: Optional<Principal>, query: GraphQLRequest): Response {
         val context = GraphQLResourceContext(principal.orElse(null))
         val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query(query.query)
-                .variables(query.variables ?: mapOf())
-                .operationName(query.operationName)
-                .context(context)
-                .build()
+            query.toExecutionInput(context, dataLoaderRegistryFactory)
         )
-        val builder = Response.ok(result)
-        // Communicate any set cookie back to the client
-        return if (context.cookie != null) {
-            builder.cookie(context.cookie)
-        } else {
-            builder
-        }.build()
+        return Response.ok(result)
+            .let {
+                // Communicate any set cookie back to the client
+                if (context.cookie != null) {
+                    it.cookie(context.cookie)
+                } else {
+                    it
+                }
+            }.build()
     }
 
     /**

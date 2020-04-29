@@ -3,7 +3,9 @@ package com.trib3.graphql.websocket
 import com.expediagroup.graphql.execution.GraphQLContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
+import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import graphql.GraphQL
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
@@ -18,7 +20,8 @@ class GraphQLWebSocketCreator(
     val graphQL: GraphQL,
     val objectMapper: ObjectMapper,
     val graphQLConfig: GraphQLConfig,
-    val context: GraphQLContext
+    val context: GraphQLContext,
+    private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
 ) : WebSocketCreator {
     /**
      * Create the [GraphQLWebSocketAdapter]and its [Channel], and launch a [GraphQLWebSocketConsumer] coroutine
@@ -28,7 +31,16 @@ class GraphQLWebSocketCreator(
         resp.acceptedSubProtocol = graphQLConfig.webSocketSubProtocol
         val channel = Channel<OperationMessage<*>>()
         val adapter = GraphQLWebSocketAdapter(channel, objectMapper)
-        val consumer = GraphQLWebSocketConsumer(graphQL, graphQLConfig, context, channel, adapter)
+        val consumer =
+            GraphQLWebSocketConsumer(
+                graphQL,
+                graphQLConfig,
+                context,
+                channel,
+                adapter,
+                Dispatchers.Default,
+                dataLoaderRegistryFactory
+            )
         adapter.launch {
             consumer.consume(this)
         }
