@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+orbs:
+  release: trib3/release@1.1.1
+
 jobs:
   build:
     docker:
@@ -48,6 +51,7 @@ jobs:
                mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
                cd ..
             done
+            echo ${NEW_PROJECT_VERSION} > ~/repo/current_version.txt
       - run:
           name: Maven Build
           command: |
@@ -78,18 +82,10 @@ jobs:
       - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
       - run: find . -type f -regex ".*/target/.*zip" -exec cp {} ~/jars/ \;
       - run: find . -type f -regex ".*/target/.*asc" -exec cp {} ~/jars/ \;
-      - run:
-          name: Notify of new master build
-          command: |
-            CURRENT_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec)
-            git fetch --tags
-            PREVIOUS_VERSION=$(git tag | sort -V | tail -n 1)
-            git log --pretty=format:'* %s\r\n' ${PREVIOUS_VERSION}..HEAD | sed 's/"/\\"/g'|tr -d '\n' > ~/jars/release-notes.txt
-            RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
-            if [ "${CIRCLE_BRANCH}" = "master" -a "${SLACK_NOTIFICATION_WEBHOOK}" != "" ]; then
-              WORKFLOW_URL="https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
-              curl -X POST -d "payload={\"attachments\":[{ \"mrkdwn_in\":[\"text\"], \"color\":\"#439FE0\", \"fallback\":\"Library master build notification\", \"pretext\":\"Library master build notification\", \"text\":\"*Project* \`${CIRCLE_PROJECT_REPONAME}\`\n*Branch* \`${CIRCLE_BRANCH}\`\n*Version* \`${CURRENT_VERSION}\`\nClick <$WORKFLOW_URL|here> to finalize release\nRelease Notes:\n\`\`\`\n${RELEASE_NOTES}\n\`\`\`\"}]}" ${SLACK_NOTIFICATION_WEBHOOK}
-            fi
+      - release/prep_release:
+          release_dir: ~/jars/release
+          current_version: ~/repo/current_version.txt
+          current_version_import: True
       - store_artifacts:
           path: ~/jars
       - persist_to_workspace:
@@ -111,14 +107,11 @@ jobs:
             REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
             mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID 
             mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID 
-            CURRENT_VERSION=$(ls ~/jars/build-resources-*.pom.asc | sed 's/^.*jars\/build-resources-\(.*\)\.pom.asc$/\1/')
-            RELEASE_NOTES=$(cat ~/jars/release-notes.txt)
-            if [ "${GITHUB_AUTH_TOKEN}" != "" -a "${RELEASE_NOTES}" != "" ]; then
-              curl -H "Authorization: bearer ${GITHUB_AUTH_TOKEN}" -X POST "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases" -X POST -d "{\"tag_name\":\"${CURRENT_VERSION}\", \"name\":\"${CURRENT_VERSION}\", \"target_commitish\":\"${CIRCLE_SHA1}\", \"body\": \"${RELEASE_NOTES}\"}"
-            fi
+      - release/execute_release:
+          release_dir: ~/jars/release
 
 workflows:
-  version: 2
+  version: 2.1
   build_pipeline:
     jobs:
       - build
