@@ -49,7 +49,7 @@
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.5</version.aws.serverless>
         <version.classgraph>4.8.78</version.classgraph>
-        <version.commons-io>2.6</version.commons-io>
+        <version.commons-io>2.7</version.commons-io>
         <version.config4k>0.4.1</version.config4k>
         <version.detekt>1.9.1</version.detekt>
         <version.dokka>0.10.1</version.dokka>
