@@ -15,6 +15,7 @@ import com.expediagroup.graphql.hooks.FlowSubscriptionSchemaGeneratorHooks
 import com.expediagroup.graphql.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
+import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResourceContext
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
@@ -107,6 +108,7 @@ class GraphQLWebSocketTest {
         )
     )
         .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy())
+        .instrumentation(RequestIdInstrumentation())
         .build()
     val mapper = ObjectMapperProvider().get()
     val config = GraphQLConfig(ConfigLoader())

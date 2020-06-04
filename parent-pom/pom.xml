@@ -59,7 +59,7 @@
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.2</version.easymock>
         <version.flyway>6.4.3</version.flyway>
-        <version.graphql-kotlin>3.0.0</version.graphql-kotlin>
+        <version.graphql-kotlin>3.1.0</version.graphql-kotlin>
         <version.graphql-java>15.0</version.graphql-java>
         <version.graphql-java.tools>5.2.4</version.graphql-java.tools>
         <version.graphql-java.dataloader>2.2.3</version.graphql-java.dataloader>
@@ -1090,6 +1090,21 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>com.expediagroup</groupId>
+                <artifactId>graphql-kotlin-types</artifactId>
+                <version>${version.graphql-kotlin}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.expediagroup</groupId>
+                <artifactId>graphql-kotlin-federation</artifactId>
+                <version>${version.graphql-kotlin}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.expediagroup</groupId>
+                <artifactId>graphql-kotlin-client</artifactId>
+                <version>${version.graphql-kotlin}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
                 <version>${version.classgraph}</version>
@@ -1764,6 +1779,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${version.maven.deploy}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.expediagroup</groupId>
+                    <artifactId>graphql-kotlin-maven-plugin</artifactId>
+                    <version>${version.graphql-kotlin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
