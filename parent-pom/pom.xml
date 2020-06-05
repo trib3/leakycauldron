@@ -110,7 +110,7 @@
         <version.maven.shade>3.2.4</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
         <version.maven.surefire>3.0.0-M4</version.maven.surefire>
-        <version.postgres>42.2.12</version.postgres>
+        <version.postgres>42.2.13</version.postgres>
         <version.postgres.embedded>0.13.3</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>1.2.27.1051</version.redshift>
@@ -976,6 +976,20 @@
                 <artifactId>postgresql</artifactId>
                 <version>${version.postgres}</version>
                 <scope>runtime</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.waffle</groupId>
+                        <artifactId>waffle-jna</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.enterprise</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- testing -->
