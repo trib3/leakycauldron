@@ -114,7 +114,8 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                         }
                     }
                 }
-            })
+            }
+        )
 
     @Test
     fun testWebSocketNoUpgrade() {

@@ -84,17 +84,19 @@ class OverrideDataLoaderModule : GraphQLApplicationModule() {
             val registry = DataLoaderRegistry()
             registry.register(
                 "loader",
-                DataLoader.newDataLoader(BatchLoader { keys: List<String> ->
-                    if (keys != listOf("a", "b")) {
-                        throw IllegalArgumentException("wrong keys!")
-                    }
-                    CompletableFuture.completedFuture(
-                        listOf(
-                            "1",
-                            "2"
+                DataLoader.newDataLoader(
+                    BatchLoader { keys: List<String> ->
+                        if (keys != listOf("a", "b")) {
+                            throw IllegalArgumentException("wrong keys!")
+                        }
+                        CompletableFuture.completedFuture(
+                            listOf(
+                                "1",
+                                "2"
+                            )
                         )
-                    )
-                })
+                    }
+                )
             )
             registry
         }

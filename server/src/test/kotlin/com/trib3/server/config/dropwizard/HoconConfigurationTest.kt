@@ -24,8 +24,10 @@ class HoconConfigurationTest {
         val config = factory.build(FileConfigurationSourceProvider(), "ignored")
         // Ensure the admin port is set to test hocon's 9080 instead of default 8080
         assertThat(
-            ((config.serverFactory as SimpleServerFactory)
-                .connector as HttpConnectorFactory)
+            (
+                (config.serverFactory as SimpleServerFactory)
+                    .connector as HttpConnectorFactory
+                )
                 .port
         ).isEqualTo(9080)
     }

@@ -16,11 +16,13 @@ class GraphQLConfigTest {
         val config = GraphQLConfig(ConfigLoader())
         assertThat(config.keepAliveIntervalSeconds).isEqualTo(DEFAULT_KEEPALIVE)
         assertThat(config.webSocketSubProtocol).isEqualTo("graphql-ws")
-        for (i in listOf(
-            config.idleTimeout,
-            config.maxBinaryMessageSize,
-            config.maxTextMessageSize
-        )) {
+        for (
+            i in listOf(
+                config.idleTimeout,
+                config.maxBinaryMessageSize,
+                config.maxTextMessageSize
+            )
+        ) {
             assertThat(i).isNull()
         }
     }

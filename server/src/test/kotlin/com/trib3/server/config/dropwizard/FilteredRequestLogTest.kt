@@ -29,17 +29,18 @@ class FilteredRequestLogTest {
         factory.appenders =
             ImmutableList.of(
                 AppenderFactory<IAccessEvent> { _,
-                                                _,
-                                                _,
-                                                _,
-                                                _
+                    _,
+                    _,
+                    _,
+                    _
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                })
+                }
+            )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
         val mockResponse = LeakyMock.niceMock<Response>()
@@ -58,17 +59,18 @@ class FilteredRequestLogTest {
         factory.appenders =
             ImmutableList.of(
                 AppenderFactory<IAccessEvent> { _,
-                                                _,
-                                                _,
-                                                _,
-                                                _
+                    _,
+                    _,
+                    _,
+                    _
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                })
+                }
+            )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
         val mockResponse = LeakyMock.niceMock<Response>()
@@ -87,17 +89,18 @@ class FilteredRequestLogTest {
         factory.appenders =
             ImmutableList.of(
                 AppenderFactory<IAccessEvent> { _,
-                                                _,
-                                                _,
-                                                _,
-                                                _
+                    _,
+                    _,
+                    _,
+                    _
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                })
+                }
+            )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
         val mockResponse = LeakyMock.niceMock<Response>()
@@ -129,17 +132,18 @@ class FilteredRequestLogTest {
         factory.appenders =
             ImmutableList.of(
                 AppenderFactory<IAccessEvent> { _,
-                                                _,
-                                                _,
-                                                _,
-                                                _
+                    _,
+                    _,
+                    _,
+                    _
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                })
+                }
+            )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
         val mockResponse = LeakyMock.niceMock<Response>()

@@ -66,8 +66,10 @@ class GraphQLWebSocketProtocolTest {
             GraphQLRequest::class to GraphQLRequest("query {q}", mapOf(), null),
             ExecutionResult::class to null // only need to support serialization right now, not round trip
         )
-        for (t in OperationType.Companion::class.memberProperties
-            .filterIsInstance<KProperty1<OperationType.Companion, OperationType<Any>>>()) {
+        for (
+            t in OperationType.Companion::class.memberProperties
+                .filterIsInstance<KProperty1<OperationType.Companion, OperationType<Any>>>()
+        ) {
             val type = t.get(OperationType.Companion)
             val message =
                 OperationMessage(
@@ -83,7 +85,8 @@ class GraphQLWebSocketProtocolTest {
 
     @Test
     fun testNoPayloadMessage() {
-        val json = """{"type": "connection_init", "id": "123"}"""
+        val json =
+            """{"type": "connection_init", "id": "123"}"""
         val message = mapper.readValue<OperationMessage<*>>(json)
         assertThat(message.type).isEqualTo(OperationType.GQL_CONNECTION_INIT)
         assertThat(message.id).isEqualTo("123")

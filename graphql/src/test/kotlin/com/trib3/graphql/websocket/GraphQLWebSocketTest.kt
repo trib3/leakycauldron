@@ -202,7 +202,8 @@ class GraphQLWebSocketTest {
             {"type": "start",
             "id": "simplequery",
             "payload": {"query": "query(${'$'}len:Int!) { v(len: ${'$'}len) }",
-                        "variables": {"len": 3}}}""".trimIndent()
+                        "variables": {"len": 3}}}
+            """.trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
     }
@@ -308,7 +309,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "start",
              "id": "simplesubscription",
-             "payload": {"query": "subscription { s }"}}""".trimIndent()
+             "payload": {"query": "subscription { s }"}}
+            """.trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
     }
@@ -352,7 +354,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "start",
              "id": "errorsubscription",
-             "payload": {"query": "subscription { e }"}}""".trimIndent()
+             "payload": {"query": "subscription { e }"}}
+            """.trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
     }
@@ -402,7 +405,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "unknown",
              "id": "unknownoperation",
-             "payload": null}""".trimIndent()
+             "payload": null}
+            """.trimIndent()
         )
         runBlocking {
             socket.handleMessage(
@@ -549,7 +553,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "start",
              "id": "longsubscription",
-             "payload": {"query": "subscription { inf }"}}""".trimIndent()
+             "payload": {"query": "subscription { inf }"}}
+            """.trimIndent()
         )
 
         data.await(1, TimeUnit.SECONDS)
@@ -557,7 +562,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "start",
              "id": "longsubscription",
-             "payload": {"query": "subscription { inf }"}}""".trimIndent()
+             "payload": {"query": "subscription { inf }"}}
+            """.trimIndent()
         )
         secondQueryErrored.await(1, TimeUnit.SECONDS)
 
@@ -565,7 +571,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "stop",
              "id": "longsubscription",
-             "payload": null}""".trimIndent()
+             "payload": null}
+            """.trimIndent()
         )
         complete.await(1, TimeUnit.SECONDS)
         EasyMock.verify(mockRemote, mockSession)
@@ -592,7 +599,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "stop",
              "id": "unknownquery",
-             "payload":null}""".trimIndent()
+             "payload":null}
+            """.trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
     }
@@ -618,7 +626,8 @@ class GraphQLWebSocketTest {
             """
             {"type": "start",
              "id": null,
-             "payload": null}""".trimIndent()
+             "payload": null}
+            """.trimIndent()
         )
         EasyMock.verify(mockRemote, mockSession)
     }

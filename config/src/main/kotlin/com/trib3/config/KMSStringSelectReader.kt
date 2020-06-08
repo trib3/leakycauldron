@@ -40,7 +40,8 @@ class KMSStringReader(private val kms: KmsClient?) {
             } else {
                 log.warn(
                     "trying to decrypt KMS config value without a configured kmsClient, " +
-                        "returning raw value at path {}", path
+                        "returning raw value at path {}",
+                    path
                 )
             }
         }
