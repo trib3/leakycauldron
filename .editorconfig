@@ -3,5 +3,5 @@ indent_size=4
 continuation_indent_size=4
 insert_final_newline=true
 max_line_length=120
-# https://github.com/pinterest/ktlint/issues/527
-disabled_rules=import-ordering
+# this is currently the default but make explicit:
+kotlin_imports_layout=idea
