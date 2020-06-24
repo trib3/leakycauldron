@@ -1,0 +1,14 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "07:00"
+  pull-request-branch-name:
+    separator: "-"
+  open-pull-requests-limit: 99
+  ignore:
+  - dependency-name: org.jetbrains:annotations
+    versions:
+    - "> 13.0"
