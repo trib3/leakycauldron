@@ -48,7 +48,7 @@ jobs:
             fi
             for i in build-resources parent-pom; do
                cd $i
-               mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
+               mvn org.codehaus.mojo:versions-maven-plugin:2.7:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
                cd ..
             done
             echo ${NEW_PROJECT_VERSION} > ~/repo/current_version.txt
