@@ -48,6 +48,7 @@
         <version.aws.java>2.13.71</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.5.1</version.aws.serverless>
+        <version.checker-qual>3.5.0</version.checker-qual>
         <version.classgraph>4.8.87</version.classgraph>
         <version.commons-io>2.7</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
@@ -111,7 +112,7 @@
         <version.maven.shade>3.2.4</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
         <version.maven.surefire>3.0.0-M5</version.maven.surefire>
-        <version.postgres>42.2.14</version.postgres>
+        <version.postgres>42.2.15</version.postgres>
         <version.postgres.embedded>0.13.3</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>1.2.27.1051</version.redshift>
@@ -224,10 +225,6 @@
                         <groupId>com.google.errorprone</groupId>
                         <artifactId>error_prone_annotations</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>org.checkerframework</groupId>
-                        <artifactId>checker-qual</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -239,6 +236,11 @@
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
                 <version>${version.threeten}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${version.checker-qual}</version>
             </dependency>
 
             <!-- dropwizard -->
