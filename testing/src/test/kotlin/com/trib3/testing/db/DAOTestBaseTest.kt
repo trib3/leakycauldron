@@ -28,6 +28,7 @@ class DAOTestBaseTest : DAOTestBase() {
             contains("tables")
         }
         var reached = false
+        assertThat(reached).isFalse()
         dataSource.connection.use {
             reached = true
         }
