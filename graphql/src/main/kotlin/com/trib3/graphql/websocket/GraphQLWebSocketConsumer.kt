@@ -147,7 +147,7 @@ class QueryCoroutine(
 /**
  * Coroutine based consumer that listens for events on coming from the WebSocket managed
  * by a [GraphQLWebSocketAdapter], and implements the apollo graphql-ws protocol
- * from https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
+ * from https://github.com/apollographql/subscriptions-transport-ws/blob/HEAD/PROTOCOL.md
  *
  * Handling some WebSocket events launches a child coroutine (eg, starting a query or
  * a keepalive timer).  The handlers for those subscriptions must inject back into the

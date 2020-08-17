@@ -7,12 +7,12 @@ and the ability to read [AWS KMS](https://aws.amazon.com/kms/) encrypted values.
 Generally, a maven module will provide a Config object that encapsulates usage of the 
 config module and exposes the raw configuration values needed.  For example, see the 
 `db` module's
-[DbConfig](https://github.com/trib3/leakycauldron/blob/master/db/src/main/kotlin/com/trib3/db/config/DbConfig.kt).
+[DbConfig](https://github.com/trib3/leakycauldron/blob/HEAD/db/src/main/kotlin/com/trib3/db/config/DbConfig.kt).
 
 Environmental Overrides
 -----------------------
 Configuration files loaded by 
-[`ConfigLoader`](https://github.com/trib3/leakycauldron/blob/master/config/src/main/kotlin/com/trib3/config/ConfigLoader.kt)
+[`ConfigLoader`](https://github.com/trib3/leakycauldron/blob/HEAD/config/src/main/kotlin/com/trib3/config/ConfigLoader.kt)
 support environmental overrides.  Files will first be loaded through standard means 
 (`application.conf` will be loaded with fallback to `reference.conf`), and then the value 
 of the `ENV` environment variable (or `env` config value) will be read to specify a comma
@@ -40,7 +40,7 @@ Example config:
 AWS KMS Encrypted Values
 ------------------------
 Configuration string values read by 
-[`Config.extract(path: String)`](https://github.com/trib3/leakycauldron/blob/master/config/src/main/kotlin/com/trib3/config/Extension.kt) 
+[`Config.extract(path: String)`](https://github.com/trib3/leakycauldron/blob/HEAD/config/src/main/kotlin/com/trib3/config/Extension.kt) 
 support reading AWS KMS-encrypted strings.  Any string encoded as `KMS(ciphertext)` will be
 decoded through KMS before being returned.  Note that in order to successfully decrypt a 
 KMS-encrypted value, the String itself must be `extract()`ed directly, and not nested within
