@@ -48,7 +48,7 @@
         <version.aws.java>2.13.76</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.5.1</version.aws.serverless>
-        <version.checker-qual>3.5.0</version.checker-qual>
+        <version.checker-qual>3.6.0</version.checker-qual>
         <version.classgraph>4.8.87</version.classgraph>
         <version.commons-io>2.7</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
