@@ -11,7 +11,7 @@
 
     <name>Build Resources</name>
     <description>Resources for use during the build process</description>
-    <url>https://github.com/trib3/leakycauldron/tree/master/build-resources</url>
+    <url>https://github.com/trib3/leakycauldron/tree/HEAD/build-resources</url>
 
     <licenses>
         <license>

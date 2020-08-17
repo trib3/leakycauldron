@@ -11,7 +11,7 @@
 
     <name>Trib3 parent pom</name>
     <description>Parent pom for downstream projects</description>
-    <url>https://github.com/trib3/leakycauldron/tree/master/parent-pom</url>
+    <url>https://github.com/trib3/leakycauldron/tree/HEAD/parent-pom</url>
 
     <licenses>
         <license>

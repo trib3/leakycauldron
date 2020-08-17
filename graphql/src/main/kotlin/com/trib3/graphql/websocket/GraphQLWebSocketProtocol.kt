@@ -15,7 +15,7 @@ import kotlin.reflect.full.memberProperties
 /**
  * Model for a message in the graphql websocket protocol
  *
- * https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
+ * https://github.com/apollographql/subscriptions-transport-ws/blob/HEAD/PROTOCOL.md
  */
 data class OperationMessage<T : Any>(
     val type: OperationType<T>?,

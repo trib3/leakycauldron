@@ -1,26 +1,26 @@
 Graphql
 ======
 Provides the application infrastructure for adding [GraphQL](https://graphql.org) support 
-to a [server](https://github.com/trib3/leakycauldron/blob/master/server) application.
+to a [server](https://github.com/trib3/leakycauldron/blob/HEAD/server) application.
 * GraphQL endpoints:
-  * UUID, java8 time, and threeten-extra [Scalars](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/execution/LeakyCauldronHooks.kt)
-  * [Request Ids](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/execution/RequestIdInstrumentation.kt) 
+  * UUID, java8 time, and threeten-extra [Scalars](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/execution/LeakyCauldronHooks.kt)
+  * [Request Ids](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/execution/RequestIdInstrumentation.kt) 
     attached to the GraphQL response extensions
   * Any guice bound Query, Subscription or Mutation Resolvers
-  * Supports websockets using the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md)
+  * Supports websockets using the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/HEAD/PROTOCOL.md)
   * Supports subscriptions via [coroutine](https://github.com/kotlin/kotlinx.coroutines/) Flows 
     for any Resolvers that return a `Publisher<T>`
   * Supports [Dropwizard Authentication](https://www.dropwizard.io/en/latest/manual/auth.html) Principals
-    passed through to Resolvers via [GraphQLContext](https://github.com/ExpediaGroup/graphql-kotlin/blob/master/graphql-kotlin-schema-generator/src/main/kotlin/com/expediagroup/graphql/execution/GraphQLContext.kt)
+    passed through to Resolvers via [GraphQLContext](https://github.com/ExpediaGroup/graphql-kotlin/blob/HEAD/graphql-kotlin-schema-generator/src/main/kotlin/com/expediagroup/graphql/execution/GraphQLContext.kt)
 * Admin:
   * [GraphiQL](https://github.com/graphql/graphiql) available at `/admin/graphiql`
 
 #### Configuration
-Configuration is done primarily though Guice.  [`GraphQLApplicationModule`](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
+Configuration is done primarily though Guice.  [`GraphQLApplicationModule`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
 exposes binders for commonly bound objects.  
 
 ##### GraphQL Resolvers
-[`GraphQLApplicationModule`](https://github.com/trib3/leakycauldron/blob/master/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
+[`GraphQLApplicationModule`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
 provides methods that expose multi-binders for configuring GraphQL resolvers.  Any model
 classes must be added to the `graphQLPackagesBinder()` to allow [GraphQL Kotlin](https://github.com/ExpediaDotCom/graphql-kotlin/)
 to use them.  Query Resolver implementations can be added to the `graphQLQueriesBinder()`, 
@@ -42,7 +42,7 @@ class ExampleApplicationModule : GraphQLApplicationModule() {
 ```
 
 #### Auth
-If Dropwizard Authentication is setup per the [server README](https://github.com/trib3/leakycauldron/blob/master/server/README.md#auth),
+If Dropwizard Authentication is setup per the [server README](https://github.com/trib3/leakycauldron/blob/HEAD/server/README.md#auth),
 GraphQL resolver methods can receive the principal inside the GraphQL context of type
 `GraphQLResourceContext`.  Resolver methods can write to the `cookie` field of the context 
 object they receive in order to set cookies on the client (useful when, for example, using

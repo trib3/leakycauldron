@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/trib3/leakycauldron.svg?style=svg&circle-token=75d8c0fddf399e7d6393730422d42be35ef4f3b2)](https://circleci.com/gh/trib3/leakycauldron)
-[![codecov](https://codecov.io/gh/trib3/leakycauldron/branch/master/graph/badge.svg?token=MmCucLTttM)](https://codecov.io/gh/trib3/leakycauldron)
+[![codecov](https://codecov.io/gh/trib3/leakycauldron/branch/main/graph/badge.svg?token=MmCucLTttM)](https://codecov.io/gh/trib3/leakycauldron)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.trib3/leakycauldron/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.trib3/leakycauldron/)
 
 Tribe Dynamics' Leaky Cauldron
@@ -42,44 +42,44 @@ Project Layout
 Note that most modules make use of [Guice](https://github.com/google/guice) for 
 dependency injection of configured instances.
 
-* [`/build-resources`](https://github.com/trib3/leakycauldron/tree/master/build-resources)
+* [`/build-resources`](https://github.com/trib3/leakycauldron/tree/HEAD/build-resources)
 
 This contains resources for use during a maven build.  If depended upon, it should only be
 brought into test scope.
 
-* [`/parent-pom`](https://github.com/trib3/leakycauldron/tree/master/parent-pom)
+* [`/parent-pom`](https://github.com/trib3/leakycauldron/tree/HEAD/parent-pom)
 
 This contains the parent pom to be used for all maven projects at Tribe.
 
-* [`/json`](https://github.com/trib3/leakycauldron/tree/master/json)
+* [`/json`](https://github.com/trib3/leakycauldron/tree/HEAD/json)
 
 This contains classes and [Guice](https://github.com/google/guice) modules for configuring 
 [Jackson](https://github.com/FasterXML/jackson) objects to work with Tribe codebases.
 
-* [`/testing`](https://github.com/trib3/leakycauldron/tree/master/testing)
+* [`/testing`](https://github.com/trib3/leakycauldron/tree/HEAD/testing)
 
 This contains classes that enhance writing unit tests.
 
-* [`/config`](https://github.com/trib3/leakycauldron/tree/master/config)
+* [`/config`](https://github.com/trib3/leakycauldron/tree/HEAD/config)
 
 This contains classes for parsing [HOCON](https://github.com/lightbend/config) application.conf
 files with support for environmental overrides and AWS KMS-based encrypted values.
 
-* [`/db`](https://github.com/trib3/leakycauldron/tree/master/db)
+* [`/db`](https://github.com/trib3/leakycauldron/tree/HEAD/db)
 
 This contains classes for injecting configured [jOOQ](https://www.jooq.org) `DSLContext`s and 
 JDBC `DataSource`s into application data access code.
 
-* [`/server`](https://github.com/trib3/leakycauldron/tree/master/server)
+* [`/server`](https://github.com/trib3/leakycauldron/tree/HEAD/server)
 
 This contains classes for setting up a configurable [Dropwizard](https://dropwizard.io) based 
 application.
 
-* [`/graphql`](https://github.com/trib3/leakycauldron/tree/master/graphql)
+* [`/graphql`](https://github.com/trib3/leakycauldron/tree/HEAD/graphql)
 
 This contains classes for adding [GraphQL](https://graphql.org) support to an application.
 
-* [`/lambda`](https://github.com/trib3/leakycauldron/tree/master/lambda)
+* [`/lambda`](https://github.com/trib3/leakycauldron/tree/HEAD/lambda)
 
 This contains classes that allow an application to be deployed to 
 [AWS Lambda](https://aws.amazon.com/lambda/).

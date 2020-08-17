@@ -29,7 +29,7 @@ jobs:
           command: |
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
-            if [ "$CIRCLE_BRANCH" = "master" ]; then
+            if [ "$CIRCLE_BRANCH" = "main" ]; then
                 set +o pipefail # it's ok to keep going if grep doesn't match anything 
                 REPOIDS=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
                 set -o pipefail
@@ -41,7 +41,7 @@ jobs:
                 fi
             fi
             cd build-resources && BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
-            if [ "$CIRCLE_BRANCH" = "master" ]; then
+            if [ "$CIRCLE_BRANCH" = "main" ]; then
               NEW_PROJECT_VERSION=${BASE_VERSION}.${CIRCLE_BUILD_NUM}
             else
               NEW_PROJECT_VERSION=${BASE_VERSION}-${CIRCLE_BRANCH}-SNAPSHOT
@@ -55,7 +55,7 @@ jobs:
       - run:
           name: Maven Build
           command: |
-            if [ "$CIRCLE_BRANCH" = "master" ]; then
+            if [ "$CIRCLE_BRANCH" = "main" ]; then
               mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} -U
             else
               mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} -U
@@ -122,11 +122,11 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
       - deploy:
           requires:
             - hold
           filters:
             branches:
               only:
-                - master
+                - main
