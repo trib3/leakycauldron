@@ -21,7 +21,8 @@ class RequestIdInstrumentationTest {
     val graphQL =
         GraphQL.newGraphQL(
             toSchema(
-                config, listOf(TopLevelObject(Query()))
+                config,
+                listOf(TopLevelObject(Query()))
             )
         ).instrumentation(RequestIdInstrumentation()).build()
 
