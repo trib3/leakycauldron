@@ -72,18 +72,20 @@ class FilteredLogbackAccessRequestLogFactory : LogbackAccessRequestLogFactory() 
         }
 
         // add successful ping filter
-        requestLog.addFilter(object : Filter<IAccessEvent>() {
-            override fun decide(event: IAccessEvent): FilterReply {
-                if (
-                    event.requestURI == "/app/ping" &&
-                    event.statusCode == HttpServletResponse.SC_OK &&
-                    event.elapsedTime < FAST_RESPONSE_TIME
-                ) {
-                    return FilterReply.DENY
+        requestLog.addFilter(
+            object : Filter<IAccessEvent>() {
+                override fun decide(event: IAccessEvent): FilterReply {
+                    if (
+                        event.requestURI == "/app/ping" &&
+                        event.statusCode == HttpServletResponse.SC_OK &&
+                        event.elapsedTime < FAST_RESPONSE_TIME
+                    ) {
+                        return FilterReply.DENY
+                    }
+                    return FilterReply.NEUTRAL
                 }
-                return FilterReply.NEUTRAL
             }
-        })
+        )
         return requestLog
     }
 }
