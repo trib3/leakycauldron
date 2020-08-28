@@ -10,6 +10,7 @@ import com.trib3.config.modules.KMSModule
 import com.trib3.json.modules.ObjectMapperModule
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
+import com.trib3.server.coroutine.CoroutineModelProcessor
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
@@ -48,8 +49,11 @@ class DefaultApplicationModule : TribeApplicationModule() {
             ServletFilterConfig(RequestIdFilter::class.java.simpleName, RequestIdFilter::class.java)
         )
 
-        // Bind ping and graphql resources
+        // Bind ping resource
         resourceBinder().addBinding().to<PingResource>()
+
+        // Bind coroutine model processor
+        resourceBinder().addBinding().toInstance(CoroutineModelProcessor::class.java)
 
         // set up metrics for guice created instances
         val registry = MetricRegistry()
