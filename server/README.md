@@ -19,6 +19,7 @@ and have:
   * [Request Ids](https://github.com/trib3/leakycauldron/blob/HEAD/server/src/main/kotlin/com/trib3/server/filters/RequestIdFilter.kt) 
     attached to HTTP headers
   * Any guice bound JAX-RS Resources
+  * JAX-RS Resource methods implementable via [suspend functions/coroutines](https://github.com/trib3/leakycauldron/blob/HEAD/server/src/main/kotlin/com/trib3/server/coroutine/CoroutineInvocationHandler.kt)
 * Admin:
   * The dropwizard `/admin` servlet will be [password protected](https://github.com/trib3/leakycauldron/blob/HEAD/server/src/main/kotlin/com/trib3/server/filters/AdminAuthFilter.kt)
     with a password set from the `application.adminAuthToken` configuration variable 
