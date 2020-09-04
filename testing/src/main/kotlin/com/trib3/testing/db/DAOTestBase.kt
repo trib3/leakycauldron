@@ -1,6 +1,7 @@
 package com.trib3.testing.db
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.jooq.DSLContext
@@ -29,6 +30,16 @@ open class DAOTestBase {
         return Flyway.configure().dataSource(dataSource)
     }
 
+    /**
+     * By default configure autoCommit to false since
+     * we do so in DbConfig, and don't want DAO tests
+     * to pass due to autocommit if transactions are
+     * not committed by application code.
+     */
+    open fun configureDataSource(ds: HikariDataSource) {
+        ds.isAutoCommit = false
+    }
+
     @BeforeClass
     open fun setUp() {
         if (!inited) {
@@ -36,7 +47,10 @@ open class DAOTestBase {
             postgres = EmbeddedPostgres.builder()
                 .setOutputRedirector(ProcessBuilder.Redirect.DISCARD)
                 .start()
-            dataSource = postgres.postgresDatabase
+            dataSource = HikariDataSource().apply {
+                dataSource = postgres.postgresDatabase
+                configureDataSource(this)
+            }
             ctx = DSL.using(dataSource, SQLDialect.POSTGRES)
             getFlywayConfiguration().load().migrate()
         }
@@ -45,5 +59,6 @@ open class DAOTestBase {
     @AfterClass
     open fun tearDown() {
         postgres.close()
+        (dataSource as HikariDataSource).close()
     }
 }
