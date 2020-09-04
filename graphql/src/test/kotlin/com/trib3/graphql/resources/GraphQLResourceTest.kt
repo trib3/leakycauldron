@@ -100,7 +100,8 @@ class GraphQLResourceTest {
     fun testErrorQuery() {
         val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {error}", mapOf(), null))
         val graphQLResult = result.entity as ExecutionResult
-        assertThat(graphQLResult.errors.first()).prop(GraphQLError::getMessage).isEqualTo("an error was thrown")
+        assertThat(graphQLResult.errors.first()).prop("message", GraphQLError::getMessage)
+            .isEqualTo("an error was thrown")
         assertThat(graphQLResult.errors.first()).isInstanceOf(SanitizedGraphQLError::class)
         assertThat((graphQLResult.errors.first() as SanitizedGraphQLError).exception)
             .hasRootCause(IllegalArgumentException("an error was thrown"))
@@ -112,7 +113,7 @@ class GraphQLResourceTest {
     fun testUnknownErrorQuery() {
         val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {unknownError}", mapOf(), null))
         val graphQLResult = result.entity as ExecutionResult
-        assertThat(graphQLResult.errors.first()).prop(GraphQLError::getMessage)
+        assertThat(graphQLResult.errors.first()).prop("message", GraphQLError::getMessage)
             .contains("Exception while fetching data")
         val serializedError = objectMapper.writeValueAsString(graphQLResult.errors.first())
         assertThat(objectMapper.readValue<Map<String, *>>(serializedError).keys).doesNotContain("exception")
