@@ -74,7 +74,14 @@ jobs:
       - run: bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
       # collect docs
       - run: mkdir -p ~/docs
-      - run: find . -type d -name 'dokka' -exec cp -r {} ~/docs/ \;
+      - run:
+          name: Collect docs
+          command: |
+            for subdir in `find . -maxdepth 1 -mindepth 1 -type d`; do
+              if [ -d $subdir/target/dokka ]; then
+                cp -r $subdir/target/dokka ~/docs/$subdir
+              fi
+            done
       - store_artifacts:
           path: ~/docs
       # collect built packages and save to workspace for deploy
