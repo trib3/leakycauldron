@@ -37,32 +37,32 @@ class CoroutineModelProcessor @Inject constructor(
             ) {
                 val fakeClass = ByteBuddy()
                     .subclass(Object::class.java)
-                    .annotateType(method.invocable.handler.handlerClass.annotations.toList())
+                    .annotateType(method.invocable.definitionMethod.declaringClass.annotations.toList())
                     .defineMethod(
-                        method.invocable.handlingMethod.name,
-                        method.invocable.rawResponseType,
+                        method.invocable.definitionMethod.name,
+                        method.invocable.responseType,
                         Visibility.PUBLIC
                     )
                     .withParameters(
                         method.invocable.parameters
                             .slice(0 until method.invocable.parameters.size - 1)
-                            .map { it.rawType }
+                            .map { it.type }
                     )
                     .intercept(
                         InvocationHandlerAdapter.of(
                             CoroutineInvocationHandler(
                                 asyncContextProvider,
                                 { method.invocable.handler.getInstance(injectionManager) },
-                                method.invocable.handlingMethod
+                                method.invocable
                             )
                         )
                     )
-                    .annotateMethod(method.invocable.handlingMethod.annotations.toList())
+                    .annotateMethod(method.invocable.definitionMethod.annotations.toList())
                     // copy the annotations for each parameter in the invocable method
                     // (except for the last/Continuation param)
                     .let { fakeMethod ->
-                        method.invocable.handlingMethod.parameterAnnotations
-                            .slice(0 until method.invocable.handlingMethod.parameterAnnotations.size - 1)
+                        method.invocable.definitionMethod.parameterAnnotations
+                            .slice(0 until method.invocable.definitionMethod.parameterAnnotations.size - 1)
                             .foldIndexed(fakeMethod) { index, annotatedMethod, parameter ->
                                 annotatedMethod.annotateParameter(index, parameter.toList())
                             }
@@ -73,7 +73,7 @@ class CoroutineModelProcessor @Inject constructor(
 
                 val proxyInstance = fakeClass.getDeclaredConstructor().newInstance()
                 val handlingMethod =
-                    proxyInstance::class.java.methods.first { it.name == method.invocable.handlingMethod.name }
+                    proxyInstance::class.java.methods.first { it.name == method.invocable.definitionMethod.name }
                 val replacedMethod = resourceBuilder.updateMethod(method)
                 replacedMethod.handledBy(
                     proxyInstance,
