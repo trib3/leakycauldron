@@ -6,12 +6,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
 import org.glassfish.jersey.server.AsyncContext
+import org.glassfish.jersey.server.model.Invocable
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import javax.inject.Provider
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.reflect.full.callSuspend
-import kotlin.reflect.jvm.kotlinFunction
+import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 
 /**
  * [InvocationHandler] that runs a jersey resource method implemented by a suspend
@@ -25,7 +25,7 @@ import kotlin.reflect.jvm.kotlinFunction
 class CoroutineInvocationHandler(
     private val asyncContextProvider: Provider<AsyncContext>,
     private val originalObjectProvider: () -> Any,
-    private val originalMethod: Method
+    private val originalInvocable: Invocable
 ) : InvocationHandler, CoroutineScope by CoroutineScope(Dispatchers.Unconfined) {
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
         val asyncContext = asyncContextProvider.get()
@@ -33,8 +33,9 @@ class CoroutineInvocationHandler(
             throw IllegalStateException("Can't suspend!")
         }
         val originalObject = originalObjectProvider.invoke()
-        val methodAnnotation = originalMethod.getAnnotation(AsyncDispatcher::class.java)
-        val classAnnotation = originalMethod.declaringClass.getAnnotation(AsyncDispatcher::class.java)
+        val methodAnnotation = originalInvocable.definitionMethod.getAnnotation(AsyncDispatcher::class.java)
+        val classAnnotation =
+            originalInvocable.definitionMethod.declaringClass.getAnnotation(AsyncDispatcher::class.java)
         val additionalContext = when ((methodAnnotation ?: classAnnotation)?.dispatcher) {
             "Default" -> Dispatchers.Default
             "IO" -> Dispatchers.IO
@@ -45,10 +46,11 @@ class CoroutineInvocationHandler(
         val scope = (originalObject as? CoroutineScope) ?: this
         scope.launch(additionalContext + MDCContext()) {
             try {
-                val result = originalMethod.kotlinFunction!!.callSuspend(
-                    originalObject,
-                    *args
-                )
+                // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
+                // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
+                val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
+                    originalInvocable.handlingMethod.invoke(originalObject, *args, cont)
+                }
                 asyncContext.resume(result)
             } catch (e: Throwable) {
                 var cause: Throwable? = e

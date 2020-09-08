@@ -30,6 +30,11 @@ abstract class ResourceTestBase<T> {
     val resource: Resource by lazy {
         val resourceBuilder = Builder()
         resourceBuilder.setTestContainerFactory(getContainerFactory())
+        // try to add the CoroutineModelProcessor without directly depending on the server jar
+        runCatching {
+            val modelProcessor = Class.forName("com.trib3.server.coroutine.CoroutineModelProcessor")
+            resourceBuilder.addResource(modelProcessor)
+        }
         resourceBuilder.addResource(getResource())
         buildAdditionalResources(resourceBuilder)
         System.setProperty("jersey.config.test.container.port", "0")

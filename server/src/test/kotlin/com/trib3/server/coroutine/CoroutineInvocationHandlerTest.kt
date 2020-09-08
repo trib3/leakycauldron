@@ -3,8 +3,14 @@ package com.trib3.server.coroutine
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.annotation.Timed
+import com.google.inject.Guice
+import com.palominolabs.metrics.guice.MetricsInstrumentationModule
 import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
+import dev.misfitlabs.kotlinguice4.KotlinModule
+import dev.misfitlabs.kotlinguice4.getInstance
 import io.dropwizard.testing.common.Resource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
+import java.util.Optional
 import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
@@ -24,7 +31,7 @@ import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalStdlibApi::class)
 @Path("/")
-class InvocationHandlerTestResource {
+open class InvocationHandlerTestResource {
 
     @Path("/regular")
     @GET
@@ -46,7 +53,8 @@ class InvocationHandlerTestResource {
 
     @Path("/coroutine")
     @GET
-    suspend fun coroutineMethod(): String {
+    @Timed
+    open suspend fun coroutineMethod(): String {
         if (coroutineContext[CoroutineDispatcher].toString() != "Dispatchers.Unconfined") {
             throw IllegalStateException("wrong dispatcher ${coroutineContext[CoroutineDispatcher]}")
         }
@@ -56,12 +64,12 @@ class InvocationHandlerTestResource {
 
     @Path("/coroutineQ")
     @GET
-    suspend fun coroutineQueryParameter(@QueryParam("q") q: String?): String {
+    suspend fun coroutineQueryParameter(@QueryParam("q") q: Optional<String>): String {
         if (coroutineContext[CoroutineDispatcher].toString() != "Dispatchers.Unconfined") {
             throw IllegalStateException("wrong dispatcher ${coroutineContext[CoroutineDispatcher]}")
         }
         delay(1)
-        return "coroutine$q"
+        return "coroutine${q.orElse("null")}"
     }
 
     @Path("/coroutine")
@@ -186,7 +194,19 @@ class InvocationHandlerClassScopeTestResource : CoroutineScope by CoroutineScope
 }
 
 class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestResource>() {
-    override fun getResource() = InvocationHandlerTestResource()
+    // create through guice  w/ metrics instrumentation so we get a dynamically subclassed instance
+    override fun getResource(): InvocationHandlerTestResource {
+        val injector = Guice.createInjector(
+            object : KotlinModule() {
+                override fun configure() {
+                    val registry = MetricRegistry()
+                    bind<MetricRegistry>().toInstance(registry)
+                    install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
+                }
+            }
+        )
+        return injector.getInstance()
+    }
 
     override fun getContainerFactory(): TestContainerFactory {
         return JettyWebTestContainerFactory()
