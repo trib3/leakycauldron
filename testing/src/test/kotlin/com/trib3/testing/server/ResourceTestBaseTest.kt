@@ -2,6 +2,7 @@ package com.trib3.testing.server
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import org.glassfish.jersey.test.inmemory.InMemoryTestContainerFactory
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import javax.servlet.http.HttpServletRequest
@@ -22,10 +23,6 @@ class ResourceTestBaseJettyWebContainerTest : ResourceTestBase<SimpleResource>()
         return SimpleResource()
     }
 
-    override fun getContainerFactory(): TestContainerFactory {
-        return JettyWebTestContainerFactory()
-    }
-
     @Test
     fun testSimpleResource() {
         val response = resource.target("/").request().header("Test-Header", "Test-Value").get()
@@ -37,6 +34,10 @@ class ResourceTestBaseJettyWebContainerTest : ResourceTestBase<SimpleResource>()
 class ResourceTestBaseInMemoryContainerTest : ResourceTestBase<SimpleResource>() {
     override fun getResource(): SimpleResource {
         return SimpleResource()
+    }
+
+    override fun getContainerFactory(): TestContainerFactory {
+        return InMemoryTestContainerFactory()
     }
 
     @Test

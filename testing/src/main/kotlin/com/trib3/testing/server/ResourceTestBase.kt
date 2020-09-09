@@ -3,7 +3,6 @@ package com.trib3.testing.server
 import com.trib3.json.ObjectMapperProvider
 import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.testing.common.Resource
-import org.glassfish.jersey.test.inmemory.InMemoryTestContainerFactory
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
@@ -44,7 +43,7 @@ abstract class ResourceTestBase<T> {
     abstract fun getResource(): T
 
     open fun getContainerFactory(): TestContainerFactory {
-        return InMemoryTestContainerFactory()
+        return JettyWebTestContainerFactory()
     }
 
     open fun buildAdditionalResources(resourceBuilder: Resource.Builder<*>) {

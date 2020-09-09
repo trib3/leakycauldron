@@ -7,24 +7,38 @@ import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput
 import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
+import com.trib3.server.coroutine.AsyncDispatcher
+import com.trib3.server.filters.RequestIdFilter
 import graphql.GraphQL
 import io.dropwizard.auth.Auth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.supervisorScope
+import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 import java.security.Principal
 import java.util.Optional
+import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Nullable
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import javax.ws.rs.DELETE
 import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
+import javax.ws.rs.QueryParam
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.NewCookie
 import javax.ws.rs.core.Response
+
+private val log = KotlinLogging.logger {}
 
 /**
  * Context class for communicating auth status to/from GraphQL queries/mutations/subscriptions.
@@ -35,8 +49,9 @@ import javax.ws.rs.core.Response
  */
 data class GraphQLResourceContext(
     val principal: Principal?,
+    private val scope: CoroutineScope = GlobalScope,
     var cookie: NewCookie? = null
-) : GraphQLContext
+) : GraphQLContext, CoroutineScope by scope
 
 /**
  * Jersey Resource entry point to GraphQL execution.  Configures the graphql schemas at
@@ -51,6 +66,9 @@ open class GraphQLResource
     private val creatorFactory: GraphQLContextWebSocketCreatorFactory,
     @Nullable val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
 ) {
+
+    internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
+
     internal val webSocketFactory = WebSocketServerFactory().apply {
         if (graphQLConfig.idleTimeout != null) {
             this.policy.idleTimeout = graphQLConfig.idleTimeout
@@ -70,12 +88,24 @@ open class GraphQLResource
     @POST
     @Path("/graphql")
     @Timed
-    open fun graphQL(@Auth principal: Optional<Principal>, query: GraphQLRequest): Response {
-        val context = GraphQLResourceContext(principal.orElse(null))
-        val result = graphQL.execute(
+    @AsyncDispatcher("IO")
+    open suspend fun graphQL(@Auth principal: Optional<Principal>, query: GraphQLRequest): Response = supervisorScope {
+        val context = GraphQLResourceContext(principal.orElse(null), this)
+        val requestId = RequestIdFilter.getRequestId()
+        val futureResult = graphQL.executeAsync(
             query.toExecutionInput(context, dataLoaderRegistryFactory)
-        )
-        return Response.ok(result)
+        ).whenComplete { result, throwable ->
+            if (requestId != null) {
+                log.debug("$requestId finished with $result, $throwable")
+                runningFutures.remove(requestId)
+            }
+        }
+        if (requestId != null) {
+            runningFutures[requestId] = this
+        }
+
+        val result = futureResult.await()
+        Response.ok(result)
             .let {
                 // Communicate any set cookie back to the client
                 if (context.cookie != null) {
@@ -84,6 +114,18 @@ open class GraphQLResource
                     it
                 }
             }.build()
+    }
+
+    /**
+     * Allow cancellation of running queries by [requestId].
+     */
+    @DELETE
+    @Path("/graphql")
+    fun cancel(@QueryParam("id") requestId: String) {
+        val running = runningFutures[requestId]
+        if (running != null) {
+            running.coroutineContext[Job]?.cancelChildren()
+        }
     }
 
     /**

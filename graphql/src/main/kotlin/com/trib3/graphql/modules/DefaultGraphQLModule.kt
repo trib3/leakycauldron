@@ -3,12 +3,12 @@ package com.trib3.graphql.modules
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
 import com.expediagroup.graphql.execution.FlowSubscriptionExecutionStrategy
-import com.expediagroup.graphql.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.Provides
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.name.Names
+import com.trib3.graphql.execution.ContextScopeKotlinDataFetcherFactoryProvider
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.JsonSafeExecutionResultMixin
 import com.trib3.graphql.execution.LeakyCauldronHooks
@@ -88,7 +88,7 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
             hooks = hooks,
-            dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(mapper)
+            dataFetcherFactoryProvider = ContextScopeKotlinDataFetcherFactoryProvider(mapper)
         )
         return GraphQL.newGraphQL(
             toSchema(

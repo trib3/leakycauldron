@@ -12,6 +12,8 @@ to a [server](https://github.com/trib3/leakycauldron/blob/HEAD/server) applicati
     for any Resolvers that return a `Publisher<T>`
   * Supports [Dropwizard Authentication](https://www.dropwizard.io/en/latest/manual/auth.html) Principals
     passed through to Resolvers via [GraphQLContext](https://github.com/ExpediaGroup/graphql-kotlin/blob/HEAD/graphql-kotlin-schema-generator/src/main/kotlin/com/expediagroup/graphql/execution/GraphQLContext.kt)
+  * Supports [coroutine](https://github.com/kotlin/kotlinx.coroutines/) structured concurrency and cancellation
+    of POSTed GraphQL queries for Resolvers implemented as `suspend` functions
 * Admin:
   * [GraphiQL](https://github.com/graphql/graphiql) available at `/admin/graphiql`
 
@@ -79,6 +81,30 @@ class ExampleLoginMutations : GraphQLQueryResolver {
                 )
         }
         return true
+    }
+}
+```
+
+#### GraphQLResourceContext CoroutineScope
+`GraphQLResourceContext` implements `CoroutineScope`.  GraphQL resolver methods
+implemented as `suspend` functions will be run in this scope.  A `DELETE` call to 
+`/app/graphql?id=${requestId}` will cancel the scope of a running query. 
+
+```kotlin
+class ExampleSuspendQuery : GraphQLQueryResolver {
+    suspend fun coroutineMethod(): String {
+        return coroutineScope {
+            // new scope whose parent scope is the GraphQLResourceContext object
+            val job1 = async {
+                // do stuff asynchronously
+                "value1"
+            }
+            val job2 = async {
+                 // do more stuff asynchronously, concurrently
+                 "value2"
+            }
+            "${job1.await()}:${job2.await()}"
+        }
     }
 }
 ```
