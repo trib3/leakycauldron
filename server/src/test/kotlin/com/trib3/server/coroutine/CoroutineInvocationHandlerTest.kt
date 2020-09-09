@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.annotation.Timed
 import com.google.inject.Guice
 import com.palominolabs.metrics.guice.MetricsInstrumentationModule
-import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import dev.misfitlabs.kotlinguice4.getInstance
@@ -18,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
+import org.glassfish.jersey.test.inmemory.InMemoryTestContainerFactory
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.util.Optional
@@ -208,10 +208,6 @@ class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestRes
         return injector.getInstance()
     }
 
-    override fun getContainerFactory(): TestContainerFactory {
-        return JettyWebTestContainerFactory()
-    }
-
     override fun buildAdditionalResources(resourceBuilder: Resource.Builder<*>) {
         resourceBuilder.addResource(CoroutineModelProcessor::class.java)
             .addResource(InvocationHandlerClassScopeTestResource::class.java)
@@ -353,6 +349,10 @@ class CoroutineInvocationHandlerCantSuspendTest : ResourceTestBase<InvocationHan
 
     override fun buildAdditionalResources(resourceBuilder: Resource.Builder<*>) {
         resourceBuilder.addResource(CoroutineModelProcessor::class.java)
+    }
+
+    override fun getContainerFactory(): TestContainerFactory {
+        return InMemoryTestContainerFactory()
     }
 
     @Test
