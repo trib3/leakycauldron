@@ -8,6 +8,7 @@ import javax.servlet.FilterChain
 import javax.servlet.FilterConfig
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 private val log = KotlinLogging.logger { }
@@ -77,11 +78,17 @@ class RequestIdFilter : Filter {
     override fun destroy() = Unit
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-        withRequestId {
-            when (response) {
-                is HttpServletResponse -> response.setHeader(REQUEST_ID_HEADER, getRequestId())
-                else -> log.warn("Couldn't set request id header for {}", response::class.java)
+        val clientUUID = (request as? HttpServletRequest)?.getHeader(REQUEST_ID_HEADER)?.let {
+            try {
+                UUID.fromString(it).toString()
+            } catch (e: IllegalArgumentException) {
+                val newId = UUID.randomUUID().toString()
+                log.warn("Ignoring invalidly formatted requestId: $it, and using $newId instead")
+                newId
             }
+        }
+        withRequestId(clientUUID) {
+            (response as? HttpServletResponse)?.setHeader(REQUEST_ID_HEADER, getRequestId())
             chain.doFilter(request, response)
         }
     }

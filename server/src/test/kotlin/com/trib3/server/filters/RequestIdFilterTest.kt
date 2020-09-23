@@ -34,8 +34,43 @@ class RequestIdFilterTest {
     fun testLoggingFilter() {
         val mockRequest = LeakyMock.mock<HttpServletRequest>()
         val mockResponse = LeakyMock.mock<HttpServletResponse>()
+        EasyMock.expect(mockRequest.getHeader(RequestIdFilter.REQUEST_ID_HEADER)).andReturn(null)
         EasyMock.expect(mockResponse.setHeader(EasyMock.eq(RequestIdFilter.REQUEST_ID_HEADER), LeakyMock.anyString()))
             .once()
+        EasyMock.replay(mockRequest, mockResponse)
+        filter.doFilter(mockRequest, mockResponse) { _, _ ->
+            assertThat(MDC.get(RequestIdFilter.REQUEST_ID_KEY)).isNotEmpty()
+        }
+        EasyMock.verify(mockResponse)
+    }
+
+    @Test
+    fun testLoggingFilterWithClientRequestId() {
+        val requestId = UUID.randomUUID().toString()
+        val mockRequest = LeakyMock.mock<HttpServletRequest>()
+        val mockResponse = LeakyMock.mock<HttpServletResponse>()
+        EasyMock.expect(mockRequest.getHeader(RequestIdFilter.REQUEST_ID_HEADER)).andReturn(requestId)
+        EasyMock.expect(mockResponse.setHeader(RequestIdFilter.REQUEST_ID_HEADER, requestId))
+            .once()
+        EasyMock.replay(mockRequest, mockResponse)
+        filter.doFilter(mockRequest, mockResponse) { _, _ ->
+            assertThat(MDC.get(RequestIdFilter.REQUEST_ID_KEY)).isNotEmpty()
+        }
+        EasyMock.verify(mockResponse)
+    }
+
+    @Test
+    fun testLoggingFilterWithInvalidClientRequestId() {
+        val requestId = "blahblahblah"
+        val mockRequest = LeakyMock.mock<HttpServletRequest>()
+        val mockResponse = LeakyMock.mock<HttpServletResponse>()
+        EasyMock.expect(mockRequest.getHeader(RequestIdFilter.REQUEST_ID_HEADER)).andReturn(requestId)
+        EasyMock.expect(
+            mockResponse.setHeader(
+                EasyMock.eq(RequestIdFilter.REQUEST_ID_HEADER),
+                EasyMock.not(EasyMock.eq(requestId))
+            )
+        ).once()
         EasyMock.replay(mockRequest, mockResponse)
         filter.doFilter(mockRequest, mockResponse) { _, _ ->
             assertThat(MDC.get(RequestIdFilter.REQUEST_ID_KEY)).isNotEmpty()
@@ -50,6 +85,7 @@ class RequestIdFilterTest {
         try {
             val mockRequest = LeakyMock.mock<HttpServletRequest>()
             val mockResponse = LeakyMock.mock<HttpServletResponse>()
+            EasyMock.expect(mockRequest.getHeader(RequestIdFilter.REQUEST_ID_HEADER)).andReturn(null)
             EasyMock.expect(
                 mockResponse.setHeader(
                     EasyMock.eq(RequestIdFilter.REQUEST_ID_HEADER),
