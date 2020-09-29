@@ -3,6 +3,7 @@ package com.trib3.db.flyway
 import org.easymock.EasyMock
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.configuration.FluentConfiguration
+import org.flywaydb.core.api.output.MigrateResult
 import org.testng.annotations.Test
 import javax.sql.DataSource
 
@@ -14,7 +15,7 @@ class FlywayBundleTest {
         val mockFlyway = EasyMock.mock<Flyway>(Flyway::class.java)
         EasyMock.expect(mockConfig.dataSource(mockDatasource)).andReturn(mockConfig).once()
         EasyMock.expect(mockConfig.load()).andReturn(mockFlyway).once()
-        EasyMock.expect(mockFlyway.migrate()).andReturn(1).once()
+        EasyMock.expect(mockFlyway.migrate()).andReturn(MigrateResult("7", "test", "test")).once()
         EasyMock.replay(mockConfig, mockDatasource, mockFlyway)
         val bundle = FlywayBundle(mockDatasource, mockConfig)
         bundle.run(null, null)
