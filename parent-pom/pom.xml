@@ -51,6 +51,7 @@
         <version.byte-buddy>1.10.15</version.byte-buddy>
         <version.checker-qual>3.6.1</version.checker-qual>
         <version.classgraph>4.8.90</version.classgraph>
+        <version.commons-codec>1.15</version.commons-codec>
         <version.commons-io>2.8.0</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
         <version.detekt>1.13.1</version.detekt>
@@ -60,7 +61,7 @@
         <version.dropwizard.metrics>4.1.12.1</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.2</version.easymock>
-        <version.flyway>6.5.7</version.flyway>
+        <version.flyway>7.0.0</version.flyway>
         <version.graphql-kotlin>3.6.4</version.graphql-kotlin>
         <version.graphql-java>15.0</version.graphql-java>
         <version.graphql-java.tools>5.2.4</version.graphql-java.tools>
@@ -803,6 +804,25 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>s3</artifactId>
+                <version>${version.aws.java}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.reactivestreams</groupId>
+                        <artifactId>reactive-streams</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.typesafe.netty</groupId>
+                        <artifactId>netty-reactive-streams-http</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <!-- lambda -->
             <dependency>
@@ -850,6 +870,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${version.commons-io}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons-codec}</version>
             </dependency>
 
             <!-- guice -->
