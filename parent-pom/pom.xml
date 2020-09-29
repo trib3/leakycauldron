@@ -53,7 +53,7 @@
         <version.classgraph>4.8.90</version.classgraph>
         <version.commons-io>2.8.0</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
-        <version.detekt>1.13.1</version.detekt>
+        <version.detekt>1.14.0</version.detekt>
         <version.dokka>1.4.10</version.dokka>
         <version.dropwizard>2.0.13</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
