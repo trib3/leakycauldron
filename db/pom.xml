@@ -96,6 +96,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- test -->
         <dependency>
