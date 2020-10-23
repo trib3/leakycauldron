@@ -123,7 +123,7 @@
         <version.swagger>2.1.5</version.swagger>
         <version.testng>7.3.0</version.testng>
         <version.threeten>1.5.0</version.threeten>
-        <version.typesafe.config>1.4.0</version.typesafe.config>
+        <version.typesafe.config>1.4.1</version.typesafe.config>
         <version.validation>2.0.2</version.validation>
     </properties>
 
