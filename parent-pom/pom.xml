@@ -83,7 +83,7 @@
         <version.jaxrs>2.1.6</version.jaxrs>
         <version.jersey>2.32</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>9.4.32.v20200930</version.jetty>
+        <version.jetty>9.4.33.v20201020</version.jetty>
         <version.joda>2.10.8</version.joda>
         <version.jooq>3.13.5</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
