@@ -29,4 +29,13 @@
             <outputDirectory></outputDirectory>
         </file>
     </files>
+    <fileSets>
+        <fileSet>
+            <includes>
+                <include>Procfile</include>
+            </includes>
+            <outputDirectory></outputDirectory>
+            <filtered>true</filtered>
+        </fileSet>
+    </fileSets>
 </assembly>
