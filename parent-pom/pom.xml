@@ -48,7 +48,7 @@
         <version.aws.java>2.15.17</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.5.2</version.aws.serverless>
-        <version.byte-buddy>1.10.17</version.byte-buddy>
+        <version.byte-buddy>1.10.18</version.byte-buddy>
         <version.checker-qual>3.7.0</version.checker-qual>
         <version.classgraph>4.8.90</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
