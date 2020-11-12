@@ -39,10 +39,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.easymock.EasyMock
+import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import javax.ws.rs.ClientErrorException
 import kotlin.coroutines.CoroutineContext
 
 class TestQuery : GraphQLQueryResolver {
@@ -56,6 +60,10 @@ class TestQuery : GraphQLQueryResolver {
 
     fun unknownError(): String {
         throw IllegalArgumentException()
+    }
+
+    fun unauthorizedError(): String {
+        throw ClientErrorException(HttpStatus.UNAUTHORIZED_401)
     }
 
     suspend fun cancellable(): String {
@@ -105,6 +113,15 @@ class GraphQLResourceTest {
     }
 
     @Test
+    fun testUpgradeNoContainer() {
+        val mockReq = LeakyMock.niceMock<HttpServletRequest>()
+        val mockRes = LeakyMock.niceMock<HttpServletResponse>()
+        EasyMock.replay(mockReq, mockRes)
+        val resp = resource.graphQLUpgrade(Optional.empty(), mockReq, mockRes)
+        assertThat(resp.status).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405)
+    }
+
+    @Test
     fun testVariablesQuery() = runBlocking {
         val result = resource.graphQL(
             Optional.empty(),
@@ -129,6 +146,14 @@ class GraphQLResourceTest {
             .hasRootCause(IllegalArgumentException("an error was thrown"))
         val serializedError = objectMapper.writeValueAsString(graphQLResult.errors.first())
         assertThat(objectMapper.readValue<Map<String, *>>(serializedError).keys).doesNotContain("exception")
+    }
+
+    @Test
+    fun testUnauthorizedErrorQuery() = runBlocking {
+        val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {unauthorizedError}", mapOf(), null))
+        assertThat(result.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
+        assertThat(result.entity).isNull()
+        assertThat(result.getHeaderString("WWW-Authenticate")).isEqualTo("Basic realm=\"Realm\"")
     }
 
     @Test

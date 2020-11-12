@@ -2,7 +2,9 @@ package com.trib3.graphql.resources
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isNull
+import assertk.assertions.messageContains
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
@@ -22,10 +24,13 @@ import io.dropwizard.auth.AuthDynamicFeature
 import io.dropwizard.testing.common.Resource
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest
 import org.eclipse.jetty.websocket.client.WebSocketClient
+import org.eclipse.jetty.websocket.client.WebSocketUpgradeRequest
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
+import java.net.HttpCookie
 import java.security.Principal
 import java.util.Optional
 import java.util.concurrent.locks.ReentrantLock
@@ -99,7 +104,7 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
     val rawResource =
         GraphQLResource(
             graphQL,
-            GraphQLConfig(ConfigLoader()),
+            GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
             object : GraphQLContextWebSocketCreatorFactory {
                 override fun getCreator(context: GraphQLContext): WebSocketCreator {
                     return WebSocketCreator { request, _ ->
@@ -119,14 +124,44 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testWebSocketNoUpgrade() {
-        val result = resource.target("/graphql").request().get()
+        val result = resource.target("/graphql")
+            .request().cookie("authCookie", "user").get()
         assertThat(result.status).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405)
     }
 
     @Test
     fun testWebSocketUpgradeFail() {
-        val result = resource.target("/graphql").queryParam("fail", "true").request().get()
-        assertThat(result.status).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405)
+        val client = WebSocketClient()
+        client.start()
+        try {
+            val uri = resource.target("/graphql").queryParam("fail", "true").uriBuilder.scheme("ws").build()
+            val adapter = WebSocketAdapter()
+            assertThat {
+                client.connect(
+                    adapter,
+                    uri,
+                    ClientUpgradeRequest(
+                        WebSocketUpgradeRequest(
+                            client,
+                            client.httpClient,
+                            uri,
+                            adapter
+                        ).also {
+                            it.cookie(HttpCookie("authCookie", "user"))
+                        }
+                    )
+                ).get()
+            }.isFailure().messageContains("Failed to upgrade")
+        } finally {
+            client.stop()
+        }
+    }
+
+    @Test
+    fun testWebSocketUpgradeUnauthenticated() {
+        val result = resource.target("/graphql").queryParam("fail", "true")
+            .request().get()
+        assertThat(result.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
     }
 
     @Test
@@ -137,16 +172,28 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
         val lock = ReentrantLock()
         val condition = lock.newCondition()
         try {
-            val session = client.connect(
-                object : WebSocketAdapter() {
-                    override fun onWebSocketText(message: String) {
-                        lock.withLock {
-                            received = message
-                            condition.signal()
-                        }
+            val uri = resource.target("/graphql").uriBuilder.scheme("ws").build()
+            val adapter = object : WebSocketAdapter() {
+                override fun onWebSocketText(message: String) {
+                    lock.withLock {
+                        received = message
+                        condition.signal()
                     }
-                },
-                resource.target("/graphql").uriBuilder.scheme("ws").build()
+                }
+            }
+            val session = client.connect(
+                adapter,
+                uri,
+                ClientUpgradeRequest(
+                    WebSocketUpgradeRequest(
+                        client,
+                        client.httpClient,
+                        uri,
+                        adapter
+                    ).also {
+                        it.cookie(HttpCookie("authCookie", "user"))
+                    }
+                )
             ).get()
             lock.withLock() {
                 session.remote.sendString("Hi there")
