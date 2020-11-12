@@ -105,15 +105,21 @@ open class GraphQLResource
         }
 
         val result = futureResult.await()
-        Response.ok(result)
-            .let {
-                // Communicate any set cookie back to the client
-                if (context.cookie != null) {
-                    it.cookie(context.cookie)
-                } else {
-                    it
-                }
-            }.build()
+        if (result.getData<Any?>() == null && result.errors.all { it.message == "HTTP 401 Unauthorized" }) {
+            Response.status(HttpStatus.UNAUTHORIZED_401).header(
+                "WWW-Authenticate", "Basic realm=\"Realm\""
+            ).build()
+        } else {
+            Response.ok(result)
+                .let {
+                    // Communicate any set cookie back to the client
+                    if (context.cookie != null) {
+                        it.cookie(context.cookie)
+                    } else {
+                        it
+                    }
+                }.build()
+        }
     }
 
     /**
@@ -139,6 +145,11 @@ open class GraphQLResource
         @Context request: HttpServletRequest,
         @Context response: HttpServletResponse
     ): Response {
+        if (graphQLConfig.authorizedWebSocketOnly && !principal.isPresent) {
+            return Response.status(HttpStatus.UNAUTHORIZED_401).header(
+                "WWW-Authenticate", "Basic realm=\"Realm\""
+            ).build()
+        }
         // Create a new WebSocketCreator for each request bound to an optional authorized principal
         val creator = creatorFactory.getCreator(GraphQLResourceContext(principal.orElse(null)))
         if (webSocketFactory.isUpgradeRequest(request, response)) {
