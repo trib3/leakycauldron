@@ -50,7 +50,7 @@
         <version.aws.serverless>1.5.2</version.aws.serverless>
         <version.byte-buddy>1.10.18</version.byte-buddy>
         <version.checker-qual>3.7.1</version.checker-qual>
-        <version.classgraph>4.8.90</version.classgraph>
+        <version.classgraph>4.8.92</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
         <version.commons-io>2.8.0</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
