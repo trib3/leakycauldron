@@ -11,15 +11,7 @@ import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import graphql.GraphQL
 import io.dropwizard.auth.Auth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.supervisorScope
-import mu.KotlinLogging
-import org.eclipse.jetty.http.HttpStatus
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory
+import io.swagger.v3.oas.annotations.Parameter
 import java.security.Principal
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
@@ -37,6 +29,15 @@ import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.NewCookie
 import javax.ws.rs.core.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.supervisorScope
+import mu.KotlinLogging
+import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 
 private val log = KotlinLogging.logger {}
 
@@ -83,13 +84,25 @@ open class GraphQLResource
     }
 
     /**
+     * Returns a response telling the browser that basic authorization is required
+     */
+    private fun unauthorizedResponse(): Response {
+        return Response.status(HttpStatus.UNAUTHORIZED_401).header(
+            "WWW-Authenticate", "Basic realm=\"Realm\""
+        ).build()
+    }
+
+    /**
      * Execute the query specified by the [GraphRequest]
      */
     @POST
     @Path("/graphql")
     @Timed
     @AsyncDispatcher("IO")
-    open suspend fun graphQL(@Auth principal: Optional<Principal>, query: GraphQLRequest): Response = supervisorScope {
+    open suspend fun graphQL(
+        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        query: GraphQLRequest
+    ): Response = supervisorScope {
         val context = GraphQLResourceContext(principal.orElse(null), this)
         val requestId = RequestIdFilter.getRequestId()
         val futureResult = graphQL.executeAsync(
@@ -106,9 +119,7 @@ open class GraphQLResource
 
         val result = futureResult.await()
         if (result.getData<Any?>() == null && result.errors.all { it.message == "HTTP 401 Unauthorized" }) {
-            Response.status(HttpStatus.UNAUTHORIZED_401).header(
-                "WWW-Authenticate", "Basic realm=\"Realm\""
-            ).build()
+            unauthorizedResponse()
         } else {
             Response.ok(result)
                 .let {
@@ -127,11 +138,18 @@ open class GraphQLResource
      */
     @DELETE
     @Path("/graphql")
-    fun cancel(@QueryParam("id") requestId: String) {
+    fun cancel(
+        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        @QueryParam("id") requestId: String
+    ): Response {
+        if (graphQLConfig.checkAuthorization && !principal.isPresent) {
+            return unauthorizedResponse()
+        }
         val running = runningFutures[requestId]
         if (running != null) {
             running.coroutineContext[Job]?.cancelChildren()
         }
+        return Response.status(HttpStatus.NO_CONTENT_204).build()
     }
 
     /**
@@ -141,14 +159,12 @@ open class GraphQLResource
     @Path("/graphql")
     @Timed
     open fun graphQLUpgrade(
-        @Auth principal: Optional<Principal>,
+        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
         @Context request: HttpServletRequest,
         @Context response: HttpServletResponse
     ): Response {
-        if (graphQLConfig.authorizedWebSocketOnly && !principal.isPresent) {
-            return Response.status(HttpStatus.UNAUTHORIZED_401).header(
-                "WWW-Authenticate", "Basic realm=\"Realm\""
-            ).build()
+        if (graphQLConfig.checkAuthorization && !principal.isPresent) {
+            return unauthorizedResponse()
         }
         // Create a new WebSocketCreator for each request bound to an optional authorized principal
         val creator = creatorFactory.getCreator(GraphQLResourceContext(principal.orElse(null)))
