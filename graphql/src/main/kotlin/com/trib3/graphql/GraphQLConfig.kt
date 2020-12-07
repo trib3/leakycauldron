@@ -11,7 +11,7 @@ class GraphQLConfig
     val idleTimeout: Long?
     val maxBinaryMessageSize: Int?
     val maxTextMessageSize: Int?
-    val authorizedWebSocketOnly: Boolean
+    val checkAuthorization: Boolean
 
     init {
         val config = loader.load("graphQL")
@@ -20,6 +20,6 @@ class GraphQLConfig
         idleTimeout = config.extract("idleTimeout")
         maxBinaryMessageSize = config.extract("maxBinaryMessageSize")
         maxTextMessageSize = config.extract("maxTextMessageSize")
-        authorizedWebSocketOnly = config.extract("authorizedWebSocketOnly") ?: false
+        checkAuthorization = config.extract("checkAuthorization") ?: config.extract("authorizedWebSocketOnly") ?: false
     }
 }

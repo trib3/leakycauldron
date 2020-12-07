@@ -73,28 +73,36 @@ class TestQuery : GraphQLQueryResolver {
 }
 
 class GraphQLResourceTest {
+    val graphQL = GraphQL.newGraphQL(
+        toSchema(
+            SchemaGeneratorConfig(
+                listOf(this::class.java.packageName),
+                dataFetcherFactoryProvider = ContextScopeKotlinDataFetcherFactoryProvider()
+            ),
+            listOf(TopLevelObject(TestQuery())),
+            listOf(),
+            listOf()
+        )
+    )
+        .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
+        .instrumentation(RequestIdInstrumentation())
+        .build()
+    val wsCreatorFactory = object : GraphQLContextWebSocketCreatorFactory {
+        override fun getCreator(context: GraphQLContext): WebSocketCreator {
+            return WebSocketCreator { _, _ -> null }
+        }
+    }
     val resource =
         GraphQLResource(
-            GraphQL.newGraphQL(
-                toSchema(
-                    SchemaGeneratorConfig(
-                        listOf(this::class.java.packageName),
-                        dataFetcherFactoryProvider = ContextScopeKotlinDataFetcherFactoryProvider()
-                    ),
-                    listOf(TopLevelObject(TestQuery())),
-                    listOf(),
-                    listOf()
-                )
-            )
-                .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
-                .instrumentation(RequestIdInstrumentation())
-                .build(),
+            graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceTest")),
-            object : GraphQLContextWebSocketCreatorFactory {
-                override fun getCreator(context: GraphQLContext): WebSocketCreator {
-                    return WebSocketCreator { _, _ -> null }
-                }
-            }
+            wsCreatorFactory
+        )
+    val lockedResource =
+        GraphQLResource(
+            graphQL,
+            GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
+            wsCreatorFactory
         )
     val objectMapper = ObjectMapperProvider().get()
 
@@ -184,7 +192,7 @@ class GraphQLResourceTest {
         while (resource.runningFutures[requestId] == null) {
             delay(1)
         }
-        resource.cancel(requestId)
+        resource.cancel(Optional.empty(), requestId)
         job.join()
         assertThat(reached).isTrue()
     }
@@ -206,7 +214,64 @@ class GraphQLResourceTest {
         while (resource.runningFutures[requestId] == null) {
             delay(1)
         }
-        resource.cancel("123")
+        resource.cancel(Optional.empty(), "123")
+        job.join()
+        assertThat(reached).isTrue()
+    }
+
+    @Test
+    fun testCancellableQueryNeedsAuthToCancel() = runBlocking {
+        var reached = false
+        val requestId = UUID.randomUUID().toString()
+        val job = launch {
+            RequestIdFilter.withRequestId(requestId) {
+                val result =
+                    lockedResource.graphQL(
+                        Optional.of(UserPrincipal(User("bill"))),
+                        GraphQLRequest("query {cancellable}", mapOf(), null)
+                    )
+                val entity = result.entity as ExecutionResult
+                assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
+                assertThat(entity.errors).isEmpty()
+                assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                reached = true
+            }
+        }
+        while (lockedResource.runningFutures[requestId] == null) {
+            delay(1)
+        }
+        assertThat(
+            lockedResource.cancel(
+                Optional.of(UserPrincipal(User("bill"))),
+                "123"
+            ).status
+        ).isEqualTo(HttpStatus.NO_CONTENT_204)
+        job.join()
+        assertThat(reached).isTrue()
+    }
+
+    @Test
+    fun testCancellableQueryWithoutAuth() = runBlocking {
+        var reached = false
+        val requestId = UUID.randomUUID().toString()
+        val job = launch {
+            RequestIdFilter.withRequestId(requestId) {
+                val result =
+                    lockedResource.graphQL(
+                        Optional.of(UserPrincipal(User("bill"))),
+                        GraphQLRequest("query {cancellable}", mapOf(), null)
+                    )
+                val entity = result.entity as ExecutionResult
+                assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
+                assertThat(entity.errors).isEmpty()
+                assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                reached = true
+            }
+        }
+        while (lockedResource.runningFutures[requestId] == null) {
+            delay(1)
+        }
+        assertThat(lockedResource.cancel(Optional.empty(), "123").status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
         job.join()
         assertThat(reached).isTrue()
     }
@@ -220,7 +285,7 @@ class GraphQLResourceTest {
         EasyMock.replay(mockScope, mockContext)
         resource.runningFutures["987"] = mockScope
         assertThat {
-            resource.cancel("987")
+            resource.cancel(Optional.empty(), "987")
         }.isSuccess()
     }
 }
