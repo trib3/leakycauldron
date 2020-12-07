@@ -17,9 +17,9 @@ jobs:
       # handle dependency caching and run build
       - restore_cache:
           keys:
-            - v1-dependencies-{{ .Branch }}-{{ .Revision }}
-            - v1-dependencies-{{ .Branch }}
-            - v1-dependencies-
+            - v2-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v2-dependencies-{{ .Branch }}
+            - v2-dependencies-
       - run:
           name: Setup GPG
           command: |
@@ -36,7 +36,7 @@ jobs:
                 if [ -n "$REPOIDS" ]; then
                     echo "Cleaning existing $REPOIDS"
                     for REPOID in $REPOIDS; do 
-                        mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID
+                        mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
                     done
                 fi
             fi
@@ -63,7 +63,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ .Branch }}-{{ .Revision }}
+          key: v2-dependencies-{{ .Branch }}-{{ .Revision }}
       # collect test results and upload coverage
       - run: mkdir -p ~/test_results
       - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;
@@ -73,17 +73,19 @@ jobs:
           path: ~/test_results
       - run: bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
       # collect docs
-      - run: mkdir -p ~/docs
       - run:
           name: Collect docs
           command: |
+            mkdir -p ~/docs
             for subdir in `find . -maxdepth 1 -mindepth 1 -type d`; do
               if [ -d $subdir/target/dokka ]; then
                 cp -r $subdir/target/dokka ~/docs/$subdir
               fi
             done
+            mkdir -p ~/docarchive
+            cd ~/docs && zip -r ~/docarchive/docs.zip .
       - store_artifacts:
-          path: ~/docs
+          path: ~/docarchive
       # collect built packages and save to workspace for deploy
       - run: mkdir -p ~/jars
       - run: find . -type f -regex ".*/target/.*jar" -exec cp {} ~/jars/ \;
@@ -112,8 +114,8 @@ jobs:
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID 
-            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID 
+            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
       - release/execute_release:
           release_dir: ~/jars/release
 
