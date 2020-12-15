@@ -49,6 +49,7 @@
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.5.2</version.aws.serverless>
         <version.byte-buddy>1.10.18</version.byte-buddy>
+        <version.caffeine>2.8.8</version.caffeine>
         <version.checker-qual>3.8.0</version.checker-qual>
         <version.classgraph>4.8.95</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
@@ -56,7 +57,7 @@
         <version.config4k>0.4.2</version.config4k>
         <version.detekt>1.14.2</version.detekt>
         <version.dokka>1.4.20</version.dokka>
-        <version.dropwizard>2.0.16</version.dropwizard>
+        <version.dropwizard>2.0.17</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.1.16</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
@@ -230,6 +231,11 @@
                         <artifactId>error_prone_annotations</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${version.caffeine}</version>
             </dependency>
             <dependency>
                 <groupId>net.bytebuddy</groupId>

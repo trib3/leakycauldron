@@ -12,6 +12,15 @@ import com.trib3.server.filters.RequestIdFilter
 import graphql.GraphQL
 import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Parameter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.supervisorScope
+import mu.KotlinLogging
+import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 import java.security.Principal
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
@@ -29,15 +38,6 @@ import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.NewCookie
 import javax.ws.rs.core.Response
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.supervisorScope
-import mu.KotlinLogging
-import org.eclipse.jetty.http.HttpStatus
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 
 private val log = KotlinLogging.logger {}
 
