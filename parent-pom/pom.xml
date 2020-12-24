@@ -51,7 +51,7 @@
         <version.byte-buddy>1.10.18</version.byte-buddy>
         <version.caffeine>2.8.8</version.caffeine>
         <version.checker-qual>3.8.0</version.checker-qual>
-        <version.classgraph>4.8.95</version.classgraph>
+        <version.classgraph>4.8.98</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
         <version.commons-io>2.8.0</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
