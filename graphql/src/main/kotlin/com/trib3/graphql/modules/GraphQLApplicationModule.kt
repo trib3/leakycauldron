@@ -2,11 +2,14 @@ package com.trib3.graphql.modules
 
 import com.google.inject.name.Names
 import com.trib3.graphql.execution.GraphQLRequest
+import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.TribeApplicationModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import graphql.execution.instrumentation.Instrumentation
 import org.dataloader.DataLoaderRegistry
+import java.security.Principal
+import javax.ws.rs.container.ContainerRequestContext
 
 /**
  * Function that takes a [GraphQLRequest] and an optional context
@@ -19,6 +22,14 @@ typealias DataLoaderRegistryFactory = Function2<
     @JvmSuppressWildcards Any?,
     @JvmSuppressWildcards DataLoaderRegistry
     >
+
+/**
+ * Function that takes a [ContainerRequestContext] from the websocket upgrade request
+ * or `connection_init` payload and returns an authorized [Principal], if any.
+ */
+typealias GraphQLWebSocketAuthenticator = Function1<
+    @JvmSuppressWildcards ContainerRequestContext,
+    @JvmSuppressWildcards Principal?>
 
 /**
  * Base class for GraphQL application guice modules.  Provides
@@ -41,6 +52,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
 
     final override fun configure() {
         super.configure()
+        install(DefaultApplicationModule())
         install(DefaultGraphQLModule())
         configureApplication()
     }
@@ -89,6 +101,13 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
      * Optional binder for the dataLoaderRegistryFactory
      */
     fun dataLoaderRegistryFactoryBinder(): KotlinOptionalBinder<DataLoaderRegistryFactory> {
+        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
+    }
+
+    /**
+     * Optional binder for the graphQLWebSocketAuthenticator
+     */
+    fun graphQLWebSocketAuthenticatorBinder(): KotlinOptionalBinder<GraphQLWebSocketAuthenticator> {
         return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
     }
 

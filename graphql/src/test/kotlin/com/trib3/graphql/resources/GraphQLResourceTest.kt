@@ -15,7 +15,6 @@ import assertk.assertions.prop
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
-import com.expediagroup.graphql.execution.GraphQLContext
 import com.expediagroup.graphql.toSchema
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.config.ConfigLoader
@@ -40,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.easymock.EasyMock
 import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.testng.annotations.Test
 import java.util.Optional
@@ -47,6 +47,7 @@ import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.ws.rs.ClientErrorException
+import javax.ws.rs.container.ContainerRequestContext
 import kotlin.coroutines.CoroutineContext
 
 class TestQuery : GraphQLQueryResolver {
@@ -88,7 +89,7 @@ class GraphQLResourceTest {
         .instrumentation(RequestIdInstrumentation())
         .build()
     val wsCreatorFactory = object : GraphQLContextWebSocketCreatorFactory {
-        override fun getCreator(context: GraphQLContext): WebSocketCreator {
+        override fun getCreator(containerRequestContext: ContainerRequestContext): WebSocketCreator {
             return WebSocketCreator { _, _ -> null }
         }
     }
@@ -124,8 +125,12 @@ class GraphQLResourceTest {
     fun testUpgradeNoContainer() {
         val mockReq = LeakyMock.niceMock<HttpServletRequest>()
         val mockRes = LeakyMock.niceMock<HttpServletResponse>()
-        EasyMock.replay(mockReq, mockRes)
-        val resp = resource.graphQLUpgrade(Optional.empty(), mockReq, mockRes)
+        val mockCtx = LeakyMock.niceMock<ContainerRequestContext>()
+        EasyMock.expect(mockReq.getHeader("Origin")).andReturn("http://localhost")
+        EasyMock.expect(mockRes.getHeader(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER))
+            .andReturn("http://localhost")
+        EasyMock.replay(mockReq, mockRes, mockCtx)
+        val resp = resource.graphQLUpgrade(Optional.empty(), mockReq, mockRes, mockCtx)
         assertThat(resp.status).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405)
     }
 

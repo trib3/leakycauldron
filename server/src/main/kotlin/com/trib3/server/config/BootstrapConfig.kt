@@ -12,12 +12,12 @@ import io.dropwizard.logging.BootstrapLogging
  * Startup configuration object that allows for configuration of the application guice modules
  * and provides a way to get a guice injector
  */
-class BootstrapConfig {
+class BootstrapConfig(configLoader: ConfigLoader = ConfigLoader()) {
 
     val appModules: List<String>
 
     init {
-        val config = ConfigLoader().load()
+        val config = configLoader.load()
         appModules = config.extract("application.modules")
     }
 

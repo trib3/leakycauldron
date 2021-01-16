@@ -4,18 +4,17 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
-import assertk.assertions.isNull
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.GraphQLConfigTest
-import com.trib3.graphql.resources.GraphQLResourceContext
 import com.trib3.testing.LeakyMock
 import graphql.GraphQL
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
 import org.testng.annotations.Test
+import javax.ws.rs.container.ContainerRequestContext
 
 class GraphQLWebSocketCreatorTest {
     @Test
@@ -23,13 +22,17 @@ class GraphQLWebSocketCreatorTest {
         val graphQL = LeakyMock.mock<GraphQL>()
         val mapper = ObjectMapper()
         val creatorFactory = GraphQLWebSocketCreatorFactory(graphQL, mapper, GraphQLConfig(ConfigLoader()))
-        val creator = creatorFactory.getCreator(GraphQLResourceContext(null))
+        val mockContext = LeakyMock.mock<ContainerRequestContext>()
+        val creator = creatorFactory.getCreator(mockContext)
         assertThat(creator).isInstanceOf(GraphQLWebSocketCreator::class)
         assertThat((creator as GraphQLWebSocketCreator).graphQL).isEqualTo(graphQL)
         assertThat(creator.objectMapper).isEqualTo(mapper)
         assertThat(creator.graphQLConfig.keepAliveIntervalSeconds).isEqualTo(GraphQLConfigTest.DEFAULT_KEEPALIVE)
-        assertThat(creator.context).isInstanceOf(GraphQLResourceContext::class)
-        assertThat((creator.context as GraphQLResourceContext).principal).isNull()
+        assertThat(creator.containerRequestContext).isEqualTo(mockContext)
+        // test optional params constructor works fine
+        val secondCreator = GraphQLWebSocketCreator(graphQL, mapper, creator.graphQLConfig, mockContext)
+        assertThat(secondCreator.graphQL).isEqualTo(graphQL)
+        assertThat(secondCreator.graphQLConfig.keepAliveIntervalSeconds).isEqualTo(GraphQLConfigTest.DEFAULT_KEEPALIVE)
 
         val request = LeakyMock.mock<ServletUpgradeRequest>()
         val response = LeakyMock.mock<ServletUpgradeResponse>()

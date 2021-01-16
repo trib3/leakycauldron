@@ -7,7 +7,7 @@
 
     <groupId>com.trib3</groupId>
     <artifactId>build-resources</artifactId>
-    <version>1.16-SNAPSHOT</version>
+    <version>1.17-SNAPSHOT</version>
 
     <name>Build Resources</name>
     <description>Resources for use during the build process</description>

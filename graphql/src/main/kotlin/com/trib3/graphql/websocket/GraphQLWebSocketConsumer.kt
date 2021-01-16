@@ -5,6 +5,8 @@ import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput
 import com.trib3.graphql.modules.DataLoaderRegistryFactory
+import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
+import com.trib3.graphql.resources.GraphQLResourceContext
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionResult
 import graphql.GraphQL
@@ -29,6 +31,10 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.yield
 import mu.KotlinLogging
 import org.eclipse.jetty.websocket.api.StatusCode
+import org.glassfish.jersey.internal.MapPropertiesDelegate
+import org.glassfish.jersey.server.ContainerRequest
+import java.security.Principal
+import javax.ws.rs.container.ContainerRequestContext
 
 private val log = KotlinLogging.logger {}
 
@@ -159,13 +165,15 @@ class QueryCoroutine(
 class GraphQLWebSocketConsumer(
     val graphQL: GraphQL,
     val graphQLConfig: GraphQLConfig,
-    val context: GraphQLContext,
+    private val upgradeContainerRequestContext: ContainerRequestContext,
     val channel: Channel<OperationMessage<*>>,
     val adapter: GraphQLWebSocketAdapter,
     val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default, // default to default for the KA interval
-    private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
+    private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null,
+    private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null
 ) {
     private var keepAliveStarted = false // only allow one keepalive coroutine to launch
+    private var connectionInitContainerRequest: ContainerRequestContext? = null
     private val queries = mutableMapOf<String, Job>() // will contain child queries that are currently running
 
     /**
@@ -233,12 +241,72 @@ class GraphQLWebSocketConsumer(
     }
 
     /**
+     * Translate a [OperationType.GQL_CONNECTION_INIT] payload into a [ContainerRequestContext]
+     * in order to filter the connection for auth
+     */
+    private fun getContainerRequestContext(connectionParams: Map<String, *>?): ContainerRequestContext {
+        val context = ContainerRequest(
+            upgradeContainerRequestContext.uriInfo.baseUri,
+            upgradeContainerRequestContext.uriInfo.requestUri,
+            upgradeContainerRequestContext.method,
+            upgradeContainerRequestContext.securityContext,
+            MapPropertiesDelegate(emptyMap()),
+            null
+        )
+        // treat connectionParams as HTTP headers
+        connectionParams?.forEach {
+            context.header(it.key, it.value)
+        }
+        return context
+    }
+
+    /**
+     * Makes a copy of the [ContainerRequestContext] set by the websocket upgrade
+     * request, so we can re-authenticate the credentials from its headers.
+     * (Required because of statefulness of the request context object)
+     */
+    private fun getReusableUpgradeContainerRequestContext(): ContainerRequestContext {
+        val context = ContainerRequest(
+            upgradeContainerRequestContext.uriInfo.baseUri,
+            upgradeContainerRequestContext.uriInfo.requestUri,
+            upgradeContainerRequestContext.method,
+            upgradeContainerRequestContext.securityContext,
+            MapPropertiesDelegate(emptyMap()),
+            null
+        )
+        // copy the headers (cookies are set in headers so don't need to handle explicitly)
+        upgradeContainerRequestContext.headers.forEach {
+            context.headers(it.key, it.value)
+        }
+        return context
+    }
+
+    /**
+     * Gets the authenticated [Principal] for the websocket, if any.
+     * First checks any creds from the [OperationType.GQL_CONNECTION_INIT] payload,
+     * then falls back to creds from the websocket upgrade request
+     */
+    private fun getSocketPrincipal(): Principal? {
+        return connectionInitContainerRequest?.let {
+            graphQLWebSocketAuthenticator?.invoke(it)
+        } ?: graphQLWebSocketAuthenticator?.invoke(getReusableUpgradeContainerRequestContext())
+    }
+
+    /**
      * Process an [OperationType.GQL_CONNECTION_INIT] message.  If the connection
      * has already initialized, send an error back to the client.  Otherwise acknowledge
      * the connection and start a keepalive timer.
      */
     private suspend fun handleConnectionInit(message: OperationMessage<*>, scope: CoroutineScope) {
         if (!keepAliveStarted) {
+            val payload = message.payload as? Map<*, *>
+            val payloadRequestContext = getContainerRequestContext(payload?.mapKeys { it.key.toString() })
+            connectionInitContainerRequest = payloadRequestContext
+            val principal = getSocketPrincipal()
+            if (principal == null && graphQLConfig.checkAuthorization) {
+                adapter.session?.close(StatusCode.SERVER_ERROR, "Unauthorized")
+                return
+            }
             adapter.sendMessage(OperationType.GQL_CONNECTION_ACK, message.id)
             adapter.sendMessage(OperationType.GQL_CONNECTION_KEEP_ALIVE, message.id)
             keepAliveStarted = true
@@ -276,9 +344,15 @@ class GraphQLWebSocketConsumer(
         check(message.payload is GraphQLRequest) {
             "Invalid payload for query"
         }
+        // re-evaluate socket Principal on each query, in case creds have expired
+        val socketPrincipal = getSocketPrincipal()
+        if (socketPrincipal == null && graphQLConfig.checkAuthorization) {
+            adapter.session?.close(StatusCode.SERVER_ERROR, "Unauthorized")
+            return
+        }
         val queryCoroutine = QueryCoroutine(
             graphQL,
-            context,
+            GraphQLResourceContext(socketPrincipal, adapter),
             channel,
             message.id,
             message.payload,

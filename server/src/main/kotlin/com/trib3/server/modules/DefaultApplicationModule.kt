@@ -22,6 +22,7 @@ import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature
 import java.security.Principal
+import javax.inject.Provider
 import javax.servlet.Filter
 
 data class ServletFilterConfig(
@@ -61,9 +62,10 @@ class DefaultApplicationModule : TribeApplicationModule() {
         install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
         bind<HealthCheckRegistry>().`in`(Scopes.SINGLETON)
 
-        // Ensure @Auth annotations can be used as long as downstream binds an AuthDynamicFeature implementation
+        // Ensure @Auth annotations can be used as long as downstream binds an AuthFilter implementation
         resourceBinder().addBinding().toInstance(RolesAllowedDynamicFeature::class.java)
         resourceBinder().addBinding().toInstance(AuthValueFactoryProvider.Binder(Principal::class.java))
+        authFilterBinder().setDefault().toProvider(Provider { null })
     }
 
     /**
