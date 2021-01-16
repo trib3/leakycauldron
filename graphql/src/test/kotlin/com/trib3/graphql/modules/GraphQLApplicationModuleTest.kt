@@ -62,20 +62,20 @@ class GraphQLApplicationModuleTest
             assertThat(x["individual-statistics"]).isNotNull()
         }
     }
-}
 
-@Test
-fun testGraphQLProvider() {
-    val module = DefaultGraphQLModule()
-    val graphQLInstance = module.provideGraphQLInstance(
-        setOf(),
-        setOf(DummyQuery()),
-        setOf(),
-        setOf(),
-        setOf(),
-        ObjectMapperProvider().get()
-    )
-    assertThat(graphQLInstance).isNotNull()
+    @Test
+    fun testGraphQLProvider() {
+        val module = DefaultGraphQLModule()
+        val graphQLInstance = module.provideGraphQLInstance(
+            setOf(),
+            setOf(DummyQuery()),
+            setOf(),
+            setOf(),
+            setOf(),
+            ObjectMapperProvider().get()
+        )
+        assertThat(graphQLInstance).isNotNull()
+    }
 }
 
 class OverrideDataLoaderModule : GraphQLApplicationModule() {

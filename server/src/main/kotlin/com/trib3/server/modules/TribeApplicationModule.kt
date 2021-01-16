@@ -3,6 +3,8 @@ package com.trib3.server.modules
 import com.google.inject.name.Names
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
+import io.dropwizard.auth.AuthFilter
 import javax.servlet.Servlet
 
 data class ServletConfig(
@@ -52,5 +54,12 @@ abstract class TribeApplicationModule : KotlinModule() {
             kotlinBinder,
             Names.named(ADMIN_SERVLETS_BIND_NAME)
         )
+    }
+
+    /**
+     * Optional binder for dropwizard AuthFilter
+     */
+    fun authFilterBinder(): KotlinOptionalBinder<AuthFilter<*, *>> {
+        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
     }
 }

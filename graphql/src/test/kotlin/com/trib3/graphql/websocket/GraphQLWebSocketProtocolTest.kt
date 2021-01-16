@@ -15,6 +15,7 @@ import kotlin.reflect.full.memberProperties
 
 class GraphQLWebSocketProtocolTest {
     val mapper = ObjectMapperProvider().get()
+
     @Test
     fun testOperationTypeRawDeserialization() {
         val start = OperationType.getOperationType("start")
@@ -64,6 +65,7 @@ class GraphQLWebSocketProtocolTest {
             Nothing::class to null,
             String::class to "message",
             GraphQLRequest::class to GraphQLRequest("query {q}", mapOf(), null),
+            Map::class to mapOf("a" to "b", "c" to "d"),
             ExecutionResult::class to null // only need to support serialization right now, not round trip
         )
         for (

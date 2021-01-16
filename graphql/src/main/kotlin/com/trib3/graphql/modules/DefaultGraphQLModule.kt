@@ -16,6 +16,7 @@ import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.graphql.websocket.GraphQLWebSocketCreatorFactory
+import com.trib3.graphql.websocket.GraphQLWebSocketDropwizardAuthenticator
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.modules.ServletConfig
 import dev.misfitlabs.kotlinguice4.typeLiteral
@@ -41,6 +42,13 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         // override this by setting a binding
         dataLoaderRegistryFactoryBinder()
             .setDefault().toProvider(Provider { null })
+        // by default, any AuthFilter that is registered to guice will be used for
+        // authenticating websocket connections during the websocket upgrade or
+        // the [OperationType.GQL_CONNNECTION_INIT] message.  Applications can provide
+        // their own GraphQLAuthenticator by setting a binding
+        graphQLWebSocketAuthenticatorBinder()
+            .setDefault()
+            .to<GraphQLWebSocketDropwizardAuthenticator>()
 
         resourceBinder().addBinding().to<GraphQLResource>()
         // Ensure graphql binders are set up

@@ -20,6 +20,7 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.supervisorScope
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 import java.security.Principal
 import java.util.Optional
@@ -34,6 +35,7 @@ import javax.ws.rs.POST
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
+import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.NewCookie
@@ -161,13 +163,17 @@ open class GraphQLResource
     open fun graphQLUpgrade(
         @Parameter(hidden = true) @Auth principal: Optional<Principal>,
         @Context request: HttpServletRequest,
-        @Context response: HttpServletResponse
+        @Context response: HttpServletResponse,
+        @Context containerRequestContext: ContainerRequestContext
     ): Response {
-        if (graphQLConfig.checkAuthorization && !principal.isPresent) {
+        if (
+            request.getHeader("Origin") != null &&
+            response.getHeader(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER) == null
+        ) {
             return unauthorizedResponse()
         }
         // Create a new WebSocketCreator for each request bound to an optional authorized principal
-        val creator = creatorFactory.getCreator(GraphQLResourceContext(principal.orElse(null)))
+        val creator = creatorFactory.getCreator(containerRequestContext)
         if (webSocketFactory.isUpgradeRequest(request, response)) {
             if (webSocketFactory.acceptWebSocket(creator, request, response)) {
                 return Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()

@@ -30,7 +30,7 @@ data class OperationMessage<T : Any>(
         Type(name = "start", value = GraphQLRequest::class),
         Type(name = "data", value = ExecutionResult::class),
         Type(name = "error", value = String::class),
-        Type(name = "connection_init", value = Nothing::class),
+        Type(name = "connection_init", value = Map::class),
         Type(name = "connection_terminate", value = Nothing::class),
         Type(name = "connection_ack", value = Nothing::class),
         Type(name = "connection_error", value = String::class),
@@ -51,10 +51,11 @@ data class OperationType<T : Any>(
 ) {
     companion object {
         // client -> server
-        val GQL_CONNECTION_INIT = OperationType("connection_init", Nothing::class)
+        val GQL_CONNECTION_INIT = OperationType("connection_init", Map::class)
         val GQL_START = OperationType("start", GraphQLRequest::class)
         val GQL_STOP = OperationType("stop", Nothing::class)
         val GQL_CONNECTION_TERMINATE = OperationType("connection_terminate", Nothing::class)
+
         // server -> client
         val GQL_CONNECTION_ERROR = OperationType("connection_error", String::class)
         val GQL_CONNECTION_ACK = OperationType("connection_ack", Nothing::class)

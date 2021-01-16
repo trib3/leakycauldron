@@ -17,12 +17,15 @@ import dev.misfitlabs.kotlinguice4.getInstance
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.ConfiguredBundle
+import io.dropwizard.auth.AuthDynamicFeature
+import io.dropwizard.auth.AuthFilter
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import io.dropwizard.jetty.setup.ServletEnvironment
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import mu.KotlinLogging
 import java.util.EnumSet
+import javax.annotation.Nullable
 import javax.inject.Inject
 import javax.inject.Named
 import javax.servlet.DispatcherType
@@ -52,7 +55,8 @@ class TribeApplication @Inject constructor(
     val appServlets: Set<@JvmSuppressWildcards ServletConfig>,
 
     @Named(TribeApplicationModule.ADMIN_SERVLETS_BIND_NAME)
-    val adminServlets: Set<@JvmSuppressWildcards ServletConfig>
+    val adminServlets: Set<@JvmSuppressWildcards ServletConfig>,
+    @Nullable val authFilter: AuthFilter<*, *>?
 ) : Application<Configuration>() {
     val versionHealthCheck: VersionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck
 
@@ -100,6 +104,7 @@ class TribeApplication @Inject constructor(
      */
     override fun run(conf: Configuration, env: Environment) {
         jerseyResources.forEach { env.jersey().register(it) }
+        authFilter?.let { env.jersey().register(AuthDynamicFeature(it)) }
 
         jaxrsAppProcessors.forEach { it.process(env.jersey().resourceConfig) }
 

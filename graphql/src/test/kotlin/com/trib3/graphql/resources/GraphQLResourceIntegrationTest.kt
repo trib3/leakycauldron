@@ -8,7 +8,6 @@ import assertk.assertions.messageContains
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.expediagroup.graphql.SchemaGeneratorConfig
 import com.expediagroup.graphql.TopLevelObject
-import com.expediagroup.graphql.execution.GraphQLContext
 import com.expediagroup.graphql.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
@@ -35,6 +34,7 @@ import java.security.Principal
 import java.util.Optional
 import java.util.concurrent.locks.ReentrantLock
 import javax.ws.rs.client.Entity
+import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.NewCookie
 import kotlin.concurrent.withLock
 
@@ -106,7 +106,7 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
             object : GraphQLContextWebSocketCreatorFactory {
-                override fun getCreator(context: GraphQLContext): WebSocketCreator {
+                override fun getCreator(containerRequestContext: ContainerRequestContext): WebSocketCreator {
                     return WebSocketCreator { request, _ ->
                         if (request.queryString != null && request.queryString.contains("fail")) {
                             null
@@ -159,8 +159,9 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testWebSocketUpgradeUnauthenticated() {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
         val result = resource.target("/graphql").queryParam("fail", "true")
-            .request().get()
+            .request().header("Origin", "https://blah.com").get()
         assertThat(result.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
     }
 
