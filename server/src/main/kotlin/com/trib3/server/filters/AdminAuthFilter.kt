@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse
  */
 class AdminAuthFilter : Filter {
     private var token: String? = null
-    private var realm: String = "Realm"
+    private var realm: String = "realm"
     private val base64 = Base64.getDecoder()
 
     /**

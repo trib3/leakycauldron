@@ -7,6 +7,7 @@ import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput
 import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
+import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import graphql.GraphQL
@@ -20,7 +21,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.supervisorScope
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
-import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory
 import java.security.Principal
 import java.util.Optional
@@ -67,8 +67,18 @@ open class GraphQLResource
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
     private val creatorFactory: GraphQLContextWebSocketCreatorFactory,
-    @Nullable val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
+    @Nullable val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null,
+    appConfig: TribeApplicationConfig
 ) {
+    // Using the CrossOriginFilter directly is tricky because it avoids setting
+    // CORS headers on websocket requests, so mimic its regex and evaluate that
+    // when doing CORS checking of websockets
+    private val corsRegex = Regex(
+        appConfig.corsDomains.joinToString("|") {
+            "https?://*.?$it|" +
+                "https?://*.?$it:${appConfig.appPort}"
+        }.replace(".", "\\.").replace("*", ".*")
+    )
 
     internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
 
@@ -90,7 +100,7 @@ open class GraphQLResource
      */
     private fun unauthorizedResponse(): Response {
         return Response.status(HttpStatus.UNAUTHORIZED_401).header(
-            "WWW-Authenticate", "Basic realm=\"Realm\""
+            "WWW-Authenticate", "Basic realm=\"realm\""
         ).build()
     }
 
@@ -166,11 +176,11 @@ open class GraphQLResource
         @Context response: HttpServletResponse,
         @Context containerRequestContext: ContainerRequestContext
     ): Response {
-        if (
-            request.getHeader("Origin") != null &&
-            response.getHeader(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER) == null
-        ) {
-            return unauthorizedResponse()
+        val origin = request.getHeader("Origin")
+        if (origin != null) {
+            if (!origin.matches(corsRegex)) {
+                return unauthorizedResponse()
+            }
         }
         // Create a new WebSocketCreator for each request bound to an optional authorized principal
         val creator = creatorFactory.getCreator(containerRequestContext)
