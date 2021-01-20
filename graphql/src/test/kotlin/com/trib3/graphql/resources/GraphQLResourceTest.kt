@@ -26,6 +26,7 @@ import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.execution.SanitizedGraphQLError
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.json.ObjectMapperProvider
+import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.testing.LeakyMock
 import graphql.ExecutionResult
@@ -97,13 +98,15 @@ class GraphQLResourceTest {
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceTest")),
-            wsCreatorFactory
+            wsCreatorFactory,
+            appConfig = TribeApplicationConfig(ConfigLoader())
         )
     val lockedResource =
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
-            wsCreatorFactory
+            wsCreatorFactory,
+            appConfig = TribeApplicationConfig(ConfigLoader())
         )
     val objectMapper = ObjectMapperProvider().get()
 
@@ -166,7 +169,7 @@ class GraphQLResourceTest {
         val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {unauthorizedError}", mapOf(), null))
         assertThat(result.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
         assertThat(result.entity).isNull()
-        assertThat(result.getHeaderString("WWW-Authenticate")).isEqualTo("Basic realm=\"Realm\"")
+        assertThat(result.getHeaderString("WWW-Authenticate")).isEqualTo("Basic realm=\"realm\"")
     }
 
     @Test

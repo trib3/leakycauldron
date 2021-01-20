@@ -14,6 +14,7 @@ import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
+import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.CookieTokenAuthFilter
 import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
@@ -119,7 +120,8 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                         }
                     }
                 }
-            }
+            },
+            appConfig = TribeApplicationConfig(ConfigLoader())
         )
 
     @Test

@@ -14,6 +14,7 @@ import com.trib3.server.coroutine.CoroutineModelProcessor
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
+import com.trib3.server.resources.AuthCookieResource
 import com.trib3.server.resources.PingResource
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.Configuration
@@ -50,8 +51,9 @@ class DefaultApplicationModule : TribeApplicationModule() {
             ServletFilterConfig(RequestIdFilter::class.java.simpleName, RequestIdFilter::class.java)
         )
 
-        // Bind ping resource
+        // Bind standard resources resources
         resourceBinder().addBinding().to<PingResource>()
+        resourceBinder().addBinding().to<AuthCookieResource>()
 
         // Bind coroutine model processor
         resourceBinder().addBinding().toInstance(CoroutineModelProcessor::class.java)
