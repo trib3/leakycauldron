@@ -91,7 +91,7 @@ class AdminAuthFilterTest {
         EasyMock.expect(
             mockResponse.setHeader(
                 EasyMock.eq("WWW-Authenticate"),
-                EasyMock.eq("Basic realm=\"Realm\"")
+                EasyMock.eq("Basic realm=\"realm\"")
             )
         ).once()
         val mockFilterConfig = LeakyMock.niceMock<FilterConfig>()
@@ -119,7 +119,7 @@ class AdminAuthFilterTest {
         EasyMock.expect(
             mockResponse.setHeader(
                 EasyMock.eq("WWW-Authenticate"),
-                EasyMock.eq("Basic realm=\"Realm\"")
+                EasyMock.eq("Basic realm=\"realm\"")
             )
         ).once()
         val mockFilterConfig = LeakyMock.niceMock<FilterConfig>()

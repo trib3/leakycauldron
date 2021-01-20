@@ -56,15 +56,19 @@
         .then(response => response.json())
         .catch(() => response.text());
     const wsproto = (window.location.protocol == 'https:') ? 'wss' : 'ws';
-    const subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient(
-      `${wsproto}://${window.location.host}/app/graphql`,
-      { reconnect: true, timeout: 60000 }
-    );
-    const subscriptionsFetcher = fetcherFactory(subscriptionsClient, graphQLFetcher);
-    ReactDOM.render(
-      React.createElement(GraphiQL, { fetcher: subscriptionsFetcher }),
-      document.getElementById('graphiql'),
-    );
+    fetch('/app/auth_cookie', {
+      method: 'get'
+    }).then(response => {
+        const subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient(
+          `${wsproto}://${window.location.host}/app/graphql`,
+          { reconnect: true, timeout: 60000 }
+        );
+        const subscriptionsFetcher = fetcherFactory(subscriptionsClient, graphQLFetcher);
+        ReactDOM.render(
+          React.createElement(GraphiQL, { fetcher: subscriptionsFetcher }),
+          document.getElementById('graphiql'),
+        );
+    });
 
 </script>
 </body>
