@@ -72,7 +72,7 @@
         <version.guice>4.2.3</version.guice>
         <version.h2>1.4.200</version.h2>
         <version.hibernate.validator>6.1.6.Final</version.hibernate.validator>
-        <version.hikaricp>3.4.5</version.hikaricp>
+        <version.hikaricp>4.0.1</version.hikaricp>
         <version.hk2>2.6.1</version.hk2>
         <version.httpcomponents.client>4.5.13</version.httpcomponents.client>
         <version.httpcomponents.core>4.4.14</version.httpcomponents.core>
