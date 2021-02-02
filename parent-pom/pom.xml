@@ -57,7 +57,7 @@
         <version.config4k>0.4.2</version.config4k>
         <version.detekt>1.15.0</version.detekt>
         <version.dokka>1.4.20</version.dokka>
-        <version.dropwizard>2.0.18</version.dropwizard>
+        <version.dropwizard>2.0.19</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.1.17</version.dropwizard.metrics>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
@@ -84,7 +84,7 @@
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.3</version.jaxb>
         <version.jaxrs>2.1.6</version.jaxrs>
-        <version.jersey>2.32</version.jersey>
+        <version.jersey>2.33</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.35.v20201120</version.jetty>
         <version.joda>2.10.9</version.joda>
