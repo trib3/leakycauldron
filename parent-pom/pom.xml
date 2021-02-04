@@ -48,7 +48,7 @@
         <version.aws.java>2.15.74</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.5.2</version.aws.serverless>
-        <version.byte-buddy>1.10.19</version.byte-buddy>
+        <version.byte-buddy>1.10.20</version.byte-buddy>
         <version.caffeine>2.8.8</version.caffeine>
         <version.checker-qual>3.10.0</version.checker-qual>
         <version.classgraph>4.8.102</version.classgraph>
