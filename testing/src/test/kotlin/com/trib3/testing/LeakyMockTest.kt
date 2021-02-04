@@ -146,10 +146,10 @@ class LeakyMockTest {
         val mock = LeakyMock.niceMock("namedNiceMock", TestClass::class.java)
         assertThat {
             EasyMock.expect(mock.manipulateThing(EasyMock.anyObject()))
-        }.isFailure().message().isNotNull().contains("EasyMock.anyObject() must not be null")
+        }.isFailure().message().isNotNull().contains("anyObject() must not be null")
         assertThat {
             EasyMock.expect(mock.manipulateString(EasyMock.anyString()))
-        }.isFailure().message().isNotNull().contains("EasyMock.anyString() must not be null")
+        }.isFailure().message().isNotNull().contains("anyString() must not be null")
     }
 
     @Test
