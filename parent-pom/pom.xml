@@ -126,7 +126,7 @@
         <version.slf4j>1.7.30</version.slf4j>
         <version.swagger>2.1.6</version.swagger>
         <version.testng>7.3.0</version.testng>
-        <version.threeten>1.5.0</version.threeten>
+        <version.threeten>1.6.0</version.threeten>
         <version.typesafe.config>1.4.1</version.typesafe.config>
         <version.validation>2.0.2</version.validation>
     </properties>
