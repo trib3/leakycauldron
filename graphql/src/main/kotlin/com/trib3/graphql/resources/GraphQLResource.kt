@@ -12,6 +12,7 @@ import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import graphql.GraphQL
 import io.dropwizard.auth.Auth
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
@@ -82,6 +83,7 @@ open class GraphQLResource
 
     internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
 
+    @get:Hidden
     internal val webSocketFactory = WebSocketServerFactory().apply {
         if (graphQLConfig.idleTimeout != null) {
             this.policy.idleTimeout = graphQLConfig.idleTimeout
