@@ -12,3 +12,35 @@ updates:
   - dependency-name: org.jetbrains:annotations
     versions:
     - "> 13.0"
+  # below are excluded until we migrate to jakarta ee9
+  - dependency-name: org.eclipse.jetty:*
+    versions:
+    - ">= 10.0.0"
+  - dependency-name: org.glassfish.*:*
+    versions:
+    - ">= 3.0.0"
+  - dependency-name: org.hibernate.validator:hibernate-validator
+    versions:
+    - ">= 7.0.0"
+  - dependency-name: com.sun.activation:jakarta.activation
+    versions:
+    - ">= 2.0.0"
+  - dependency-name: jakarta.ws.rs:jakarta.ws.rs-api
+    versions:
+    - ">= 3.0.0"
+  - dependency-name: jakarta.annotation:jakarta.annotation-api
+    versions:
+    - ">= 2.0.0"
+  - dependency-name: jakarta.xml.bind:jakarta.xml.bind-api
+    versions:
+    - ">= 3.0.0"
+  - dependency-name: jakarta.servlet:jakarta.servlet-api
+    versions:
+    - ">= 5.0.0"
+  - dependency-name: jakarta.validation:jakarta.validation-api
+    versions:
+    - ">= 3.0.0"
+  # caffeine versions above 3 require java 11, we still run on java 8
+  - dependency-name: com.github.ben-manes.caffeine:caffeine
+    versions:
+    - ">= 3.0.0"
