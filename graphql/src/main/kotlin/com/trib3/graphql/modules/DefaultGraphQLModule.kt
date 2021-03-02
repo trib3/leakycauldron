@@ -82,14 +82,14 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
     @Provides
     fun provideGraphQLInstance(
         @Named(GRAPHQL_PACKAGES_BIND_NAME)
-        graphQLPackages: Set<@JvmSuppressWildcards String>,
+        graphQLPackages: Set<String>,
         @Named(GRAPHQL_QUERIES_BIND_NAME)
-        queries: Set<@JvmSuppressWildcards Any>,
+        queries: Set<Any>,
         @Named(GRAPHQL_MUTATIONS_BIND_NAME)
-        mutations: Set<@JvmSuppressWildcards Any>,
+        mutations: Set<Any>,
         @Named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
-        subscriptions: Set<@JvmSuppressWildcards Any>,
-        instrumentations: Set<@JvmSuppressWildcards Instrumentation>,
+        subscriptions: Set<Any>,
+        instrumentations: Set<Instrumentation>,
         mapper: ObjectMapper
     ): GraphQL {
         val hooks = LeakyCauldronHooks()

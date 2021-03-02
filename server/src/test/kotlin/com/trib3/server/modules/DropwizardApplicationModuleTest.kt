@@ -14,9 +14,9 @@ import javax.inject.Named
 @Guice(modules = [DropwizardApplicationModule::class])
 class DropwizardApplicationModuleTest
 @Inject constructor(
-    val bundles: Set<@JvmSuppressWildcards ConfiguredBundle<Configuration>>,
+    val bundles: Set<ConfiguredBundle<Configuration>>,
     @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
-    val adminFilters: Set<@JvmSuppressWildcards ServletFilterConfig>
+    val adminFilters: Set<ServletFilterConfig>
 ) {
     @Test
     fun testBindings() {

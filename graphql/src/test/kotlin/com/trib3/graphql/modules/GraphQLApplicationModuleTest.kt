@@ -45,7 +45,7 @@ class DummyModule : GraphQLApplicationModule() {
 class GraphQLApplicationModuleTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<@JvmSuppressWildcards Any>,
+    val resources: Set<Any>,
     val graphQL: GraphQL
 ) {
     @Test
@@ -107,7 +107,7 @@ class OverrideDataLoaderModule : GraphQLApplicationModule() {
 class GraphQLApplicationModuleDataLoaderOverrideTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<@JvmSuppressWildcards Any>
+    val resources: Set<Any>
 ) {
     @Test
     fun testBinding() {

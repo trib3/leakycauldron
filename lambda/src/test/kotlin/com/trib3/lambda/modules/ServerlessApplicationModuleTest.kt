@@ -16,7 +16,7 @@ import javax.inject.Named
 class ServerlessApplicationModuleTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<@JvmSuppressWildcards Any>
+    val resources: Set<Any>
 ) {
     @Test
     fun testBindings() {

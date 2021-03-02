@@ -16,7 +16,7 @@ import javax.inject.Inject
 @Guice(modules = [FlywayModule::class])
 class DefaultFlywayModuleTest
 @Inject constructor(
-    val dropwizardBundles: Set<@JvmSuppressWildcards ConfiguredBundle<Configuration>>
+    val dropwizardBundles: Set<ConfiguredBundle<Configuration>>
 ) {
     @Test
     fun testFlyway() {
@@ -41,7 +41,7 @@ private class ConfiguredFlywayModule : KotlinModule() {
 @Guice(modules = [FlywayModule::class, ConfiguredFlywayModule::class])
 class ConfiguredFlywayModuleTest
 @Inject constructor(
-    val dropwizardBundles: Set<@JvmSuppressWildcards ConfiguredBundle<Configuration>>
+    val dropwizardBundles: Set<ConfiguredBundle<Configuration>>
 ) {
     @Test
     fun testFlyway() {
