@@ -43,11 +43,11 @@ class TribeServerlessApp @Inject constructor(
     val objectMapper: ObjectMapper,
     val metricRegistry: MetricRegistry,
     val healthCheckRegistry: HealthCheckRegistry,
-    internal val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
-    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
+    internal val configurationFactoryFactory: ConfigurationFactoryFactory<Configuration>,
+    val healthChecks: Set<HealthCheck>,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    internal val jerseyResources: Set<@JvmSuppressWildcards Any>,
-    internal val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
+    internal val jerseyResources: Set<Any>,
+    internal val servletFilterConfigs: Set<ServletFilterConfig>,
     internal val versionHealthCheck: VersionHealthCheck
 ) : Application<Configuration>() {
 

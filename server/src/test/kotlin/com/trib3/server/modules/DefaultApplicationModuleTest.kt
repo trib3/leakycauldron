@@ -24,11 +24,11 @@ import javax.inject.Named
 class DefaultApplicationModuleTest
 @Inject constructor(
     val configurationFactoryFactory: ConfigurationFactoryFactory<Configuration>,
-    val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
-    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
+    val servletFilterConfigs: Set<ServletFilterConfig>,
+    val healthChecks: Set<HealthCheck>,
     val objectMapper: ObjectMapper,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<@JvmSuppressWildcards Any>
+    val resources: Set<Any>
 ) {
     @Test
     fun testBindings() {

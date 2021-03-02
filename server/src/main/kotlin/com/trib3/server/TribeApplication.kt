@@ -40,22 +40,22 @@ class TribeApplication @Inject constructor(
     val objectMapper: ObjectMapper,
     val metricRegistry: MetricRegistry,
     val healthCheckRegistry: HealthCheckRegistry,
-    val configurationFactoryFactory: ConfigurationFactoryFactory<@JvmSuppressWildcards Configuration>,
-    val dropwizardBundles: Set<@JvmSuppressWildcards ConfiguredBundle<Configuration>>,
-    val servletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
+    val configurationFactoryFactory: ConfigurationFactoryFactory<Configuration>,
+    val dropwizardBundles: Set<ConfiguredBundle<Configuration>>,
+    val servletFilterConfigs: Set<ServletFilterConfig>,
     @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
-    val adminServletFilterConfigs: Set<@JvmSuppressWildcards ServletFilterConfig>,
-    val healthChecks: Set<@JvmSuppressWildcards HealthCheck>,
-    val jaxrsAppProcessors: Set<@JvmSuppressWildcards JaxrsAppProcessor>,
+    val adminServletFilterConfigs: Set<ServletFilterConfig>,
+    val healthChecks: Set<HealthCheck>,
+    val jaxrsAppProcessors: Set<JaxrsAppProcessor>,
 
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val jerseyResources: Set<@JvmSuppressWildcards Any>,
+    val jerseyResources: Set<Any>,
 
     @Named(TribeApplicationModule.APPLICATION_SERVLETS_BIND_NAME)
-    val appServlets: Set<@JvmSuppressWildcards ServletConfig>,
+    val appServlets: Set<ServletConfig>,
 
     @Named(TribeApplicationModule.ADMIN_SERVLETS_BIND_NAME)
-    val adminServlets: Set<@JvmSuppressWildcards ServletConfig>,
+    val adminServlets: Set<ServletConfig>,
     @Nullable val authFilter: AuthFilter<*, *>?
 ) : Application<Configuration>() {
     val versionHealthCheck: VersionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck

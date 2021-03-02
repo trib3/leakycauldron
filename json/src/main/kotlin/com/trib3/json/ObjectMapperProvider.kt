@@ -25,7 +25,7 @@ import kotlin.reflect.KClass
 
 class ObjectMapperProvider @Inject constructor(
     @Named(OBJECT_MAPPER_MIXINS)
-    private val mixins: Map<@JvmSuppressWildcards KClass<*>, @JvmSuppressWildcards KClass<*>>
+    private val mixins: Map<KClass<*>, KClass<*>>
 ) : Provider<ObjectMapper> {
     constructor() : this(emptyMap())
 
