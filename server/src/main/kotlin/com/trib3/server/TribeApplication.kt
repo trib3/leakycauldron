@@ -35,7 +35,7 @@ private val log = KotlinLogging.logger { }
 /**
  * A dropwizard Application that allows Guice configuration of the application
  */
-class TribeApplication @Inject constructor(
+class TribeApplication @Inject @Suppress("LongParameterList") constructor(
     val appConfig: TribeApplicationConfig,
     val objectMapper: ObjectMapper,
     val metricRegistry: MetricRegistry,

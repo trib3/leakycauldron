@@ -33,7 +33,8 @@ inline fun <reified T> EasyMockSupport.niceMock(name: String? = null): T {
  * In those cases, the EasyMock version of the matcher can be used if the
  * method being called accepts null arguments.
  */
-class LeakyMock {
+@Suppress("TooManyFunctions")
+class LeakyMock private constructor() {
     companion object {
         /**
          * Create a mock object of the specified type

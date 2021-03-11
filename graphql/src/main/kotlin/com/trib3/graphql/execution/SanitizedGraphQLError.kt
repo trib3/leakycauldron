@@ -30,9 +30,11 @@ class SanitizedGraphQLError(
      */
     private fun getCause(e: Throwable): Throwable {
         var result: Throwable = e
+        var cause = result.cause
 
-        while (result.cause != null && result != result.cause) {
-            result = result.cause!!
+        while (cause != null && result != cause) {
+            result = cause
+            cause = result.cause
         }
         return result
     }

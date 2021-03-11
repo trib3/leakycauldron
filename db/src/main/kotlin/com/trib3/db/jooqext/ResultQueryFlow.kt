@@ -16,6 +16,7 @@ import org.jooq.ResultQuery
 import kotlin.coroutines.CoroutineContext
 
 private val log = KotlinLogging.logger {}
+private const val DELAY_TIME = 100L
 
 /**
  * Convert a [ResultQuery] to a [Flow], ensuring that the underlying cursor gets closed on completion,
@@ -38,7 +39,7 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
                 log.trace("fetch monitor awaiting job cancellation or completion")
                 val cancelException = try {
                     while (fetchJob.isActive) {
-                        delay(100)
+                        delay(DELAY_TIME)
                     }
                     null
                 } catch (e: CancellationException) {
@@ -48,7 +49,7 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
                 // wait until the fetch job is actually complete, cancelling the query to speed its completion
                 while (!fetchJob.isCompleted) {
                     query.cancel()
-                    delay(100)
+                    delay(DELAY_TIME)
                 }
                 log.trace("fetch monitor job finished, throwing $cancelException")
                 if (cancelException != null) {

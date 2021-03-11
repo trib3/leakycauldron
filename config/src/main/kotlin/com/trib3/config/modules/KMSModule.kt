@@ -5,12 +5,11 @@ import com.trib3.config.KMSStringSelectReader
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.kms.KmsClient
-import javax.inject.Singleton
 
 class KMSModule : KotlinModule() {
 
     override fun configure() {
-        bind<KMSStringSelectReader>().`in`<Singleton>()
+        bind<KMSStringSelectReader>().asEagerSingleton()
     }
 
     @Provides
