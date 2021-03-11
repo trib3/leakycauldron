@@ -3,6 +3,7 @@ package com.trib3.server.resources
 import com.codahale.metrics.annotation.Timed
 import com.trib3.server.config.TribeApplicationConfig
 import org.eclipse.jetty.http.HttpStatus
+import java.util.Locale
 import javax.annotation.security.PermitAll
 import javax.inject.Inject
 import javax.ws.rs.GET
@@ -20,7 +21,7 @@ class AuthCookieResource @Inject constructor(
      * Create the cookie name based on the configured application name
      */
     private fun getCookieName(): String {
-        val formattedAppName = appConfig.appName.toUpperCase().replace(' ', '_')
+        val formattedAppName = appConfig.appName.toUpperCase(Locale.US).replace(' ', '_')
         return "${formattedAppName}_AUTHORIZATION"
     }
 

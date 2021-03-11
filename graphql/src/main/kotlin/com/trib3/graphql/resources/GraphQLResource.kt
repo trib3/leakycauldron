@@ -186,11 +186,12 @@ open class GraphQLResource
         }
         // Create a new WebSocketCreator for each request bound to an optional authorized principal
         val creator = creatorFactory.getCreator(containerRequestContext)
-        if (webSocketFactory.isUpgradeRequest(request, response)) {
-            if (webSocketFactory.acceptWebSocket(creator, request, response)) {
-                return Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
-            }
+        return if (webSocketFactory.isUpgradeRequest(request, response) &&
+            webSocketFactory.acceptWebSocket(creator, request, response)
+        ) {
+            Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
+        } else {
+            Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()
         }
-        return Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()
     }
 }

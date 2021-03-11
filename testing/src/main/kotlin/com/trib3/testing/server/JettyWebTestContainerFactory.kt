@@ -21,6 +21,7 @@ import org.glassfish.jersey.test.spi.TestContainer
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.glassfish.jersey.uri.UriComponent
 import java.net.URI
+import java.util.Locale
 import javax.servlet.Servlet
 import javax.ws.rs.core.UriBuilder
 
@@ -75,7 +76,7 @@ class JettyWebTestContainerFactory : TestContainerFactory {
             require(uri.path.isNotEmpty()) { "The URI path, of the URI $uri, must be present" }
             require(uri.path[0] == '/') { "The URI path, of the URI $uri. must start with a '/'" }
 
-            val path = String.format("/%s", UriComponent.decodePath(uri.path, true)[1].toString())
+            val path = String.format(Locale.US, "/%s", UriComponent.decodePath(uri.path, true)[1].toString())
             val context = WebAppContext()
             context.displayName = "JettyContext"
             context.contextPath = path

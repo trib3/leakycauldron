@@ -1,6 +1,7 @@
 package com.trib3.server.filters
 
 import java.util.Base64
+import java.util.Locale
 import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.FilterConfig
@@ -30,7 +31,7 @@ class AdminAuthFilter : Filter {
         }
         if (credentials != null) {
             val (scheme, encoded) = credentials.split(' ')
-            if ("basic" == scheme.toLowerCase()) {
+            if ("basic" == scheme.toLowerCase(Locale.US)) {
                 val decoded = String(base64.decode(encoded))
                 val (_, pass) = decoded.split(":")
                 if (pass == token) {

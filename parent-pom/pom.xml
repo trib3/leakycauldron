@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.19-SNAPSHOT</version>
+    <version>1.20-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -56,7 +56,7 @@
         <version.commons-codec>1.15</version.commons-codec>
         <version.commons-io>2.8.0</version.commons-io>
         <version.config4k>0.4.2</version.config4k>
-        <version.detekt>1.15.0</version.detekt>
+        <version.detekt>1.16.0</version.detekt>
         <version.dokka>1.4.30</version.dokka>
         <version.dropwizard>2.0.20</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
@@ -1468,18 +1468,24 @@
                             <configuration>
                                 <skip>${skip.checks}</skip>
                                 <target name="detekt">
+                                    <property name="compile_classpath" refid="maven.compile.classpath"/>
                                     <java taskname="detekt" dir="${basedir}"
                                           fork="true"
                                           failonerror="true"
                                           classname="io.gitlab.arturbosch.detekt.cli.Main"
                                           classpathref="maven.plugin.classpath">
 
+                                        <arg value="--build-upon-default-config"/>
                                         <arg value="--input"/>
                                         <arg value="${basedir}/src/main/kotlin"/>
                                         <arg value="--excludes"/>
                                         <arg value=".*/target/.*,.*/resources/.*"/>
                                         <arg value="--config-resource"/>
                                         <arg value="detekt-config.yml"/>
+                                        <arg value="--jvm-target"/>
+                                        <arg value="1.8"/>
+                                        <arg value="--classpath"/>
+                                        <arg value="${compile_classpath}"/>
                                     </java>
                                 </target>
                             </configuration>

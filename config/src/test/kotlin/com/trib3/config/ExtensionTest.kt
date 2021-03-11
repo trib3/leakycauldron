@@ -13,14 +13,14 @@ import software.amazon.awssdk.services.kms.model.DecryptResponse
 const val ASSERT_VAL = "valvalval"
 
 class ExtensionTest {
-    val loader: ConfigLoader
+    val loader: ConfigLoader = ConfigLoader()
 
     init {
         val fakeKms = LeakyMock.mock<KmsClient>()
         EasyMock.expect(fakeKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
             .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build()).anyTimes()
         EasyMock.replay(fakeKms)
-        loader = ConfigLoader(KMSStringSelectReader(fakeKms))
+        KMSStringSelectReader(fakeKms)
     }
 
     @Test

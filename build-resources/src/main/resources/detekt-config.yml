@@ -21,4 +21,4 @@ style:
     active: false # CHANGE FROM DEFAULT OF true
   ForbiddenImport:
     active: true # CHANGE FROM DEFAULT OF false
-    imports: 'com.google.inject.Inject,com.google.inject.name.Named,com.google.inject.Provider,com.google.inject.Singleton,com.google.inject.Scope' # CHANGE FROM DEFAULT OF ''
+    imports: ['com.google.inject.Inject','com.google.inject.name.Named','com.google.inject.Provider','com.google.inject.Singleton','com.google.inject.Scope'] # CHANGE FROM DEFAULT OF ''

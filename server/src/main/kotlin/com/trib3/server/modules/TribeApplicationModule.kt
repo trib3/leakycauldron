@@ -17,7 +17,7 @@ data class ServletConfig(
  * Base class for modules that bind things for TribeApplication.
  * Provides binder methods for commonly bound members of the TribeApplication.
  */
-abstract class TribeApplicationModule : KotlinModule() {
+open class TribeApplicationModule : KotlinModule() {
 
     companion object {
         const val APPLICATION_RESOURCES_BIND_NAME = "ApplicationResources"

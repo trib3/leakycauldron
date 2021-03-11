@@ -5,6 +5,7 @@ import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
 import com.codahale.metrics.jvm.ThreadDump
 import com.trib3.server.config.TribeApplicationConfig
+import mu.KotlinLogging
 import java.lang.management.ManagementFactory
 import java.util.SortedMap
 import javax.inject.Inject
@@ -16,6 +17,8 @@ import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 import javax.ws.rs.core.StreamingOutput
+
+private val log = KotlinLogging.logger { }
 
 /**
  * A Resource that exposes similar information to dropwizard's AdminServlet from
@@ -32,6 +35,7 @@ class AdminResource
     private val threadDumper = try {
         ThreadDump(ManagementFactory.getThreadMXBean())
     } catch (e: NoClassDefFoundError) {
+        log.error("Couldn't create threadDumper", e)
         null
     }
 

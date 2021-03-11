@@ -31,13 +31,11 @@ import javax.inject.Inject
  *
  */
 class ConfigLoader
-@Inject constructor(
-    // we inject the reader so that it gets initialized but don't use it directly :(
-    private val reader: KMSStringSelectReader,
-    private val defaultPath: String = "" // usually only specified for tests
+constructor(
+    private val defaultPath: String // usually only specified for tests
 ) {
-    // convenience constructor for tests
-    constructor(defaultPath: String = "") : this(KMSStringSelectReader(null), defaultPath)
+    @Inject
+    constructor() : this("")
 
     /**
      * Loads config from application.conf with environmental and global overrides

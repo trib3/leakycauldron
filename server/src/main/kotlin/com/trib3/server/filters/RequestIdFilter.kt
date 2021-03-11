@@ -83,7 +83,7 @@ class RequestIdFilter : Filter {
                 UUID.fromString(it).toString()
             } catch (e: IllegalArgumentException) {
                 val newId = UUID.randomUUID().toString()
-                log.warn("Ignoring invalidly formatted requestId: $it, and using $newId instead")
+                log.warn("Ignoring invalidly formatted requestId: $it, and using $newId instead", e)
                 newId
             }
         }

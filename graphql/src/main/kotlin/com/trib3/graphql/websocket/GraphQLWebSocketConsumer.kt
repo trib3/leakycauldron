@@ -34,6 +34,7 @@ import org.eclipse.jetty.websocket.api.StatusCode
 import org.glassfish.jersey.internal.MapPropertiesDelegate
 import org.glassfish.jersey.server.ContainerRequest
 import java.security.Principal
+import java.time.Duration
 import javax.ws.rs.container.ContainerRequestContext
 
 private val log = KotlinLogging.logger {}
@@ -68,7 +69,7 @@ class KeepAliveCoroutine(
 ) : GraphQLCoroutine(channel) {
     override suspend fun run() {
         while (true) {
-            delay(graphQLConfig.keepAliveIntervalSeconds * 1000)
+            delay(Duration.ofSeconds(graphQLConfig.keepAliveIntervalSeconds).toMillis())
             log.trace("WebSocket connection keepalive ping")
             queueMessage(
                 OperationMessage(
@@ -98,11 +99,12 @@ class QueryCoroutine(
     override suspend fun run() {
         try {
             val result = graphQL.execute(executionQuery)
-            // if result data is a Publisher, collect it as a flow
+            // if result data is a Flow, collect it as a flow
             // if it's not, just collect the result itself
             val flow = try {
                 result.getData<Flow<ExecutionResult>>() ?: flowOf(result)
             } catch (e: Exception) {
+                log.debug("Could not get Flow result, collecting result directly", e)
                 flowOf(result)
             }
             flow.onEach {
