@@ -97,6 +97,8 @@ class NamedDbModuleTest
         }
         assertThat((test2DS as HikariDataSource).jdbcUrl).contains("test2")
         assertThat((test3DS as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
+        assertThat(defaultDSLContext.settings().fetchSize).isEqualTo(0)
+        assertThat(test3DSLContext.settings().fetchSize).isEqualTo(1000)
     }
 
     @Test
