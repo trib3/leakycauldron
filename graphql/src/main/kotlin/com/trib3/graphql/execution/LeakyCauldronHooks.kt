@@ -1,6 +1,6 @@
 package com.trib3.graphql.execution
 
-import com.expediagroup.graphql.hooks.FlowSubscriptionSchemaGeneratorHooks
+import com.expediagroup.graphql.generator.hooks.FlowSubscriptionSchemaGeneratorHooks
 import graphql.language.StringValue
 import graphql.schema.Coercing
 import graphql.schema.CoercingSerializeException

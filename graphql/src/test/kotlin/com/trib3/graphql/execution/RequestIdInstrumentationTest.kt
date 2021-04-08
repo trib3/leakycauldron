@@ -2,9 +2,9 @@ package com.trib3.graphql.execution
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.expediagroup.graphql.SchemaGeneratorConfig
-import com.expediagroup.graphql.TopLevelObject
-import com.expediagroup.graphql.toSchema
+import com.expediagroup.graphql.generator.SchemaGeneratorConfig
+import com.expediagroup.graphql.generator.TopLevelObject
+import com.expediagroup.graphql.generator.toSchema
 import graphql.GraphQL
 import org.slf4j.MDC
 import org.testng.annotations.Test

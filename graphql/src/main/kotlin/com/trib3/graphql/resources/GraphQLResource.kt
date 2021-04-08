@@ -1,7 +1,7 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
-import com.expediagroup.graphql.execution.GraphQLContext
+import com.expediagroup.graphql.generator.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput

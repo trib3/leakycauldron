@@ -1,9 +1,9 @@
 package com.trib3.graphql.modules
 
-import com.expediagroup.graphql.SchemaGeneratorConfig
-import com.expediagroup.graphql.TopLevelObject
-import com.expediagroup.graphql.execution.FlowSubscriptionExecutionStrategy
-import com.expediagroup.graphql.toSchema
+import com.expediagroup.graphql.generator.SchemaGeneratorConfig
+import com.expediagroup.graphql.generator.TopLevelObject
+import com.expediagroup.graphql.generator.execution.FlowSubscriptionExecutionStrategy
+import com.expediagroup.graphql.generator.toSchema
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.Provides
 import com.google.inject.multibindings.MapBinder
