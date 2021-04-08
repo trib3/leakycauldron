@@ -1,6 +1,6 @@
 package com.trib3.graphql.websocket
 
-import com.expediagroup.graphql.execution.GraphQLContext
+import com.expediagroup.graphql.generator.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput

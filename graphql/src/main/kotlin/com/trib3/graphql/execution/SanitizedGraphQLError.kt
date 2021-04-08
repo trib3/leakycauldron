@@ -2,7 +2,7 @@ package com.trib3.graphql.execution
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import graphql.ExceptionWhileDataFetching
-import graphql.execution.ExecutionPath
+import graphql.execution.ResultPath
 import graphql.language.SourceLocation
 
 /**
@@ -10,7 +10,7 @@ import graphql.language.SourceLocation
  * and attempts to bubble up the message from the root cause of the exception
  */
 class SanitizedGraphQLError(
-    path: ExecutionPath,
+    path: ResultPath,
     exception: Throwable,
     sourceLocation: SourceLocation
 ) : ExceptionWhileDataFetching(path, exception, sourceLocation) {

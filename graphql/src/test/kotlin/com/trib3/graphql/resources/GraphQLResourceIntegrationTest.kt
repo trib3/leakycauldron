@@ -6,9 +6,9 @@ import assertk.assertions.isFailure
 import assertk.assertions.isNull
 import assertk.assertions.messageContains
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
-import com.expediagroup.graphql.SchemaGeneratorConfig
-import com.expediagroup.graphql.TopLevelObject
-import com.expediagroup.graphql.toSchema
+import com.expediagroup.graphql.generator.SchemaGeneratorConfig
+import com.expediagroup.graphql.generator.TopLevelObject
+import com.expediagroup.graphql.generator.toSchema
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler

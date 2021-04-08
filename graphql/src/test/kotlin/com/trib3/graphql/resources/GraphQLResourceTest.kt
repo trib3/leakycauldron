@@ -13,9 +13,9 @@ import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import assertk.assertions.prop
 import com.coxautodev.graphql.tools.GraphQLQueryResolver
-import com.expediagroup.graphql.SchemaGeneratorConfig
-import com.expediagroup.graphql.TopLevelObject
-import com.expediagroup.graphql.toSchema
+import com.expediagroup.graphql.generator.SchemaGeneratorConfig
+import com.expediagroup.graphql.generator.TopLevelObject
+import com.expediagroup.graphql.generator.toSchema
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig

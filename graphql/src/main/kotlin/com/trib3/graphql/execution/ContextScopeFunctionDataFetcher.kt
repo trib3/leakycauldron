@@ -1,7 +1,7 @@
 package com.trib3.graphql.execution
 
-import com.expediagroup.graphql.execution.FunctionDataFetcher
-import com.expediagroup.graphql.execution.SimpleKotlinDataFetcherFactoryProvider
+import com.expediagroup.graphql.generator.execution.FunctionDataFetcher
+import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import graphql.schema.DataFetcherFactory
@@ -15,7 +15,9 @@ import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KFunction
-import kotlin.reflect.full.callSuspend
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.callSuspendBy
+import kotlin.reflect.full.instanceParameter
 
 /**
  * [SimpleKotlinDataFetcherFactoryProvider] subclass that provides a
@@ -47,30 +49,33 @@ open class ContextScopeFunctionDataFetcher(
     objectMapper: ObjectMapper = jacksonObjectMapper()
 ) : FunctionDataFetcher(target, fn, objectMapper) {
     override fun get(environment: DataFetchingEnvironment): Any? {
-        val instance: Any? = target ?: environment.getSource()
+        val instance: Any? = target ?: environment.getSource<Any?>()
+        val instanceParameter = fn.instanceParameter
 
-        return instance?.let {
-            val parameterValues = getParameterValues(fn, environment)
+        return if (instance != null && instanceParameter != null) {
+            val parameterValues = getParameters(fn, environment)
+                .plus(instanceParameter to instance)
 
             if (fn.isSuspend) {
                 val scope = (environment.getContext<Any?>() as? CoroutineScope) ?: GlobalScope
-                runScopedSuspendingFunction(it, parameterValues, scope)
+                runScopedSuspendingFunction(parameterValues, scope)
             } else {
-                runBlockingFunction(it, parameterValues)
+                runBlockingFunction(parameterValues)
             }
+        } else {
+            null
         }
     }
 
     protected open fun runScopedSuspendingFunction(
-        instance: Any,
-        parameterValues: Array<Any?>,
+        parameterValues: Map<KParameter, Any?>,
         scope: CoroutineScope,
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         coroutineStart: CoroutineStart = CoroutineStart.DEFAULT
     ): CompletableFuture<Any?> {
         return scope.future(coroutineContext, coroutineStart) {
             try {
-                fn.callSuspend(instance, *parameterValues)
+                fn.callSuspendBy(parameterValues)
             } catch (exception: InvocationTargetException) {
                 throw exception.cause ?: exception
             }
