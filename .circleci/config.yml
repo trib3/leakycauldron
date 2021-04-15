@@ -71,7 +71,19 @@ jobs:
           path: ~/test_results
       - store_artifacts:
           path: ~/test_results
-      - run: bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
+      - run:
+          name: Upload coverage report
+          command: |
+            curl https://codecov.io/bash > ~/codecov
+            CODECOV_VERSION=$(grep 'VERSION=\".*\"' ~/codecov | cut -d '"' -f2)
+            curl "https://raw.githubusercontent.com/codecov/codecov-bash/${CODECOV_VERSION}/SHA512SUM" | grep codecov$ > ~/codecov.sha
+            cd ~ && shasum -a 512 -c ~/codecov.sha && cd ~/repo
+            if [ $? -eq 0 ]; then
+              chmod +x ~/codecov
+              ~/codecov -t ${CODECOV_TOKEN}
+            else
+              exit 1
+            fi
       # collect docs
       - run:
           name: Collect docs
