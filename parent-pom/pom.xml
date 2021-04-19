@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.20-SNAPSHOT</version>
+    <version>1.21-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -455,8 +455,8 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
                 <version>${version.jaxb}</version>
                 <scope>runtime</scope>
             </dependency>
@@ -1296,6 +1296,7 @@
                                     <exclude>org.glassfish:javax.el</exclude>
                                     <exclude>jakarta.el:jakarta.el-api</exclude> <!-- el impl includes el-api -->
                                     <exclude>jakarta.activation:jakarta.activation-api</exclude> <!-- use com.sun -->
+                                    <exclude>com.sun.xml.bind:jaxb-impl</exclude> <!-- use org.glassfish.jaxb:jaxb-runtime -->
                                 </excludes>
                             </bannedDependencies>
                         </rules>
@@ -1697,6 +1698,7 @@
                                 <Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
                                 <Implementation-Version>${git.commit.id.describe}</Implementation-Version>
                                 <Specification-Version>${project.version}</Specification-Version>
+                                <Multi-Release>true</Multi-Release>
                             </manifestEntries>
                         </archive>
                     </configuration>
