@@ -8,7 +8,7 @@ import graphql.schema.DataFetcherFactory
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.CompletableFuture
@@ -40,14 +40,13 @@ open class ContextScopeKotlinDataFetcherFactoryProvider(
 /**
  * [FunctionDataFetcher] that tries to run suspend functions
  * in a [CoroutineScope] provided by the [DataFetchingEnvironment.getContext],
- * if the context is a [CoroutineScope].  Otherwise runs in [GlobalScope] like
- * [FunctionDataFetcher].
+ * if the context is a [CoroutineScope].  Otherwise runs in a scope with [Dispatchers.Default].
  */
 open class ContextScopeFunctionDataFetcher(
     private val target: Any?,
     private val fn: KFunction<*>,
     objectMapper: ObjectMapper = jacksonObjectMapper()
-) : FunctionDataFetcher(target, fn, objectMapper) {
+) : FunctionDataFetcher(target, fn, objectMapper), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     override fun get(environment: DataFetchingEnvironment): Any? {
         val instance: Any? = target ?: environment.getSource<Any?>()
         val instanceParameter = fn.instanceParameter
@@ -57,7 +56,7 @@ open class ContextScopeFunctionDataFetcher(
                 .plus(instanceParameter to instance)
 
             if (fn.isSuspend) {
-                val scope = (environment.getContext<Any?>() as? CoroutineScope) ?: GlobalScope
+                val scope = (environment.getContext<Any?>() as? CoroutineScope) ?: this
                 runScopedSuspendingFunction(parameterValues, scope)
             } else {
                 runBlockingFunction(parameterValues)

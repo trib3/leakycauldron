@@ -16,7 +16,6 @@ import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.future.await
@@ -54,7 +53,7 @@ private val log = KotlinLogging.logger {}
  */
 data class GraphQLResourceContext(
     val principal: Principal?,
-    private val scope: CoroutineScope = GlobalScope,
+    private val scope: CoroutineScope,
     var cookie: NewCookie? = null
 ) : GraphQLContext, CoroutineScope by scope
 

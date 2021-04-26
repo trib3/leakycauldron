@@ -11,7 +11,6 @@ import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -133,7 +132,7 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
             resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "spin").build()
         ).get()
         session.remote.sendString(mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)))
-        GlobalScope.launch(Dispatchers.IO) {
+        launch(Dispatchers.IO) {
             for (i in 0..19) {
                 delay(100)
                 log.info("SPIN: $i: $coroutineContext")

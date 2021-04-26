@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.22-SNAPSHOT</version>
+    <version>1.23-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -94,8 +94,8 @@
         <version.joda>2.10.10</version.joda>
         <version.jooq>3.14.9</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
-        <version.kotlin>1.4.32</version.kotlin>
-        <version.kotlin.coroutines>1.4.3</version.kotlin.coroutines>
+        <version.kotlin>1.5.0</version.kotlin>
+        <version.kotlin.coroutines>1.5.0</version.kotlin.coroutines>
         <version.kotlin.guice>1.5.0</version.kotlin.guice>
         <version.kotlin.logging>2.0.6</version.kotlin.logging>
         <version.ktlint>0.41.0</version.ktlint>
@@ -1528,6 +1528,11 @@
                             <artifactId>build-resources</artifactId>
                             <version>${version.leakycauldron}</version>
                         </dependency>
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-stdlib</artifactId>
+                            <version>${version.kotlin}</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
@@ -1539,7 +1544,6 @@
                         <args>
                             <arg>-Werror</arg>
                             <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
-                            <arg>-Xuse-ir</arg>
                         </args>
                     </configuration>
                     <executions>
