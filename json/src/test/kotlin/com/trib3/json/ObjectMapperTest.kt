@@ -10,7 +10,9 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.message
+import com.fasterxml.jackson.annotation.JacksonInject
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.OptBoolean
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -34,9 +36,46 @@ private data class SimpleBean(
     val ignoreMe: String? = null
 )
 
+private data class InjectedValueBean(
+    val foo: String,
+    val bar: Int,
+    @JacksonInject
+    val injectedBeanDefault: SimpleBean,
+    @JacksonInject(useInput = OptBoolean.TRUE)
+    val injectedBeanTrue: SimpleBean,
+    @JacksonInject(useInput = OptBoolean.FALSE)
+    val injectedBeanFalse: SimpleBean
+)
+
+private enum class SimpleEnum { ONE, TWO }
+
+private class UnDeserializable(var enumValue: SimpleEnum) {
+    fun setFoo(strValue: String) {
+        enumValue = SimpleEnum.valueOf(strValue)
+    }
+}
+
+private data class CantDeserializeBean(
+    val foo: String,
+    val undeserializable: UnDeserializable
+)
+
+private data class InjectUnDeserializeBean(
+    val foo: String,
+    @JacksonInject
+    val undeserializable: UnDeserializable
+)
+
 private abstract class SimpleMixin(
     @JsonIgnore
     val ignoreMe: String? = null
+)
+
+private val moduleInjectedBean = SimpleBean(
+    "injectfoo",
+    99,
+    "injectmaybe",
+    LocalDate.of(2021, 5, 3)
 )
 
 private class SimpleMixinModule : KotlinModule() {
@@ -47,6 +86,11 @@ private class SimpleMixinModule : KotlinModule() {
             typeLiteral<KClass<*>>(),
             Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS)
         ).addBinding(SimpleBean::class).toInstance(SimpleMixin::class)
+        bind<Int>().toInstance(25)
+        bind<UnDeserializable>().toInstance(UnDeserializable(SimpleEnum.TWO))
+        bind<SimpleBean>().toInstance(
+            moduleInjectedBean
+        )
     }
 }
 
@@ -113,5 +157,29 @@ class ObjectMapperTest
             isInstanceOf(JsonMappingException::class)
             message().isNotNull().contains("Unexpected quarter")
         }
+    }
+
+    @Test
+    fun testInjection() {
+        val injectedBean = mapper.readValue<InjectedValueBean>("""{"foo": "blah", "bar": 15}""")
+        assertThat(injectedBean.foo).isEqualTo("blah")
+        assertThat(injectedBean.bar).isEqualTo(15)
+        assertThat(injectedBean.injectedBeanDefault).isEqualTo(moduleInjectedBean)
+        assertThat(injectedBean.injectedBeanTrue).isEqualTo(moduleInjectedBean)
+        assertThat(injectedBean.injectedBeanFalse).isEqualTo(moduleInjectedBean)
+    }
+
+    @Test
+    fun testNeedInjectionForUnDeserializable() {
+        assertThat {
+            mapper.readValue<CantDeserializeBean>("""{"foo": "blah"}""")
+        }.isFailure()
+    }
+
+    @Test
+    fun testInjectUnDeserializableValue() {
+        val injectedUndeserializableBean = mapper.readValue<InjectUnDeserializeBean>("""{"foo": "blah"}""")
+        assertThat(injectedUndeserializableBean.foo).isEqualTo("blah")
+        assertThat(injectedUndeserializableBean.undeserializable.enumValue).isEqualTo(SimpleEnum.TWO)
     }
 }

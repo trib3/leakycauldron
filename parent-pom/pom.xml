@@ -63,6 +63,7 @@
         <version.dropwizard>2.0.21</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.1.21</version.dropwizard.metrics>
+        <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.3</version.easymock>
         <version.flyway>7.8.2</version.flyway>
@@ -120,6 +121,7 @@
         <version.maven.shade>3.2.4</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
         <version.maven.surefire>3.0.0-M5</version.maven.surefire>
+        <version.netty>4.1.63.Final</version.netty>
         <version.postgres>42.2.20</version.postgres>
         <version.postgres.embedded>0.13.3</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
@@ -145,10 +147,6 @@
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
-        </repository>
-        <repository>
-            <id>redshift</id>
-            <url>https://s3.amazonaws.com/redshift-maven-repository/release</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -314,6 +312,11 @@
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-metrics</artifactId>
+                <version>${version.dropwizard}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-jersey</artifactId>
                 <version>${version.dropwizard}</version>
                 <exclusions>
@@ -399,6 +402,11 @@
                         <artifactId>jakarta.activation-api</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-validation</artifactId>
+                <version>${version.dropwizard}</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
@@ -824,6 +832,17 @@
             </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
+                <artifactId>cloudwatch</artifactId>
+                <version>${version.aws.java}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
                 <artifactId>kms</artifactId>
                 <version>${version.aws.java}</version>
                 <exclusions>
@@ -869,6 +888,21 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${version.httpcomponents.client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler</artifactId>
+                <version>${version.netty}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>${version.netty}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.azagniotov</groupId>
+                <artifactId>dropwizard-metrics-cloudwatch</artifactId>
+                <version>${version.dropwizard.metrics.cloudwatch}</version>
             </dependency>
 
             <!-- lambda -->

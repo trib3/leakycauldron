@@ -2,6 +2,7 @@ package com.trib3.server.resources
 
 import com.codahale.metrics.annotation.Timed
 import com.trib3.server.config.TribeApplicationConfig
+import com.trib3.server.runIf
 import org.eclipse.jetty.http.HttpStatus
 import java.util.Locale
 import javax.annotation.security.PermitAll
@@ -45,9 +46,9 @@ class AuthCookieResource @Inject constructor(
             .getHeaderString("Authorization")
             ?.split(' ', limit = 2)
         val authToken = authHeaderSplit?.last()
-        return Response.status(HttpStatus.NO_CONTENT_204).let { builder ->
-            if (authToken != null) {
-                builder.cookie(
+        return Response.status(HttpStatus.NO_CONTENT_204)
+            .runIf(authToken != null) {
+                cookie(
                     NewCookie(
                         getCookieName(),
                         authToken,
@@ -61,9 +62,6 @@ class AuthCookieResource @Inject constructor(
                         true
                     )
                 )
-            } else {
-                builder
-            }
-        }.build()
+            }.build()
     }
 }

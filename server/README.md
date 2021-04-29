@@ -43,12 +43,12 @@ under the `application.modules`configuration key.
 Example config:
 
 ```hocon
-    application {
-        modules: [
-            "com.example.ExampleApplicationModule",
-            "com.example.ExamplePersistenceModule"
-        ]
-    }
+application {
+    modules: [
+        "com.example.ExampleApplicationModule",
+        "com.example.ExamplePersistenceModule"
+    ]
+}
 ```
 
 ##### JAX-RS Resources
@@ -64,6 +64,50 @@ class ExampleApplicationModule : TribeApplicationModule() {
     resourceBinder().addBinding().to<com.example.server.resources.ExampleResource>()
     // ...
   }
+}
+```
+
+##### Cloudwatch Metrics Reporter
+
+[`CloudWatchReporterFactory`](https://github.com/trib3/leakycauldron/blob/HEAD/server/src/main/kotlin/com/trib3/server/config/dropwizard/CloudWatchReporterFactory.kt)
+allows for configuration based specification of a
+[CloudWatch Reporter](https://github.com/azagniotov/codahale-aggregated-metrics-cloudwatch-reporter). In addition to the
+below example config, an application using the `CloudWatchReporterFactory` must make a `CloudWatchAsyncClient`
+injectable via guice, for example:
+
+```kotlin
+bind<CloudWatchAsyncClient>()
+  .toInstance(
+    CloudWatchAsyncClient.builder().region(Region.US_EAST_1).build()
+  )
+```
+
+Example config:
+
+```hocon
+metrics: {
+    frequency: 10 seconds
+    reporters: [{
+        includes: [] # use to control which metrics to report on
+        excludes: [] # use to control which metrics to report on
+        type: cloudwatch
+        namespace: null # defaults to TribeApplicationConfig.env
+        globalDimensions: ['dim1=val1', 'dim2=val2'] # adds Application=TribeApplicationConfig.appName,Hostname=InetAddress.getLocalHost().hostname
+        percentiles: [P75, P95, P999]
+        dryRun: false
+        meanRate: false # applies to Meters and Timers
+        oneMinuteMeanRate: false # applies to Meters and Timers
+        fiveMinuteMeanRate: false # applies to Meters and Timers
+        fifteenMinuteMeanRate: false # applies to Meters and Timers
+        arithmeticMean: false # applies to Histograms and Timers
+        stdDev: false # applies to Histograms and Timers
+        statisticSet: false # applies to Histograms and Timers
+        zeroValueSubmission: false
+        highResolution: false
+        reportRawCountValue: false
+        jvmMetrics: false
+        meterUnit: null # defaults to durationUnit
+    }]
 }
 ```
 

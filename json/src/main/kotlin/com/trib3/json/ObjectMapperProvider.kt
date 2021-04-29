@@ -1,11 +1,16 @@
 package com.trib3.json
 
 import com.codahale.metrics.json.MetricsModule
+import com.fasterxml.jackson.annotation.JacksonInject
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair
+import com.fasterxml.jackson.module.guice.GuiceInjectableValues
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.google.inject.Injector
 import com.trib3.json.ObjectMapperProvider.Companion.OBJECT_MAPPER_MIXINS
+import com.trib3.json.jackson.DontUseInputGuiceAnnotationIntrospector
 import com.trib3.json.jackson.ThreeTenExtraModule
 import io.dropwizard.jackson.Jackson
 import java.util.concurrent.TimeUnit
@@ -21,13 +26,19 @@ import kotlin.reflect.KClass
  *
  * Allows injecting mixins by providing a Map<KClass, KClass> bound
  * by name [OBJECT_MAPPER_MIXINS]
+ *
+ * When created as part of a Guice [Injector], will bridge jackson
+ * [com.fasterxml.jackson.databind.InjectableValues] and guice bindings,
+ * so that deserialized objects with [JacksonInject] annotated members
+ * are injected from the guice bindings.
  */
 
 class ObjectMapperProvider @Inject constructor(
     @Named(OBJECT_MAPPER_MIXINS)
-    private val mixins: Map<KClass<*>, KClass<*>>
+    private val mixins: Map<KClass<*>, KClass<*>>,
+    private val injector: Injector?
 ) : Provider<ObjectMapper> {
-    constructor() : this(emptyMap())
+    constructor() : this(emptyMap(), null)
 
     companion object {
         const val OBJECT_MAPPER_MIXINS = "ObjectMapperMixins"
@@ -41,6 +52,20 @@ class ObjectMapperProvider @Inject constructor(
         mapper.registerModule(KotlinModule())
         mapper.registerModule(MetricsModule(TimeUnit.SECONDS, TimeUnit.SECONDS, false))
         mapper.registerModule(ThreeTenExtraModule())
+
+        // set up guice <-> jackson inject bridge like jackson's guice module does
+        if (injector != null) {
+            val guiceIntrospector = DontUseInputGuiceAnnotationIntrospector()
+            mapper.injectableValues = GuiceInjectableValues(injector)
+            mapper.setAnnotationIntrospectors(
+                AnnotationIntrospectorPair(
+                    guiceIntrospector, mapper.serializationConfig.annotationIntrospector
+                ),
+                AnnotationIntrospectorPair(
+                    guiceIntrospector, mapper.deserializationConfig.annotationIntrospector
+                )
+            )
+        }
         mixins.forEach {
             mapper.addMixIn(it.key.java, it.value.java)
         }

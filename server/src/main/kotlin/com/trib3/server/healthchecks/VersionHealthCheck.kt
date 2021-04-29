@@ -48,11 +48,11 @@ open class VersionHealthCheck : HealthCheck() {
 
     public override fun check(): Result {
         return Result.builder().withMessage(info)
-            .let { builder ->
+            .run {
                 if (healthy) {
-                    builder.healthy()
+                    healthy()
                 } else {
-                    builder.unhealthy()
+                    unhealthy()
                 }
             }.build()
     }
