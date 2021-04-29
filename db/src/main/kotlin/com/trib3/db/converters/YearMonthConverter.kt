@@ -13,8 +13,6 @@ class YearMonthConverter : AbstractConverter<LocalDate, YearMonth>(LocalDate::cl
     }
 
     override fun to(yearMonth: YearMonth?): LocalDate? {
-        return yearMonth?.let {
-            it.atDay(1)
-        }
+        return yearMonth?.atDay(1)
     }
 }

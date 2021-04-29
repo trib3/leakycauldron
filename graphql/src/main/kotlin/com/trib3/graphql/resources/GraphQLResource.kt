@@ -10,6 +10,7 @@ import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
+import com.trib3.server.runIf
 import graphql.GraphQL
 import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Hidden
@@ -136,13 +137,9 @@ open class GraphQLResource
             unauthorizedResponse()
         } else {
             Response.ok(result)
-                .let {
-                    // Communicate any set cookie back to the client
-                    if (context.cookie != null) {
-                        it.cookie(context.cookie)
-                    } else {
-                        it
-                    }
+                // Communicate any set cookie back to the client
+                .runIf(context.cookie != null) {
+                    cookie(context.cookie)
                 }.build()
         }
     }

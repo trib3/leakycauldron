@@ -5,6 +5,7 @@ import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
 import com.codahale.metrics.jvm.ThreadDump
 import com.trib3.server.config.TribeApplicationConfig
+import com.trib3.server.runIf
 import mu.KotlinLogging
 import java.lang.management.ManagementFactory
 import java.util.SortedMap
@@ -43,10 +44,8 @@ class AdminResource
      * Verifies an auth token is correct if configured
      */
     private fun checkAccess(key: String?) {
-        appConfig.adminAuthToken?.let {
-            if (it != key) {
-                throw NotAuthorizedException(Response.status(Response.Status.UNAUTHORIZED).build())
-            }
+        appConfig.adminAuthToken?.runIf(appConfig.adminAuthToken != key) {
+            throw NotAuthorizedException(Response.status(Response.Status.UNAUTHORIZED).build())
         }
     }
 
@@ -79,10 +78,8 @@ class AdminResource
     fun getThreads(@QueryParam("key") key: String?): Response {
         checkAccess(key)
         return Response.ok()
-            .let { builder ->
-                threadDumper?.let { tDumper ->
-                    builder.entity(StreamingOutput { output -> tDumper.dump(output) })
-                } ?: builder
+            .runIf(threadDumper != null) {
+                entity(StreamingOutput { output -> threadDumper?.dump(output) })
             }.build()
     }
 }
