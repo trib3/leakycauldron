@@ -119,9 +119,12 @@ class GraphQLResourceTest {
 
     @Test
     fun testSimpleQuery() = runBlocking {
-        val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {test(value:\"123\")}", null, null))
-        val graphQLResult = result.entity as ExecutionResult
-        assertThat(graphQLResult.getData<Map<String, String>>()["test"]).isEqualTo("123")
+        RequestIdFilter.withRequestId("test-simple-query") {
+            val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {test(value:\"123\")}", null, null))
+            val graphQLResult = result.entity as ExecutionResult
+            assertThat(graphQLResult.getData<Map<String, String>>()["test"]).isEqualTo("123")
+            assertThat(resource.runningFutures["test-simple-query"]).isNull()
+        }
     }
 
     @Test
@@ -194,6 +197,7 @@ class GraphQLResourceTest {
                 assertThat(entity.errors).hasSize(1)
                 assertThat(entity.errors[0].message).contains("was cancelled")
                 assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
         }
@@ -216,6 +220,7 @@ class GraphQLResourceTest {
                 assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
                 assertThat(entity.errors).isEmpty()
                 assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
         }
@@ -242,6 +247,7 @@ class GraphQLResourceTest {
                 assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
                 assertThat(entity.errors).isEmpty()
                 assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
         }
@@ -273,6 +279,7 @@ class GraphQLResourceTest {
                 assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
                 assertThat(entity.errors).isEmpty()
                 assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
         }
