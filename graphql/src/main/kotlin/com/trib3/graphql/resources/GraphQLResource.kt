@@ -120,27 +120,29 @@ open class GraphQLResource
     ): Response = supervisorScope {
         val context = GraphQLResourceContext(principal.orElse(null), this)
         val requestId = RequestIdFilter.getRequestId()
-        val futureResult = graphQL.executeAsync(
-            query.toExecutionInput(context, dataLoaderRegistryFactory)
-        ).whenComplete { result, throwable ->
-            if (requestId != null) {
-                log.debug("$requestId finished with $result, $throwable")
-                runningFutures.remove(requestId)
-            }
-        }
         if (requestId != null) {
             runningFutures[requestId] = this
         }
-
-        val result = futureResult.await()
-        if (result.getData<Any?>() == null && result.errors.all { it.message == "HTTP 401 Unauthorized" }) {
-            unauthorizedResponse()
-        } else {
-            Response.ok(result)
-                // Communicate any set cookie back to the client
-                .runIf(context.cookie != null) {
-                    cookie(context.cookie)
-                }.build()
+        try {
+            val futureResult = graphQL.executeAsync(
+                query.toExecutionInput(context, dataLoaderRegistryFactory)
+            ).whenComplete { result, throwable ->
+                log.debug("$requestId finished with $result, $throwable")
+            }
+            val result = futureResult.await()
+            if (result.getData<Any?>() == null && result.errors.all { it.message == "HTTP 401 Unauthorized" }) {
+                unauthorizedResponse()
+            } else {
+                Response.ok(result)
+                    // Communicate any set cookie back to the client
+                    .runIf(context.cookie != null) {
+                        cookie(context.cookie)
+                    }.build()
+            }
+        } finally {
+            if (requestId != null) {
+                runningFutures.remove(requestId)
+            }
         }
     }
 
