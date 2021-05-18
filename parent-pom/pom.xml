@@ -121,7 +121,7 @@
         <version.maven.shade>3.2.4</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
         <version.maven.surefire>3.0.0-M5</version.maven.surefire>
-        <version.netty>4.1.63.Final</version.netty>
+        <version.netty>4.1.64.Final</version.netty>
         <version.postgres>42.2.20</version.postgres>
         <version.postgres.embedded>0.13.3</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
@@ -891,13 +891,10 @@
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
-                <artifactId>netty-handler</artifactId>
+                <artifactId>netty-bom</artifactId>
                 <version>${version.netty}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http</artifactId>
-                <version>${version.netty}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.github.azagniotov</groupId>
