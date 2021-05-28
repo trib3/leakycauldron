@@ -65,9 +65,11 @@ class DefaultApplicationModule : TribeApplicationModule() {
         bind<HealthCheckRegistry>().`in`(Scopes.SINGLETON)
 
         // Ensure @Auth annotations can be used as long as downstream binds an AuthFilter implementation
+        // (and optionally an Authorizer implementation)
         resourceBinder().addBinding().toInstance(RolesAllowedDynamicFeature::class.java)
         resourceBinder().addBinding().toInstance(AuthValueFactoryProvider.Binder(Principal::class.java))
         authFilterBinder().setDefault().toProvider(Provider { null })
+        authorizerBinder().setDefault().toProvider(Provider { null })
     }
 
     /**

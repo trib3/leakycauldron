@@ -17,7 +17,7 @@ class Query {
 
 class RequestIdInstrumentationTest {
     val config =
-        SchemaGeneratorConfig(listOf())
+        SchemaGeneratorConfig(listOf(this::class.java.packageName))
     val graphQL =
         GraphQL.newGraphQL(
             toSchema(

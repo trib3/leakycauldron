@@ -66,7 +66,7 @@ class LeakyCauldronHooksTest {
     val hooks = LeakyCauldronHooks()
     val config =
         SchemaGeneratorConfig(
-            listOf(),
+            listOf(this::class.java.packageName),
             hooks = hooks,
             dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(
                 ObjectMapperProvider().get()

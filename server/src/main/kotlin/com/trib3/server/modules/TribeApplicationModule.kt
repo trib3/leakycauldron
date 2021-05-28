@@ -5,6 +5,8 @@ import dev.misfitlabs.kotlinguice4.KotlinModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import io.dropwizard.auth.AuthFilter
+import io.dropwizard.auth.Authorizer
+import java.security.Principal
 import javax.servlet.Servlet
 
 data class ServletConfig(
@@ -60,6 +62,13 @@ open class TribeApplicationModule : KotlinModule() {
      * Optional binder for dropwizard AuthFilter
      */
     fun authFilterBinder(): KotlinOptionalBinder<AuthFilter<*, *>> {
+        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
+    }
+
+    /**
+     * Optional binder for the role based principal authorizer
+     */
+    fun authorizerBinder(): KotlinOptionalBinder<Authorizer<Principal>> {
         return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
     }
 }

@@ -120,7 +120,7 @@ class GraphQLWebSocketTest {
 
     val testGraphQL = GraphQL.newGraphQL(
         toSchema(
-            SchemaGeneratorConfig(listOf(), hooks = FlowSubscriptionSchemaGeneratorHooks()),
+            SchemaGeneratorConfig(listOf(this::class.java.packageName), hooks = FlowSubscriptionSchemaGeneratorHooks()),
             listOf(TopLevelObject(SocketQuery())),
             listOf(),
             listOf(TopLevelObject(SocketSubscription()))
