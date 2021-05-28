@@ -51,12 +51,14 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
             .to<GraphQLWebSocketDropwizardAuthenticator>()
 
         resourceBinder().addBinding().to<GraphQLResource>()
+
         // Ensure graphql binders are set up
         graphQLPackagesBinder()
         graphQLQueriesBinder()
         graphQLMutationsBinder()
         graphQLSubscriptionsBinder()
         graphQLInstrumentationsBinder()
+        schemaDirectivesBinder()
 
         adminServletBinder().addBinding().toInstance(
             ServletConfig(
@@ -90,9 +92,9 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         @Named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
         subscriptions: Set<Any>,
         instrumentations: Set<Instrumentation>,
-        mapper: ObjectMapper
+        mapper: ObjectMapper,
+        hooks: LeakyCauldronHooks = LeakyCauldronHooks()
     ): GraphQL {
-        val hooks = LeakyCauldronHooks()
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
             hooks = hooks,

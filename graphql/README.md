@@ -21,7 +21,7 @@ a [server](https://github.com/trib3/leakycauldron/blob/HEAD/server) application.
 * Admin:
   * [GraphiQL](https://github.com/graphql/graphiql) available at `/admin/graphiql`
 
-#### Configuration
+### Configuration
 
 Configuration is done primarily though Guice.
 [`GraphQLApplicationModule`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
@@ -40,7 +40,7 @@ Default config:
     }
 ```
 
-##### GraphQL Resolvers
+### GraphQL Resolvers
 
 [`GraphQLApplicationModule`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
 provides methods that expose multi-binders for configuring GraphQL resolvers. Any model classes must be added to
@@ -50,22 +50,24 @@ the `graphQLSubscriptionsBinder()`, and Mutations to the `graphQLMutationsBinder
 
 ```kotlin
 class ExampleApplicationModule : GraphQLApplicationModule() {
-    override fun configureApplication() {
-        // ...
-        graphQLPackagesBinder().addBinding().toInstance("com.example.api")
-        graphQLPackagesBinder().addBinding().toInstance("com.example.server.graphql")
+  override fun configureApplication() {
+    // ...
+    graphQLPackagesBinder().addBinding().toInstance("com.example.api")
+    graphQLPackagesBinder().addBinding().toInstance("com.example.server.graphql")
 
-      graphQLQueriesBinder().addBinding().to<com.example.server.graphql.Query>()
-      graphQLMutationsBinder().addBinding().to<com.example.server.graphql.Mutation>()
-      graphQLSubscriptionsBinder().addBinding().to<com.example.server.graphql.Subscription>()
-      // ...
-    }
+    graphQLQueriesBinder().addBinding().to<com.example.server.graphql.Query>()
+    graphQLMutationsBinder().addBinding().to<com.example.server.graphql.Mutation>()
+    graphQLSubscriptionsBinder().addBinding().to<com.example.server.graphql.Subscription>()
+    // ...
+  }
 }
 ```
 
-#### Auth
+### Auth
 
-If Dropwizard Authentication is setup per
+#### Auth Context
+
+If Dropwizard Authentication is setup and an `AuthFilter<*, *>` binding is provided per
 the [server README](https://github.com/trib3/leakycauldron/blob/HEAD/server/README.md#auth), GraphQL resolver methods
 can receive the principal inside the GraphQL context of type
 `GraphQLResourceContext`. Resolver methods can write to the `cookie` field of the context object they receive in order
@@ -80,36 +82,66 @@ class ExampleLoginMutations : GraphQLQueryResolver {
       if (userSession == null) {
         return false
       }
-            // cookie will be set in response
-            context.cookie = NewCookie("example-app-session-id", userSession.id)
-        } else {
-            // already logged in
-        }
-        return true
+      // cookie will be set in response
+      context.cookie = NewCookie("example-app-session-id", userSession.id)
+    } else {
+      // already logged in
     }
+    return true
+  }
 
-    fun logout(context: GraphQLResourceContext): Boolean {
-        if (context.principal != null) {
-            deleteSession(context.principal)
-            context.cookie =
-                NewCookie(
-                    Cookie("example-app-session-id", ""),
-                    null,
-                  -1,
-                  Date(0), // 1970
-                  false,
-                  false
-                )
-        }
-      return true
+  fun logout(context: GraphQLResourceContext): Boolean {
+    if (context.principal != null) {
+      deleteSession(context.principal)
+      context.cookie =
+        NewCookie(
+          Cookie("example-app-session-id", ""),
+          null,
+          -1,
+          Date(0), // 1970
+          false,
+          false
+        )
     }
+    return true
+  }
 }
 ```
 
 When using the WebSocket transport, credentials can be provided in HTTP headers/cookies of the upgrade request, or
 provided in the payload of the `connection_init` message.
 
-#### GraphQLResourceContext CoroutineScope
+#### Auth Schema Directive
+
+A [`@GraphQLAuth`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/execution/GraphQLAuthDirectiveWiring.kt)
+schema directive annotation is also provided to allow role based protection of GraphQL exposed fields. Any field in the
+GraphQL schema that is annotated with `@GraphQLAuth` will be restricted to being fetched by authenticated users. If an
+`Authorizer<Principal>` binding is provided per the
+[server README](https://github.com/trib3/leakycauldron/blob/HEAD/server/README.md#auth), then the `@GraphQLAuth`
+directive allows for role based restriction of fields.
+
+Note that any field annotated with `@GraphQLAuth` will return null if auth fails, so must return a nullable type. Failed
+auth will also result in Unauthorized/Forbidden errors in the GraphQL result.
+
+```kotlin
+class ExampleAuthedQuery : GraphQLQueryResolver {
+  fun openField(): String {
+    return "anyone can access this"
+  }
+
+  @GraphQLAuth
+  fun protectedField(): String? {
+    return "only logged in users can access this"
+  }
+
+  @GraphQLAuth(roles = ["ADMIN", "SPECIAL"])
+  fun protectedField(): String? {
+    return "only logged in ADMIN and SPECIAL users can access this, assuming an Authorizer binding is provided"
+  }
+}
+```
+
+### GraphQLResourceContext CoroutineScope
 
 `GraphQLResourceContext` implements `CoroutineScope`. GraphQL resolver methods implemented as `suspend` functions will
 be run in this scope. A `DELETE` call to

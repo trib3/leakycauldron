@@ -118,25 +118,34 @@ via [Dropwizard Authentication](https://www.dropwizard.io/en/latest/manual/auth.
 by binding an `AuthFilter` with an `Authenticator` (and optionally an `Authorizer`)
 in the Guice injector. Binding and registration of `AuthDynamicFeature`, `RolesAllowedDynamicFeature`
 and `AuthValueFactoryProvider.Binder(Principal::class.java)` are done by default, so `@Auth`
-annotations on resource method parameterss are supported once the `AuthFilter` is registered.
+annotations on resource method parameters are supported once the `AuthFilter` is registered.
+
+`TribeApplicationModule` provides access to `authFilterBinder()` and `authorizerBinder()` optional binders for
+specifying the `AuthFilter<*, *>` and `Authorizer<Principal>` bindings.
 
 In addition, a `CookieTokenAuthFilter` implementation is provided for reading a session token out of a configured cookie
 value.
 
 ```kotlin
+class ExampleAuthFilterProvider @Inject constructor(
+  val authenticator: Authenticator<String?, Principal>,
+  val authorizer: Authorizer<Principal>
+) : Provider<AuthFilter<*, *>> {
+  override fun get(): AuthFilter<*, *> {
+    // can also use a ChainedAuthFilter<Any, Principal> to add BasicAuthFilter/OAuthCredentialAuthFilter/etc
+    return CookieTokenAuthFilter.Builder<Principal>("example-app-session-id")
+      .setAuthenticator(authenticator)
+      .setAuthorizer(authorizer)
+      .buildAuthFilter()
+  }
+}
+
 class ExampleCookieAuthedApplicationModule : TribeApplicationModule() {
   override fun configure() {
     // ...
     bind<Authenticator<String?, Principal>>().to<com.example.server.auth.ExampleSessionAuthenticator>()
-    bind<Authorizer<Principal>>().to<com.example.server.auth.ExampleUserAuthorizer>()
-
-    // can also use a ChainedAuthFilter<Any, Principal> to add BasicAuthFilter/OAuthCredentialAuthFilter/etc
-    authFilterBinder().setBinding().toInstance(
-      CookieTokenAuthFilter.Builder<Principal>("example-app-session-id")
-        .setAuthenticator(authenticator)
-        .setAuthorizer(authorizer)
-        .buildAuthFilter()
-    )
+    authorizerBinder().setBinding().to<com.example.server.auth.ExampleUserAuthorizer>()
+    authFilterBinder().setBinding().toProvider<ExampleAuthFilterProvider>()
     // ...
   }
 }

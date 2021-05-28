@@ -1,9 +1,11 @@
 package com.trib3.graphql.modules
 
+import com.expediagroup.graphql.generator.directives.KotlinSchemaDirectiveWiring
 import com.google.inject.name.Names
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.TribeApplicationModule
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinMapBinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import graphql.execution.instrumentation.Instrumentation
@@ -118,5 +120,13 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
      */
     fun graphQLInstrumentationsBinder(): KotlinMultibinder<Instrumentation> {
         return KotlinMultibinder.newSetBinder(kotlinBinder)
+    }
+
+    /**
+     * Binder for Schema Directives.  By default an "auth" directive is registered;
+     * additional schema directives can be registered via this binder.
+     */
+    fun schemaDirectivesBinder(): KotlinMapBinder<String, KotlinSchemaDirectiveWiring> {
+        return KotlinMapBinder.newMapBinder(kotlinBinder)
     }
 }
