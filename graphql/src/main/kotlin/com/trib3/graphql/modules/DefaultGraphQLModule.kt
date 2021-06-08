@@ -23,6 +23,7 @@ import dev.misfitlabs.kotlinguice4.typeLiteral
 import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
+import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.ChainedInstrumentation
 import graphql.execution.instrumentation.Instrumentation
 import io.dropwizard.servlets.assets.AssetServlet
@@ -49,6 +50,8 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         graphQLWebSocketAuthenticatorBinder()
             .setDefault()
             .to<GraphQLWebSocketDropwizardAuthenticator>()
+
+        dataFetcherExceptionHandlerBinder().setDefault().to<CustomDataFetcherExceptionHandler>()
 
         resourceBinder().addBinding().to<GraphQLResource>()
 
@@ -93,7 +96,8 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         subscriptions: Set<Any>,
         instrumentations: Set<Instrumentation>,
         mapper: ObjectMapper,
-        hooks: LeakyCauldronHooks = LeakyCauldronHooks()
+        hooks: LeakyCauldronHooks = LeakyCauldronHooks(),
+        exceptionHandler: DataFetcherExceptionHandler = CustomDataFetcherExceptionHandler()
     ): GraphQL {
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
@@ -108,8 +112,9 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
                 subscriptions.toList().map { TopLevelObject(it) }
             )
         )
-            .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
-            .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
+            .queryExecutionStrategy(AsyncExecutionStrategy(exceptionHandler))
+            .mutationExecutionStrategy(AsyncExecutionStrategy(exceptionHandler))
+            .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy(exceptionHandler))
             .instrumentation(ChainedInstrumentation(listOf(RequestIdInstrumentation()) + instrumentations.toList()))
             .build()
     }

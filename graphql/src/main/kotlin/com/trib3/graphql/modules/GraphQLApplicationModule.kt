@@ -8,6 +8,7 @@ import com.trib3.server.modules.TribeApplicationModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMapBinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
+import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.Instrumentation
 import org.dataloader.DataLoaderRegistry
 import java.security.Principal
@@ -38,6 +39,7 @@ typealias GraphQLWebSocketAuthenticator = Function1<
  * binders for GraphQL packages, queries, mutations, and subscriptions,
  * and ensures that a [DefaultGraphQLModule] is installed.
  */
+@Suppress("TooManyFunctions") // All functions are graphQL binding related
 abstract class GraphQLApplicationModule : TribeApplicationModule() {
 
     companion object {
@@ -128,5 +130,14 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
      */
     fun schemaDirectivesBinder(): KotlinMapBinder<String, KotlinSchemaDirectiveWiring> {
         return KotlinMapBinder.newMapBinder(kotlinBinder)
+    }
+
+    /**
+     * Optional binder for specifying a [DataFetcherExceptionHandler] to be used by
+     * queries, mutations, and subscriptions to handle errors.  Defaults to one that
+     * skips printing of exception stack traces.
+     */
+    fun dataFetcherExceptionHandlerBinder(): KotlinOptionalBinder<DataFetcherExceptionHandler> {
+        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
     }
 }
