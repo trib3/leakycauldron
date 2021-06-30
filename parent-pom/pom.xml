@@ -125,7 +125,7 @@
         <version.postgres>42.2.22</version.postgres>
         <version.postgres.embedded>0.13.4</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
-        <version.redshift>2.0.0.5</version.redshift>
+        <version.redshift>2.0.0.6</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>1.7.31</version.slf4j>
         <version.swagger>2.1.9</version.swagger>
