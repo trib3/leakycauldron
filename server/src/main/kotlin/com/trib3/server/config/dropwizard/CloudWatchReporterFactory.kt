@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JacksonInject
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.fasterxml.jackson.annotation.OptBoolean
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.runIf
 import io.dropwizard.metrics.BaseReporterFactory
@@ -22,9 +23,9 @@ import java.net.InetAddress
  */
 @JsonTypeName("cloudwatch")
 class CloudWatchReporterFactory(
-    @JacksonInject @JsonIgnore
+    @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     private val appConfig: TribeApplicationConfig,
-    @JacksonInject @JsonIgnore
+    @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     internal val cloudwatch: CloudWatchAsyncClient
 ) : BaseReporterFactory() {
     private val hostname = InetAddress.getLocalHost().hostName
