@@ -92,7 +92,7 @@
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.42.v20210604</version.jetty>
         <version.joda>2.10.10</version.joda>
-        <version.jooq>3.14.11</version.jooq>
+        <version.jooq>3.15.0</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.kotlin>1.5.20</version.kotlin>
         <version.kotlin.coroutines>1.5.0</version.kotlin.coroutines>
