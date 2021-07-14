@@ -54,7 +54,7 @@
         <version.checker-qual>3.15.0</version.checker-qual>
         <version.classgraph>4.8.110</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
-        <version.commons-io>2.10.0</version.commons-io>
+        <version.commons-io>2.11.0</version.commons-io>
         <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.commons-text>1.9</version.commons-text>
         <version.config4k>0.4.2</version.config4k>
