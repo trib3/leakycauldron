@@ -51,7 +51,7 @@
         <version.aws.serverless>1.5.2</version.aws.serverless>
         <version.byte-buddy>1.11.6</version.byte-buddy>
         <version.caffeine>2.9.2</version.caffeine>
-        <version.checker-qual>3.15.0</version.checker-qual>
+        <version.checker-qual>3.16.0</version.checker-qual>
         <version.classgraph>4.8.110</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
         <version.commons-io>2.10.0</version.commons-io>
