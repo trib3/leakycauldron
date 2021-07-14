@@ -97,7 +97,7 @@
         <version.kotlin>1.5.20</version.kotlin>
         <version.kotlin.coroutines>1.5.0</version.kotlin.coroutines>
         <version.kotlin.guice>1.5.0</version.kotlin.guice>
-        <version.kotlin.logging>2.0.8</version.kotlin.logging>
+        <version.kotlin.logging>2.0.10</version.kotlin.logging>
         <version.ktlint>0.41.0</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
         <version.logback>1.2.3</version.logback>
