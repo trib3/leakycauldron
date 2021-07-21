@@ -128,7 +128,7 @@
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>2.0.0.6</version.redshift>
         <version.servlet>4.0.4</version.servlet>
-        <version.slf4j>1.7.31</version.slf4j>
+        <version.slf4j>1.7.32</version.slf4j>
         <version.swagger>2.1.10</version.swagger>
         <version.testng>7.3.0</version.testng>
         <version.threeten>1.6.0</version.threeten>
