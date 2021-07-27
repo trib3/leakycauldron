@@ -101,7 +101,7 @@
         <version.kotlin.logging>2.0.10</version.kotlin.logging>
         <version.ktlint>0.42.1</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
-        <version.logback>1.2.4</version.logback>
+        <version.logback>1.2.5</version.logback>
         <version.maven.antrun>3.0.0</version.maven.antrun>
         <version.maven.assembly>3.3.0</version.maven.assembly>
         <version.maven.buildhelper>3.2.0</version.maven.buildhelper>
