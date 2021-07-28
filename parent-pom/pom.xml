@@ -49,7 +49,7 @@
         <version.assertk>0.24</version.assertk>
         <version.aws.java>2.17.3</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
-        <version.aws.serverless>1.5.2</version.aws.serverless>
+        <version.aws.serverless>1.6</version.aws.serverless>
         <version.byte-buddy>1.11.8</version.byte-buddy>
         <version.caffeine>2.9.2</version.caffeine>
         <version.checker-qual>3.16.0</version.checker-qual>
