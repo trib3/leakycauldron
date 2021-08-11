@@ -55,6 +55,7 @@
         <version.checker-qual>3.17.0</version.checker-qual>
         <version.classgraph>4.8.113</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
+        <version.commons-compress>1.21</version.commons-compress>
         <version.commons-io>2.11.0</version.commons-io>
         <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.commons-text>1.9</version.commons-text>
@@ -951,6 +952,11 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${version.commons-codec}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${version.commons-compress}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
