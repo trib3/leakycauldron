@@ -60,7 +60,7 @@
         <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.commons-text>1.9</version.commons-text>
         <version.config4k>0.4.2</version.config4k>
-        <version.detekt>1.17.1</version.detekt>
+        <version.detekt>1.18.0</version.detekt>
         <version.dokka>1.5.0</version.dokka>
         <version.dropwizard>2.0.24</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
