@@ -5,7 +5,7 @@ orbs:
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:11-jdk
+      - image: cimg/openjdk:11.0
 
     working_directory: ~/repo
     environment:
@@ -17,9 +17,9 @@ jobs:
       # handle dependency caching and run build
       - restore_cache:
           keys:
-            - v2-dependencies-{{ .Branch }}-{{ .Revision }}
-            - v2-dependencies-{{ .Branch }}
-            - v2-dependencies-
+            - v3-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v3-dependencies-{{ .Branch }}
+            - v3-dependencies-
       - run:
           name: Setup GPG
           command: |
@@ -63,7 +63,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: v2-dependencies-{{ .Branch }}-{{ .Revision }}
+          key: v3-dependencies-{{ .Branch }}-{{ .Revision }}
       # collect test results and upload coverage
       - run: mkdir -p ~/test_results
       - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;
@@ -116,7 +116,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/openjdk:11-jdk
+      - image: cimg/openjdk:11.0
     steps:
       - attach_workspace:
           at: ~/jars
