@@ -47,7 +47,7 @@
         <version.ant>1.10.11</version.ant>
         <version.argparse4j>0.9.0</version.argparse4j>
         <version.assertk>0.24</version.assertk>
-        <version.aws.java>2.17.20</version.aws.java>
+        <version.aws.java>2.17.26</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.6</version.aws.serverless>
         <version.byte-buddy>1.11.12</version.byte-buddy>
