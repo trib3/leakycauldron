@@ -50,7 +50,7 @@
         <version.aws.java>2.17.26</version.aws.java>
         <version.aws.lambda>1.2.1</version.aws.lambda>
         <version.aws.serverless>1.6</version.aws.serverless>
-        <version.byte-buddy>1.11.13</version.byte-buddy>
+        <version.byte-buddy>1.11.14</version.byte-buddy>
         <version.caffeine>2.9.2</version.caffeine>
         <version.checker-qual>3.17.0</version.checker-qual>
         <version.classgraph>4.8.115</version.classgraph>

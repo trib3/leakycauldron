@@ -27,7 +27,7 @@ class CoroutineInvocationHandler(
     private val originalObjectProvider: () -> Any,
     private val originalInvocable: Invocable
 ) : InvocationHandler, CoroutineScope by CoroutineScope(Dispatchers.Unconfined) {
-    override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
+    override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
         val asyncContext = asyncContextProvider.get()
         if (!asyncContext.suspend()) {
             throw IllegalStateException("Can't suspend!")
@@ -48,8 +48,9 @@ class CoroutineInvocationHandler(
             try {
                 // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
                 // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
+                val nonNullArgs = args ?: arrayOf()
                 val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
-                    originalInvocable.handlingMethod.invoke(originalObject, *args, cont)
+                    originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
                 }
                 asyncContext.resume(result)
             } catch (e: Throwable) {
