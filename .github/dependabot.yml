@@ -40,7 +40,3 @@ updates:
   - dependency-name: jakarta.validation:jakarta.validation-api
     versions:
     - ">= 3.0.0"
-  # caffeine versions above 3 require java 11, we still run on java 8
-  - dependency-name: com.github.ben-manes.caffeine:caffeine
-    versions:
-    - ">= 3.0.0"
