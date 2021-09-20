@@ -26,6 +26,7 @@ class BootstrapConfig(configLoader: ConfigLoader = ConfigLoader()) {
         // logging so that we don't log things we don't want to during instantiation
         BootstrapLogging.bootstrap(Level.WARN)
         System.setProperty("org.jooq.no-logo", "true")
+        System.setProperty("org.jooq.no-tips", "true")
         val appModules = appModules.map {
             Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
         }
