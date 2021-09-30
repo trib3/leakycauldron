@@ -93,7 +93,7 @@
         <version.jersey>2.35</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.43.v20210629</version.jetty>
-        <version.joda>2.10.10</version.joda>
+        <version.joda>2.10.12</version.joda>
         <version.jooq>3.15.3</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.kotlin>1.5.31</version.kotlin>
