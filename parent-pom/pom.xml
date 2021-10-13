@@ -96,7 +96,7 @@
         <version.joda>2.10.12</version.joda>
         <version.jooq>3.15.3</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
-        <version.junit>4.13.1</version.junit>
+        <version.junit>4.13.2</version.junit>
         <version.kotlin>1.5.31</version.kotlin>
         <version.kotlin.coroutines>1.5.2</version.kotlin.coroutines>
         <version.kotlin.guice>1.5.0</version.kotlin.guice>
