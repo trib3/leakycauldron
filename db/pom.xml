@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.trib3</groupId>
         <artifactId>leakycauldron</artifactId>
-        <version>1.26-SNAPSHOT</version>
+        <version>1.27-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -104,12 +104,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-
-        <!-- test -->
-        <dependency>
-            <groupId>com.opentable.components</groupId>
-            <artifactId>otj-pg-embedded</artifactId>
         </dependency>
     </dependencies>
 </project>

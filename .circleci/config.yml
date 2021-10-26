@@ -4,8 +4,8 @@ orbs:
 
 jobs:
   build:
-    docker:
-      - image: cimg/openjdk:11.0
+    machine:
+      image: ubuntu-2004:202107-02
 
     working_directory: ~/repo
     environment:

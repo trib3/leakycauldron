@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.26-SNAPSHOT</version>
+    <version>1.27-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -93,6 +93,7 @@
         <version.jersey>2.35</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.44.v20210927</version.jetty>
+        <version.jna>5.8.0</version.jna>
         <version.joda>2.10.13</version.joda>
         <version.jooq>3.15.4</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
@@ -126,12 +127,12 @@
         <version.maven.surefire>3.0.0-M5</version.maven.surefire>
         <version.netty>4.1.70.Final</version.netty>
         <version.postgres>42.3.1</version.postgres>
-        <version.postgres.embedded>0.13.4</version.postgres.embedded>
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>2.1.0.1</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>1.7.32</version.slf4j>
         <version.swagger>2.1.11</version.swagger>
+        <version.testcontainers>1.16.2</version.testcontainers>
         <version.testng>7.3.0</version.testng>
         <version.threeten>1.7.0</version.threeten>
         <version.typesafe.config>1.4.1</version.typesafe.config>
@@ -1039,6 +1040,16 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${version.jna}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>${version.jna}</version>
+            </dependency>
 
             <!-- db -->
             <dependency>
@@ -1149,9 +1160,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.opentable.components</groupId>
-                <artifactId>otj-pg-embedded</artifactId>
-                <version>${version.postgres.embedded}</version>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${version.testcontainers}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -1345,7 +1356,8 @@
                                     <exclude>org.glassfish:javax.el</exclude>
                                     <exclude>jakarta.el:jakarta.el-api</exclude> <!-- el impl includes el-api -->
                                     <exclude>jakarta.activation:jakarta.activation-api</exclude> <!-- use com.sun -->
-                                    <exclude>com.sun.xml.bind:jaxb-impl</exclude> <!-- use org.glassfish.jaxb:jaxb-runtime -->
+                                    <exclude>com.sun.xml.bind:jaxb-impl
+                                    </exclude> <!-- use org.glassfish.jaxb:jaxb-runtime -->
                                 </excludes>
                             </bannedDependencies>
                         </rules>
