@@ -11,11 +11,13 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.generator.toSchema
-import com.trib3.graphql.resources.GraphQLResourceContext
+import com.trib3.graphql.resources.getGraphQLContextMap
+import com.trib3.graphql.resources.getInstance
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
+import graphql.schema.DataFetchingEnvironment
 import io.dropwizard.auth.Authorizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +26,8 @@ import java.security.Principal
 
 class AuthQuery {
     @GraphQLAuth
-    fun needUser(ctx: GraphQLResourceContext): String? {
-        return ctx.principal?.name
+    fun needUser(dfe: DataFetchingEnvironment): String? {
+        return dfe.graphQlContext.getInstance<Principal>()?.name
     }
 
     fun noUser(): String {
@@ -33,8 +35,8 @@ class AuthQuery {
     }
 
     @GraphQLAuth(["ADMIN"])
-    fun needSuperUser(ctx: GraphQLResourceContext): String? {
-        return ctx.principal?.name
+    fun needSuperUser(dfe: DataFetchingEnvironment): String? {
+        return dfe.graphQlContext.getInstance<Principal>()?.name
     }
 }
 
@@ -64,8 +66,8 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
         ).build().execute(
             ExecutionInput.newExecutionInput()
                 .query("{ needUser noUser needSuperUser }")
-                .context(
-                    GraphQLResourceContext(principal, scope)
+                .graphQLContext(
+                    getGraphQLContextMap(scope, principal)
                 )
                 .build()
         )

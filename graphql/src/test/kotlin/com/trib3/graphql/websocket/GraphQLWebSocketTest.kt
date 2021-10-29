@@ -17,11 +17,12 @@ import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
-import com.trib3.graphql.resources.GraphQLResourceContext
+import com.trib3.graphql.resources.getInstance
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
 import graphql.ExecutionInput
 import graphql.GraphQL
+import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,8 +59,8 @@ class SocketQuery {
         throw IllegalStateException("forced exception")
     }
 
-    fun u(context: GraphQLResourceContext): String? {
-        return context.principal?.name
+    fun u(dfe: DataFetchingEnvironment): String? {
+        return dfe.graphQlContext.getInstance<Principal>()?.name
     }
 }
 

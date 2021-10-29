@@ -15,6 +15,7 @@ import graphql.GraphQL
 import graphql.schema.CoercingSerializeException
 import org.testng.annotations.Test
 import org.threeten.extra.YearQuarter
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -59,6 +60,10 @@ class HooksQuery {
 
     fun existinguuid(uuid: UUID): String {
         return uuid.toString()
+    }
+
+    fun bigDecimal(): BigDecimal {
+        return BigDecimal.TEN
     }
 }
 
@@ -335,5 +340,11 @@ class LeakyCauldronHooksTest {
                 .variables(mapOf("input" to uuid.toString())).build()
         ).getData<Map<String, String>>()
         assertThat(result["existinguuid"]).isEqualTo(uuid.toString())
+    }
+
+    @Test
+    fun testBigDecimal() {
+        val result = graphQL.execute("""query { bigDecimal }""").getData<Map<String, BigDecimal>>()
+        assertThat(result["bigDecimal"]).isEqualTo(BigDecimal.TEN)
     }
 }

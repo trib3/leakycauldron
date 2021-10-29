@@ -6,8 +6,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.fail
-import com.trib3.graphql.resources.GraphQLResourceContext
+import com.trib3.graphql.resources.getGraphQLContextMap
 import com.trib3.testing.LeakyMock
+import graphql.GraphQLContext
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
@@ -44,7 +45,7 @@ class ContextScopeFunctionDataFetcherTest {
     fun testNoTarget() {
         val fetcher = ContextScopeFunctionDataFetcher(null, ContextScopeQuery::coroutine)
         val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-        EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(null)
+        EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.newContext().build())
         EasyMock.expect(mockEnv.getSource<Any?>()).andReturn(null)
         EasyMock.replay(mockEnv)
         assertThat(fetcher.get(mockEnv)).isNull()
@@ -54,7 +55,7 @@ class ContextScopeFunctionDataFetcherTest {
     fun testNoScopeSuccess() = runBlocking {
         val fetcher = ContextScopeFunctionDataFetcher(ContextScopeQuery(), ContextScopeQuery::coroutine)
         val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-        EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(null)
+        EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.newContext().build())
         EasyMock.replay(mockEnv)
         val future = fetcher.get(mockEnv) as CompletableFuture<*>
         assertThat(future.await()).isEqualTo("coroutine")
@@ -64,7 +65,7 @@ class ContextScopeFunctionDataFetcherTest {
     fun testNoScopeError() = runBlocking {
         val fetcher = ContextScopeFunctionDataFetcher(ContextScopeQuery(), ContextScopeQuery::coroutineExceptionNoCause)
         val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-        EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(null)
+        EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.newContext().build())
         EasyMock.replay(mockEnv)
         val future = fetcher.get(mockEnv) as CompletableFuture<*>
         try {
@@ -79,7 +80,7 @@ class ContextScopeFunctionDataFetcherTest {
     fun testNoScopeCancel() = runBlocking {
         val fetcher = ContextScopeFunctionDataFetcher(ContextScopeQuery(), ContextScopeQuery::coroutine)
         val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-        EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(null)
+        EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.newContext().build())
         EasyMock.replay(mockEnv)
         val scope = this
         val future = fetcher.get(mockEnv) as CompletableFuture<*>
@@ -94,7 +95,7 @@ class ContextScopeFunctionDataFetcherTest {
         val scope = this
         val fetcher = ContextScopeFunctionDataFetcher(ContextScopeQuery(), ContextScopeQuery::coroutine)
         val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-        EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(GraphQLResourceContext(null, scope))
+        EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.of(getGraphQLContextMap(scope)))
         EasyMock.replay(mockEnv)
         val future = fetcher.get(mockEnv) as CompletableFuture<*>
         assertThat(future.await()).isEqualTo("coroutine")
@@ -106,7 +107,7 @@ class ContextScopeFunctionDataFetcherTest {
             val scope = this
             val fetcher = ContextScopeFunctionDataFetcher(ContextScopeQuery(), ContextScopeQuery::coroutineException)
             val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-            EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(GraphQLResourceContext(null, scope))
+            EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.of(getGraphQLContextMap(scope)))
             EasyMock.replay(mockEnv)
             val future = fetcher.get(mockEnv) as CompletableFuture<*>
             try {
@@ -124,7 +125,7 @@ class ContextScopeFunctionDataFetcherTest {
             val scope = this
             val fetcher = ContextScopeFunctionDataFetcher(ContextScopeQuery(), ContextScopeQuery::coroutine)
             val mockEnv = LeakyMock.mock<DataFetchingEnvironment>()
-            EasyMock.expect(mockEnv.getContext<GraphQLResourceContext>()).andReturn(GraphQLResourceContext(null, scope))
+            EasyMock.expect(mockEnv.graphQlContext).andReturn(GraphQLContext.of(getGraphQLContextMap(scope)))
             EasyMock.replay(mockEnv)
             val future = fetcher.get(mockEnv) as CompletableFuture<*>
             launch {

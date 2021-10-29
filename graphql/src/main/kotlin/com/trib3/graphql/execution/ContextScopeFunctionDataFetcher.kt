@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.execution.FunctionDataFetcher
 import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.trib3.graphql.resources.getInstance
 import graphql.schema.DataFetcherFactory
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.CoroutineScope
@@ -56,7 +57,7 @@ open class ContextScopeFunctionDataFetcher(
                 .plus(instanceParameter to instance)
 
             if (fn.isSuspend) {
-                val scope = (environment.getContext<Any?>() as? CoroutineScope) ?: this
+                val scope = environment.graphQlContext.getInstance<CoroutineScope>() ?: this
                 runScopedSuspendingFunction(parameterValues, scope)
             } else {
                 runBlockingFunction(parameterValues)

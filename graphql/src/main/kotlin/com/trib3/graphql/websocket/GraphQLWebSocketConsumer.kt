@@ -1,12 +1,11 @@
 package com.trib3.graphql.websocket
 
-import com.expediagroup.graphql.generator.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput
 import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
-import com.trib3.graphql.resources.GraphQLResourceContext
+import com.trib3.graphql.resources.getGraphQLContextMap
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionResult
 import graphql.GraphQL
@@ -88,7 +87,7 @@ class KeepAliveCoroutine(
 @OptIn(ExperimentalCoroutinesApi::class)
 class QueryCoroutine(
     private val graphQL: GraphQL,
-    context: GraphQLContext,
+    context: Map<*, Any>,
     channel: Channel<OperationMessage<*>>,
     private val messageId: String,
     payload: GraphQLRequest,
@@ -354,7 +353,7 @@ class GraphQLWebSocketConsumer(
         }
         val queryCoroutine = QueryCoroutine(
             graphQL,
-            GraphQLResourceContext(socketPrincipal, adapter),
+            getGraphQLContextMap(adapter, socketPrincipal),
             channel,
             message.id,
             message.payload,
