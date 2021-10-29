@@ -1,7 +1,6 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
-import com.expediagroup.graphql.generator.execution.GraphQLContext
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.toExecutionInput
@@ -12,6 +11,7 @@ import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.runIf
 import graphql.GraphQL
+import graphql.GraphQLContext
 import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
@@ -45,21 +45,41 @@ import javax.ws.rs.core.Response
 private val log = KotlinLogging.logger {}
 
 /**
- * Context class for communicating auth status to/from GraphQL queries/mutations/subscriptions.
- * A request's authorized [Principal] may be read from this [GraphQLContext].  If a GraphQL
- * operation (eg, a login/logout mutation) needs to set a cookie, it can set a [cookie] on
- * the context object and that cookie will be sent to the client (note this only works via
- * a POST request, not via a query executing over a websocket).
+ * Extension method to get [GraphQLContext] element as a singleton instance for a given [T] class.
+ * Internally used for getting a GraphQL request's [Principal] and [CoroutineScope], and any
+ * GraphQL executor set [NewCookie].
  */
-data class GraphQLResourceContext(
-    val principal: Principal?,
-    private val scope: CoroutineScope,
-    var cookie: NewCookie? = null
-) : GraphQLContext, CoroutineScope by scope
+inline fun <reified T> GraphQLContext.getInstance(): T? {
+    return this.get<Any?>(T::class) as? T
+}
+
+/**
+ * Extension method to set [obj] as a singleton instance of its [T] class.  A GraphQL executor
+ * setting a [NewCookie] on the [GraphQLContext] during a GraphQL operation's execution will
+ * result in that cookie being sent to the client (note this only works via a POST request,
+ * not via an operation being executed over a websocket).
+ */
+inline fun <reified T> GraphQLContext.setInstance(obj: T) {
+    this.put(T::class, obj)
+}
+
+/**
+ * Helper method to construct a [GraphQLContext]'s underlying [Map] from a [CoroutineScope] and optional [Principal].
+ */
+fun getGraphQLContextMap(
+    scope: CoroutineScope,
+    principal: Principal? = null
+): Map<*, Any> {
+    return mapOf(CoroutineScope::class to scope) + if (principal != null) {
+        mapOf(Principal::class to principal)
+    } else {
+        mapOf()
+    }
+}
 
 /**
  * Jersey Resource entry point to GraphQL execution.  Configures the graphql schemas at
- * injection time and then executes a [GraphRequest] specified query when requested.
+ * injection time and then executes a [GraphQLRequest] specified query when requested.
  */
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -107,7 +127,7 @@ open class GraphQLResource
     }
 
     /**
-     * Execute the query specified by the [GraphRequest]
+     * Execute the query specified by the [GraphQLRequest]
      */
     @POST
     @Path("/graphql")
@@ -117,15 +137,14 @@ open class GraphQLResource
         @Parameter(hidden = true) @Auth principal: Optional<Principal>,
         query: GraphQLRequest
     ): Response = supervisorScope {
-        val context = GraphQLResourceContext(principal.orElse(null), this)
+        val contextMap = getGraphQLContextMap(this, principal.orElse(null))
         val requestId = RequestIdFilter.getRequestId()
         if (requestId != null) {
             runningFutures[requestId] = this
         }
         try {
-            val futureResult = graphQL.executeAsync(
-                query.toExecutionInput(context, dataLoaderRegistryFactory)
-            ).whenComplete { result, throwable ->
+            val input = query.toExecutionInput(contextMap, dataLoaderRegistryFactory)
+            val futureResult = graphQL.executeAsync(input).whenComplete { result, throwable ->
                 log.debug("$requestId finished with $result, $throwable")
             }
             val result = futureResult.await()
@@ -134,8 +153,8 @@ open class GraphQLResource
             } else {
                 Response.ok(result)
                     // Communicate any set cookie back to the client
-                    .runIf(context.cookie != null) {
-                        cookie(context.cookie)
+                    .runIf(input.graphQLContext.getInstance<NewCookie>() != null) {
+                        cookie(input.graphQLContext.getInstance<NewCookie>())
                     }.build()
             }
         } finally {

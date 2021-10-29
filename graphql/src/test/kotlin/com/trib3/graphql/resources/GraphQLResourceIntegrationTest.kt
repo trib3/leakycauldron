@@ -20,6 +20,7 @@ import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
+import graphql.schema.DataFetchingEnvironment
 import io.dropwizard.auth.AuthDynamicFeature
 import io.dropwizard.testing.common.Resource
 import org.eclipse.jetty.http.HttpStatus
@@ -48,12 +49,12 @@ data class UserPrincipal(val user: User) : Principal {
 }
 
 class AuthTestQuery : GraphQLQueryResolver {
-    fun context(context: GraphQLResourceContext): User? {
-        return if (context.principal == null) {
-            context.cookie = NewCookie("testCookie", "testValue")
+    fun context(dfe: DataFetchingEnvironment): User? {
+        return if (dfe.graphQlContext.getInstance<Principal>() == null) {
+            dfe.graphQlContext.setInstance(NewCookie("testCookie", "testValue"))
             null
         } else {
-            (context.principal as UserPrincipal).user
+            (dfe.graphQlContext.getInstance<Principal>() as UserPrincipal).user
         }
     }
 }

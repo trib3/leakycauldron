@@ -4,12 +4,14 @@ import com.expediagroup.graphql.generator.directives.KotlinDirectiveWiringFactor
 import com.expediagroup.graphql.generator.directives.KotlinSchemaDirectiveWiring
 import com.expediagroup.graphql.generator.hooks.FlowSubscriptionSchemaGeneratorHooks
 import graphql.language.StringValue
+import graphql.scalars.ExtendedScalars
 import graphql.schema.Coercing
 import graphql.schema.CoercingSerializeException
 import graphql.schema.GraphQLScalarType
 import graphql.schema.GraphQLType
 import io.dropwizard.auth.Authorizer
 import org.threeten.extra.YearQuarter
+import java.math.BigDecimal
 import java.security.Principal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -318,6 +320,8 @@ class LeakyCauldronHooks @Inject constructor(
     )
 
     override fun willGenerateGraphQLType(type: KType): GraphQLType? {
+        // TODO: include more from ExtendedScalars?
+        //       Use impls from ExtendedScalars instead of our own for date/time/datetimes?
         return when (type.classifier) {
             Year::class -> YEAR_SCALAR
             YearMonth::class -> YEAR_MONTH_SCALAR
@@ -327,6 +331,7 @@ class LeakyCauldronHooks @Inject constructor(
             LocalTime::class -> LOCAL_TIME_SCALAR
             OffsetDateTime::class -> OFFSET_DATETIME_SCALAR
             UUID::class -> UUID_SCALAR
+            BigDecimal::class -> ExtendedScalars.GraphQLBigDecimal
             else -> null
         }
     }

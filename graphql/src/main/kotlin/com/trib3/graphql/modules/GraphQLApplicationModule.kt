@@ -15,14 +15,14 @@ import java.security.Principal
 import javax.ws.rs.container.ContainerRequestContext
 
 /**
- * Function that takes a [GraphQLRequest] and an optional context
+ * Function that takes a [GraphQLRequest] and an optional contextMap
  * and returns a [DataLoaderRegistry] with registered [org.dataloader.DataLoader]s
  *
  * Invoked per GraphQL request to allow for batching of data fetchers
  */
 typealias DataLoaderRegistryFactory = Function2<
     @JvmSuppressWildcards GraphQLRequest,
-    @JvmSuppressWildcards Any?,
+    @JvmSuppressWildcards Map<*, Any>?,
     @JvmSuppressWildcards DataLoaderRegistry
     >
 

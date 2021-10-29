@@ -3,7 +3,6 @@ package com.trib3.graphql.execution
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
-import graphql.GraphQLContext
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentationState
 import org.dataloader.DataLoaderRegistry
 import org.testng.annotations.Test
@@ -17,14 +16,14 @@ class GraphQLRequestTest {
         assertThat(executionInput.dataLoaderRegistry).isEqualTo(
             DataLoaderDispatcherInstrumentationState.EMPTY_DATALOADER_REGISTRY
         )
-        assertThat(executionInput.context).isInstanceOf(GraphQLContext::class)
 
         val emptyRegistry = DataLoaderRegistry()
-        val executionInputWithArgs = request.toExecutionInput("context object") { _, _ ->
+        val executionInputWithArgs = request.toExecutionInput(mapOf("context key" to "context object")) { _, _ ->
             emptyRegistry
         }
         assertThat(executionInputWithArgs.query).isEqualTo(request.query)
         assertThat(executionInputWithArgs.dataLoaderRegistry).isEqualTo(emptyRegistry)
-        assertThat(executionInputWithArgs.context).isInstanceOf(String::class).isEqualTo("context object")
+        assertThat(executionInputWithArgs.graphQLContext.get<String>("context key")).isInstanceOf(String::class)
+            .isEqualTo("context object")
     }
 }

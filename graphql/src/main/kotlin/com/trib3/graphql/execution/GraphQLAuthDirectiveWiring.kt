@@ -3,17 +3,14 @@ package com.trib3.graphql.execution
 import com.expediagroup.graphql.generator.annotations.GraphQLDirective
 import com.expediagroup.graphql.generator.directives.KotlinFieldDirectiveEnvironment
 import com.expediagroup.graphql.generator.directives.KotlinSchemaDirectiveWiring
-import com.trib3.graphql.resources.GraphQLResourceContext
+import com.trib3.graphql.resources.getInstance
 import graphql.introspection.Introspection
 import graphql.schema.DataFetcher
 import graphql.schema.GraphQLFieldDefinition
 import io.dropwizard.auth.Authorizer
-import mu.KotlinLogging
 import java.security.Principal
 import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.Response
-
-private val log = KotlinLogging.logger {}
 
 /**
  * Annotation to be used on field definitions to
@@ -51,18 +48,13 @@ class GraphQLAuthDirectiveWiring(private val authorizer: Authorizer<Principal>?)
 
     override fun onField(environment: KotlinFieldDirectiveEnvironment): GraphQLFieldDefinition {
         @Suppress("UNCHECKED_CAST")
-        val roles = environment.directive.getArgument("roles").value as Array<String>
+        val roles = environment.directive.getArgument("roles").argumentValue.value as Array<String>
         val originalDataFetcher = environment.getDataFetcher()
 
         val authFetcher = DataFetcher { dfe ->
-            val context = try {
-                dfe.getContext<GraphQLResourceContext?>()
-            } catch (e: Exception) {
-                log.warn("Could not get graphql context: ${e.message}, auth will treat principal as null")
-                null
-            }
-            if (context?.principal == null || missingAllowedRole(context.principal, roles)) {
-                val status = if (context?.principal == null) {
+            val principal = dfe.graphQlContext.getInstance<Principal>()
+            if (principal == null || missingAllowedRole(principal, roles)) {
+                val status = if (principal == null) {
                     Response.Status.UNAUTHORIZED
                 } else {
                     Response.Status.FORBIDDEN
