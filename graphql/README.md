@@ -11,6 +11,7 @@ a [server](https://github.com/trib3/leakycauldron/blob/HEAD/server) application.
   * Any guice bound Query, Subscription or Mutation Resolvers
   * Supports websockets using
     the [Apollo Protocol](https://github.com/apollographql/subscriptions-transport-ws/blob/HEAD/PROTOCOL.md)
+    or the new [GraphQL over WebSocket Protocol](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md)
   * Supports subscriptions via [coroutine](https://github.com/kotlin/kotlinx.coroutines/) Flows for any Resolvers that
     return a `Publisher<T>`
   * Supports [Dropwizard Authentication](https://www.dropwizard.io/en/latest/manual/auth.html) Principals passed through
@@ -31,12 +32,13 @@ Default config:
 
 ```hocon
     graphql {
-        keepAliveIntervalSeconds: 15  # interval to send keepalive messages over apollo websocket protocol
+        keepAliveIntervalSeconds: 15  # interval to send keepalive messages over apollo websocket protocol in seconds
         webSocketSubProtocol: "graphql-ws"  # apollo websocket subprotocol to identify as
         idleTimeout: null  # allows override of jetty websocket policy idleTimeout
         maxBinaryMessageSize: null  # allows override of jetty websocket policy maxBinaryMessageSize
         maxTextMessageSize: null  # allows override of jetty websocket policy maxTextMessageSize
         checkAuthorization: false  # whether to kick unauthenticated clients off websocket sessions (allow by default)
+        connectionInitWaitTimeout: 15  # when using graphql-ws protocol, must receive the connection_init message within this many seconds
     }
 ```
 
@@ -69,31 +71,32 @@ class ExampleApplicationModule : GraphQLApplicationModule() {
 
 If Dropwizard Authentication is setup and an `AuthFilter<*, *>` binding is provided per
 the [server README](https://github.com/trib3/leakycauldron/blob/HEAD/server/README.md#auth), GraphQL resolver methods
-can receive the principal inside the GraphQL context of type
-`GraphQLResourceContext`. Resolver methods can write to the `cookie` field of the context object they receive in order
-to set cookies on the client (useful when, for example, using a `CookieTokenAuthFilter` for auth).
+can receive the principal inside the GraphQL context map received from the `DataFetchingEnvironment` using the
+provided `getInstance` extension method. Resolver methods can write to the `cookie` field of the context map using
+the `setInstance` extension method in order to set cookies on the client (useful when, for example, using
+a `CookieTokenAuthFilter` for auth).
 
 ```kotlin
 class ExampleLoginMutations : GraphQLQueryResolver {
-  fun login(context: GraphQLResourceContext, email: String, pass: String): Boolean {
-    if (context.principal == null) {
+  fun login(dfe: DataFetchingEnvironment, email: String, pass: String): Boolean {
+    if (dfe.graphQlContext.getInstance<Principal> == null) {
       // log in!
       val userSession = authenticate(email, pass)
       if (userSession == null) {
         return false
       }
       // cookie will be set in response
-      context.cookie = NewCookie("example-app-session-id", userSession.id)
+      dfe.graphQlContext.setInstance(NewCookie("example-app-session-id", userSession.id))
     } else {
       // already logged in
     }
     return true
   }
 
-  fun logout(context: GraphQLResourceContext): Boolean {
-    if (context.principal != null) {
-      deleteSession(context.principal)
-      context.cookie =
+  fun logout(dfe: DataFetchingEnvironment): Boolean {
+    if (dfe.graphQlContext.getInstance<Principal> != null) {
+      deleteSession(dfe.graphQlContext.getInstance<Principal>)
+      dfe.graphQlContext.setInstance(
         NewCookie(
           Cookie("example-app-session-id", ""),
           null,
@@ -102,6 +105,7 @@ class ExampleLoginMutations : GraphQLQueryResolver {
           false,
           false
         )
+      )
     }
     return true
   }
@@ -141,17 +145,17 @@ class ExampleAuthedQuery : GraphQLQueryResolver {
 }
 ```
 
-### GraphQLResourceContext CoroutineScope
+### GraphQLContext CoroutineScope
 
-`GraphQLResourceContext` implements `CoroutineScope`. GraphQL resolver methods implemented as `suspend` functions will
-be run in this scope. A `DELETE` call to
+The GraphQLContext map also contains a `CoroutineScope`. GraphQL resolver methods implemented as `suspend` functions
+will be run in this scope. A `DELETE` call to
 `/app/graphql?id=${requestId}` will cancel the scope of a running query.
 
 ```kotlin
 class ExampleSuspendQuery : GraphQLQueryResolver {
   suspend fun coroutineMethod(): String {
     return coroutineScope {
-      // new scope whose parent scope is the GraphQLResourceContext object
+      // new scope whose parent scope is the in GraphQLContext map
       val job1 = async {
         // do stuff asynchronously
         "value1"

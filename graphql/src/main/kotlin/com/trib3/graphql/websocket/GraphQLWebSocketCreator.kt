@@ -27,12 +27,17 @@ class GraphQLWebSocketCreator(
 ) : WebSocketCreator {
     /**
      * Create the [GraphQLWebSocketAdapter]and its [Channel], and launch a [GraphQLWebSocketConsumer] coroutine
-     * to consume the events.  Also set the graphql-ws subprotocol in our upgrade response.
+     * to consume the events.  Also set the appropriate subprotocol in our upgrade response.
      */
     override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
-        resp.acceptedSubProtocol = graphQLConfig.webSocketSubProtocol
+        val subProtocol = if (req.hasSubProtocol(GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL.subProtocol)) {
+            GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL
+        } else {
+            GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL
+        }
+        resp.acceptedSubProtocol = subProtocol.subProtocol
         val channel = Channel<OperationMessage<*>>()
-        val adapter = GraphQLWebSocketAdapter(channel, objectMapper)
+        val adapter = GraphQLWebSocketAdapter(subProtocol, channel, objectMapper)
         val consumer =
             GraphQLWebSocketConsumer(
                 graphQL,

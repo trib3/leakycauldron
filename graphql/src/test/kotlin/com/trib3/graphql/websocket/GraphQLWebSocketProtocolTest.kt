@@ -7,6 +7,7 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.graphql.execution.GraphQLRequest
+import com.trib3.graphql.execution.MessageGraphQLError
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionResult
 import org.testng.annotations.Test
@@ -66,6 +67,10 @@ class GraphQLWebSocketProtocolTest {
             String::class to "message",
             GraphQLRequest::class to GraphQLRequest("query {q}", mapOf(), null),
             Map::class to mapOf("a" to "b", "c" to "d"),
+            List::class to listOf(
+                MessageGraphQLError("e").toSpecification(),
+                MessageGraphQLError("f").toSpecification()
+            ),
             ExecutionResult::class to null // only need to support serialization right now, not round trip
         )
         for (
