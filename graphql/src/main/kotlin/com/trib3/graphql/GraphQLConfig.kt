@@ -7,19 +7,19 @@ import javax.inject.Inject
 class GraphQLConfig
 @Inject constructor(loader: ConfigLoader) {
     val keepAliveIntervalSeconds: Long
-    val webSocketSubProtocol: String
     val idleTimeout: Long?
     val maxBinaryMessageSize: Int?
     val maxTextMessageSize: Int?
     val checkAuthorization: Boolean
+    val connectionInitWaitTimeout: Long
 
     init {
         val config = loader.load("graphQL")
         keepAliveIntervalSeconds = config.extract("keepAliveIntervalSeconds")
-        webSocketSubProtocol = config.extract("webSocketSubProtocol")
         idleTimeout = config.extract("idleTimeout")
         maxBinaryMessageSize = config.extract("maxBinaryMessageSize")
         maxTextMessageSize = config.extract("maxTextMessageSize")
         checkAuthorization = config.extract("checkAuthorization") ?: config.extract("authorizedWebSocketOnly") ?: false
+        connectionInitWaitTimeout = config.extract("connectionInitWaitTimeout")
     }
 }

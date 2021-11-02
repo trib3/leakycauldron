@@ -2,6 +2,7 @@ package com.trib3.graphql.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ private val log = KotlinLogging.logger {}
  * to the [remote] for sending messages to the client.
  */
 open class GraphQLWebSocketAdapter(
+    val subProtocol: GraphQLWebSocketSubProtocol,
     val channel: Channel<OperationMessage<*>>,
     val objectMapper: ObjectMapper,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -30,7 +32,9 @@ open class GraphQLWebSocketAdapter(
             OperationType.GQL_CONNECTION_INIT,
             OperationType.GQL_START,
             OperationType.GQL_STOP,
-            OperationType.GQL_CONNECTION_TERMINATE
+            OperationType.GQL_CONNECTION_TERMINATE,
+            OperationType.GQL_PING,
+            OperationType.GQL_PONG
         )
     }
 
@@ -39,29 +43,19 @@ open class GraphQLWebSocketAdapter(
      */
     override fun onWebSocketText(message: String) = runBlocking {
         try {
-            val operation = objectMapper.readValue<OperationMessage<*>>(message)
-            // Only send client->server messages downstream, otherwise queue an error to be sent back
+            val operation = subProtocol.getClientToServerMessage(objectMapper.readValue<OperationMessage<*>>(message))
+            // Only send client->server messages downstream, otherwise kill the socket per graphql-ws protocol
             if (operation.type in CLIENT_SOURCED_MESSAGES) {
                 channel.send(operation)
             } else {
-                channel.send(
-                    OperationMessage(
-                        OperationType.GQL_ERROR,
-                        operation.id,
-                        "Invalid message `$message`"
-                    )
-                )
+                subProtocol.onInvalidMessage(operation.id, message, this@GraphQLWebSocketAdapter)
             }
         } catch (error: Throwable) {
-            // Don't kill the socket because of a bad message, just queue an error to be sent back
+            if (error is CancellationException) {
+                throw error
+            }
             log.error("Error parsing message: ${error.message}", error)
-            channel.send(
-                OperationMessage(
-                    OperationType.GQL_ERROR,
-                    null,
-                    "Invalid message `$message`"
-                )
-            )
+            subProtocol.onInvalidMessage(null, message, this@GraphQLWebSocketAdapter)
         }
     }
 
@@ -88,7 +82,7 @@ open class GraphQLWebSocketAdapter(
      * Must be called from the Subscriber's observation context
      */
     internal fun sendMessage(message: OperationMessage<*>) {
-        remote?.sendString(objectWriter.writeValueAsString(message))
+        remote?.sendString(objectWriter.writeValueAsString(subProtocol.getServerToClientMessage(message)))
     }
 
     /**
