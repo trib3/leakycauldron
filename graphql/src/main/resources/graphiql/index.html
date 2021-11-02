@@ -1,42 +1,45 @@
 <html>
 <head>
     <title>GraphiQL</title>
-    <link href="//unpkg.com/graphiql@1.0.6/graphiql.min.css" rel="stylesheet"/>
+    <link href="//unpkg.com/graphiql@1.4.6/graphiql.min.css" rel="stylesheet"/>
 </head>
 <body style="margin: 0;">
 <div id="graphiql" style="height: 100vh;"></div>
 
-<script crossorigin src="//unpkg.com/react@17.0.1/umd/react.production.min.js"></script>
-<script crossorigin src="//unpkg.com/react-dom@17.0.1/umd/react-dom.production.min.js"></script>
-<script crossorigin src="//unpkg.com/graphiql@1.0.6/graphiql.min.js"></script>
-<script crossorigin src="//unpkg.com/subscriptions-transport-ws@0.9.18/browser/client.js"></script>
+<script crossorigin src="//unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+<script crossorigin src="//unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+<script crossorigin src="//unpkg.com/graphiql@1.4.6/graphiql.min.js"></script>
+<script crossorigin src="//unpkg.com/graphql-ws@5.5.5/umd/graphql-ws.min.js"></script>
 
 <script>
     const fetcherFactory = function (subscriptionsClient, fallbackFetcher) {
-      var activeSubscription = null;
+      var cleanupCallback = null;
       var results = [];
-      return function (graphQLParams) {
-        if (subscriptionsClient && activeSubscription !== null) {
-          activeSubscription.unsubscribe();
+      return function (graphQLParams, fetcherOpts) {
+        if (subscriptionsClient && cleanupCallback !== null) {
+          cleanupCallback();
           results = [];
         }
-        if (subscriptionsClient && graphQLParams.query.trim().startsWith("subscription")) {
+        var isSubscription = fetcherOpts.documentAST.definitions.some((definition) => definition.operation == 'subscription');
+        if (subscriptionsClient && isSubscription) {
           return {
             subscribe: function (observer) {
               observer.next('Your subscription data will appear here after server publication!');
-              activeSubscription = subscriptionsClient.request({
+              cleanupCallback = subscriptionsClient.subscribe({
                 query: graphQLParams.query,
                 variables: graphQLParams.variables,
-              }).subscribe(function (result) {
-                results.push(result);
-                if (results.length % 10 == 0) { // debounce
-                  observer.next(results);
-                }
-              }, function(error) {
-                observer.error(error);
-              },
-              function() {
-                observer.next(results); // on completion show all results
+              }, {
+                next: function (result) {
+                  results.push({path: `${results.length}`, ...result});
+                  if (results.length % 10 == 0) { // debounce
+                    observer.next(results);
+                  }
+                }, error: function(error) {
+                  observer.error(error);
+                },
+                complete: function() {
+                  observer.next(results); // on completion show all results
+                },
               });
             },
           };
@@ -45,7 +48,6 @@
         }
       };
     };
-
 
     const graphQLFetcher = graphQLParams =>
       fetch('/app/graphql', {
@@ -59,10 +61,10 @@
     fetch('/app/auth_cookie', {
       method: 'get'
     }).then(response => {
-        const subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient(
-          `${wsproto}://${window.location.host}/app/graphql`,
-          { reconnect: true, timeout: 60000 }
-        );
+        const subscriptionsClient = graphqlWs.createClient({
+            url: `${wsproto}://${window.location.host}/app/graphql`,
+            lazyCloseTimeout: 60000
+        });
         const subscriptionsFetcher = fetcherFactory(subscriptionsClient, graphQLFetcher);
         ReactDOM.render(
           React.createElement(GraphiQL, { fetcher: subscriptionsFetcher }),

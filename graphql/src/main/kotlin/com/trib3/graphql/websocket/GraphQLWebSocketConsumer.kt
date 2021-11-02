@@ -2,6 +2,7 @@ package com.trib3.graphql.websocket
 
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.GraphQLRequest
+import com.trib3.graphql.execution.MessageGraphQLError
 import com.trib3.graphql.execution.toExecutionInput
 import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
@@ -29,7 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.yield
 import mu.KotlinLogging
-import org.eclipse.jetty.websocket.api.StatusCode
 import org.glassfish.jersey.internal.MapPropertiesDelegate
 import org.glassfish.jersey.server.ContainerRequest
 import java.security.Principal
@@ -145,7 +145,7 @@ class QueryCoroutine(
             OperationMessage(
                 OperationType.GQL_ERROR,
                 messageId,
-                cause.message
+                listOf(MessageGraphQLError(cause.message))
             )
         )
     }
@@ -182,6 +182,12 @@ class GraphQLWebSocketConsumer(
      * coroutine launched in the adapter's scope
      */
     suspend fun consume(scope: CoroutineScope) {
+        scope.launch(keepAliveDispatcher) {
+            delay(Duration.ofSeconds(graphQLConfig.connectionInitWaitTimeout).toMillis())
+            if (!keepAliveStarted) {
+                adapter.session?.close(GraphQLWebSocketCloseReason.TIMEOUT_INIT)
+            }
+        }
         channel.consumeAsFlow().collect {
             handleMessage(it, scope)
         }
@@ -213,6 +219,18 @@ class GraphQLWebSocketConsumer(
                         handleClientBoundMessage(message)
                     }
 
+                    // Respond to pings with pongs, ignore pongs
+                    OperationType.GQL_PING -> handleClientBoundMessage(
+                        OperationMessage(
+                            OperationType.GQL_PONG,
+                            message.id,
+                            message.payload as Map<*, *>
+                        )
+                    )
+                    OperationType.GQL_PONG -> {
+                        // do nothing
+                    }
+
                     // Any client bound messages from child coroutines
                     OperationType.GQL_CONNECTION_ERROR,
                     OperationType.GQL_CONNECTION_ACK,
@@ -221,14 +239,8 @@ class GraphQLWebSocketConsumer(
                         message
                     )
 
-                    // Unknown message, let the client know
-                    else -> handleClientBoundMessage(
-                        OperationMessage(
-                            OperationType.GQL_ERROR,
-                            message.id,
-                            "Unknown message type"
-                        )
-                    )
+                    // Unknown message type
+                    else -> adapter.subProtocol.onInvalidMessage(message.id, message.toString(), adapter)
                 }
             } catch (error: Throwable) {
                 if (error is CancellationException) {
@@ -236,7 +248,7 @@ class GraphQLWebSocketConsumer(
                     throw error
                 }
                 log.error("Error processing message ${error.message}", error)
-                adapter.sendMessage(OperationType.GQL_ERROR, message.id, error.message)
+                adapter.sendMessage(OperationType.GQL_ERROR, message.id, listOf(MessageGraphQLError(error.message)))
             }
         }
     }
@@ -305,18 +317,20 @@ class GraphQLWebSocketConsumer(
             connectionInitContainerRequest = payloadRequestContext
             val principal = getSocketPrincipal()
             if (principal == null && graphQLConfig.checkAuthorization) {
-                adapter.session?.close(StatusCode.SERVER_ERROR, "Unauthorized")
+                adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
                 return
             }
             adapter.sendMessage(OperationType.GQL_CONNECTION_ACK, message.id)
-            adapter.sendMessage(OperationType.GQL_CONNECTION_KEEP_ALIVE, message.id)
             keepAliveStarted = true
-            val keepAliveCoroutine = KeepAliveCoroutine(graphQLConfig, channel, message)
-            scope.launch(keepAliveDispatcher + MDCContext()) {
-                keepAliveCoroutine.run()
+            if (graphQLConfig.keepAliveIntervalSeconds > 0) {
+                adapter.sendMessage(OperationType.GQL_CONNECTION_KEEP_ALIVE, message.id)
+                val keepAliveCoroutine = KeepAliveCoroutine(graphQLConfig, channel, message)
+                scope.launch(keepAliveDispatcher + MDCContext()) {
+                    keepAliveCoroutine.run()
+                }
             }
         } else {
-            adapter.sendMessage(OperationType.GQL_CONNECTION_ERROR, message.id, "Already connected!")
+            adapter.subProtocol.onDuplicateInit(message, adapter)
         }
     }
 
@@ -326,7 +340,7 @@ class GraphQLWebSocketConsumer(
      */
     private fun handleConnectionTerminate(message: OperationMessage<*>) {
         log.info("WebSocket connection termination requested by message ${message.id}!")
-        adapter.session?.close(StatusCode.NORMAL, "Termination Requested")
+        adapter.session?.close(GraphQLWebSocketCloseReason.NORMAL)
     }
 
     /**
@@ -336,34 +350,32 @@ class GraphQLWebSocketConsumer(
      */
     private suspend fun handleQueryStart(message: OperationMessage<*>, scope: CoroutineScope) {
         val messageId = message.id
-        check(messageId != null) {
-            "Must pass a message id to start a query"
-        }
-        check(!queries.containsKey(messageId)) {
-            "Query with id $messageId already running!"
-        }
-        check(message.payload is GraphQLRequest) {
-            "Invalid payload for query"
-        }
         // re-evaluate socket Principal on each query, in case creds have expired
         val socketPrincipal = getSocketPrincipal()
-        if (socketPrincipal == null && graphQLConfig.checkAuthorization) {
-            adapter.session?.close(StatusCode.SERVER_ERROR, "Unauthorized")
-            return
-        }
-        val queryCoroutine = QueryCoroutine(
-            graphQL,
-            getGraphQLContextMap(adapter, socketPrincipal),
-            channel,
-            message.id,
-            message.payload,
-            dataLoaderRegistryFactory
-        )
+        // must connection_init before starting a query in new protocol spec
+        if (!keepAliveStarted && adapter.subProtocol == GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL) {
+            adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
+        } else if (messageId == null || message.payload !is GraphQLRequest) {
+            adapter.subProtocol.onInvalidMessage(messageId, message.toString(), adapter)
+        } else if (queries.containsKey(messageId)) {
+            adapter.subProtocol.onDuplicateQuery(message, adapter)
+        } else if (socketPrincipal == null && graphQLConfig.checkAuthorization) {
+            adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
+        } else {
+            val queryCoroutine = QueryCoroutine(
+                graphQL,
+                getGraphQLContextMap(adapter, socketPrincipal),
+                channel,
+                message.id,
+                message.payload,
+                dataLoaderRegistryFactory
+            )
 
-        val job = scope.launch(MDCContext()) {
-            queryCoroutine.run()
+            val job = scope.launch(MDCContext()) {
+                queryCoroutine.run()
+            }
+            queries[messageId] = job
         }
-        queries[messageId] = job
     }
 
     /**
@@ -381,7 +393,13 @@ class GraphQLWebSocketConsumer(
             handleClientBoundMessage(OperationMessage(OperationType.GQL_COMPLETE, message.id))
             queries.remove(message.id)
         } else {
-            handleClientBoundMessage(OperationMessage(OperationType.GQL_ERROR, message.id, "Query not running"))
+            handleClientBoundMessage(
+                OperationMessage(
+                    OperationType.GQL_ERROR,
+                    message.id,
+                    listOf(MessageGraphQLError("Query not running"))
+                )
+            )
         }
     }
 

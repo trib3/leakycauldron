@@ -170,7 +170,7 @@ class SessionTrackingCreator : WebSocketCreator {
     val errors = ConcurrentHashMap<String, Throwable>()
     override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
         val channel = Channel<OperationMessage<*>>()
-        val adapter = object : GraphQLWebSocketAdapter(channel, mapper) {
+        val adapter = object : GraphQLWebSocketAdapter(GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL, channel, mapper) {
             override fun onWebSocketError(cause: Throwable) {
                 errors[req.queryString] = cause
                 super.onWebSocketError(cause)
