@@ -20,7 +20,10 @@
           cleanupCallback();
           results = [];
         }
-        var isSubscription = fetcherOpts.documentAST.definitions.some((definition) => definition.operation == 'subscription');
+        // For the Introspection query never use a subscription since the schema is expected
+        // to be returned as a promise, not an Observable
+        var isSubscription = graphQLParams.operationName != 'IntrospectionQuery' &&
+          fetcherOpts.documentAST.definitions.some((definition) => definition.operation == 'subscription');
         if (subscriptionsClient && isSubscription) {
           return {
             subscribe: function (observer) {
