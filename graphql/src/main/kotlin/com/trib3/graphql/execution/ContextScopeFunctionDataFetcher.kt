@@ -11,10 +11,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
+import kotlinx.coroutines.slf4j.MDCContext
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspendBy
@@ -70,7 +70,7 @@ open class ContextScopeFunctionDataFetcher(
     protected open fun runScopedSuspendingFunction(
         parameterValues: Map<KParameter, Any?>,
         scope: CoroutineScope,
-        coroutineContext: CoroutineContext = EmptyCoroutineContext,
+        coroutineContext: CoroutineContext = MDCContext(),
         coroutineStart: CoroutineStart = CoroutineStart.DEFAULT
     ): CompletableFuture<Any?> {
         return scope.future(coroutineContext, coroutineStart) {

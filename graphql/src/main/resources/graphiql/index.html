@@ -20,30 +20,39 @@
           cleanupCallback();
           results = [];
         }
-        // For the Introspection query never use a subscription since the schema is expected
-        // to be returned as a promise, not an Observable
-        var isSubscription = graphQLParams.operationName != 'IntrospectionQuery' &&
-          fetcherOpts.documentAST.definitions.some((definition) => definition.operation == 'subscription');
-        if (subscriptionsClient && isSubscription) {
+        // Use the subscription client to execute anything that's not a mutation.
+        // Note the IntrospectionQuery is requested with the editor pane documentAST, so can't
+        // use that AST to detect if it's a mutation.  assume IntrospectionQuery is always a query.
+        var isMutation = graphQLParams.operationName != 'IntrospectionQuery' &&
+          fetcherOpts.documentAST.definitions.some((definition) => definition.operation == 'mutation');
+        if (subscriptionsClient && !isMutation) {
           return {
             subscribe: function (observer) {
-              observer.next('Your subscription data will appear here after server publication!');
               cleanupCallback = subscriptionsClient.subscribe({
                 query: graphQLParams.query,
                 variables: graphQLParams.variables,
               }, {
                 next: function (result) {
-                  results.push({path: `${results.length}`, ...result});
+                  results.push(result);
                   if (results.length % 10 == 0) { // debounce
-                    observer.next(results);
+                    observer.next(results.map((r, index) => ({path: `${index}`, ...r})));
                   }
                 }, error: function(error) {
                   observer.error(error);
                 },
                 complete: function() {
-                  observer.next(results); // on completion show all results
+                  // on completion show all results, or just a single result
+                  if (results.length == 1) {
+                    observer.next(results[0])
+                  } else {
+                    observer.next(results.map((r, index) => ({path: `${index}`, ...r})));
+                  }
+                  observer.complete();
                 },
               });
+              return {
+                unsubscribe: cleanupCallback,
+              };
             },
           };
         } else {
@@ -66,7 +75,6 @@
     }).then(response => {
         const subscriptionsClient = graphqlWs.createClient({
             url: `${wsproto}://${window.location.host}/app/graphql`,
-            lazyCloseTimeout: 60000
         });
         const subscriptionsFetcher = fetcherFactory(subscriptionsClient, graphQLFetcher);
         ReactDOM.render(
