@@ -28,28 +28,28 @@
         if (subscriptionsClient && !isMutation) {
           return {
             subscribe: function (observer) {
-              cleanupCallback = subscriptionsClient.subscribe({
-                query: graphQLParams.query,
-                variables: graphQLParams.variables,
-              }, {
-                next: function (result) {
-                  results.push(result);
-                  if (results.length % 10 == 0) { // debounce
-                    observer.next(results.map((r, index) => ({path: `${index}`, ...r})));
-                  }
-                }, error: function(error) {
-                  observer.error(error);
+              cleanupCallback = subscriptionsClient.subscribe(
+                graphQLParams,
+                {
+                  next: function (result) {
+                    results.push(result);
+                    if (results.length % 10 == 0) { // debounce
+                      observer.next(results.map((r, index) => ({path: `${index}`, ...r})));
+                    }
+                  }, error: function(error) {
+                    observer.error(error);
+                  },
+                  complete: function() {
+                    // on completion show all results, or just a single result
+                    if (results.length == 1) {
+                      observer.next(results[0])
+                    } else {
+                      observer.next(results.map((r, index) => ({path: `${index}`, ...r})));
+                    }
+                    observer.complete();
+                  },
                 },
-                complete: function() {
-                  // on completion show all results, or just a single result
-                  if (results.length == 1) {
-                    observer.next(results[0])
-                  } else {
-                    observer.next(results.map((r, index) => ({path: `${index}`, ...r})));
-                  }
-                  observer.complete();
-                },
-              });
+              );
               return {
                 unsubscribe: cleanupCallback,
               };
