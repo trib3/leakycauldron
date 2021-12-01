@@ -1060,6 +1060,7 @@ class GraphQLWebSocketTest {
         )
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
+        val closeLatch = CountDownLatch(1)
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
         EasyMock.expect(
             mockRemote.sendString(
@@ -1085,7 +1086,7 @@ class GraphQLWebSocketTest {
                     "dupsubscription"
                 )
             )
-        )
+        ).andAnswer { closeLatch.countDown() }
 
         EasyMock.replay(mockRemote, mockSession)
         socket.adapter.onWebSocketConnect(mockSession)
@@ -1106,6 +1107,7 @@ class GraphQLWebSocketTest {
              "payload": {"query": "subscription { inf }"}}
             """.trimIndent()
         )
+        closeLatch.await(1, TimeUnit.SECONDS)
         EasyMock.verify(mockRemote, mockSession)
     }
 
