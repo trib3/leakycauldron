@@ -827,13 +827,10 @@
             <!-- AWS -->
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
-                <artifactId>sdk-core</artifactId>
+                <artifactId>bom</artifactId>
                 <version>${version.aws.java}</version>
-            </dependency>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>regions</artifactId>
-                <version>${version.aws.java}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
