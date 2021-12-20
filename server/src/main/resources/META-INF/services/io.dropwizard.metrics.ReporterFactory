@@ -1,1 +1,2 @@
 com.trib3.server.config.dropwizard.CloudWatchReporterFactory
+com.trib3.server.config.dropwizard.TimestreamReporterFactory
