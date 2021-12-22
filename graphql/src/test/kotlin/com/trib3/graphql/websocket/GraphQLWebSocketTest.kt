@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
@@ -463,7 +463,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testConnectAckAndKeepAlive() {
-        val testDispatcher = TestCoroutineDispatcher()
+        val testDispatcher = StandardTestDispatcher()
         val socket = getSocket(keepAliveDispatcher = testDispatcher)
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
@@ -506,7 +506,7 @@ class GraphQLWebSocketTest {
         socket.adapter.onWebSocketConnect(mockSession)
         socket.adapter.onWebSocketText("""{"type": "connection_init", "id": "connect", "payload": null}""")
         socket.adapter.onWebSocketText("""{"type": "connection_init", "id": "connect2", "payload": null}""")
-        testDispatcher.advanceTimeBy((config.keepAliveIntervalSeconds + 1) * 1000)
+        testDispatcher.scheduler.advanceTimeBy((config.keepAliveIntervalSeconds + 1) * 1000)
         EasyMock.verify(mockRemote, mockSession)
     }
 
@@ -1030,7 +1030,7 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsNeverConnect() {
-        val testDispatcher = TestCoroutineDispatcher()
+        val testDispatcher = StandardTestDispatcher()
         val socket = getSocket(
             subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
             keepAliveDispatcher = testDispatcher
@@ -1044,7 +1044,7 @@ class GraphQLWebSocketTest {
 
         EasyMock.replay(mockRemote, mockSession)
         socket.adapter.onWebSocketConnect(mockSession)
-        testDispatcher.advanceTimeBy(
+        testDispatcher.scheduler.advanceTimeBy(
             (config.connectionInitWaitTimeout + 1) * 1000
         )
         EasyMock.verify(
