@@ -113,7 +113,7 @@
         <version.maven.compiler>3.8.1</version.maven.compiler>
         <version.maven.dependency>3.1.2</version.maven.dependency>
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
-        <version.maven.deploy>3.0.0-M1</version.maven.deploy>
+        <version.maven.deploy>3.0.0-M2</version.maven.deploy>
         <version.maven.enforcer>3.0.0-M3</version.maven.enforcer>
         <version.maven.failsafe>3.0.0-M5</version.maven.failsafe>
         <version.maven.git>4.9.10</version.maven.git>
