@@ -1,3 +1,5 @@
+@file:Suppress("Deprecation")
+
 package com.trib3.lambda.resources
 
 import com.codahale.metrics.MetricRegistry
@@ -25,6 +27,7 @@ private val log = KotlinLogging.logger { }
  * A Resource that exposes similar information to dropwizard's AdminServlet from
  * a JAX-RS context instead of a servlet context
  */
+@Deprecated("Unmaintained and will be removed in a future version")
 @Path("/admin")
 @Produces(MediaType.APPLICATION_JSON)
 class AdminResource

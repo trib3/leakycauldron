@@ -1,3 +1,5 @@
+@file:Suppress("Deprecation")
+
 package com.trib3.lambda
 
 import com.amazonaws.serverless.proxy.jersey.JerseyLambdaContainerHandler
@@ -38,6 +40,7 @@ private val log = KotlinLogging.logger { }
 /**
  * Exposes the dropwizard application's jersey context as a serverless handler
  */
+@Deprecated("Unmaintained and will be removed in a future version")
 class TribeServerlessApp @Inject constructor(
     val appConfig: TribeApplicationConfig,
     val objectMapper: ObjectMapper,
@@ -110,6 +113,7 @@ class TribeServerlessApp @Inject constructor(
             appConfig.env,
             versionHealthCheck.info()
         )
+        log.warn("com.trib3:lambda is deprecated and will be removed in a future version", Exception("Deprecated"))
         return newProxy
     }
 
@@ -121,6 +125,7 @@ class TribeServerlessApp @Inject constructor(
 /**
  * Simple command that lets TribeServerless leverage dropwizard to set up basic bootstrap environment
  */
+@Deprecated("Unmaintained and will be removed in a future version")
 class ServerlessCommand : ConfiguredCommand<Configuration>(
     "serverless",
     "Command that allows dropwizard bootstrap to happen, but runs nothing"
@@ -133,6 +138,7 @@ class ServerlessCommand : ConfiguredCommand<Configuration>(
 /**
  * Main entry point for AWS lambda
  */
+@Deprecated("Unmaintained and will be removed in a future version")
 class TribeServerless : RequestHandler<AwsProxyRequest, AwsProxyResponse> {
     /**
      * Handles the lambda function request by passing it to the jersey proxy
