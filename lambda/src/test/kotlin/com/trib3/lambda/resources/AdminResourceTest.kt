@@ -1,3 +1,5 @@
+@file:Suppress("Deprecation")
+
 package com.trib3.lambda.resources
 
 import assertk.assertThat
@@ -52,6 +54,7 @@ class AdminResourceTest
             .queryParam("key", adminAuthToken)
             .request(MediaType.APPLICATION_JSON).get()
             .readEntity(object : GenericType<Map<String, Any>>() {})
+
         @Suppress("UNCHECKED_CAST") // in practice always strings here
         val gauges = metrics.getValue("gauges") as Map<String, Map<String, String>>
         assertThat(gauges.getValue("jvm.attribute.vendor").getValue("value"))

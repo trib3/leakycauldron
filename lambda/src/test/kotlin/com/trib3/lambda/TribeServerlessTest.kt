@@ -1,3 +1,5 @@
+@file:Suppress("Deprecation")
+
 package com.trib3.lambda
 
 import assertk.all

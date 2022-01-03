@@ -1,3 +1,5 @@
+@file:Suppress("Deprecation")
+
 package com.trib3.lambda.modules
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -11,6 +13,7 @@ import io.dropwizard.setup.ExceptionMapperBinder
  * Default module for running serverless.  Binds jersey AWS dependencies and
  * jersey resources that the dropwizard server registers automatically.
  */
+@Deprecated("Unmaintained and will be removed in a future version")
 class ServerlessApplicationModule : TribeApplicationModule() {
     override fun configure() {
         val resourceBinder = resourceBinder()
