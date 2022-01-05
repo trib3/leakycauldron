@@ -1311,6 +1311,7 @@
                                 <excludes>
                                     <exclude>org.glassfish.hk2.external</exclude>
                                     <exclude>commons-logging:commons-logging</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-core</exclude>
                                     <exclude>com.google.inject.extensions:guice-multibindings</exclude>
                                     <exclude>com.authzee.kotlinguice4:*</exclude>
                                     <!-- use jakarta apis instead of javax apis for the following: -->
@@ -1322,10 +1323,12 @@
                                     <exclude>javax.validation:validation-api</exclude>
                                     <exclude>javax.el:javax.el-api</exclude>
                                     <exclude>org.glassfish:javax.el</exclude>
-                                    <exclude>jakarta.el:jakarta.el-api</exclude> <!-- el impl includes el-api -->
-                                    <exclude>jakarta.activation:jakarta.activation-api</exclude> <!-- use com.sun -->
-                                    <exclude>com.sun.xml.bind:jaxb-impl
-                                    </exclude> <!-- use org.glassfish.jaxb:jaxb-runtime -->
+                                    <!-- el impl includes el-api -->
+                                    <exclude>jakarta.el:jakarta.el-api</exclude>
+                                    <!-- use com.sun -->
+                                    <exclude>jakarta.activation:jakarta.activation-api</exclude>
+                                    <!-- use org.glassfish.jaxb:jaxb-runtime -->
+                                    <exclude>com.sun.xml.bind:jaxb-impl</exclude>
                                 </excludes>
                             </bannedDependencies>
                         </rules>
