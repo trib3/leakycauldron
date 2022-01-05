@@ -2,19 +2,18 @@ package com.trib3.db.config
 
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheckRegistry
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.jasonclawson.jackson.dataformat.hocon.HoconTreeTraversingParser
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
 import com.zaxxer.hikari.HikariDataSource
-import org.apache.commons.text.StringEscapeUtils
-import org.jooq.Constants
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.Settings
 import org.jooq.impl.DSL
-import java.io.StringReader
 import javax.inject.Inject
 import javax.sql.DataSource
-import javax.xml.bind.JAXB
 
 private const val POSTGRES_DEFAULT_PORT = 5432
 
@@ -23,7 +22,8 @@ class DbConfig
     loader: ConfigLoader,
     configPath: String,
     healthCheckRegistry: HealthCheckRegistry,
-    metricRegistry: MetricRegistry
+    metricRegistry: MetricRegistry,
+    objectMapper: ObjectMapper
 ) {
     val dialect: SQLDialect
     val dataSource: DataSource
@@ -76,15 +76,7 @@ class DbConfig
             hds.maximumPoolSize = maximumPoolSize
         }
         val jooqSettings = if (config.hasPath("jooq")) {
-            val jooqConfigXml = config.getConfig("jooq").entrySet().joinToString("\n") {
-                "<${it.key}>${StringEscapeUtils.escapeXml11(it.value.unwrapped().toString())}</${it.key}>"
-            }
-            val jooqXml = """
-                <settings xmlns="${Constants.NS_RUNTIME}">
-                $jooqConfigXml
-                </settings>
-            """.trimIndent()
-            JAXB.unmarshal(StringReader(jooqXml), Settings::class.java)
+            objectMapper.readValue(HoconTreeTraversingParser(config.getConfig("jooq").root(), objectMapper))
         } else {
             Settings()
         }

@@ -2,6 +2,7 @@ package com.trib3.db.modules
 
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheckRegistry
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.trib3.config.ConfigLoader
@@ -25,9 +26,10 @@ class DbModule : AbstractModule() {
     fun provideDbConfig(
         loader: ConfigLoader,
         healthCheckRegistry: HealthCheckRegistry,
-        metricRegistry: MetricRegistry
+        metricRegistry: MetricRegistry,
+        objectMapper: ObjectMapper
     ): DbConfig {
-        return DbConfig(loader, "db", healthCheckRegistry, metricRegistry)
+        return DbConfig(loader, "db", healthCheckRegistry, metricRegistry, objectMapper)
     }
 
     @Provides
