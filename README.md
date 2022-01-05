@@ -84,8 +84,3 @@ This contains classes for setting up a configurable [Dropwizard](https://dropwiz
 * [`/graphql`](https://github.com/trib3/leakycauldron/tree/HEAD/graphql)
 
 This contains classes for adding [GraphQL](https://graphql.org) support to an application.
-
-* [`/lambda`](https://github.com/trib3/leakycauldron/tree/HEAD/lambda): **DEPRECATED**
-
-This contains classes that allow an application to be deployed to
-[AWS Lambda](https://aws.amazon.com/lambda/). Unmaintained and will be removed in a future version.
