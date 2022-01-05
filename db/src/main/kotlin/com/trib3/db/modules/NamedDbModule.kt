@@ -2,6 +2,7 @@ package com.trib3.db.modules
 
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheckRegistry
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.name.Names
 import com.trib3.config.ConfigLoader
 import com.trib3.config.modules.KMSModule
@@ -23,10 +24,11 @@ private class DbConfigProvider
     private val loader: ConfigLoader,
     @Named("configPath") private val configPath: String,
     private val healthCheckRegistry: HealthCheckRegistry,
-    private val metricRegistry: MetricRegistry
+    private val metricRegistry: MetricRegistry,
+    private val objectMapper: ObjectMapper
 ) : Provider<DbConfig> {
     override fun get(): DbConfig {
-        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry)
+        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper)
     }
 }
 
@@ -38,10 +40,11 @@ private class DataSourceProvider
     private val loader: ConfigLoader,
     @Named("configPath") private val configPath: String,
     private val healthCheckRegistry: HealthCheckRegistry,
-    private val metricRegistry: MetricRegistry
+    private val metricRegistry: MetricRegistry,
+    private val objectMapper: ObjectMapper
 ) : Provider<DataSource> {
     override fun get(): DataSource {
-        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry).dataSource
+        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dataSource
     }
 }
 
@@ -53,10 +56,11 @@ private class DSLContextProvider
     private val loader: ConfigLoader,
     @Named("configPath") private val configPath: String,
     private val healthCheckRegistry: HealthCheckRegistry,
-    private val metricRegistry: MetricRegistry
+    private val metricRegistry: MetricRegistry,
+    private val objectMapper: ObjectMapper
 ) : Provider<DSLContext> {
     override fun get(): DSLContext {
-        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry).dslContext
+        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dslContext
     }
 }
 
