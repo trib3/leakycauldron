@@ -48,8 +48,6 @@
         <version.argparse4j>0.9.0</version.argparse4j>
         <version.assertk>0.25</version.assertk>
         <version.aws.java>2.17.105</version.aws.java>
-        <version.aws.lambda>1.2.1</version.aws.lambda>
-        <version.aws.serverless>1.6.1</version.aws.serverless>
         <version.byte-buddy>1.12.6</version.byte-buddy>
         <version.caffeine>3.0.5</version.caffeine>
         <version.checker-qual>3.21.0</version.checker-qual>
@@ -904,40 +902,7 @@
                 <version>${version.dropwizard.metrics.cloudwatch}</version>
             </dependency>
 
-            <!-- lambda -->
-            <dependency>
-                <groupId>com.amazonaws.serverless</groupId>
-                <artifactId>aws-serverless-java-container-jersey</artifactId>
-                <version>${version.aws.serverless}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws.serverless</groupId>
-                <artifactId>aws-serverless-java-container-core</artifactId>
-                <version>${version.aws.serverless}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.module</groupId>
-                        <artifactId>jackson-module-afterburner</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-lambda-java-core</artifactId>
-                <version>${version.aws.lambda}</version>
-            </dependency>
+            <!-- commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
