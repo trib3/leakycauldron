@@ -47,7 +47,7 @@
         <version.ant>1.10.12</version.ant>
         <version.argparse4j>0.9.0</version.argparse4j>
         <version.assertk>0.25</version.assertk>
-        <version.aws.java>2.17.107</version.aws.java>
+        <version.aws.java>2.17.110</version.aws.java>
         <version.byte-buddy>1.12.6</version.byte-buddy>
         <version.caffeine>3.0.5</version.caffeine>
         <version.checker-qual>3.21.1</version.checker-qual>
