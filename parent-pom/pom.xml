@@ -124,7 +124,7 @@
         <version.maven.source>3.2.1</version.maven.source>
         <version.maven.surefire>3.0.0-M5</version.maven.surefire>
         <version.netty>4.1.73.Final</version.netty>
-        <version.postgres>42.3.1</version.postgres>
+        <version.postgres>42.3.2</version.postgres>
         <version.reactivestreams>1.0.3</version.reactivestreams>
         <version.redshift>2.1.0.4</version.redshift>
         <version.servlet>4.0.4</version.servlet>
