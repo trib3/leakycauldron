@@ -31,12 +31,12 @@ jobs:
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             if [ "$CIRCLE_BRANCH" = "main" ]; then
                 set +o pipefail # it's ok to keep going if grep doesn't match anything 
-                REPOIDS=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+                REPOIDS=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
                 set -o pipefail
                 if [ -n "$REPOIDS" ]; then
                     echo "Cleaning existing $REPOIDS"
                     for REPOID in $REPOIDS; do 
-                        mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+                    mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
                     done
                 fi
             fi
@@ -134,9 +134,9 @@ jobs:
           command: |
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
-            REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
-            mvn org.sonatype.plugins:nexus-staging-maven-plugin:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+            mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
       - release/execute_release:
           release_dir: ~/jars/release
 
