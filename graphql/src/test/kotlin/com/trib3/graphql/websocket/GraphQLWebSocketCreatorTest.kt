@@ -57,7 +57,8 @@ class GraphQLWebSocketCreatorTest {
         assertThat(socket.objectWriter.writeValueAsString(mapOf("a" to "b"))).isEqualTo(
             """{
             |  "a" : "b"
-            |}""".trimMargin()
+            |}
+            """.trimMargin()
         )
     }
 
