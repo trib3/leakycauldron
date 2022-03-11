@@ -3,6 +3,7 @@ package com.trib3.server.coroutine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
 import org.glassfish.jersey.server.AsyncContext
@@ -10,6 +11,7 @@ import org.glassfish.jersey.server.model.Invocable
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import javax.inject.Provider
+import javax.ws.rs.container.ConnectionCallback
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 
@@ -45,6 +47,12 @@ class CoroutineInvocationHandler(
         }
         val scope = (originalObject as? CoroutineScope) ?: this
         scope.launch(additionalContext + MDCContext()) {
+            // cancel this coroutine when a client disconnection is detected by jersey
+            asyncContext.register(
+                ConnectionCallback {
+                    cancel()
+                }
+            )
             try {
                 // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
                 // so use suspendCoroutineUninterceptedOrReturn to get the current continuation

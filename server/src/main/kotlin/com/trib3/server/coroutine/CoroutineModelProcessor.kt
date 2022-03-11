@@ -8,6 +8,9 @@ import org.glassfish.jersey.server.AsyncContext
 import org.glassfish.jersey.server.model.ModelProcessor
 import org.glassfish.jersey.server.model.Resource
 import org.glassfish.jersey.server.model.ResourceModel
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
 import javax.inject.Inject
 import javax.ws.rs.core.Configuration
 import javax.ws.rs.ext.Provider
@@ -24,6 +27,27 @@ class CoroutineModelProcessor @Inject constructor(
     private val injectionManager: InjectionManager,
     private val asyncContextProvider: javax.inject.Provider<AsyncContext>
 ) : ModelProcessor {
+
+    /**
+     * Extract the type parameter from the continuation Type to be used
+     * as the return value for the generated function.  Special case Unit->void
+     * conversion to correctly generate a void method instead of an Object/Unit
+     * returning method
+     */
+    private fun getContinuationTypeParameter(continuationType: Type): Type {
+        val typeArgument = (continuationType as ParameterizedType).actualTypeArguments[0]
+        val lowerBound = if (typeArgument is WildcardType) {
+            typeArgument.lowerBounds[0]
+        } else {
+            typeArgument
+        }
+        return if (lowerBound == Unit::class.java) {
+            Void.TYPE
+        } else {
+            lowerBound
+        }
+    }
+
     /**
      * Replace any suspend function (ie, function whose last param is a Continuation)
      * with a dynamically created non-suspend implementation
@@ -40,7 +64,7 @@ class CoroutineModelProcessor @Inject constructor(
                     .annotateType(method.invocable.definitionMethod.declaringClass.annotations.toList())
                     .defineMethod(
                         method.invocable.definitionMethod.name,
-                        method.invocable.responseType,
+                        getContinuationTypeParameter(method.invocable.parameters.last().type),
                         Visibility.PUBLIC
                     )
                     .withParameters(
@@ -91,7 +115,7 @@ class CoroutineModelProcessor @Inject constructor(
     override fun processResourceModel(resourceModel: ResourceModel, configuration: Configuration): ResourceModel {
         val resourceModelBuilder = ResourceModel.Builder(false)
         for (resource in resourceModel.resources) {
-            val resourceBuilder = Resource.builder(resource)
+            val resourceBuilder = Resource.builder(buildCoroutineReplacedResource(resource))
             for (child in resource.childResources) {
                 resourceBuilder.replaceChildResource(child, buildCoroutineReplacedResource(child))
             }
