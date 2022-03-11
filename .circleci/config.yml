@@ -17,9 +17,9 @@ jobs:
       # handle dependency caching and run build
       - restore_cache:
           keys:
-            - v3-dependencies-{{ .Branch }}-{{ .Revision }}
-            - v3-dependencies-{{ .Branch }}
-            - v3-dependencies-
+            - v4-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v4-dependencies-{{ .Branch }}
+            - v4-dependencies-
       - run:
           name: Setup GPG
           command: |
@@ -63,7 +63,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: v3-dependencies-{{ .Branch }}-{{ .Revision }}
+          key: v4-dependencies-{{ .Branch }}-{{ .Revision }}
       # collect test results and upload coverage
       - run: mkdir -p ~/test_results
       - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;

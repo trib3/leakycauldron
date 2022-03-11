@@ -3,6 +3,9 @@ package com.trib3.server.coroutine
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isLessThan
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.annotation.Timed
 import com.google.inject.Guice
@@ -15,19 +18,32 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+import org.glassfish.jersey.media.sse.EventInput
 import org.glassfish.jersey.test.inmemory.InMemoryTestContainerFactory
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.util.Optional
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
+import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.client.Entity
+import javax.ws.rs.core.Context
+import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
+import javax.ws.rs.sse.Sse
+import javax.ws.rs.sse.SseEventSink
 import kotlin.coroutines.coroutineContext
+
+private val sseScopes = ConcurrentHashMap<String, CoroutineScope>()
 
 @OptIn(ExperimentalStdlibApi::class)
 @Path("/")
@@ -139,6 +155,29 @@ open class InvocationHandlerTestResource {
         coroutineContext.cancel()
         yield()
         return "coroutine"
+    }
+
+    @Path("/sse")
+    @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    suspend fun sse(
+        @Context sseEventSink: SseEventSink,
+        @Context sse: Sse,
+        @QueryParam("q") q: String
+    ) = coroutineScope<Unit> {
+        launch {
+            sseScopes[q] = this
+            try {
+                var i = 0
+                while (isActive) {
+                    sseEventSink.send(sse.newEvent("i", i.toString()))
+                    i++
+                    delay(1)
+                }
+            } finally {
+                sseScopes.remove(q)
+            }
+        }
     }
 }
 
@@ -337,6 +376,23 @@ class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestRes
     fun testCoroutineMethodCancel() {
         val ping = resource.target("/coroutineCancelled").request().get()
         assertThat(ping.status).isEqualTo(Response.Status.SERVICE_UNAVAILABLE.statusCode)
+    }
+
+    @Test
+    fun testSseMethodCancel() {
+        val q = UUID.randomUUID().toString()
+        val sse = resource.target("/sse").queryParam("q", q).request().get(EventInput::class.java)
+        assertThat(sseScopes[q]).isNotNull()
+        val event = sse.read()
+        assertThat(event.readData()).isEqualTo("0")
+        sse.close()
+        // wait up to one second for the resource method to be cancelled and cleaned up
+        val now = System.currentTimeMillis()
+        while (sseScopes[q] != null) {
+            assertThat(System.currentTimeMillis() - now).isLessThan(1000)
+            Thread.sleep(1)
+        }
+        assertThat(sseScopes[q]).isNull()
     }
 }
 
