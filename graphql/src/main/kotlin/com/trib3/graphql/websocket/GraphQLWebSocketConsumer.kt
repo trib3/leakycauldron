@@ -35,6 +35,8 @@ import org.glassfish.jersey.server.ContainerRequest
 import java.security.Principal
 import java.time.Duration
 import javax.ws.rs.container.ContainerRequestContext
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 private val log = KotlinLogging.logger {}
 
@@ -68,7 +70,7 @@ class KeepAliveCoroutine(
 ) : GraphQLCoroutine(channel) {
     override suspend fun run() {
         while (true) {
-            delay(Duration.ofSeconds(graphQLConfig.keepAliveIntervalSeconds).toMillis())
+            delay(graphQLConfig.keepAliveIntervalSeconds.toDuration(DurationUnit.SECONDS))
             log.trace("WebSocket connection keepalive ping")
             queueMessage(
                 OperationMessage(

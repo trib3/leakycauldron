@@ -35,7 +35,7 @@ enum class GraphQLWebSocketSubProtocol(
     APOLLO_PROTOCOL(
         "graphql-ws",
         mapOf(),
-        { messageId, messageBody, adapter ->
+        onInvalidMessageCallback = { messageId, messageBody, adapter ->
             adapter.sendMessage(
                 OperationMessage(
                     OperationType.GQL_ERROR, messageId,
@@ -43,7 +43,7 @@ enum class GraphQLWebSocketSubProtocol(
                 )
             )
         },
-        { message, adapter ->
+        onDuplicateQueryCallback = { message, adapter ->
             adapter.sendMessage(
                 OperationMessage(
                     OperationType.GQL_ERROR,
@@ -52,7 +52,7 @@ enum class GraphQLWebSocketSubProtocol(
                 )
             )
         },
-        { message, adapter ->
+        onDuplicateInitCallback = { message, adapter ->
             adapter.sendMessage(
                 OperationMessage(
                     OperationType.GQL_CONNECTION_ERROR,
@@ -70,14 +70,14 @@ enum class GraphQLWebSocketSubProtocol(
             OperationType.GQL_STOP to OperationType.GQL_COMPLETE,
             OperationType.GQL_CONNECTION_KEEP_ALIVE to OperationType.GQL_PONG
         ),
-        { msgId, msgBody, adapter ->
+        onInvalidMessageCallback = { msgId, msgBody, adapter ->
             adapter.session?.close(
                 GraphQLWebSocketCloseReason.INVALID_MESSAGE.code,
                 GraphQLWebSocketCloseReason.INVALID_MESSAGE.description.replace("<id>", msgId ?: "")
                     .replace("<body>", msgBody)
             )
         },
-        { message, adapter ->
+        onDuplicateQueryCallback = { message, adapter ->
             adapter.session?.close(
                 GraphQLWebSocketCloseReason.MULTIPLE_SUBSCRIBER.code,
                 GraphQLWebSocketCloseReason.MULTIPLE_SUBSCRIBER.description.replace(
@@ -86,7 +86,7 @@ enum class GraphQLWebSocketSubProtocol(
                 )
             )
         },
-        { _, adapter ->
+        onDuplicateInitCallback = { _, adapter ->
             adapter.session?.close(GraphQLWebSocketCloseReason.MULTIPLE_INIT)
         }
     );

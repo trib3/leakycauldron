@@ -64,6 +64,9 @@ class AuthTestQuery : GraphQLQueryResolver {
  * websocket upgrades and authentication
  */
 class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
+    init {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
+    }
 
     override fun getResource(): GraphQLResource {
         return rawResource
@@ -162,7 +165,6 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testWebSocketUpgradeUnauthenticated() {
-        System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
         val result = resource.target("/graphql").queryParam("fail", "true")
             .request().header("Origin", "https://blah.com").get()
         assertThat(result.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
