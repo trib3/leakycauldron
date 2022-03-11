@@ -78,10 +78,19 @@ fun getGraphQLContextMap(
 }
 
 /**
+ * Returns a response telling the browser that basic authorization is required
+ */
+internal fun unauthorizedResponse(): Response {
+    return Response.status(HttpStatus.UNAUTHORIZED_401).header(
+        "WWW-Authenticate", "Basic realm=\"realm\""
+    ).build()
+}
+
+/**
  * Jersey Resource entry point to GraphQL execution.  Configures the graphql schemas at
  * injection time and then executes a [GraphQLRequest] specified query when requested.
  */
-@Path("/")
+@Path("/graphql")
 @Produces(MediaType.APPLICATION_JSON)
 open class GraphQLResource
 @Inject constructor(
@@ -118,19 +127,9 @@ open class GraphQLResource
     }
 
     /**
-     * Returns a response telling the browser that basic authorization is required
-     */
-    private fun unauthorizedResponse(): Response {
-        return Response.status(HttpStatus.UNAUTHORIZED_401).header(
-            "WWW-Authenticate", "Basic realm=\"realm\""
-        ).build()
-    }
-
-    /**
      * Execute the query specified by the [GraphQLRequest]
      */
     @POST
-    @Path("/graphql")
     @Timed
     @AsyncDispatcher("IO")
     open suspend fun graphQL(
@@ -168,7 +167,6 @@ open class GraphQLResource
      * Allow cancellation of running queries by [requestId].
      */
     @DELETE
-    @Path("/graphql")
     fun cancel(
         @Parameter(hidden = true) @Auth principal: Optional<Principal>,
         @QueryParam("id") requestId: String
@@ -187,7 +185,6 @@ open class GraphQLResource
      * For websocket subscriptions, support upgrading from GET to a websocket
      */
     @GET
-    @Path("/graphql")
     @Timed
     open fun graphQLUpgrade(
         @Parameter(hidden = true) @Auth principal: Optional<Principal>,

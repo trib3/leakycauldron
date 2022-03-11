@@ -14,6 +14,7 @@ import com.trib3.graphql.execution.JsonSafeExecutionResultMixin
 import com.trib3.graphql.execution.LeakyCauldronHooks
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
+import com.trib3.graphql.resources.GraphQLSseResource
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.graphql.websocket.GraphQLWebSocketCreatorFactory
 import com.trib3.graphql.websocket.GraphQLWebSocketDropwizardAuthenticator
@@ -54,6 +55,7 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         dataFetcherExceptionHandlerBinder().setDefault().to<CustomDataFetcherExceptionHandler>()
 
         resourceBinder().addBinding().to<GraphQLResource>()
+        resourceBinder().addBinding().to<GraphQLSseResource>()
 
         // Ensure graphql binders are set up
         graphQLPackagesBinder()

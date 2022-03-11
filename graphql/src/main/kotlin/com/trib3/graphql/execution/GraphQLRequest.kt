@@ -5,9 +5,14 @@ import com.trib3.server.runIf
 import graphql.ExecutionInput
 
 /**
- * A generic GraphQL Request object that includes query, variable, and operationName components
+ * A generic GraphQL Request object that includes query, variable, operationName and extensions components
  */
-data class GraphQLRequest(val query: String, val variables: Map<String, Any>?, val operationName: String?)
+data class GraphQLRequest(
+    val query: String,
+    val variables: Map<String, Any>?,
+    val operationName: String?,
+    val extensions: Map<String, String> = mapOf()
+)
 
 /**
  * Extension function to convert a [GraphQLRequest] to an [ExecutionInput]
