@@ -49,7 +49,7 @@
         <version.assertk>0.25</version.assertk>
         <version.aws.java>2.17.152</version.aws.java>
         <version.byte-buddy>1.12.8</version.byte-buddy>
-        <version.caffeine>3.0.5</version.caffeine>
+        <version.caffeine>3.0.6</version.caffeine>
         <version.checker-qual>3.21.3</version.checker-qual>
         <version.classgraph>4.8.141</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
