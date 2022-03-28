@@ -1170,17 +1170,6 @@
                 <groupId>com.expediagroup</groupId>
                 <artifactId>graphql-kotlin-schema-generator</artifactId>
                 <version>${version.graphql-kotlin}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.javassist</groupId>
-                        <artifactId>javassist</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.expediagroup</groupId>
-                <artifactId>graphql-kotlin-types</artifactId>
-                <version>${version.graphql-kotlin}</version>
             </dependency>
             <dependency>
                 <groupId>com.expediagroup</groupId>
