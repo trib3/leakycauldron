@@ -27,11 +27,40 @@ import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 class CoroutineInvocationHandler(
     private val asyncContextProvider: Provider<AsyncContext>,
     private val originalObjectProvider: () -> Any,
-    private val originalInvocable: Invocable
+    private val originalInvocable: Invocable,
+    private val shouldIgnoreReturn: Boolean
 ) : InvocationHandler, CoroutineScope by CoroutineScope(Dispatchers.Unconfined) {
+    private suspend fun executeCoroutine(
+        originalObject: Any,
+        args: Array<out Any>?,
+        asyncContext: AsyncContext
+    ) {
+        try {
+            // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
+            // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
+            val nonNullArgs = args ?: arrayOf()
+            val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
+                originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
+            }
+            if (!shouldIgnoreReturn) {
+                asyncContext.resume(result)
+            }
+        } catch (e: Throwable) {
+            var cause: Throwable? = e
+            while (cause !is CancellationException && cause != null) {
+                cause = cause.cause
+            }
+            if (cause is CancellationException) {
+                asyncContext.cancel()
+            } else {
+                asyncContext.resume(e)
+            }
+        }
+    }
+
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
         val asyncContext = asyncContextProvider.get()
-        if (!asyncContext.suspend()) {
+        if (!asyncContext.isSuspended && !asyncContext.suspend()) {
             throw IllegalStateException("Can't suspend!")
         }
         val originalObject = originalObjectProvider.invoke()
@@ -53,25 +82,7 @@ class CoroutineInvocationHandler(
                     cancel()
                 }
             )
-            try {
-                // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
-                // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
-                val nonNullArgs = args ?: arrayOf()
-                val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
-                    originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
-                }
-                asyncContext.resume(result)
-            } catch (e: Throwable) {
-                var cause: Throwable? = e
-                while (cause !is CancellationException && cause != null) {
-                    cause = cause.cause
-                }
-                if (cause is CancellationException) {
-                    asyncContext.cancel()
-                } else {
-                    asyncContext.resume(e)
-                }
-            }
+            executeCoroutine(originalObject, args, asyncContext)
         }
         return null
     }

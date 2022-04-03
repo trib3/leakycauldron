@@ -7,6 +7,7 @@ import org.glassfish.jersey.internal.inject.InjectionManager
 import org.glassfish.jersey.server.AsyncContext
 import org.glassfish.jersey.server.model.ModelProcessor
 import org.glassfish.jersey.server.model.Resource
+import org.glassfish.jersey.server.model.ResourceMethod
 import org.glassfish.jersey.server.model.ResourceModel
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -48,6 +49,49 @@ class CoroutineModelProcessor @Inject constructor(
         }
     }
 
+    private fun createClassWrapper(method: ResourceMethod): Class<*> {
+        return ByteBuddy()
+            .subclass(Object::class.java)
+            .annotateType(method.invocable.definitionMethod.declaringClass.annotations.toList())
+            .defineMethod(
+                method.invocable.definitionMethod.name,
+                getContinuationTypeParameter(method.invocable.parameters.last().type),
+                Visibility.PUBLIC
+            )
+            .withParameters(
+                method.invocable.parameters
+                    .slice(0 until method.invocable.parameters.size - 1)
+                    .map { it.type }
+            )
+            .intercept(
+                InvocationHandlerAdapter.of(
+                    CoroutineInvocationHandler(
+                        asyncContextProvider,
+                        { method.invocable.handler.getInstance(injectionManager) },
+                        method.invocable,
+                        // Invoker should ignore the method's return value if the actual value will be
+                        // provided asynchronously.  eg, processing SSE or providing return value
+                        // explicitly through a @Suspended AsyncReturn.resume() callback.
+                        // See org.glassfish.jersey.server.model.ResourceMethodInvoker.apply() for details.
+                        method.isSse || method.isSuspendDeclared
+                    )
+                )
+            )
+            .annotateMethod(method.invocable.definitionMethod.annotations.toList())
+            // copy the annotations for each parameter in the invocable method
+            // (except for the last/Continuation param)
+            .let { fakeMethod ->
+                method.invocable.definitionMethod.parameterAnnotations
+                    .slice(0 until method.invocable.definitionMethod.parameterAnnotations.size - 1)
+                    .foldIndexed(fakeMethod) { index, annotatedMethod, parameter ->
+                        annotatedMethod.annotateParameter(index, parameter.toList())
+                    }
+            }
+            .make()
+            .load(this::class.java.classLoader)
+            .loaded
+    }
+
     /**
      * Replace any suspend function (ie, function whose last param is a Continuation)
      * with a dynamically created non-suspend implementation
@@ -59,46 +103,21 @@ class CoroutineModelProcessor @Inject constructor(
                 method.invocable.parameters.isNotEmpty() &&
                 method.invocable.parameters.last().rawType == Continuation::class.java
             ) {
-                val fakeClass = ByteBuddy()
-                    .subclass(Object::class.java)
-                    .annotateType(method.invocable.definitionMethod.declaringClass.annotations.toList())
-                    .defineMethod(
-                        method.invocable.definitionMethod.name,
-                        getContinuationTypeParameter(method.invocable.parameters.last().type),
-                        Visibility.PUBLIC
-                    )
-                    .withParameters(
-                        method.invocable.parameters
-                            .slice(0 until method.invocable.parameters.size - 1)
-                            .map { it.type }
-                    )
-                    .intercept(
-                        InvocationHandlerAdapter.of(
-                            CoroutineInvocationHandler(
-                                asyncContextProvider,
-                                { method.invocable.handler.getInstance(injectionManager) },
-                                method.invocable
-                            )
-                        )
-                    )
-                    .annotateMethod(method.invocable.definitionMethod.annotations.toList())
-                    // copy the annotations for each parameter in the invocable method
-                    // (except for the last/Continuation param)
-                    .let { fakeMethod ->
-                        method.invocable.definitionMethod.parameterAnnotations
-                            .slice(0 until method.invocable.definitionMethod.parameterAnnotations.size - 1)
-                            .foldIndexed(fakeMethod) { index, annotatedMethod, parameter ->
-                                annotatedMethod.annotateParameter(index, parameter.toList())
-                            }
-                    }
-                    .make()
-                    .load(this::class.java.classLoader)
-                    .loaded
+                val fakeClass = createClassWrapper(method)
 
                 val proxyInstance = fakeClass.getDeclaredConstructor().newInstance()
                 val handlingMethod =
                     proxyInstance::class.java.methods.first { it.name == method.invocable.definitionMethod.name }
                 val replacedMethod = resourceBuilder.updateMethod(method)
+                if (method.isSse) {
+                    replacedMethod.sse()
+                }
+                if (method.isSuspendDeclared) {
+                    replacedMethod.suspended(method.suspendTimeout, method.suspendTimeoutUnit)
+                }
+                if (method.isManagedAsyncDeclared) {
+                    replacedMethod.managedAsync()
+                }
                 replacedMethod.handledBy(
                     proxyInstance,
                     handlingMethod
