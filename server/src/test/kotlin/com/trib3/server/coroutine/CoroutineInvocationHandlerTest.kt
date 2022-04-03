@@ -3,6 +3,7 @@ package com.trib3.server.coroutine
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isLessThan
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
@@ -24,8 +25,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import org.glassfish.jersey.media.sse.EventInput
-import org.glassfish.jersey.test.inmemory.InMemoryTestContainerFactory
-import org.glassfish.jersey.test.spi.TestContainerFactory
+import org.glassfish.jersey.server.ManagedAsync
 import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
@@ -36,6 +36,8 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.client.Entity
+import javax.ws.rs.container.AsyncResponse
+import javax.ws.rs.container.Suspended
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
@@ -178,6 +180,23 @@ open class InvocationHandlerTestResource {
                 sseScopes.remove(q)
             }
         }
+    }
+
+    @Path("/async")
+    @GET
+    @ManagedAsync
+    suspend fun async(@Suspended async: AsyncResponse) {
+        delay(1)
+        async.resume("async")
+    }
+
+    @Path("/asyncError")
+    @GET
+    @ManagedAsync
+    suspend fun asyncError(@Suspended async: AsyncResponse) {
+        delay(1)
+        async.toString()
+        throw IllegalStateException("asyncoops")
     }
 }
 
@@ -394,26 +413,17 @@ class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestRes
         }
         assertThat(sseScopes[q]).isNull()
     }
-}
 
-/**
- * Separate test with in memory container which doesn't support async resources methods
- * in order to test failure case
- */
-class CoroutineInvocationHandlerCantSuspendTest : ResourceTestBase<InvocationHandlerTestResource>() {
-    override fun getResource() = InvocationHandlerTestResource()
-
-    override fun buildAdditionalResources(resourceBuilder: Resource.Builder<*>) {
-        resourceBuilder.addResource(CoroutineModelProcessor::class.java)
-    }
-
-    override fun getContainerFactory(): TestContainerFactory {
-        return InMemoryTestContainerFactory()
+    @Test
+    fun testAsync() {
+        val async = resource.target("/async").request().get(String::class.java)
+        assertThat(async).isEqualTo("async")
     }
 
     @Test
-    fun testCantSuspend() {
-        val ping = resource.target("/coroutine").request().get()
-        assertThat(ping.status).isEqualTo(Response.Status.INTERNAL_SERVER_ERROR.statusCode)
+    fun testAsyncError() {
+        assertThat {
+            resource.target("/asyncError").request().get(String::class.java)
+        }.isFailure()
     }
 }

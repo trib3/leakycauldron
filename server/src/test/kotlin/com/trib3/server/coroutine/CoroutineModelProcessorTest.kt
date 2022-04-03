@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import org.easymock.EasyMock
 import org.glassfish.jersey.internal.inject.InjectionManager
 import org.glassfish.jersey.server.AsyncContext
+import org.glassfish.jersey.server.ManagedAsync
 import org.glassfish.jersey.server.ResourceConfig
 import org.glassfish.jersey.server.model.Resource
 import org.glassfish.jersey.server.model.ResourceModel
@@ -18,6 +19,8 @@ import javax.inject.Provider
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.QueryParam
+import javax.ws.rs.container.AsyncResponse
+import javax.ws.rs.container.Suspended
 import javax.ws.rs.core.Context
 import javax.ws.rs.sse.Sse
 import javax.ws.rs.sse.SseEventSink
@@ -46,6 +49,14 @@ class ProcessorTestResource {
         delay(1)
         sseEventSink.send(sse.newEvent("data", "value"))
         sseEventSink.close()
+    }
+
+    @GET
+    @Path("/managedAsync")
+    @ManagedAsync
+    suspend fun managedAsync(@Suspended async: AsyncResponse) {
+        delay(1)
+        async.resume("async")
     }
 }
 
@@ -86,10 +97,15 @@ class CoroutineModelProcessorTest {
                         "sseMethod" -> {
                             assertThat(method.invocable.parameters).hasSize(2)
                             assertThat(method.invocable.responseType).isEqualTo(Void.TYPE)
+                            assertThat(method.isSse)
                         }
                         "simpleMethod" -> {
                             assertThat(method.invocable.parameters).isEmpty()
                             assertThat(method.invocable.responseType).isEqualTo(String::class.java)
+                        }
+                        "managedAsync" -> {
+                            assertThat(method.isManagedAsyncDeclared)
+                            assertThat(method.isSuspendDeclared)
                         }
                     }
                 }
