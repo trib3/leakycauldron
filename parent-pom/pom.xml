@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.29-SNAPSHOT</version>
+    <version>1.30-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -96,7 +96,7 @@
         <version.jooq>3.16.5</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.junit>4.13.2</version.junit>
-        <version.kotlin>1.6.10</version.kotlin>
+        <version.kotlin>1.6.20</version.kotlin>
         <version.kotlin.coroutines>1.6.0</version.kotlin.coroutines>
         <version.kotlin.guice>1.6.0</version.kotlin.guice>
         <version.kotlin.logging>2.1.21</version.kotlin.logging>
@@ -1542,7 +1542,7 @@
                         <jvmTarget>${version.java.release}</jvmTarget>
                         <args>
                             <arg>-Werror</arg>
-                            <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
+                            <arg>-opt-in=kotlin.RequiresOptIn</arg>
                         </args>
                     </configuration>
                     <executions>
