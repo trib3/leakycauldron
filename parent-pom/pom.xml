@@ -112,7 +112,7 @@
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
         <version.maven.deploy>3.0.0-M2</version.maven.deploy>
         <version.maven.enforcer>3.0.0-M3</version.maven.enforcer>
-        <version.maven.failsafe>3.0.0-M5</version.maven.failsafe>
+        <version.maven.failsafe>3.0.0-M6</version.maven.failsafe>
         <version.maven.git>4.9.10</version.maven.git>
         <version.maven.gpg>3.0.1</version.maven.gpg>
         <version.maven.install>3.0.0-M1</version.maven.install>
@@ -122,7 +122,7 @@
         <version.maven.resources>3.2.0</version.maven.resources>
         <version.maven.shade>3.2.4</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
-        <version.maven.surefire>3.0.0-M5</version.maven.surefire>
+        <version.maven.surefire>3.0.0-M6</version.maven.surefire>
         <version.netty>4.1.75.Final</version.netty>
         <version.postgres>42.3.3</version.postgres>
         <version.reactivestreams>1.0.3</version.reactivestreams>
@@ -131,7 +131,7 @@
         <version.slf4j>1.7.36</version.slf4j>
         <version.swagger>2.1.13</version.swagger>
         <version.testcontainers>1.16.3</version.testcontainers>
-        <version.testng>7.3.0</version.testng>
+        <version.testng>7.5</version.testng>
         <version.threeten>1.7.0</version.threeten>
         <version.typesafe.config>1.4.2</version.typesafe.config>
         <version.validation>2.0.2</version.validation>
