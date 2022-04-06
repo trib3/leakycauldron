@@ -83,7 +83,7 @@
         <version.jackson>2.13.2</version.jackson>
         <version.jackson.databind>${version.jackson}</version.jackson.databind>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
-        <version.jacoco>0.8.7</version.jacoco>
+        <version.jacoco>0.8.8</version.jacoco>
         <version.java.release>11</version.java.release>
         <version.javax.inject>1</version.javax.inject>
         <version.jaxb>2.3.3</version.jaxb>
