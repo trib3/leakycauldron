@@ -126,7 +126,7 @@
         <version.netty>4.1.76.Final</version.netty>
         <version.postgres>42.3.3</version.postgres>
         <version.reactivestreams>1.0.3</version.reactivestreams>
-        <version.redshift>2.1.0.5</version.redshift>
+        <version.redshift>2.1.0.6</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>1.7.36</version.slf4j>
         <version.swagger>2.2.0</version.swagger>
