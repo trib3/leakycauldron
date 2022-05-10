@@ -22,6 +22,8 @@ import java.time.OffsetDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.UUID
 import javax.annotation.Nullable
 import javax.inject.Inject
@@ -137,6 +139,20 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
     )
     .coercing(
         object : Coercing<LocalDateTime, String> {
+            // define iso formatter with required fractional seconds per https://www.graphql-scalars.com/date-time/
+            @Suppress("MagicNumber") // const expression
+            private val ISO_FORMATTER = DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                .appendLiteral('T')
+                .appendValue(ChronoField.HOUR_OF_DAY, 2)
+                .appendLiteral(':')
+                .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                .appendLiteral(':')
+                .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+                .appendFraction(ChronoField.NANO_OF_SECOND, 3, 3, true)
+                .toFormatter()
+
             private fun parse(input: String, exceptionConstructor: (String, Throwable) -> Exception): LocalDateTime {
                 return try {
                     LocalDateTime.parse(input)
@@ -158,7 +174,7 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
 
             override fun serialize(dataFetcherResult: Any): String {
                 return when (dataFetcherResult) {
-                    is LocalDateTime -> DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(dataFetcherResult)
+                    is LocalDateTime -> ISO_FORMATTER.format(dataFetcherResult)
                     else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
                 }
             }

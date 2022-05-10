@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair
 import com.fasterxml.jackson.module.guice.GuiceAnnotationIntrospector
 import com.fasterxml.jackson.module.guice.GuiceInjectableValues
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Injector
 import com.trib3.json.ObjectMapperProvider.Companion.OBJECT_MAPPER_MIXINS
 import com.trib3.json.jackson.ThreeTenExtraModule
@@ -49,7 +49,7 @@ class ObjectMapperProvider @Inject constructor(
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         mapper.disable(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY)
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        mapper.registerModule(KotlinModule.Builder().build())
+        mapper.registerKotlinModule()
         mapper.registerModule(MetricsModule(TimeUnit.SECONDS, TimeUnit.SECONDS, false))
         mapper.registerModule(ThreeTenExtraModule())
 
