@@ -171,7 +171,7 @@ class LeakyCauldronHooksTest {
     fun testLocalDateTime() {
         val result = graphQL.execute("""query {localDateTime(l:"2019-10-30T00:01")}""")
             .getData<Map<String, String>>()
-        assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01:00")
+        assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01:00.000")
         assertValidationErrors("""query {localDateTime(l:123)}""", """query {localDateTime(l:"123")}""")
 
         assertThat {
@@ -180,7 +180,7 @@ class LeakyCauldronHooksTest {
 
         assertThat {
             LOCAL_DATETIME_SCALAR.coercing.serialize(LocalDateTime.of(2019, 10, 31, 1, 1))
-        }.isSuccess().isEqualTo("2019-10-31T01:01:00")
+        }.isSuccess().isEqualTo("2019-10-31T01:01:00.000")
     }
 
     @Test
@@ -190,7 +190,7 @@ class LeakyCauldronHooksTest {
                 .query("""query(${'$'}input: LocalDateTime!) {localDateTime(l:${'$'}input)}""")
                 .variables(mapOf("input" to "2019-10-30T00:01")).build()
         ).getData<Map<String, String>>()
-        assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01:00")
+        assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01:00.000")
     }
 
     @Test
@@ -233,7 +233,7 @@ class LeakyCauldronHooksTest {
     fun testOffsetDateTime() {
         val result = graphQL.execute("""query {offsetDateTime(o:"2019-10-30T00:01-07:00")}""")
             .getData<Map<String, String>>()
-        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01:00Z")
+        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01:00.000Z")
         assertValidationErrors("""query {offsetDateTime(o:123)}""", """query {offsetDateTime(o:"123")}""")
     }
 
@@ -244,7 +244,7 @@ class LeakyCauldronHooksTest {
                 .query("""query(${'$'}input: DateTime!) {offsetDateTime(o:${'$'}input)}""")
                 .variables(mapOf("input" to "2019-10-30T00:01-07:00")).build()
         ).getData<Map<String, String>>()
-        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01:00Z")
+        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01:00.000Z")
     }
 
     @Test
