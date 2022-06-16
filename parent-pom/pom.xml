@@ -128,7 +128,7 @@
         <version.redshift>2.1.0.8</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>1.7.36</version.slf4j>
-        <version.swagger>2.2.0</version.swagger>
+        <version.swagger>2.2.1</version.swagger>
         <version.testcontainers>1.17.2</version.testcontainers>
         <version.testng>7.6.0</version.testng>
         <version.threeten>1.7.0</version.threeten>
