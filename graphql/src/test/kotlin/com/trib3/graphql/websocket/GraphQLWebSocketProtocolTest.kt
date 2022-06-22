@@ -74,8 +74,8 @@ class GraphQLWebSocketProtocolTest {
             ExecutionResult::class to null // only need to support serialization right now, not round trip
         )
         for (
-            t in OperationType.Companion::class.memberProperties
-                .filterIsInstance<KProperty1<OperationType.Companion, OperationType<Any>>>()
+        t in OperationType.Companion::class.memberProperties
+            .filterIsInstance<KProperty1<OperationType.Companion, OperationType<Any>>>()
         ) {
             val type = t.get(OperationType.Companion)
             val message =

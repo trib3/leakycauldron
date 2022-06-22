@@ -12,6 +12,7 @@ import java.math.BigDecimal
 class PageConditionComponentTest {
     val stringField = DSL.field("foo", String::class.java)
     val decimalField = DSL.field("bar", BigDecimal::class.java)
+
     @Test
     fun testCondition() {
         val component1 = PageConditionComponent(stringField, "abc") { it }

@@ -262,7 +262,6 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
     @Test
     fun testSingleConnCancellation() {
-
         val tokenResponse = target.request().put(Entity.text(""))
         val token = tokenResponse.readEntity(String::class.java)
         assertThat(tokenResponse.status).isEqualTo(201)

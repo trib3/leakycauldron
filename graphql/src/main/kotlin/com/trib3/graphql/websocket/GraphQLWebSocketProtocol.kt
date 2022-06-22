@@ -38,7 +38,8 @@ enum class GraphQLWebSocketSubProtocol(
         onInvalidMessageCallback = { messageId, messageBody, adapter ->
             adapter.sendMessage(
                 OperationMessage(
-                    OperationType.GQL_ERROR, messageId,
+                    OperationType.GQL_ERROR,
+                    messageId,
                     listOf(MessageGraphQLError("Invalid message `$messageBody`"))
                 )
             )
@@ -200,7 +201,7 @@ data class OperationMessage<T : Any>(
         Type(name = "complete", value = Nothing::class),
         Type(name = "ka", value = Nothing::class),
         Type(name = "ping", value = Map::class),
-        Type(name = "pong", value = Map::class),
+        Type(name = "pong", value = Map::class)
     )
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val payload: T? = null

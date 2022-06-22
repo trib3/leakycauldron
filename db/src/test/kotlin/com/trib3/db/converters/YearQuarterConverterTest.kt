@@ -8,6 +8,7 @@ import org.threeten.extra.YearQuarter
 
 class YearQuarterConverterTest {
     val converter = YearQuarterConverter()
+
     @Test
     fun testStringToYearQuarter() {
         val date = "2019-Q1"

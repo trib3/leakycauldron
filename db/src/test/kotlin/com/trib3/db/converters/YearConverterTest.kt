@@ -8,6 +8,7 @@ import java.time.Year
 
 class YearConverterTest {
     val converter = YearConverter()
+
     @Test
     fun testLocalDateToYear() {
         val date = "2019"

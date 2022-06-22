@@ -9,6 +9,7 @@ import java.time.YearMonth
 
 class YearMonthConverterTest {
     val converter = YearMonthConverter()
+
     @Test
     fun testLocalDateToYearMonth() {
         val date = LocalDate.of(2019, 3, 4)
