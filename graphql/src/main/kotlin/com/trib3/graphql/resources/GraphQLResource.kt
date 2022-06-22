@@ -82,7 +82,8 @@ fun getGraphQLContextMap(
  */
 internal fun unauthorizedResponse(): Response {
     return Response.status(HttpStatus.UNAUTHORIZED_401).header(
-        "WWW-Authenticate", "Basic realm=\"realm\""
+        "WWW-Authenticate",
+        "Basic realm=\"realm\""
     ).build()
 }
 
@@ -133,7 +134,8 @@ open class GraphQLResource
     @Timed
     @AsyncDispatcher("IO")
     open suspend fun graphQL(
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
         query: GraphQLRequest
     ): Response = supervisorScope {
         val contextMap = getGraphQLContextMap(this, principal.orElse(null))
@@ -168,7 +170,8 @@ open class GraphQLResource
      */
     @DELETE
     fun cancel(
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
         @QueryParam("id") requestId: String
     ): Response {
         if (graphQLConfig.checkAuthorization && !principal.isPresent) {
@@ -187,7 +190,8 @@ open class GraphQLResource
     @GET
     @Timed
     open fun graphQLUpgrade(
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
         @Context request: HttpServletRequest,
         @Context response: HttpServletResponse,
         @Context containerRequestContext: ContainerRequestContext

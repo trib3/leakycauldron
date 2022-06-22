@@ -34,7 +34,11 @@ class TimestreamReporter(
     rateUnit: TimeUnit,
     durationUnit: TimeUnit
 ) : ScheduledReporter(
-    registry, name, filter, rateUnit, durationUnit
+    registry,
+    name,
+    filter,
+    rateUnit,
+    durationUnit
 ) {
 
     private val rateFactor = rateUnit.toSeconds(1)

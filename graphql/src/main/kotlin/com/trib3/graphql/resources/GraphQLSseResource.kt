@@ -175,7 +175,8 @@ open class GraphQLSseResource @Inject constructor(
     @Produces(MediaType.TEXT_PLAIN)
     @Timed
     open fun reserveEventStream(
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>
     ): Response {
         if (principal.isEmpty && graphQLConfig.checkAuthorization) {
             return unauthorizedResponse()
@@ -229,7 +230,8 @@ open class GraphQLSseResource @Inject constructor(
     @POST
     @Timed
     open fun queryOpenStream(
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
         query: GraphQLRequest,
         @HeaderParam(STREAM_TOKEN_HEADER) headerToken: UUID?,
         @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?
@@ -281,7 +283,8 @@ open class GraphQLSseResource @Inject constructor(
     open suspend fun querySse(
         @Context eventSink: SseEventSink,
         @Context sse: Sse,
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
         query: GraphQLRequest
     ) = coroutineScope {
         val contextMap = getGraphQLContextMap(this, principal.orElse(null))
