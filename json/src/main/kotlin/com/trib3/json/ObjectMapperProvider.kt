@@ -59,10 +59,12 @@ class ObjectMapperProvider @Inject constructor(
             mapper.injectableValues = GuiceInjectableValues(injector)
             mapper.setAnnotationIntrospectors(
                 AnnotationIntrospectorPair(
-                    guiceIntrospector, mapper.serializationConfig.annotationIntrospector
+                    guiceIntrospector,
+                    mapper.serializationConfig.annotationIntrospector
                 ),
                 AnnotationIntrospectorPair(
-                    guiceIntrospector, mapper.deserializationConfig.annotationIntrospector
+                    guiceIntrospector,
+                    mapper.deserializationConfig.annotationIntrospector
                 )
             )
         }

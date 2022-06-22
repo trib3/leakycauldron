@@ -867,7 +867,8 @@ class GraphQLWebSocketTest {
             )
         }
         EasyMock.verify(
-            mockRemote, mockSession
+            mockRemote,
+            mockSession
         )
     }
 
@@ -881,7 +882,8 @@ class GraphQLWebSocketTest {
         EasyMock.expect(mockSession.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)).once()
 
         EasyMock.replay(
-            mockRemote, mockSession
+            mockRemote,
+            mockSession
         )
         socket.adapter.onWebSocketConnect(mockSession)
         socket.adapter.onWebSocketText(
@@ -902,7 +904,8 @@ class GraphQLWebSocketTest {
             )
         }
         EasyMock.verify(
-            mockRemote, mockSession
+            mockRemote,
+            mockSession
         )
     }
 
@@ -1048,7 +1051,8 @@ class GraphQLWebSocketTest {
             (config.connectionInitWaitTimeout + 1) * 1000
         )
         EasyMock.verify(
-            mockRemote, mockSession
+            mockRemote,
+            mockSession
         )
     }
 
@@ -1158,7 +1162,8 @@ class GraphQLWebSocketTest {
             )
         )
         EasyMock.replay(
-            mockRemote, mockSession
+            mockRemote,
+            mockSession
         )
         socket.adapter.onWebSocketConnect(mockSession)
         socket.adapter.onWebSocketText(
