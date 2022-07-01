@@ -130,7 +130,7 @@
         <version.slf4j>1.7.36</version.slf4j>
         <version.swagger>2.2.1</version.swagger>
         <version.testcontainers>1.17.2</version.testcontainers>
-        <version.testng>7.6.0</version.testng>
+        <version.testng>7.6.1</version.testng>
         <version.threeten>1.7.0</version.threeten>
         <version.typesafe.config>1.4.2</version.typesafe.config>
         <version.validation>2.0.2</version.validation>
