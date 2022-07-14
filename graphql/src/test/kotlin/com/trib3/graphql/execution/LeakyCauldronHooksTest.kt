@@ -96,7 +96,7 @@ class LeakyCauldronHooksTest {
     fun testYear() {
         val result = graphQL.execute("""query {year(y:"2019")}""").getData<Map<String, String>>()
         assertThat(result["year"]).isEqualTo("2020")
-        assertValidationErrors("""query {year(y:123)}""", """query {year(y:"123")}""")
+        assertValidationErrors("""query {year(y:123)}""", """query {year(y:"123-45")}""")
 
         assertThat {
             YEAR_SCALAR.coercing.serialize(123)

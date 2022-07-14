@@ -18,18 +18,25 @@ import io.dropwizard.testing.common.Resource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.yield
 import org.glassfish.jersey.media.sse.EventInput
 import org.glassfish.jersey.server.ManagedAsync
+import org.testng.annotations.AfterClass
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
@@ -251,7 +258,22 @@ class InvocationHandlerClassScopeTestResource : CoroutineScope by CoroutineScope
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestResource>() {
+
+    private val mainDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+    @BeforeClass
+    fun setup() {
+        Dispatchers.setMain(mainDispatcher)
+    }
+
+    @AfterClass
+    fun tearDown() {
+        Dispatchers.resetMain()
+        mainDispatcher.close()
+    }
+
     // create through guice  w/ metrics instrumentation so we get a dynamically subclassed instance
     override fun getResource(): InvocationHandlerTestResource {
         val injector = Guice.createInjector(

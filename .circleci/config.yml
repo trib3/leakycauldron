@@ -5,7 +5,7 @@ orbs:
 jobs:
   build:
     machine:
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2204:2022.04.2
 
     working_directory: ~/repo
     environment:
@@ -27,6 +27,7 @@ jobs:
       - run:
           name: Maven Setup
           command: |
+            mvn --version
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             if [ "$CIRCLE_BRANCH" = "main" ]; then
@@ -125,7 +126,7 @@ jobs:
 
   deploy:
     docker:
-      - image: cimg/openjdk:11.0
+      - image: cimg/openjdk:17.0
     steps:
       - attach_workspace:
           at: ~/jars
