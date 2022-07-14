@@ -18,6 +18,7 @@
             <unpackOptions>
                 <includes>
                     <include>.ebextensions/**</include>
+                    <include>.platform/**</include>
                 </includes>
             </unpackOptions>
             <outputDirectory></outputDirectory>

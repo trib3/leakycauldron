@@ -5,7 +5,7 @@ orbs:
 jobs:
   build:
     machine:
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2204:2022.04.2
 
     working_directory: ~/repo
     environment:
@@ -27,8 +27,10 @@ jobs:
       - run:
           name: Maven Setup
           command: |
+            mvn --version
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
+            export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             if [ "$CIRCLE_BRANCH" = "main" ]; then
                 set +o pipefail # it's ok to keep going if grep doesn't match anything 
                 REPOIDS=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
@@ -40,6 +42,7 @@ jobs:
                     done
                 fi
             fi
+            export MAVEN_OPTS=""
             cd build-resources && BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
             if [ "$CIRCLE_BRANCH" = "main" ]; then
               NEW_PROJECT_VERSION=${BASE_VERSION}.${CIRCLE_BUILD_NUM}
@@ -125,7 +128,7 @@ jobs:
 
   deploy:
     docker:
-      - image: cimg/openjdk:11.0
+      - image: cimg/openjdk:17.0
     steps:
       - attach_workspace:
           at: ~/jars
@@ -134,6 +137,7 @@ jobs:
           command: |
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
+            export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
             mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
             mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30

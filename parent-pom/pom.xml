@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.32-SNAPSHOT</version>
+    <version>1.33-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -84,7 +84,7 @@
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.jacoco>0.8.8</version.jacoco>
         <version.jakarta.inject>1.0.5</version.jakarta.inject>
-        <version.java.release>11</version.java.release>
+        <version.java.release>17</version.java.release>
         <version.jaxb>2.3.3</version.jaxb>
         <version.jaxrs>2.1.6</version.jaxrs>
         <version.jersey>2.36</version.jersey>
@@ -107,7 +107,7 @@
         <version.maven.buildhelper>3.3.0</version.maven.buildhelper>
         <version.maven.clean>3.2.0</version.maven.clean>
         <version.maven.compiler>3.10.1</version.maven.compiler>
-        <version.maven.dependency>3.1.2</version.maven.dependency>
+        <version.maven.dependency>3.3.0</version.maven.dependency>
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
         <version.maven.deploy>3.0.0</version.maven.deploy>
         <version.maven.enforcer>3.0.0-M3</version.maven.enforcer>
@@ -116,7 +116,6 @@
         <version.maven.gpg>3.0.1</version.maven.gpg>
         <version.maven.install>3.0.1</version.maven.install>
         <version.maven.jar>3.2.2</version.maven.jar>
-        <version.maven.ktlint>1.13.1</version.maven.ktlint>
         <version.maven.properties>1.1.0</version.maven.properties>
         <version.maven.resources>3.3.0</version.maven.resources>
         <version.maven.shade>3.3.0</version.maven.shade>
@@ -1436,55 +1435,6 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>com.github.gantsign.maven</groupId>
-                    <artifactId>ktlint-maven-plugin</artifactId>
-                    <version>${version.maven.ktlint}</version>
-                    <executions>
-                        <execution>
-                            <id>format-and-check</id>
-                            <goals>
-                                <goal>format</goal>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.pinterest.ktlint</groupId>
-                            <artifactId>ktlint-core</artifactId>
-                            <version>${version.ktlint}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.pinterest.ktlint</groupId>
-                            <artifactId>ktlint-reporter-checkstyle</artifactId>
-                            <version>${version.ktlint}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.pinterest.ktlint</groupId>
-                            <artifactId>ktlint-reporter-json</artifactId>
-                            <version>${version.ktlint}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.pinterest.ktlint</groupId>
-                            <artifactId>ktlint-reporter-plain</artifactId>
-                            <version>${version.ktlint}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.pinterest.ktlint</groupId>
-                            <artifactId>ktlint-ruleset-experimental</artifactId>
-                            <version>${version.ktlint}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.pinterest.ktlint</groupId>
-                            <artifactId>ktlint-ruleset-standard</artifactId>
-                            <version>${version.ktlint}</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <skip>${skip.checks}</skip>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>${version.maven.antrun}</version>
@@ -1520,6 +1470,32 @@
                                 </target>
                             </configuration>
                         </execution>
+                        <!--
+                        run ktlint through antrun plugin to allow setting add-opens
+                        without setting it on the full build.  This works around
+                        https://github.com/pinterest/ktlint/issues/1391
+                        -->
+                        <execution>
+                            <id>ktlint</id>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${skip.checks}</skip>
+                                <target name="ktlint">
+                                    <property name="compile_classpath" refid="maven.compile.classpath"/>
+                                    <java taskname="ktlint" dir="${basedir}"
+                                          fork="true"
+                                          failonerror="true"
+                                          classname="com.pinterest.ktlint.Main"
+                                          classpathref="maven.plugin.classpath">
+                                        <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
+                                        <arg value="-F"/>
+                                    </java>
+                                </target>
+                            </configuration>
+                        </execution>
                     </executions>
                     <dependencies>
                         <dependency>
@@ -1541,6 +1517,11 @@
                             <groupId>org.apache.ant</groupId>
                             <artifactId>ant</artifactId>
                             <version>${version.ant}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.pinterest</groupId>
+                            <artifactId>ktlint</artifactId>
+                            <version>${version.ktlint}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -1862,6 +1843,10 @@
                                 io.github.microutils:kotlin-logging-jvm
                             </ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
+                        <!-- workaround for https://issues.apache.org/jira/browse/MDEP-791 -->
+                        <ignoredNonTestScopedDependencies>
+                            <ignoredNonTestScopedDependency>*</ignoredNonTestScopedDependency>
+                        </ignoredNonTestScopedDependencies>
                     </configuration>
                     <executions>
                         <execution>
@@ -1979,10 +1964,6 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.github.gantsign.maven</groupId>
-                        <artifactId>ktlint-maven-plugin</artifactId>
-                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>

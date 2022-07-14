@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.trib3</groupId>
         <artifactId>leakycauldron</artifactId>
-        <version>1.32-SNAPSHOT</version>
+        <version>1.33-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -255,8 +255,7 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
-            <!-- just so we have a Main dispatcher for tests -->
-            <artifactId>kotlinx-coroutines-swing</artifactId>
+            <artifactId>kotlinx-coroutines-test-jvm</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
