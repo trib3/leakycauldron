@@ -24,6 +24,7 @@ import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
  * to launch the coroutine with, otherwise defaults to [Dispatchers.Unconfined].
  * Additionally, if a resource class implements [CoroutineScope], that scope is used to launch the coroutine.
  */
+@Suppress("InjectDispatcher") // specify dispatchers by annotation instead of injection
 class CoroutineInvocationHandler(
     private val asyncContextProvider: Provider<AsyncContext>,
     private val originalObjectProvider: () -> Any,
@@ -60,8 +61,8 @@ class CoroutineInvocationHandler(
 
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
         val asyncContext = asyncContextProvider.get()
-        if (!asyncContext.isSuspended && !asyncContext.suspend()) {
-            throw IllegalStateException("Can't suspend!")
+        check(asyncContext.isSuspended || asyncContext.suspend()) {
+            "Can't suspend!"
         }
         val originalObject = originalObjectProvider.invoke()
         val methodAnnotation = originalInvocable.definitionMethod.getAnnotation(AsyncDispatcher::class.java)

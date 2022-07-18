@@ -23,7 +23,7 @@ fun GraphQLRequest.toExecutionInput(
 ): ExecutionInput {
     return ExecutionInput.newExecutionInput()
         .query(this.query)
-        .variables(this.variables ?: emptyMap())
+        .variables(this.variables.orEmpty())
         .operationName(operationName)
         .runIf(contextMap != null) {
             graphQLContext(contextMap)

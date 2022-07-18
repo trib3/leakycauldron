@@ -50,10 +50,9 @@ open class GraphQLWebSocketAdapter(
             } else {
                 subProtocol.onInvalidMessage(operation.id, message, this@GraphQLWebSocketAdapter)
             }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
         } catch (error: Throwable) {
-            if (error is CancellationException) {
-                throw error
-            }
             log.error("Error parsing message: ${error.message}", error)
             subProtocol.onInvalidMessage(null, message, this@GraphQLWebSocketAdapter)
         }

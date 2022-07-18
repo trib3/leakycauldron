@@ -60,9 +60,9 @@ class AdminAuthFilter : Filter {
      * Read configured [token] and [realm] from the [FilterConfig]
      */
     override fun init(filterConfig: FilterConfig?) {
-        filterConfig?.let {
-            token = filterConfig.getInitParameter("token")
-            filterConfig.getInitParameter("realm")?.let {
+        filterConfig?.let { filtConfig ->
+            token = filtConfig.getInitParameter("token")
+            filtConfig.getInitParameter("realm")?.let {
                 realm = it
             }
         }
