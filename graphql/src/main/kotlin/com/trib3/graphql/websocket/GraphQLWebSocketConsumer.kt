@@ -244,11 +244,10 @@ class GraphQLWebSocketConsumer(
                     // Unknown message type
                     else -> adapter.subProtocol.onInvalidMessage(message.id, message.toString(), adapter)
                 }
+            } catch (cancellation: CancellationException) {
+                log.trace("Rethrowing cancellation")
+                throw cancellation
             } catch (error: Throwable) {
-                if (error is CancellationException) {
-                    log.trace("Rethrowing cancellation")
-                    throw error
-                }
                 log.error("Error processing message ${error.message}", error)
                 adapter.sendMessage(OperationType.GQL_ERROR, message.id, listOf(MessageGraphQLError(error.message)))
             }

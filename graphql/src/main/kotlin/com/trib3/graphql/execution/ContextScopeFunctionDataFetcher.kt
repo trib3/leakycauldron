@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.trib3.graphql.resources.getInstance
 import graphql.schema.DataFetcherFactory
 import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -46,8 +47,9 @@ open class ContextScopeKotlinDataFetcherFactoryProvider(
 open class ContextScopeFunctionDataFetcher(
     private val target: Any?,
     private val fn: KFunction<*>,
-    objectMapper: ObjectMapper = jacksonObjectMapper()
-) : FunctionDataFetcher(target, fn, objectMapper), CoroutineScope by CoroutineScope(Dispatchers.Default) {
+    objectMapper: ObjectMapper = jacksonObjectMapper(),
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
+) : FunctionDataFetcher(target, fn, objectMapper), CoroutineScope by CoroutineScope(dispatcher) {
     override fun get(environment: DataFetchingEnvironment): Any? {
         val instance: Any? = target ?: environment.getSource<Any?>()
         val instanceParameter = fn.instanceParameter

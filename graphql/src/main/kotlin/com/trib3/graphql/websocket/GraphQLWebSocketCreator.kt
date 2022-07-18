@@ -5,6 +5,7 @@ import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
 import graphql.GraphQL
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -23,7 +24,8 @@ class GraphQLWebSocketCreator(
     val graphQLConfig: GraphQLConfig,
     val containerRequestContext: ContainerRequestContext,
     private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null,
-    private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null
+    private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : WebSocketCreator {
     /**
      * Create the [GraphQLWebSocketAdapter]and its [Channel], and launch a [GraphQLWebSocketConsumer] coroutine
@@ -45,7 +47,7 @@ class GraphQLWebSocketCreator(
                 containerRequestContext,
                 channel,
                 adapter,
-                Dispatchers.Default,
+                dispatcher,
                 dataLoaderRegistryFactory,
                 graphQLWebSocketAuthenticator
             )

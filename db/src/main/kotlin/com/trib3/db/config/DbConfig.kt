@@ -35,7 +35,7 @@ class DbConfig
         val subprotocol = config.extract("subprotocol") ?: "postgresql"
         val host = config.extract("host") ?: "localhost"
         val port = config.extract("port") ?: POSTGRES_DEFAULT_PORT
-        val schema: String = config.extract("schema") ?: ""
+        val schema: String = config.extract<String?>("schema").orEmpty()
         val driverClassName = config.extract("driverClassName") ?: "org.postgresql.Driver"
         val username = config.extract("user") ?: "tribe"
         val password = config.extract<String?>("password")

@@ -74,7 +74,7 @@ enum class GraphQLWebSocketSubProtocol(
         onInvalidMessageCallback = { msgId, msgBody, adapter ->
             adapter.session?.close(
                 GraphQLWebSocketCloseReason.INVALID_MESSAGE.code,
-                GraphQLWebSocketCloseReason.INVALID_MESSAGE.description.replace("<id>", msgId ?: "")
+                GraphQLWebSocketCloseReason.INVALID_MESSAGE.description.replace("<id>", msgId.orEmpty())
                     .replace("<body>", msgBody)
             )
         },
@@ -83,7 +83,7 @@ enum class GraphQLWebSocketSubProtocol(
                 GraphQLWebSocketCloseReason.MULTIPLE_SUBSCRIBER.code,
                 GraphQLWebSocketCloseReason.MULTIPLE_SUBSCRIBER.description.replace(
                     "<unique-operation-id>",
-                    message.id ?: ""
+                    message.id.orEmpty()
                 )
             )
         },
