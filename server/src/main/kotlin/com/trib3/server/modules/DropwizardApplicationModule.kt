@@ -61,7 +61,7 @@ class DropwizardApplicationModule : TribeApplicationModule() {
                     mapOf("token" to it)
                 )
             )
-        } ?: setOf()
+        }.orEmpty()
     }
 
     // allow multiple installations so that multiple other modules can install this one
