@@ -118,7 +118,7 @@
         <version.maven.jar>3.2.2</version.maven.jar>
         <version.maven.ktlint>1.13.1</version.maven.ktlint>
         <version.maven.properties>1.1.0</version.maven.properties>
-        <version.maven.resources>3.2.0</version.maven.resources>
+        <version.maven.resources>3.3.0</version.maven.resources>
         <version.maven.shade>3.3.0</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
         <version.maven.surefire>3.0.0-M7</version.maven.surefire>
