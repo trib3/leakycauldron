@@ -6,17 +6,18 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.size
+import com.expediagroup.graphql.dataloader.KotlinDataLoader
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.config.modules.KMSModule
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.resources.GraphQLResource
-import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.modules.TribeApplicationModule
 import graphql.GraphQL
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentationOptions
+import org.dataloader.DataLoader
 import org.dataloader.DataLoaderFactory
-import org.dataloader.DataLoaderRegistry
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import java.util.concurrent.CompletableFuture
@@ -51,7 +52,7 @@ class GraphQLApplicationModuleTest
     fun testBinding() {
         val graphQLResources = resources.filterIsInstance<GraphQLResource>()
         assertThat(graphQLResources).size().isGreaterThan(0)
-        assertThat(graphQLResources.first().dataLoaderRegistryFactory).isNull()
+        assertThat(graphQLResources.first().dataLoaderRegistryFactoryProvider).isNull()
         RequestIdFilter.withRequestId("graphQLInstrumentationBindingTest") {
             val result = graphQL.execute("query test")
             assertThat(result.extensions["RequestId"]).isEqualTo("graphQLInstrumentationBindingTest")
@@ -70,8 +71,7 @@ class GraphQLApplicationModuleTest
             setOf(DummyQuery()),
             setOf(),
             setOf(),
-            setOf(),
-            ObjectMapperProvider().get()
+            setOf()
         )
         assertThat(graphQLInstance).isNotNull()
     }
@@ -79,20 +79,23 @@ class GraphQLApplicationModuleTest
 
 class OverrideDataLoaderModule : GraphQLApplicationModule() {
     override fun configureApplication() {
-        dataLoaderRegistryFactoryBinder().setBinding().toInstance { _, _ ->
-            val registry = DataLoaderRegistry()
-            registry.register(
-                "loader",
-                DataLoaderFactory.newDataLoader { keys: List<String> ->
-                    if (keys != listOf("a", "b")) {
-                        throw IllegalArgumentException("wrong keys!")
+        dataLoaderRegistryFactoryProviderBinder().setBinding().toInstance { _, _ ->
+            val registry = KotlinDataLoaderRegistryFactory(
+                object : KotlinDataLoader<String, String> {
+                    override val dataLoaderName = "loader"
+                    override fun getDataLoader(): DataLoader<String, String> {
+                        return DataLoaderFactory.newDataLoader { keys: List<String> ->
+                            if (keys != listOf("a", "b")) {
+                                throw IllegalArgumentException("wrong keys!")
+                            }
+                            CompletableFuture.completedFuture(
+                                listOf(
+                                    "1",
+                                    "2"
+                                )
+                            )
+                        }
                     }
-                    CompletableFuture.completedFuture(
-                        listOf(
-                            "1",
-                            "2"
-                        )
-                    )
                 }
             )
             registry
@@ -110,9 +113,10 @@ class GraphQLApplicationModuleDataLoaderOverrideTest
     fun testBinding() {
         val graphQLResources = resources.filterIsInstance<GraphQLResource>()
         assertThat(graphQLResources).size().isGreaterThan(0)
-        val factory = graphQLResources.first().dataLoaderRegistryFactory
+        val factory = graphQLResources.first().dataLoaderRegistryFactoryProvider
         assertThat(factory).isNotNull()
-        val loader = factory!!.invoke(GraphQLRequest("", mapOf(), ""), null).getDataLoader<String, String>("loader")
+        val loader = factory!!.invoke(GraphQLRequest(""), mapOf<Any, Any>()).generate()
+            .getDataLoader<String, String>("loader")
         assertThat(loader).isNotNull()
         val future = loader.loadMany(listOf("a", "b"))
         // an actual GraphQL resolver would return CompletableFuture<T> instead of T, and graphql-java would

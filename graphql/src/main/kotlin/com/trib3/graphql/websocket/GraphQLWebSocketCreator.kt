@@ -2,8 +2,8 @@ package com.trib3.graphql.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
+import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import graphql.GraphQL
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +23,7 @@ class GraphQLWebSocketCreator(
     val objectMapper: ObjectMapper,
     val graphQLConfig: GraphQLConfig,
     val containerRequestContext: ContainerRequestContext,
-    private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null,
+    private val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
     private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : WebSocketCreator {

@@ -9,11 +9,9 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
-import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
+import com.expediagroup.graphql.generator.extensions.get
 import com.expediagroup.graphql.generator.toSchema
 import com.trib3.graphql.resources.getGraphQLContextMap
-import com.trib3.graphql.resources.getInstance
-import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
@@ -27,7 +25,7 @@ import java.security.Principal
 class AuthQuery {
     @GraphQLAuth
     fun needUser(dfe: DataFetchingEnvironment): String? {
-        return dfe.graphQlContext.getInstance<Principal>()?.name
+        return dfe.graphQlContext.get<Principal>()?.name
     }
 
     fun noUser(): String {
@@ -36,7 +34,7 @@ class AuthQuery {
 
     @GraphQLAuth(["ADMIN"])
     fun needSuperUser(dfe: DataFetchingEnvironment): String? {
-        return dfe.graphQlContext.getInstance<Principal>()?.name
+        return dfe.graphQlContext.get<Principal>()?.name
     }
 }
 
@@ -56,10 +54,7 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
         val config =
             SchemaGeneratorConfig(
                 listOf(this::class.java.packageName),
-                hooks = hooks,
-                dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(
-                    ObjectMapperProvider().get()
-                )
+                hooks = hooks
             )
         return GraphQL.newGraphQL(
             toSchema(config, listOf(TopLevelObject(AuthQuery())))
@@ -155,10 +150,7 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
         val config =
             SchemaGeneratorConfig(
                 listOf(this::class.java.packageName),
-                hooks = hooks,
-                dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(
-                    ObjectMapperProvider().get()
-                )
+                hooks = hooks
             )
         val result = GraphQL.newGraphQL(
             toSchema(config, listOf(TopLevelObject(AuthQuery())))

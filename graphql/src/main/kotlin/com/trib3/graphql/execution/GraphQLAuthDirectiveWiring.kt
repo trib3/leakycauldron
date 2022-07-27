@@ -3,7 +3,7 @@ package com.trib3.graphql.execution
 import com.expediagroup.graphql.generator.annotations.GraphQLDirective
 import com.expediagroup.graphql.generator.directives.KotlinFieldDirectiveEnvironment
 import com.expediagroup.graphql.generator.directives.KotlinSchemaDirectiveWiring
-import com.trib3.graphql.resources.getInstance
+import com.expediagroup.graphql.generator.extensions.get
 import graphql.introspection.Introspection
 import graphql.schema.DataFetcher
 import graphql.schema.GraphQLFieldDefinition
@@ -52,7 +52,7 @@ class GraphQLAuthDirectiveWiring(private val authorizer: Authorizer<Principal>?)
         val originalDataFetcher = environment.getDataFetcher()
 
         val authFetcher = DataFetcher { dfe ->
-            val principal = dfe.graphQlContext.getInstance<Principal>()
+            val principal = dfe.graphQlContext.get<Principal>()
             if (principal == null || missingAllowedRole(principal, roles)) {
                 val status = if (principal == null) {
                     Response.Status.UNAUTHORIZED

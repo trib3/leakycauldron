@@ -64,6 +64,14 @@
             <artifactId>graphql-kotlin-schema-generator</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.expediagroup</groupId>
+            <artifactId>graphql-kotlin-dataloader</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.expediagroup</groupId>
+            <artifactId>graphql-kotlin-server</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
         </dependency>
@@ -101,12 +109,6 @@
             <artifactId>kotlinx-coroutines-test-jvm</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java-tools</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
