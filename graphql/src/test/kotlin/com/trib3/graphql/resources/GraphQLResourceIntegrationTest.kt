@@ -1,14 +1,18 @@
 package com.trib3.graphql.resources
 
 import assertk.assertThat
+import assertk.assertions.endsWith
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.messageContains
-import com.coxautodev.graphql.tools.GraphQLQueryResolver
+import assertk.assertions.startsWith
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
+import com.expediagroup.graphql.generator.extensions.get
 import com.expediagroup.graphql.generator.toSchema
+import com.expediagroup.graphql.server.operations.Query
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
@@ -38,6 +42,7 @@ import java.util.concurrent.locks.ReentrantLock
 import javax.ws.rs.client.Entity
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.NewCookie
+import javax.ws.rs.core.Response.ResponseBuilder
 import kotlin.concurrent.withLock
 
 data class User(val name: String)
@@ -48,14 +53,20 @@ data class UserPrincipal(val user: User) : Principal {
     }
 }
 
-class AuthTestQuery : GraphQLQueryResolver {
+class AuthTestQuery : Query {
     fun context(dfe: DataFetchingEnvironment): User? {
-        return if (dfe.graphQlContext.getInstance<Principal>() == null) {
-            dfe.graphQlContext.setInstance(NewCookie("testCookie", "testValue"))
+        return if (dfe.graphQlContext.get<Principal>() == null) {
+            dfe.graphQlContext.get<ResponseBuilder>()?.cookie(NewCookie("testCookie", "testValue"))
             null
         } else {
-            (dfe.graphQlContext.getInstance<Principal>() as UserPrincipal).user
+            (dfe.graphQlContext.get<Principal>() as UserPrincipal).user
         }
+    }
+
+    fun requestContext(dfe: DataFetchingEnvironment): String? {
+        val requestUri = dfe.graphQlContext.get<ContainerRequestContext>()?.uriInfo?.requestUri
+        val headerValue = dfe.graphQlContext.get<ContainerRequestContext>()?.getHeaderString("other-header")
+        return "$headerValue -- $requestUri"
     }
 }
 
@@ -231,5 +242,15 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
         assertThat(result.cookies["testCookie"]?.value).isEqualTo("testValue")
         val data = result.readEntity(Map::class.java)["data"] as Map<*, *>
         assertThat(data["context"]).isNull()
+    }
+
+    @Test
+    fun testRequestContextUri() {
+        val result = resource.target("/graphql").request().header("other-header", "other-value")
+            .post(Entity.json("""{"query":"query {requestContext}"}"""))
+        assertThat(result.status).isEqualTo(HttpStatus.OK_200)
+        val data = result.readEntity(Map::class.java)["data"] as Map<*, *>
+        assertThat(data["requestContext"]?.toString()).isNotNull().endsWith("/graphql")
+        assertThat(data["requestContext"]?.toString()).isNotNull().startsWith("other-value --")
     }
 }

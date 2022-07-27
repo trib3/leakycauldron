@@ -1,8 +1,9 @@
 package com.trib3.graphql.modules
 
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
 import com.expediagroup.graphql.generator.directives.KotlinSchemaDirectiveWiring
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.google.inject.name.Names
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.TribeApplicationModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMapBinder
@@ -10,20 +11,19 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.Instrumentation
-import org.dataloader.DataLoaderRegistry
 import java.security.Principal
 import javax.ws.rs.container.ContainerRequestContext
 
 /**
- * Function that takes a [GraphQLRequest] and an optional contextMap
- * and returns a [DataLoaderRegistry] with registered [org.dataloader.DataLoader]s
+ * Function that takes a [GraphQLRequest] and a contextMap and returns a [KotlinDataLoaderRegistryFactory]
+ * with registered [org.dataloader.DataLoader]s for use in resolvers
  *
  * Invoked per GraphQL request to allow for batching of data fetchers
  */
-typealias DataLoaderRegistryFactory = Function2<
+typealias KotlinDataLoaderRegistryFactoryProvider = Function2<
     @JvmSuppressWildcards GraphQLRequest,
-    @JvmSuppressWildcards Map<*, Any>?,
-    @JvmSuppressWildcards DataLoaderRegistry
+    @JvmSuppressWildcards Map<*, Any>,
+    @JvmSuppressWildcards KotlinDataLoaderRegistryFactory
     >
 
 /**
@@ -104,7 +104,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     /**
      * Optional binder for the dataLoaderRegistryFactory
      */
-    fun dataLoaderRegistryFactoryBinder(): KotlinOptionalBinder<DataLoaderRegistryFactory> {
+    fun dataLoaderRegistryFactoryProviderBinder(): KotlinOptionalBinder<KotlinDataLoaderRegistryFactoryProvider> {
         return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
     }
 

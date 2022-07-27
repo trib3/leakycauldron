@@ -5,8 +5,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.MessageGraphQLError
 import com.trib3.json.ObjectMapperProvider
 import graphql.ExecutionResult
@@ -65,7 +65,7 @@ class GraphQLWebSocketProtocolTest {
         val objectExample = mapOf(
             Nothing::class to null,
             String::class to "message",
-            GraphQLRequest::class to GraphQLRequest("query {q}", mapOf(), null),
+            GraphQLRequest::class to GraphQLRequest("query {q}"),
             Map::class to mapOf("a" to "b", "c" to "d"),
             List::class to listOf(
                 MessageGraphQLError("e").toSpecification(),

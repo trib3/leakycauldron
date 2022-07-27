@@ -4,9 +4,9 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isSuccess
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.testing.LeakyMock
@@ -71,7 +71,7 @@ class GraphQLSseResourceTest {
                 mockSink,
                 mockSse,
                 Optional.of(principal),
-                GraphQLRequest("query", mapOf(), null)
+                GraphQLRequest("query")
             )
         }.isSuccess()
         assertThat(eventCapture.values[0].name).isEqualTo("next")
@@ -100,7 +100,7 @@ class GraphQLSseResourceTest {
         RequestIdFilter.withRequestId("querytofail") {
             resource.queryOpenStream(
                 Optional.empty(),
-                GraphQLRequest("query", mapOf(), null),
+                GraphQLRequest("query"),
                 token,
                 null
             )
