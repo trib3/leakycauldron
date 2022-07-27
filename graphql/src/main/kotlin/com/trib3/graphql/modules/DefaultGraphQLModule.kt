@@ -4,11 +4,9 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.FlowSubscriptionExecutionStrategy
 import com.expediagroup.graphql.generator.toSchema
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.Provides
 import com.google.inject.multibindings.MapBinder
 import com.google.inject.name.Names
-import com.trib3.graphql.execution.ContextScopeKotlinDataFetcherFactoryProvider
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.JsonSafeExecutionResultMixin
 import com.trib3.graphql.execution.LeakyCauldronHooks
@@ -40,9 +38,9 @@ import kotlin.reflect.KClass
 class DefaultGraphQLModule : GraphQLApplicationModule() {
     override fun configureApplication() {
         bind<GraphQLContextWebSocketCreatorFactory>().to<GraphQLWebSocketCreatorFactory>()
-        // by default, null DataLoaderRegistryFactory is configured, applications can
+        // by default, null DataLoaderRegistryFactoryProvider is configured, applications can
         // override this by setting a binding
-        dataLoaderRegistryFactoryBinder()
+        dataLoaderRegistryFactoryProviderBinder()
             .setDefault().toProvider(Provider { null })
         // by default, any AuthFilter that is registered to guice will be used for
         // authenticating websocket connections during the websocket upgrade or
@@ -97,14 +95,12 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         @Named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
         subscriptions: Set<Any>,
         instrumentations: Set<Instrumentation>,
-        mapper: ObjectMapper,
         hooks: LeakyCauldronHooks = LeakyCauldronHooks(),
         exceptionHandler: DataFetcherExceptionHandler = CustomDataFetcherExceptionHandler()
     ): GraphQL {
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
-            hooks = hooks,
-            dataFetcherFactoryProvider = ContextScopeKotlinDataFetcherFactoryProvider(mapper)
+            hooks = hooks
         )
         return GraphQL.newGraphQL(
             toSchema(

@@ -1,15 +1,14 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
+import com.expediagroup.graphql.server.extensions.toExecutionInput
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.execution.GraphQLRequest
-import com.trib3.graphql.execution.toExecutionInput
-import com.trib3.graphql.modules.DataLoaderRegistryFactory
+import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
-import com.trib3.server.runIf
 import graphql.GraphQL
 import graphql.GraphQLContext
 import io.dropwizard.auth.Auth
@@ -39,28 +38,16 @@ import javax.ws.rs.QueryParam
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.NewCookie
 import javax.ws.rs.core.Response
+import kotlin.collections.set
 
 private val log = KotlinLogging.logger {}
 
 /**
- * Extension method to get [GraphQLContext] element as a singleton instance for a given [T] class.
- * Internally used for getting a GraphQL request's [Principal] and [CoroutineScope], and any
- * GraphQL executor set [NewCookie].
+ * Helper method for null-safe context map construction
  */
-inline fun <reified T> GraphQLContext.getInstance(): T? {
-    return this.get<Any?>(T::class) as? T
-}
-
-/**
- * Extension method to set [obj] as a singleton instance of its [T] class.  A GraphQL executor
- * setting a [NewCookie] on the [GraphQLContext] during a GraphQL operation's execution will
- * result in that cookie being sent to the client (note this only works via a POST request,
- * not via an operation being executed over a websocket).
- */
-inline fun <reified T> GraphQLContext.setInstance(obj: T) {
-    this.put(T::class, obj)
+inline fun <reified T> contextMap(value: T?): Map<*, Any> {
+    return value?.let { mapOf(T::class to value) }.orEmpty()
 }
 
 /**
@@ -70,11 +57,7 @@ fun getGraphQLContextMap(
     scope: CoroutineScope,
     principal: Principal? = null
 ): Map<*, Any> {
-    return mapOf(CoroutineScope::class to scope) + if (principal != null) {
-        mapOf(Principal::class to principal)
-    } else {
-        mapOf()
-    }
+    return contextMap(scope) + contextMap(principal)
 }
 
 /**
@@ -97,7 +80,7 @@ open class GraphQLResource
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
     private val creatorFactory: GraphQLContextWebSocketCreatorFactory,
-    @Nullable val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null,
+    @Nullable val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
     appConfig: TribeApplicationConfig
 ) {
     // Using the CrossOriginFilter directly is tricky because it avoids setting
@@ -133,16 +116,24 @@ open class GraphQLResource
     @Timed
     @AsyncDispatcher("IO")
     open suspend fun graphQL(
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
-        query: GraphQLRequest
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
+        query: GraphQLRequest,
+        @Context requestContext: ContainerRequestContext? = null
     ): Response = supervisorScope {
-        val contextMap = getGraphQLContextMap(this, principal.orElse(null))
+        val responseBuilder = Response.ok()
+        val contextMap =
+            getGraphQLContextMap(this, principal.orElse(null)) +
+                contextMap(responseBuilder) +
+                contextMap(requestContext)
+
         val requestId = RequestIdFilter.getRequestId()
         if (requestId != null) {
             runningFutures[requestId] = this
         }
         try {
-            val input = query.toExecutionInput(contextMap, dataLoaderRegistryFactory)
+            val factory = dataLoaderRegistryFactoryProvider?.invoke(query, contextMap)
+            val input = query.toExecutionInput(factory?.generate(), graphQLContextMap = contextMap)
             val futureResult = graphQL.executeAsync(input).whenComplete { result, throwable ->
                 log.debug("$requestId finished with $result, $throwable")
             }
@@ -150,11 +141,7 @@ open class GraphQLResource
             if (result.getData<Any?>() == null && result.errors.all { it.message == "HTTP 401 Unauthorized" }) {
                 unauthorizedResponse()
             } else {
-                Response.ok(result)
-                    // Communicate any set cookie back to the client
-                    .runIf(input.graphQLContext.getInstance<NewCookie>() != null) {
-                        cookie(input.graphQLContext.getInstance<NewCookie>())
-                    }.build()
+                responseBuilder.entity(result).build()
             }
         } finally {
             if (requestId != null) {

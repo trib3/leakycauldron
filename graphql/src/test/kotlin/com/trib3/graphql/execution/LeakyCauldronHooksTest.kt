@@ -7,9 +7,7 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isSuccess
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
-import com.expediagroup.graphql.generator.execution.SimpleKotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.generator.toSchema
-import com.trib3.json.ObjectMapperProvider
 import graphql.ErrorType
 import graphql.ExecutionInput
 import graphql.GraphQL
@@ -72,10 +70,7 @@ class LeakyCauldronHooksTest {
     val config =
         SchemaGeneratorConfig(
             listOf(this::class.java.packageName),
-            hooks = hooks,
-            dataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(
-                ObjectMapperProvider().get()
-            )
+            hooks = hooks
         )
     val graphQL =
         GraphQL.newGraphQL(
@@ -231,9 +226,9 @@ class LeakyCauldronHooksTest {
 
     @Test
     fun testOffsetDateTime() {
-        val result = graphQL.execute("""query {offsetDateTime(o:"2019-10-30T00:01-07:00")}""")
+        val result = graphQL.execute("""query {offsetDateTime(o:"2019-10-30T03:01-08:00")}""")
             .getData<Map<String, String>>()
-        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01:00.000Z")
+        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T03:01:00.000-08:00")
         assertValidationErrors("""query {offsetDateTime(o:123)}""", """query {offsetDateTime(o:"123")}""")
     }
 
@@ -244,7 +239,7 @@ class LeakyCauldronHooksTest {
                 .query("""query(${'$'}input: DateTime!) {offsetDateTime(o:${'$'}input)}""")
                 .variables(mapOf("input" to "2019-10-30T00:01-07:00")).build()
         ).getData<Map<String, String>>()
-        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T07:01:00.000Z")
+        assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T00:01:00.000-07:00")
     }
 
     @Test

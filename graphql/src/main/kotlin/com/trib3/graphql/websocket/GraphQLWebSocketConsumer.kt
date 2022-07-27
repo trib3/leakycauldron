@@ -1,13 +1,14 @@
 package com.trib3.graphql.websocket
 
+import com.expediagroup.graphql.server.extensions.toExecutionInput
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.MessageGraphQLError
-import com.trib3.graphql.execution.toExecutionInput
-import com.trib3.graphql.modules.DataLoaderRegistryFactory
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
+import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import com.trib3.graphql.resources.getGraphQLContextMap
 import com.trib3.server.filters.RequestIdFilter
+import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
 import kotlinx.coroutines.CancellationException
@@ -89,14 +90,10 @@ class KeepAliveCoroutine(
 @OptIn(ExperimentalCoroutinesApi::class)
 class QueryCoroutine(
     private val graphQL: GraphQL,
-    context: Map<*, Any>,
     channel: Channel<OperationMessage<*>>,
     private val messageId: String,
-    payload: GraphQLRequest,
-    dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
+    private val executionQuery: ExecutionInput
 ) : GraphQLCoroutine(channel) {
-    private val executionQuery = payload.toExecutionInput(context, dataLoaderRegistryFactory)
-
     override suspend fun run() {
         try {
             val result = graphQL.execute(executionQuery)
@@ -172,7 +169,7 @@ class GraphQLWebSocketConsumer(
     val channel: Channel<OperationMessage<*>>,
     val adapter: GraphQLWebSocketAdapter,
     val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default, // default to default for the KA interval
-    private val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null,
+    private val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
     private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null
 ) {
     private var keepAliveStarted = false // only allow one keepalive coroutine to launch
@@ -229,6 +226,7 @@ class GraphQLWebSocketConsumer(
                             message.payload as Map<*, *>
                         )
                     )
+
                     OperationType.GQL_PONG -> {
                         // do nothing
                     }
@@ -364,13 +362,13 @@ class GraphQLWebSocketConsumer(
         } else if (socketPrincipal == null && graphQLConfig.checkAuthorization) {
             adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
         } else {
+            val context = getGraphQLContextMap(adapter, socketPrincipal)
+            val dataLoaderRegistry = dataLoaderRegistryFactoryProvider?.invoke(message.payload, context)?.generate()
             val queryCoroutine = QueryCoroutine(
                 graphQL,
-                getGraphQLContextMap(adapter, socketPrincipal),
                 channel,
                 message.id,
-                message.payload,
-                dataLoaderRegistryFactory
+                message.payload.toExecutionInput(dataLoaderRegistry, graphQLContextMap = context)
             )
 
             val job = scope.launch(MDCContext()) {

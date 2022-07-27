@@ -72,23 +72,24 @@ class ExampleApplicationModule : GraphQLApplicationModule() {
 #### Auth Context
 
 If Dropwizard Authentication is setup and an `AuthFilter<*, *>` binding is provided per
-the [server README](https://github.com/trib3/leakycauldron/blob/HEAD/server/README.md#auth), GraphQL resolver methods
-can receive the principal inside the GraphQL context map received from the `DataFetchingEnvironment` using the
-provided `getInstance` extension method. Resolver methods can write to the `cookie` field of the context map using
-the `setInstance` extension method in order to set cookies on the client (useful when, for example, using
-a `CookieTokenAuthFilter` for auth).
+the [server README](https://github.com/trib3/leakycauldron/blob/HEAD/server/README.md#auth), GraphQL resolver
+methods can receive the `Principal` inside the GraphQL context map received from the `DataFetchingEnvironment`
+using graphql-kotlin's `get` extension method. When executing over the standard HTTP transport, resolver
+methods can also access a jax-rs `ResponseBuilder` object in order to affect the HTTP response
+(useful when, for example, using a `CookieTokenAuthFilter` for auth), and a `ContainerRequestContext`
+object for reading information about the request itself.
 
 ```kotlin
-class ExampleLoginMutations : GraphQLQueryResolver {
+class ExampleLoginMutations : Mutation {
     fun login(dfe: DataFetchingEnvironment, email: String, pass: String): Boolean {
-        if (dfe.graphQlContext.getInstance<Principal> == null) {
+        if (dfe.graphQlContext.get<Principal> == null) {
             // log in!
             val userSession = authenticate(email, pass)
             if (userSession == null) {
                 return false
             }
             // cookie will be set in response
-            dfe.graphQlContext.setInstance(NewCookie("example-app-session-id", userSession.id))
+            dfe.graphQlContext.get<ResponseBuilder>?.cookie(NewCookie("example-app-session-id", userSession.id))
         } else {
             // already logged in
         }
@@ -96,9 +97,11 @@ class ExampleLoginMutations : GraphQLQueryResolver {
     }
 
     fun logout(dfe: DataFetchingEnvironment): Boolean {
-        if (dfe.graphQlContext.getInstance<Principal> != null) {
-            deleteSession(dfe.graphQlContext.getInstance<Principal>)
-            dfe.graphQlContext.setInstance(
+        if (dfe.graphQlContext.get<Principal> != null) {
+            // if sessionId not available in the Principal object, can grab from eg. HTTP header directly:
+            val sessionId = dfe.graphQlContext.get<ContainerRequestContext>()?.getHeaderString("session-header")
+            deleteSession(sessionId)
+            dfe.graphQlContext.get<ResponseBuilder>?.cookie(
                 NewCookie(
                     Cookie("example-app-session-id", ""),
                     null,
@@ -133,7 +136,7 @@ Note that any field annotated with `@GraphQLAuth` will return null if auth fails
 auth will also result in Unauthorized/Forbidden errors in the GraphQL result.
 
 ```kotlin
-class ExampleAuthedQuery : GraphQLQueryResolver {
+class ExampleAuthedQuery : Query {
     fun openField(): String {
         return "anyone can access this"
     }
@@ -152,12 +155,12 @@ class ExampleAuthedQuery : GraphQLQueryResolver {
 
 ### GraphQLContext CoroutineScope
 
-The GraphQLContext map also contains a `CoroutineScope`. GraphQL resolver methods implemented as `suspend` functions
+The `GraphQLContext` map also contains a `CoroutineScope`. GraphQL resolver methods implemented as `suspend` functions
 will be run in this scope. A `DELETE` call to
 `/app/graphql?id=${requestId}` will cancel the scope of a running query.
 
 ```kotlin
-class ExampleSuspendQuery : GraphQLQueryResolver {
+class ExampleSuspendQuery : Query {
     suspend fun coroutineMethod(): String {
         return coroutineScope {
             // new scope whose parent scope is the in GraphQLContext map
@@ -171,6 +174,78 @@ class ExampleSuspendQuery : GraphQLQueryResolver {
             }
             "${job1.await()}:${job2.await()}"
         }
+    }
+}
+```
+
+### DataLoaders
+
+Providing a binding for
+[`KotlinDataLoaderRegistryFactoryProvider`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/modules/GraphQLApplicationModule.kt)
+(using `GraphQLApplicationModule.dataLoaderRegistryFactoryProviderBinder()`) allows for providing `DataLoader`s
+that can be used by resolvers.
+
+For implementing loaders,
+[`CoroutineBatchLoader` and `CoroutineMappedBatchLoader`](https://github.com/trib3/leakycauldron/blob/HEAD/graphql/src/main/kotlin/com/trib3/graphql/execution/CoroutineBatchLoaders.kt)
+allow for writing loader functions as suspend functions/coroutines. When subclassing these loader implementations,
+the `CoroutineScope` will use the same scope as in the `GraphQLContext` map (see above section), and the
+`GraphQLContext` will be made available as the `BatchLoaderEnvironment.context`. If using graphql-kotlin's
+[`DataFetchingEnvironment.getValueFromDataLoader()`](https://opensource.expediagroup.com/graphql-kotlin/docs/server/data-loader/#getvaluefromdataloader)
+to load values in resolvers, the `GraphQLContext` is also available through
+[`BatchLoaderEnvironment.getGraphQLContext()`](https://github.com/ExpediaGroup/graphql-kotlin/blob/master/executions/graphql-kotlin-dataloader-instrumentation/src/main/kotlin/com/expediagroup/graphql/dataloader/instrumentation/extensions/BatchLoaderEnvironmentExtensions.kt)
+
+Note that resolver methods that call `DataLoader`s CANNOT be suspend functions, but must be non-suspend
+functions that return a `CompletableFuture` (see upstream
+[graphql-java](https://github.com/graphql-java/java-dataloader/issues/54) /
+[graphql-kotlin](https://github.com/ExpediaGroup/graphql-kotlin/issues/986) issues)
+
+```kotlin
+class ExampleListLoader<String, String>(contextMap: Map<*, Any>) : CoroutineBatchLoader(contextMap) {
+    override val dataLoaderName = "listLoader"
+    override suspend fun loadSuspend(
+        keys: List<String>,
+        environment: BatchLoaderEnvironment
+    ): List<String> {
+        val context = environment.getContext<GraphQLContext>()
+        // ... can look at context objects like context.get<Principal> etc...
+        // ... can call suspend functions etc...
+        return keys.map { it.lowercase() }
+    }
+}
+
+class ExampleMapLoader<String, String>(contextMap: Map<*, Any>) : CoroutineBatchLoader(contextMap) {
+    override val dataLoaderName = "listLoader"
+    override suspend fun loadSuspend(
+        keys: Set<String>,
+        environment: BatchLoaderEnvironment
+    ): Map<String, String> {
+        val context = environment.getContext<GraphQLContext>()
+        // ... can look at context objects like context.get<Principal> etc...
+        // ... can call suspend functions etc...
+        return keys.associateWith { it.lowercase() }
+    }
+}
+
+class ExampleDataLoaderRegistryFactoryProvider : KotlinDataLoaderRegistryFactoryProvider {
+    override fun invoke(request: GraphQLRequest, contextMap: Map<*, Any>): KotlinDataLoaderRegistryFactory {
+        return KotlinDataLoaderRegistryFactory(
+            ExampleListLoader(contextMap),
+            ExampleMapLoader(contextMap)
+        )
+    }
+}
+
+class ExampleBatchLoaderModule : GraphQLApplicationModule() {
+    override fun configureApplication() {
+        dataLoaderRegistryFactoryProviderBinder().setBinding()
+            .to<ExampleDataLoaderRegistryFactoryProvider>()
+    }
+}
+
+class ExampleDataLoaderQuery : Query {
+    // must be a non-suspend method that returns a CompleteableFuture!!!
+    fun notCoroutineMethod(dfe: DataFetchingEnvironment): CompletableFuture<String?> {
+        return dfe.getValueFromDataLoader("listLoader", "123")
     }
 }
 ```

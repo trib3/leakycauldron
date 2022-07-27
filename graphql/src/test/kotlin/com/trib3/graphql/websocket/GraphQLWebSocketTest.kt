@@ -10,14 +10,14 @@ import assertk.assertions.isTrue
 import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.FlowSubscriptionExecutionStrategy
+import com.expediagroup.graphql.generator.extensions.get
 import com.expediagroup.graphql.generator.hooks.FlowSubscriptionSchemaGeneratorHooks
 import com.expediagroup.graphql.generator.toSchema
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
-import com.trib3.graphql.resources.getInstance
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.LeakyMock
 import graphql.ExecutionInput
@@ -60,7 +60,7 @@ class SocketQuery {
     }
 
     fun u(dfe: DataFetchingEnvironment): String? {
-        return dfe.graphQlContext.getInstance<Principal>()?.name
+        return dfe.graphQlContext.get<Principal>()?.name
     }
 }
 
@@ -896,7 +896,7 @@ class GraphQLWebSocketTest {
                 OperationMessage(
                     OperationType.GQL_START,
                     "queryerror2",
-                    GraphQLRequest("query {u}", emptyMap(), null)
+                    GraphQLRequest("query {u}")
                 ),
                 socket.adapter
             )

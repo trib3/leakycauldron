@@ -1,11 +1,11 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
+import com.expediagroup.graphql.server.extensions.toExecutionInput
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.execution.GraphQLRequest
-import com.trib3.graphql.execution.toExecutionInput
-import com.trib3.graphql.modules.DataLoaderRegistryFactory
+import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionInput
@@ -45,6 +45,7 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.WebApplicationException
+import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
@@ -71,6 +72,8 @@ internal data class StreamInfo(
 /**
  * Implements the graphql-sse protocol from https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md
  * Both "Single connection mode" and "Distinct connections mode" are supported at the /app/graphql/stream endpoint.
+ * "Distinct connections mode" will set a [ContainerRequestContext] on the GraphQLContext, however
+ * "Single connection mode" will not, as there are multiple requests involved in the execution of a query.
  *
  * Single connection mode client request flow:
  * PUT -> x-graphql-event-stream-token 201 response
@@ -83,7 +86,7 @@ open class GraphQLSseResource @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
     private val objectMapper: ObjectMapper,
-    @Nullable val dataLoaderRegistryFactory: DataLoaderRegistryFactory? = null
+    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null
 ) {
     private val reservedStreams = ConcurrentHashMap<UUID, Optional<Principal>>()
     internal val activeStreams = ConcurrentHashMap<UUID, StreamInfo>()
@@ -240,7 +243,7 @@ open class GraphQLSseResource @Inject constructor(
         if (streamInfo == null || (contextPrincipal == null && graphQLConfig.checkAuthorization)) {
             return unauthorizedResponse()
         }
-        val operationId = query.extensions["operationId"] ?: RequestIdFilter.getRequestId().toString()
+        val operationId = query.extensions?.get("operationId")?.toString() ?: RequestIdFilter.getRequestId().toString()
         val newQueryMap = ConcurrentHashMap<String, CoroutineScope>()
         val queryMap = runningOperations.putIfAbsent(streamToken, newQueryMap) ?: newQueryMap
         // launch in the connection's scope so this POST can return immediately with 202
@@ -248,7 +251,8 @@ open class GraphQLSseResource @Inject constructor(
             try {
                 queryMap[operationId] = this
                 val contextMap = getGraphQLContextMap(this, contextPrincipal)
-                val input = query.toExecutionInput(contextMap, dataLoaderRegistryFactory)
+                val dataLoaderRegistryFactory = dataLoaderRegistryFactory?.invoke(query, contextMap)?.generate()
+                val input = query.toExecutionInput(dataLoaderRegistryFactory, graphQLContextMap = contextMap)
                 runQuery(input, streamInfo.eventSink, streamInfo.sse, operationId)
             } finally {
                 queryMap.remove(operationId)
@@ -281,13 +285,16 @@ open class GraphQLSseResource @Inject constructor(
     open suspend fun querySse(
         @Context eventSink: SseEventSink,
         @Context sse: Sse,
-        @Parameter(hidden = true) @Auth principal: Optional<Principal>,
-        query: GraphQLRequest
+        @Parameter(hidden = true) @Auth
+        principal: Optional<Principal>,
+        query: GraphQLRequest,
+        @Context containerRequestContext: ContainerRequestContext? = null
     ) = coroutineScope {
-        val contextMap = getGraphQLContextMap(this, principal.orElse(null))
+        val contextMap = getGraphQLContextMap(this, principal.orElse(null)) + contextMap(containerRequestContext)
         val ka = launchKeepAlive(eventSink, sse)
         try {
-            val input = query.toExecutionInput(contextMap, dataLoaderRegistryFactory)
+            val dataLoaderRegistryFactory = dataLoaderRegistryFactory?.invoke(query, contextMap)?.generate()
+            val input = query.toExecutionInput(dataLoaderRegistryFactory, graphQLContextMap = contextMap)
             runQuery(input, eventSink, sse, null)
         } finally {
             ka.cancel()

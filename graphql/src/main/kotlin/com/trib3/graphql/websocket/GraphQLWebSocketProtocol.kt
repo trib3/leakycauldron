@@ -1,5 +1,6 @@
 package com.trib3.graphql.websocket
 
+import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -7,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonValue
-import com.trib3.graphql.execution.GraphQLRequest
 import com.trib3.graphql.execution.MessageGraphQLError
 import graphql.ExecutionResult
 import org.eclipse.jetty.websocket.api.Session
