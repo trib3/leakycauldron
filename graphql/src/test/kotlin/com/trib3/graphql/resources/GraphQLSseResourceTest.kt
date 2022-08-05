@@ -25,6 +25,7 @@ import org.glassfish.jersey.media.sse.OutboundEvent
 import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import javax.ws.rs.sse.OutboundSseEvent
 import javax.ws.rs.sse.Sse
 import javax.ws.rs.sse.SseEventSink
@@ -45,8 +46,8 @@ class GraphQLSseResourceTest {
         val graphQL = LeakyMock.mock<GraphQL>()
         val executionResult = ExecutionResultImpl.newExecutionResult().data(mockFlow).build()
 
-        EasyMock.expect(graphQL.execute(EasyMock.anyObject<ExecutionInput>()))
-            .andReturn(executionResult).anyTimes()
+        EasyMock.expect(graphQL.executeAsync(EasyMock.anyObject<ExecutionInput>()))
+            .andReturn(CompletableFuture.completedFuture(executionResult)).anyTimes()
 
         EasyMock.replay(graphQL)
 

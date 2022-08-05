@@ -2,6 +2,7 @@ package com.trib3.graphql.resources
 
 import assertk.assertThat
 import assertk.assertions.contains
+import assertk.assertions.doesNotContain
 import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
@@ -148,7 +149,7 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
         val events = readEventInput(result, "")
         assertThat(events).hasSize(1)
         assertThat(events[0]).contains(""""message":"Forced Error"""")
-        assertThat(events[0]).contains(""""data":null""")
+        assertThat(events[0]).doesNotContain(""""data":""")
     }
 
     @Test
@@ -158,7 +159,7 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
         val events = readEventInput(result, "")
         assertThat(events).hasSize(1)
         assertThat(events[0]).contains(""""message":"Forced Error"""")
-        assertThat(events[0]).contains(""""data":null""")
+        assertThat(events[0]).doesNotContain(""""data":""")
     }
 
     @Test

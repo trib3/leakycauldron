@@ -1,6 +1,7 @@
 package com.trib3.graphql.websocket
 
 import com.expediagroup.graphql.server.types.GraphQLRequest
+import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -9,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonValue
 import com.trib3.graphql.execution.MessageGraphQLError
-import graphql.ExecutionResult
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
 import kotlin.reflect.KClass
@@ -189,8 +189,8 @@ data class OperationMessage<T : Any>(
     @JsonSubTypes(
         Type(name = "start", value = GraphQLRequest::class),
         Type(name = "subscribe", value = GraphQLRequest::class),
-        Type(name = "data", value = ExecutionResult::class),
-        Type(name = "next", value = ExecutionResult::class),
+        Type(name = "data", value = GraphQLResponse::class),
+        Type(name = "next", value = GraphQLResponse::class),
         Type(name = "error", value = List::class),
         Type(name = "connection_init", value = Map::class),
         Type(name = "connection_terminate", value = Nothing::class),
@@ -225,8 +225,8 @@ data class OperationType<T : Any>(
         // server -> client
         val GQL_CONNECTION_ERROR = OperationType("connection_error", String::class) // apollo-only
         val GQL_CONNECTION_ACK = OperationType("connection_ack", Map::class) // shared
-        val GQL_DATA = OperationType("data", ExecutionResult::class) // apollo
-        val GQL_NEXT = OperationType("next", ExecutionResult::class) // graphql-ws
+        val GQL_DATA = OperationType("data", GraphQLResponse::class) // apollo
+        val GQL_NEXT = OperationType("next", GraphQLResponse::class) // graphql-ws
         val GQL_ERROR = OperationType("error", List::class) // shared
         val GQL_CONNECTION_KEEP_ALIVE = OperationType("ka", Nothing::class) // apollo-only, graphql-ws uses PING/PONG
 
