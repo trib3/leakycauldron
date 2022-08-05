@@ -1,8 +1,11 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
-import com.expediagroup.graphql.server.extensions.toExecutionInput
+import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
+import com.expediagroup.graphql.server.types.GraphQLBatchResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
+import com.expediagroup.graphql.server.types.GraphQLResponse
+import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
@@ -17,7 +20,6 @@ import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.future.await
 import kotlinx.coroutines.supervisorScope
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
@@ -119,7 +121,7 @@ open class GraphQLResource
     open suspend fun graphQL(
         @Parameter(hidden = true) @Auth
         principal: Optional<Principal>,
-        query: GraphQLRequest,
+        query: GraphQLServerRequest,
         @Context requestContext: ContainerRequestContext? = null
     ): Response = supervisorScope {
         val responseBuilder = Response.ok()
@@ -134,15 +136,22 @@ open class GraphQLResource
         }
         try {
             val factory = dataLoaderRegistryFactoryProvider?.invoke(query, contextMap)
-            val input = query.toExecutionInput(factory?.generate(), graphQLContextMap = contextMap)
-            val futureResult = graphQL.executeAsync(input).whenComplete { result, throwable ->
-                log.debug("$requestId finished with $result, $throwable")
+            val response = GraphQLRequestHandler(graphQL, factory).executeRequest(query, graphQLContext = contextMap)
+            log.debug("$requestId finished with $response")
+            val responses = when (response) {
+                is GraphQLResponse<*> -> listOf(response)
+                is GraphQLBatchResponse -> response.responses
             }
-            val result = futureResult.await()
-            if (result.getData<Any?>() == null && result.errors.all { it.message == "HTTP 401 Unauthorized" }) {
+            if (
+                responses.all { r -> r.data == null } &&
+                responses.all { r ->
+                    val errors = r.errors
+                    errors != null && errors.all { it.message == "HTTP 401 Unauthorized" }
+                }
+            ) {
                 unauthorizedResponse()
             } else {
-                responseBuilder.entity(result).build()
+                responseBuilder.entity(response).build()
             }
         } finally {
             if (requestId != null) {

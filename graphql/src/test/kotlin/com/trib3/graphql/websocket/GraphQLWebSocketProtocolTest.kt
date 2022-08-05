@@ -6,10 +6,10 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import com.expediagroup.graphql.server.types.GraphQLRequest
+import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.graphql.execution.MessageGraphQLError
 import com.trib3.json.ObjectMapperProvider
-import graphql.ExecutionResult
 import org.testng.annotations.Test
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -71,7 +71,7 @@ class GraphQLWebSocketProtocolTest {
                 MessageGraphQLError("e").toSpecification(),
                 MessageGraphQLError("f").toSpecification()
             ),
-            ExecutionResult::class to null // only need to support serialization right now, not round trip
+            GraphQLResponse::class to null // only need to support serialization right now, not round trip
         )
         for (
         t in OperationType.Companion::class.memberProperties

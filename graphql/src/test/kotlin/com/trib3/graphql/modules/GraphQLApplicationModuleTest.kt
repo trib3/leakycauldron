@@ -1,13 +1,16 @@
 package com.trib3.graphql.modules
 
 import assertk.assertThat
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.size
 import com.expediagroup.graphql.dataloader.KotlinDataLoader
 import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
+import com.expediagroup.graphql.generator.extensions.get
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.config.modules.KMSModule
 import com.trib3.graphql.resources.GraphQLResource
@@ -124,5 +127,27 @@ class GraphQLApplicationModuleDataLoaderOverrideTest
         // dispatch and await the future explicitly to assert on its returned value
         loader.dispatch()
         assertThat(future.get()).isEqualTo(listOf("1", "2"))
+    }
+
+    @Test
+    fun testRequestToExecutionInputExtensionWithFactory() {
+        val graphQLResources = resources.filterIsInstance<GraphQLResource>()
+        val factory = graphQLResources.first().dataLoaderRegistryFactoryProvider
+        val exampleQuery = GraphQLRequest("query {query}")
+        val exampleContext = mapOf(String::class to "abc")
+        val executionInput = exampleQuery.toExecutionInput(factory, exampleContext)
+        assertThat(executionInput.dataLoaderRegistry.dataLoaders).isNotEmpty()
+        assertThat(executionInput.query).isEqualTo(exampleQuery.query)
+        assertThat(executionInput.graphQLContext.get<String>()).isEqualTo("abc")
+    }
+
+    @Test
+    fun testRequestToExecutionInputExtensionWithoutFactory() {
+        val exampleQuery = GraphQLRequest("query {query}")
+        val exampleContext = mapOf(String::class to "abc")
+        val executionInput = exampleQuery.toExecutionInput(null, exampleContext)
+        assertThat(executionInput.dataLoaderRegistry.dataLoaders).isEmpty()
+        assertThat(executionInput.query).isEqualTo(exampleQuery.query)
+        assertThat(executionInput.graphQLContext.get<String>()).isEqualTo("abc")
     }
 }
