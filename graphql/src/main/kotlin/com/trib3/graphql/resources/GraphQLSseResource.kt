@@ -1,18 +1,18 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
-import com.expediagroup.graphql.server.extensions.toExecutionInput
+import com.expediagroup.graphql.server.extensions.toGraphQLError
+import com.expediagroup.graphql.server.extensions.toGraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
+import com.trib3.graphql.modules.toExecutionInput
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
-import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.ExecutionResultImpl
 import graphql.GraphQL
-import graphql.GraphqlErrorBuilder
 import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
@@ -110,9 +111,16 @@ open class GraphQLSseResource @Inject constructor(
     /**
      * Execute a graphql query and send results to the [eventSink]
      */
-    private suspend fun runQuery(input: ExecutionInput, eventSink: SseEventSink, sse: Sse, operationId: String?) {
+    private suspend fun runQuery(
+        query: GraphQLRequest,
+        contextMap: Map<*, Any>,
+        eventSink: SseEventSink,
+        sse: Sse,
+        operationId: String?
+    ) {
         try {
-            val result = graphQL.execute(input)
+            val input = query.toExecutionInput(dataLoaderRegistryFactory, contextMap)
+            val result = graphQL.executeAsync(input).await()
             // if result data is a Flow, collect it as a flow
             // if it's not, just collect the result itself
             val flow = try {
@@ -123,26 +131,22 @@ open class GraphQLSseResource @Inject constructor(
             }
             flow.onEach {
                 yield()
+                val response = it.toGraphQLResponse()
                 val nextMessage: Any = if (operationId != null) {
-                    mapOf(
-                        "id" to operationId,
-                        "payload" to it
-                    )
+                    mapOf("id" to operationId, "payload" to response)
                 } else {
-                    it
+                    response
                 }
                 eventSink.send(
                     sse.newEventBuilder().name("next").data(
-                        objectMapper.writeValueAsString(
-                            nextMessage
-                        )
+                        objectMapper.writeValueAsString(nextMessage)
                     ).build()
                 )
             }.collect()
         } catch (e: Exception) {
             log.warn("Error running sse query: ${e.message}", e)
             val gqlError = ExecutionResultImpl.newExecutionResult()
-                .addError(GraphqlErrorBuilder.newError().message(e.message).build()).build()
+                .addError(e.toGraphQLError()).build().toGraphQLResponse()
             val nextMessage: Any = if (operationId != null) {
                 mapOf(
                     "id" to operationId,
@@ -153,17 +157,13 @@ open class GraphQLSseResource @Inject constructor(
             }
             eventSink.send(
                 sse.newEventBuilder().name("next").data(
-                    objectMapper.writeValueAsString(
-                        nextMessage
-                    )
+                    objectMapper.writeValueAsString(nextMessage)
                 ).build()
             )
         } finally {
             log.info("Query ${operationId ?: RequestIdFilter.getRequestId()} completed.")
             val completeMessage = if (operationId != null) {
-                objectMapper.writeValueAsString(
-                    mapOf("id" to operationId)
-                )
+                objectMapper.writeValueAsString(mapOf("id" to operationId))
             } else {
                 ""
             }
@@ -253,9 +253,7 @@ open class GraphQLSseResource @Inject constructor(
             try {
                 queryMap[operationId] = this
                 val contextMap = getGraphQLContextMap(this, contextPrincipal)
-                val dataLoaderRegistryFactory = dataLoaderRegistryFactory?.invoke(query, contextMap)?.generate()
-                val input = query.toExecutionInput(dataLoaderRegistryFactory, graphQLContextMap = contextMap)
-                runQuery(input, streamInfo.eventSink, streamInfo.sse, operationId)
+                runQuery(query, contextMap, streamInfo.eventSink, streamInfo.sse, operationId)
             } finally {
                 queryMap.remove(operationId)
             }
@@ -295,9 +293,7 @@ open class GraphQLSseResource @Inject constructor(
         val contextMap = getGraphQLContextMap(this, principal.orElse(null)) + contextMap(containerRequestContext)
         val ka = launchKeepAlive(eventSink, sse)
         try {
-            val dataLoaderRegistryFactory = dataLoaderRegistryFactory?.invoke(query, contextMap)?.generate()
-            val input = query.toExecutionInput(dataLoaderRegistryFactory, graphQLContextMap = contextMap)
-            runQuery(input, eventSink, sse, null)
+            runQuery(query, contextMap, eventSink, sse, null)
         } finally {
             ka.cancel()
             eventSink.close()

@@ -276,7 +276,7 @@ class GraphQLWebSocketTest {
         val mockRemote = LeakyMock.mock<WebSocketRemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
-        EasyMock.expect(mockGraphQL.execute(LeakyMock.anyObject<ExecutionInput>()))
+        EasyMock.expect(mockGraphQL.executeAsync(LeakyMock.anyObject<ExecutionInput>()))
             .andThrow(IllegalStateException("ExecutionError"))
         EasyMock.expect(
             mockRemote.sendString(

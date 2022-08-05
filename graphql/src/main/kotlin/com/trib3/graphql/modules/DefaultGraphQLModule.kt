@@ -5,10 +5,7 @@ import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.FlowSubscriptionExecutionStrategy
 import com.expediagroup.graphql.generator.toSchema
 import com.google.inject.Provides
-import com.google.inject.multibindings.MapBinder
-import com.google.inject.name.Names
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
-import com.trib3.graphql.execution.JsonSafeExecutionResultMixin
 import com.trib3.graphql.execution.LeakyCauldronHooks
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
@@ -16,10 +13,7 @@ import com.trib3.graphql.resources.GraphQLSseResource
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.graphql.websocket.GraphQLWebSocketCreatorFactory
 import com.trib3.graphql.websocket.GraphQLWebSocketDropwizardAuthenticator
-import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.modules.ServletConfig
-import dev.misfitlabs.kotlinguice4.typeLiteral
-import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
 import graphql.execution.DataFetcherExceptionHandler
@@ -28,7 +22,6 @@ import graphql.execution.instrumentation.Instrumentation
 import io.dropwizard.servlets.assets.AssetServlet
 import javax.inject.Named
 import javax.inject.Provider
-import kotlin.reflect.KClass
 
 /**
  * Default Guice module for GraphQL applications.  Sets up
@@ -75,13 +68,6 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
                 listOf("/graphiql")
             )
         )
-        // use the JsonSafe jackson serialization mixin for ExecutionResults
-        MapBinder.newMapBinder(
-            kotlinBinder,
-            typeLiteral<KClass<*>>(),
-            typeLiteral<KClass<*>>(),
-            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS)
-        ).addBinding(ExecutionResult::class).toInstance(JsonSafeExecutionResultMixin::class)
     }
 
     @Provides

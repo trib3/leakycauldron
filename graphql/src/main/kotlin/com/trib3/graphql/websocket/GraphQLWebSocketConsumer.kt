@@ -1,11 +1,13 @@
 package com.trib3.graphql.websocket
 
-import com.expediagroup.graphql.server.extensions.toExecutionInput
+import com.expediagroup.graphql.server.extensions.toGraphQLError
+import com.expediagroup.graphql.server.extensions.toGraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.MessageGraphQLError
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
 import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
+import com.trib3.graphql.modules.toExecutionInput
 import com.trib3.graphql.resources.getGraphQLContextMap
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionInput
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.yield
@@ -96,7 +99,7 @@ class QueryCoroutine(
 ) : GraphQLCoroutine(channel) {
     override suspend fun run() {
         try {
-            val result = graphQL.execute(executionQuery)
+            val result = graphQL.executeAsync(executionQuery).await()
             // if result data is a Flow, collect it as a flow
             // if it's not, just collect the result itself
             val flow = try {
@@ -111,7 +114,7 @@ class QueryCoroutine(
                     OperationMessage(
                         OperationType.GQL_DATA,
                         messageId,
-                        it
+                        it.toGraphQLResponse()
                     )
                 )
             }.catch {
@@ -247,7 +250,7 @@ class GraphQLWebSocketConsumer(
                 throw cancellation
             } catch (error: Throwable) {
                 log.error("Error processing message ${error.message}", error)
-                adapter.sendMessage(OperationType.GQL_ERROR, message.id, listOf(MessageGraphQLError(error.message)))
+                adapter.sendMessage(OperationType.GQL_ERROR, message.id, listOf(error.toGraphQLError()))
             }
         }
     }
@@ -362,12 +365,11 @@ class GraphQLWebSocketConsumer(
             adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
         } else {
             val context = getGraphQLContextMap(adapter, socketPrincipal)
-            val dataLoaderRegistry = dataLoaderRegistryFactoryProvider?.invoke(message.payload, context)?.generate()
             val queryCoroutine = QueryCoroutine(
                 graphQL,
                 channel,
                 message.id,
-                message.payload.toExecutionInput(dataLoaderRegistry, graphQLContextMap = context)
+                message.payload.toExecutionInput(dataLoaderRegistryFactoryProvider, context)
             )
 
             val job = scope.launch(MDCContext()) {

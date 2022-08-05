@@ -3,12 +3,11 @@ package com.trib3.graphql.resources
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.doesNotContain
-import assertk.assertions.hasRootCause
 import assertk.assertions.hasSize
-import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
+import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import assertk.assertions.prop
@@ -16,21 +15,22 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import com.expediagroup.graphql.server.operations.Query
+import com.expediagroup.graphql.server.types.GraphQLBatchRequest
+import com.expediagroup.graphql.server.types.GraphQLBatchResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
+import com.expediagroup.graphql.server.types.GraphQLResponse
+import com.expediagroup.graphql.server.types.GraphQLServerError
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.RequestIdInstrumentation
-import com.trib3.graphql.execution.SanitizedGraphQLError
 import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.testing.LeakyMock
-import graphql.ExecutionResult
 import graphql.GraphQL
-import graphql.GraphQLError
 import graphql.execution.AsyncExecutionStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -119,9 +119,27 @@ class GraphQLResourceTest {
     fun testSimpleQuery() = runBlocking {
         RequestIdFilter.withRequestId("test-simple-query") {
             val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {test(value:\"123\")}"))
-            val graphQLResult = result.entity as ExecutionResult
-            assertThat(graphQLResult.getData<Map<String, String>>()["test"]).isEqualTo("123")
+            val graphQLResult = result.entity as GraphQLResponse<*>
+            assertThat((graphQLResult.data as Map<*, *>)["test"]).isEqualTo("123")
             assertThat(resource.runningFutures["test-simple-query"]).isNull()
+        }
+    }
+
+    @Test
+    fun testBatchQuery() = runBlocking {
+        RequestIdFilter.withRequestId("test-batch-query") {
+            val result = resource.graphQL(
+                Optional.empty(),
+                GraphQLBatchRequest(
+                    GraphQLRequest("query {test(value:\"123\")}"),
+                    GraphQLRequest("query {test(value:\"456\")}")
+                )
+            )
+            val graphQLResult = result.entity as GraphQLBatchResponse
+            assertThat(graphQLResult.responses).hasSize(2)
+            assertThat((graphQLResult.responses[0].data as Map<*, *>)["test"]).isEqualTo("123")
+            assertThat((graphQLResult.responses[1].data as Map<*, *>)["test"]).isEqualTo("456")
+            assertThat(resource.runningFutures["test-batch-query"]).isNull()
         }
     }
 
@@ -148,20 +166,18 @@ class GraphQLResourceTest {
                 mapOf("val" to "123")
             )
         )
-        val graphQLResult = result.entity as ExecutionResult
-        assertThat(graphQLResult.getData<Map<String, String>>()["test"]).isEqualTo("123")
+        val graphQLResult = result.entity as GraphQLResponse<*>
+        assertThat((graphQLResult.data as Map<*, *>)["test"]).isEqualTo("123")
     }
 
     @Test
     fun testErrorQuery() = runBlocking {
         val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {error}"))
-        val graphQLResult = result.entity as ExecutionResult
-        assertThat(graphQLResult.errors.first()).prop("message", GraphQLError::getMessage)
+        val graphQLResult = result.entity as GraphQLResponse<*>
+        val errors = graphQLResult.errors
+        assertThat(errors?.first()).isNotNull().prop("message", GraphQLServerError::message)
             .isEqualTo("an error was thrown")
-        assertThat(graphQLResult.errors.first()).isInstanceOf(SanitizedGraphQLError::class)
-        assertThat((graphQLResult.errors.first() as SanitizedGraphQLError).exception)
-            .hasRootCause(IllegalArgumentException("an error was thrown"))
-        val serializedError = objectMapper.writeValueAsString(graphQLResult.errors.first())
+        val serializedError = objectMapper.writeValueAsString(graphQLResult.errors?.first())
         assertThat(objectMapper.readValue<Map<String, *>>(serializedError).keys).doesNotContain("exception")
     }
 
@@ -176,10 +192,10 @@ class GraphQLResourceTest {
     @Test
     fun testUnknownErrorQuery() = runBlocking {
         val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {unknownError}"))
-        val graphQLResult = result.entity as ExecutionResult
-        assertThat(graphQLResult.errors.first()).prop("message", GraphQLError::getMessage)
+        val graphQLResult = result.entity as GraphQLResponse<*>
+        assertThat(graphQLResult.errors?.first()).isNotNull().prop("message", GraphQLServerError::message)
             .contains("Exception while fetching data")
-        val serializedError = objectMapper.writeValueAsString(graphQLResult.errors.first())
+        val serializedError = objectMapper.writeValueAsString(graphQLResult.errors?.first())
         assertThat(objectMapper.readValue<Map<String, *>>(serializedError).keys).doesNotContain("exception")
     }
 
@@ -190,11 +206,11 @@ class GraphQLResourceTest {
         val job = launch {
             RequestIdFilter.withRequestId(requestId) {
                 val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {cancellable}"))
-                val entity = result.entity as ExecutionResult
-                assertThat(entity.getData<Any>()).isNull()
-                assertThat(entity.errors).hasSize(1)
-                assertThat(entity.errors[0].message).contains("was cancelled")
-                assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                val entity = result.entity as GraphQLResponse<*>
+                assertThat(entity.data).isNull()
+                assertThat(entity.errors).isNotNull().hasSize(1)
+                assertThat(entity.errors!![0].message).contains("was cancelled")
+                assertThat(entity.extensions!!["RequestId"]).isEqualTo(requestId)
                 assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
@@ -214,10 +230,10 @@ class GraphQLResourceTest {
         val job = launch {
             RequestIdFilter.withRequestId(requestId) {
                 val result = resource.graphQL(Optional.empty(), GraphQLRequest("query {cancellable}"))
-                val entity = result.entity as ExecutionResult
-                assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
-                assertThat(entity.errors).isEmpty()
-                assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                val entity = result.entity as GraphQLResponse<*>
+                assertThat((entity.data as Map<*, *>)["cancellable"]).isEqualTo("result")
+                assertThat(entity.errors).isNullOrEmpty()
+                assertThat(entity.extensions!!["RequestId"]).isEqualTo(requestId)
                 assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
@@ -241,10 +257,10 @@ class GraphQLResourceTest {
                         Optional.of(UserPrincipal(User("bill"))),
                         GraphQLRequest("query {cancellable}")
                     )
-                val entity = result.entity as ExecutionResult
-                assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
-                assertThat(entity.errors).isEmpty()
-                assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                val entity = result.entity as GraphQLResponse<*>
+                assertThat((entity.data as Map<*, *>)["cancellable"]).isEqualTo("result")
+                assertThat(entity.errors).isNullOrEmpty()
+                assertThat(entity.extensions!!["RequestId"]).isEqualTo(requestId)
                 assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
@@ -273,10 +289,10 @@ class GraphQLResourceTest {
                         Optional.of(UserPrincipal(User("bill"))),
                         GraphQLRequest("query {cancellable}")
                     )
-                val entity = result.entity as ExecutionResult
-                assertThat(entity.getData<Map<String, String>>()["cancellable"]).isEqualTo("result")
-                assertThat(entity.errors).isEmpty()
-                assertThat(entity.extensions["RequestId"]).isEqualTo(requestId)
+                val entity = result.entity as GraphQLResponse<*>
+                assertThat((entity.data as Map<*, *>)["cancellable"]).isEqualTo("result")
+                assertThat(entity.errors).isNullOrEmpty()
+                assertThat(entity.extensions!!["RequestId"]).isEqualTo(requestId)
                 assertThat(resource.runningFutures[requestId]).isNull()
                 reached = true
             }
