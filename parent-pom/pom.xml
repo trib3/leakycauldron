@@ -36,6 +36,7 @@
     <properties>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.outputTimestamp>10</project.build.outputTimestamp>
 
         <skip.checks>false</skip.checks>
         <skip.docs>false</skip.docs>
