@@ -90,7 +90,7 @@
         <version.jetty>9.4.48.v20220622</version.jetty>
         <version.jna>5.12.1</version.jna>
         <version.joda>2.11.1</version.joda>
-        <version.jooq>3.17.3</version.jooq>
+        <version.jooq>3.17.4</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.junit>4.13.2</version.junit>
         <version.kotlin>1.7.10</version.kotlin>
