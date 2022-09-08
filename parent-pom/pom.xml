@@ -66,7 +66,7 @@
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>4.3</version.easymock>
-        <version.flyway>9.2.2</version.flyway>
+        <version.flyway>9.2.3</version.flyway>
         <version.graphql-kotlin>6.2.2</version.graphql-kotlin>
         <version.graphql-java>19.2</version.graphql-java>
         <version.graphql-java-extended-scalars>18.1</version.graphql-java-extended-scalars>
