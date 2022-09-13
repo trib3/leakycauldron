@@ -60,7 +60,7 @@
         <version.config4k>0.5.0</version.config4k>
         <version.detekt>1.21.0</version.detekt>
         <version.dokka>1.7.10</version.dokka>
-        <version.dropwizard>2.1.1</version.dropwizard>
+        <version.dropwizard>2.1.2</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.2.12</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
