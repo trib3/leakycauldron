@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.yield
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
@@ -47,7 +48,8 @@ import javax.ws.rs.core.MultivaluedHashMap
 import javax.ws.rs.core.UriInfo
 
 class SocketQuery {
-    fun q(): List<String> {
+    suspend fun q(): List<String> {
+        yield()
         return listOf("1", "2", "3")
     }
 
@@ -187,7 +189,8 @@ class GraphQLWebSocketTest {
                 LeakyMock.and(
                     LeakyMock.contains(""""q" : [ "1", "2", "3" ]"""),
                     LeakyMock.contains(""""type" : "data""""),
-                    LeakyMock.contains(""""id" : "simplequery"""")
+                    LeakyMock.contains(""""id" : "simplequery""""),
+                    LeakyMock.contains(""""RequestId" : "simplequery"""")
                 )
             )
         ).once()

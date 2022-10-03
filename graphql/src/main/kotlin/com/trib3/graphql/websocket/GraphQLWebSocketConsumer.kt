@@ -364,15 +364,14 @@ class GraphQLWebSocketConsumer(
         } else if (socketPrincipal == null && graphQLConfig.checkAuthorization) {
             adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
         } else {
-            val context = getGraphQLContextMap(adapter, socketPrincipal)
-            val queryCoroutine = QueryCoroutine(
-                graphQL,
-                channel,
-                message.id,
-                message.payload.toExecutionInput(dataLoaderRegistryFactoryProvider, context)
-            )
-
             val job = scope.launch(MDCContext()) {
+                val context = getGraphQLContextMap(this, socketPrincipal)
+                val queryCoroutine = QueryCoroutine(
+                    graphQL,
+                    channel,
+                    message.id,
+                    message.payload.toExecutionInput(dataLoaderRegistryFactoryProvider, context)
+                )
                 queryCoroutine.run()
             }
             queries[messageId] = job
