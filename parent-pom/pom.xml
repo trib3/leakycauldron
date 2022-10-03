@@ -126,7 +126,7 @@
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>2.0.2</version.slf4j>
         <version.swagger>2.2.3</version.swagger>
-        <version.testcontainers>1.17.3</version.testcontainers>
+        <version.testcontainers>1.17.4</version.testcontainers>
         <version.testng>7.6.1</version.testng>
         <version.threeten>1.7.1</version.threeten>
         <version.typesafe.config>1.4.2</version.typesafe.config>
