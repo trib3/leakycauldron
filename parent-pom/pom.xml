@@ -125,7 +125,8 @@
         <version.redshift>2.1.0.9</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>2.0.3</version.slf4j>
-        <version.swagger>2.2.3</version.swagger>
+        <version.snakeyaml>1.33</version.snakeyaml>
+        <version.swagger>2.2.4</version.swagger>
         <version.testcontainers>1.17.4</version.testcontainers>
         <version.testng>7.6.1</version.testng>
         <version.threeten>1.7.1</version.threeten>
@@ -825,6 +826,11 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${version.joda}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${version.snakeyaml}</version>
             </dependency>
 
             <!-- AWS -->
