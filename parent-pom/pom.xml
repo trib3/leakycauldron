@@ -122,7 +122,7 @@
         <version.netty>4.1.85.Final</version.netty>
         <version.postgres>42.5.1</version.postgres>
         <version.reactivestreams>1.0.4</version.reactivestreams>
-        <version.redshift>2.1.0.9</version.redshift>
+        <version.redshift>2.1.0.10</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>2.0.5</version.slf4j>
         <version.snakeyaml>1.33</version.snakeyaml>
