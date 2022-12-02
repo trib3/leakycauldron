@@ -172,8 +172,5 @@ $ mvn exec:java -Dexec.mainClass=com.trib3.server.TribeApplicationKt
 When running in [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/), the assembly configuration
 from [build-resources](https://github.com/trib3/leakycauldron/blob/HEAD/build-resources)
 can be used to create a `.zip` distribution that configures health checks and timeout values. With the
-preconfigured `Java 8` Elastic Beanstalk platform, the `PORT` environment property should be set to `5000` in the
+preconfigured `Java 17` Elastic Beanstalk platform, the `PORT` environment property should be set to `5000` in the
 environment's software configuration.
-
-For running in [AWS Lambda](https://aws.amazon.com/lambda/),
-see [lambda](https://github.com/trib3/leakycauldron/blob/HEAD/lambda)
