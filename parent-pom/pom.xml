@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.33-SNAPSHOT</version>
+    <version>1.34-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -68,7 +68,7 @@
         <version.easymock>5.0.1</version.easymock>
         <version.flyway>9.10.0</version.flyway>
         <version.graphql-kotlin>6.3.2</version.graphql-kotlin>
-        <version.graphql-java>19.3</version.graphql-java>
+        <version.graphql-java>20.0</version.graphql-java>
         <version.graphql-java-extended-scalars>19.1</version.graphql-java-extended-scalars>
         <version.graphql-java.dataloader>3.2.0</version.graphql-java.dataloader>
         <version.guava>31.1-jre</version.guava>

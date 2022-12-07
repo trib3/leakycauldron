@@ -42,10 +42,12 @@ internal val YEAR_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseValue(input, context, locale)"))
             override fun parseValue(input: Any): Year {
                 return parse(input.toString(), ::CoercingParseValueException)
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseLiteral(input, context, locale)"))
             override fun parseLiteral(input: Any): Year {
                 return when (input) {
                     is StringValue -> parse(input.value, ::CoercingParseLiteralException)
@@ -53,6 +55,7 @@ internal val YEAR_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("serialize(input, context, locale)"))
             override fun serialize(dataFetcherResult: Any): String {
                 return when (dataFetcherResult) {
                     is Year -> dataFetcherResult.toString()
@@ -76,10 +79,12 @@ internal val YEAR_MONTH_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseValue(input, context, locale)"))
             override fun parseValue(input: Any): YearMonth {
                 return parse(input.toString(), ::CoercingParseValueException)
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseLiteral(input, context, locale)"))
             override fun parseLiteral(input: Any): YearMonth {
                 return when (input) {
                     is StringValue -> parse(input.value, ::CoercingParseLiteralException)
@@ -87,6 +92,7 @@ internal val YEAR_MONTH_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("serialize(input, context, locale)"))
             override fun serialize(dataFetcherResult: Any): String {
                 return when (dataFetcherResult) {
                     is YearMonth -> dataFetcherResult.toString()
@@ -110,10 +116,12 @@ internal val YEAR_QUARTER_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseValue(input, context, locale)"))
             override fun parseValue(input: Any): YearQuarter {
                 return parse(input.toString(), ::CoercingParseValueException)
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseLiteral(input, context, locale)"))
             override fun parseLiteral(input: Any): YearQuarter {
                 return when (input) {
                     is StringValue -> parse(input.value, ::CoercingParseLiteralException)
@@ -121,6 +129,7 @@ internal val YEAR_QUARTER_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("serialize(input, context, locale)"))
             override fun serialize(dataFetcherResult: Any): String {
                 return when (dataFetcherResult) {
                     is YearQuarter -> dataFetcherResult.toString()
@@ -161,10 +170,12 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseValue(input, context, locale)"))
             override fun parseValue(input: Any): LocalDateTime {
                 return parse(input.toString(), ::CoercingParseValueException)
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("parseLiteral(input, context, locale)"))
             override fun parseLiteral(input: Any): LocalDateTime {
                 return when (input) {
                     is StringValue -> parse(input.value, ::CoercingParseLiteralException)
@@ -172,6 +183,7 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
                 }
             }
 
+            @Deprecated("Deprecated in superclass", ReplaceWith("serialize(input, context, locale)"))
             override fun serialize(dataFetcherResult: Any): String {
                 return when (dataFetcherResult) {
                     is LocalDateTime -> ISO_FORMATTER.format(dataFetcherResult)
