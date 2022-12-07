@@ -11,6 +11,7 @@ import com.expediagroup.graphql.generator.toSchema
 import graphql.ErrorType
 import graphql.ExecutionInput
 import graphql.GraphQL
+import graphql.GraphQLContext
 import graphql.schema.CoercingSerializeException
 import org.testng.annotations.Test
 import org.threeten.extra.YearQuarter
@@ -21,6 +22,7 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.Year
 import java.time.YearMonth
+import java.util.Locale
 import java.util.UUID
 
 class HooksQuery {
@@ -94,11 +96,11 @@ class LeakyCauldronHooksTest {
         assertValidationErrors("""query {year(y:123)}""", """query {year(y:"123-45")}""")
 
         assertThat {
-            YEAR_SCALAR.coercing.serialize(123)
+            YEAR_SCALAR.coercing.serialize(123, GraphQLContext.getDefault(), Locale.getDefault())
         }.isFailure().isInstanceOf(CoercingSerializeException::class)
 
         assertThat {
-            YEAR_SCALAR.coercing.serialize(Year.of(2019))
+            YEAR_SCALAR.coercing.serialize(Year.of(2019), GraphQLContext.getDefault(), Locale.getDefault())
         }.isSuccess().isEqualTo("2019")
     }
 
@@ -119,11 +121,15 @@ class LeakyCauldronHooksTest {
         assertValidationErrors("""query {quarter(q:123)}""", """query {quarter(q:"123")}""")
 
         assertThat {
-            YEAR_QUARTER_SCALAR.coercing.serialize(123)
+            YEAR_QUARTER_SCALAR.coercing.serialize(123, GraphQLContext.getDefault(), Locale.getDefault())
         }.isFailure().isInstanceOf(CoercingSerializeException::class)
 
         assertThat {
-            YEAR_QUARTER_SCALAR.coercing.serialize(YearQuarter.of(2019, 2))
+            YEAR_QUARTER_SCALAR.coercing.serialize(
+                YearQuarter.of(2019, 2),
+                GraphQLContext.getDefault(),
+                Locale.getDefault()
+            )
         }.isSuccess().isEqualTo("2019-Q2")
     }
 
@@ -144,11 +150,15 @@ class LeakyCauldronHooksTest {
         assertValidationErrors("""query {month(m:123)}""", """query {month(m:"123")}""")
 
         assertThat {
-            YEAR_MONTH_SCALAR.coercing.serialize(123)
+            YEAR_MONTH_SCALAR.coercing.serialize(123, GraphQLContext.getDefault(), Locale.getDefault())
         }.isFailure().isInstanceOf(CoercingSerializeException::class)
 
         assertThat {
-            YEAR_MONTH_SCALAR.coercing.serialize(YearMonth.of(2019, 10))
+            YEAR_MONTH_SCALAR.coercing.serialize(
+                YearMonth.of(2019, 10),
+                GraphQLContext.getDefault(),
+                Locale.getDefault()
+            )
         }.isSuccess().isEqualTo("2019-10")
     }
 
@@ -170,11 +180,15 @@ class LeakyCauldronHooksTest {
         assertValidationErrors("""query {localDateTime(l:123)}""", """query {localDateTime(l:"123")}""")
 
         assertThat {
-            LOCAL_DATETIME_SCALAR.coercing.serialize(123)
+            LOCAL_DATETIME_SCALAR.coercing.serialize(123, GraphQLContext.getDefault(), Locale.getDefault())
         }.isFailure().isInstanceOf(CoercingSerializeException::class)
 
         assertThat {
-            LOCAL_DATETIME_SCALAR.coercing.serialize(LocalDateTime.of(2019, 10, 31, 1, 1))
+            LOCAL_DATETIME_SCALAR.coercing.serialize(
+                LocalDateTime.of(2019, 10, 31, 1, 1),
+                GraphQLContext.getDefault(),
+                Locale.getDefault()
+            )
         }.isSuccess().isEqualTo("2019-10-31T01:01:00.000")
     }
 
