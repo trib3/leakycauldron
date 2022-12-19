@@ -129,7 +129,7 @@
         <version.swagger>2.2.7</version.swagger>
         <version.testcontainers>1.17.6</version.testcontainers>
         <version.testng>7.7.0</version.testng>
-        <version.threeten>1.7.1</version.threeten>
+        <version.threeten>1.7.2</version.threeten>
         <version.typesafe.config>1.4.2</version.typesafe.config>
         <version.validation>2.0.2</version.validation>
     </properties>
