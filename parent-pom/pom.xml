@@ -51,7 +51,7 @@
         <version.byte-buddy>1.12.19</version.byte-buddy>
         <version.caffeine>3.1.2</version.caffeine>
         <version.checker-qual>3.28.0</version.checker-qual>
-        <version.classgraph>4.8.151</version.classgraph>
+        <version.classgraph>4.8.153</version.classgraph>
         <version.commons-codec>1.15</version.commons-codec>
         <version.commons-compress>1.22</version.commons-compress>
         <version.commons-io>2.11.0</version.commons-io>
