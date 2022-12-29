@@ -93,7 +93,7 @@
         <version.jooq>3.17.6</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.junit>4.13.2</version.junit>
-        <version.kotlin>1.7.21</version.kotlin>
+        <version.kotlin>1.8.0</version.kotlin>
         <version.kotlin.coroutines>1.6.4</version.kotlin.coroutines>
         <version.kotlin.guice>1.6.0</version.kotlin.guice>
         <version.kotlin.logging>3.0.4</version.kotlin.logging>
@@ -171,28 +171,10 @@
             <!-- kotlin -->
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib</artifactId>
+                <artifactId>kotlin-bom</artifactId>
                 <version>${version.kotlin}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-common</artifactId>
-                <version>${version.kotlin}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-jdk8</artifactId>
-                <version>${version.kotlin}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-jdk7</artifactId>
-                <version>${version.kotlin}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-reflect</artifactId>
-                <version>${version.kotlin}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains</groupId>
@@ -1210,14 +1192,6 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk7</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
         </dependency>
         <dependency>
@@ -1836,12 +1810,6 @@
                         <ignoredUnusedDeclaredDependencies>
                             <ignoredUnusedDeclaredDependency>
                                 org.jetbrains.kotlin:kotlin-stdlib
-                            </ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependency>
-                                org.jetbrains.kotlin:kotlin-stdlib-jdk8
-                            </ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependency>
-                                org.jetbrains.kotlin:kotlin-stdlib-jdk7
                             </ignoredUnusedDeclaredDependency>
                             <ignoredUnusedDeclaredDependency>
                                 org.jetbrains.kotlin:kotlin-reflect
