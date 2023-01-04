@@ -62,7 +62,7 @@ internal val YEAR_SCALAR = GraphQLScalarType.newScalar()
                     else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
                 }
             }
-        }
+        },
     )
     .build()
 
@@ -99,7 +99,7 @@ internal val YEAR_MONTH_SCALAR = GraphQLScalarType.newScalar()
                     else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
                 }
             }
-        }
+        },
     )
     .build()
 
@@ -136,7 +136,7 @@ internal val YEAR_QUARTER_SCALAR = GraphQLScalarType.newScalar()
                     else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
                 }
             }
-        }
+        },
     )
     .build()
 
@@ -144,7 +144,7 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
     .name("LocalDateTime")
     .description(
         "Year + Month + Day Of Month + Time (Hour:Minute + Optional(Second:Milliseconds)), " +
-            "for example 2019-10-31T12:31:45.129"
+            "for example 2019-10-31T12:31:45.129",
     )
     .coercing(
         object : Coercing<LocalDateTime, String> {
@@ -190,7 +190,7 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
                     else -> throw CoercingSerializeException("can't serialize ${dataFetcherResult::class}")
                 }
             }
-        }
+        },
     )
     .build()
 
@@ -200,15 +200,15 @@ internal val LOCAL_DATETIME_SCALAR = GraphQLScalarType.newScalar()
  */
 class LeakyCauldronHooks @Inject constructor(
     @Nullable authorizer: Authorizer<Principal>?,
-    manualWiring: Map<String, KotlinSchemaDirectiveWiring>
+    manualWiring: Map<String, KotlinSchemaDirectiveWiring>,
 ) :
     FlowSubscriptionSchemaGeneratorHooks() {
     constructor() : this(null, emptyMap())
 
     override val wiringFactory = KotlinDirectiveWiringFactory(
         mapOf(
-            "auth" to GraphQLAuthDirectiveWiring(authorizer)
-        ) + manualWiring
+            "auth" to GraphQLAuthDirectiveWiring(authorizer),
+        ) + manualWiring,
     )
 
     override fun willGenerateGraphQLType(type: KType): GraphQLType? {

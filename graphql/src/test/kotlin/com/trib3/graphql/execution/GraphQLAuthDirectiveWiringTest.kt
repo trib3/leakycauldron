@@ -54,17 +54,17 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
         val config =
             SchemaGeneratorConfig(
                 listOf(this::class.java.packageName),
-                hooks = hooks
+                hooks = hooks,
             )
         return GraphQL.newGraphQL(
-            toSchema(config, listOf(TopLevelObject(AuthQuery())))
+            toSchema(config, listOf(TopLevelObject(AuthQuery()))),
         ).build().execute(
             ExecutionInput.newExecutionInput()
                 .query("{ needUser noUser needSuperUser }")
                 .graphQLContext(
-                    getGraphQLContextMap(scope, principal)
+                    getGraphQLContextMap(scope, principal),
                 )
-                .build()
+                .build(),
         )
     }
 
@@ -150,14 +150,14 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
         val config =
             SchemaGeneratorConfig(
                 listOf(this::class.java.packageName),
-                hooks = hooks
+                hooks = hooks,
             )
         val result = GraphQL.newGraphQL(
-            toSchema(config, listOf(TopLevelObject(AuthQuery())))
+            toSchema(config, listOf(TopLevelObject(AuthQuery()))),
         ).build().execute(
             ExecutionInput.newExecutionInput()
                 .query("{ needUser noUser needSuperUser }")
-                .build()
+                .build(),
         )
         val data = result.getData<Map<String, String>>()
         val errors = result.errors

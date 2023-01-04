@@ -25,7 +25,7 @@ class CoroutineBatchLoadersTest {
         val loader = object : CoroutineBatchLoader<String, String>(mapOf<Any, Any>()) {
             override suspend fun loadSuspend(
                 keys: List<String>,
-                environment: BatchLoaderEnvironment
+                environment: BatchLoaderEnvironment,
             ): List<String> {
                 return keys.map {
                     val charA = 'a'
@@ -48,7 +48,7 @@ class CoroutineBatchLoadersTest {
         val loader = object : CoroutineMappedBatchLoader<String, String>(mapOf<Any, Any>()) {
             override suspend fun loadSuspend(
                 keys: Set<String>,
-                environment: BatchLoaderEnvironment
+                environment: BatchLoaderEnvironment,
             ): Map<String, String> {
                 return keys.associateBy { it }
             }
@@ -67,7 +67,7 @@ class CoroutineBatchLoadersTest {
         val loader = object : CoroutineMappedBatchLoader<String, String>(mapOf(CoroutineScope::class to this)) {
             override suspend fun loadSuspend(
                 keys: Set<String>,
-                environment: BatchLoaderEnvironment
+                environment: BatchLoaderEnvironment,
             ): Map<String, String> {
                 delay(20000)
                 throw IllegalStateException("Should not get here")
@@ -94,7 +94,7 @@ class CoroutineBatchLoadersTest {
             CoroutineBatchLoader<String, String>(mapOf(String::class to "test")) {
             override suspend fun loadSuspend(
                 keys: List<String>,
-                environment: BatchLoaderEnvironment
+                environment: BatchLoaderEnvironment,
             ): List<String> {
                 return keys.map {
                     it + environment.getContext<GraphQLContext>().get<String>() + environment.keyContexts[it]
@@ -117,7 +117,7 @@ class CoroutineBatchLoadersTest {
             CoroutineMappedBatchLoader<String, String>(mapOf(String::class to "test")) {
             override suspend fun loadSuspend(
                 keys: Set<String>,
-                environment: BatchLoaderEnvironment
+                environment: BatchLoaderEnvironment,
             ): Map<String, String> {
                 return keys.associateWith {
                     it + environment.getContext<GraphQLContext>().get<String>() + environment.keyContexts[it]

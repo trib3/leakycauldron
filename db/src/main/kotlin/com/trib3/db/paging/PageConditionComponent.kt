@@ -9,7 +9,7 @@ import org.jooq.Field
  */
 enum class SortDirection {
     DESC,
-    ASC
+    ASC,
 }
 
 /**
@@ -21,7 +21,7 @@ enum class SortDirection {
 data class PageConditionComponent<T>(
     val field: Field<T>,
     val value: String,
-    val extractor: ((String) -> T)
+    val extractor: ((String) -> T),
 ) {
     fun eq(): Condition {
         return field.eq(extractor.invoke(value))
@@ -41,7 +41,7 @@ data class PageConditionComponent<T>(
          */
         fun getPageCondition(
             sortDirection: SortDirection,
-            vararg pagingState: PageConditionComponent<out Any>
+            vararg pagingState: PageConditionComponent<out Any>,
         ): Condition {
             return getPageCondition(sortDirection, pagingState.asList())
         }
@@ -57,7 +57,7 @@ data class PageConditionComponent<T>(
          */
         fun getPageCondition(
             sortDirection: SortDirection,
-            pagingState: List<PageConditionComponent<out Any>>
+            pagingState: List<PageConditionComponent<out Any>>,
         ): Condition {
             return pagingState.map {
                 when (sortDirection) {

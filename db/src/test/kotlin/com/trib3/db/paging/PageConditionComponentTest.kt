@@ -25,7 +25,7 @@ class PageConditionComponentTest {
         assertThat(component1.extractor.invoke("abc")).isEqualTo("abc")
         assertThat(ascending.toString()).all {
             isEqualTo(
-                descending.toString().replace("<", ">")
+                descending.toString().replace("<", ">"),
             )
             // simple assertions on the SQL -- can't inspect the AST easily and asserting on the
             // whole sql string seems fragile against minor formatting changes

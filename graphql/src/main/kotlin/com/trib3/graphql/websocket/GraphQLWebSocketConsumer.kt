@@ -70,7 +70,7 @@ abstract class GraphQLCoroutine(private val channel: Channel<OperationMessage<*>
 class KeepAliveCoroutine(
     private val graphQLConfig: GraphQLConfig,
     channel: Channel<OperationMessage<*>>,
-    private val message: OperationMessage<*>
+    private val message: OperationMessage<*>,
 ) : GraphQLCoroutine(channel) {
     override suspend fun run() {
         while (true) {
@@ -79,8 +79,8 @@ class KeepAliveCoroutine(
             queueMessage(
                 OperationMessage(
                     OperationType.GQL_CONNECTION_KEEP_ALIVE,
-                    message.id
-                )
+                    message.id,
+                ),
             )
         }
     }
@@ -95,7 +95,7 @@ class QueryCoroutine(
     private val graphQL: GraphQL,
     channel: Channel<OperationMessage<*>>,
     private val messageId: String,
-    private val executionQuery: ExecutionInput
+    private val executionQuery: ExecutionInput,
 ) : GraphQLCoroutine(channel) {
     override suspend fun run() {
         try {
@@ -114,8 +114,8 @@ class QueryCoroutine(
                     OperationMessage(
                         OperationType.GQL_DATA,
                         messageId,
-                        it.toGraphQLResponse()
-                    )
+                        it.toGraphQLResponse(),
+                    ),
                 )
             }.catch {
                 yield() // allow for cancellations to abort the coroutine
@@ -147,8 +147,8 @@ class QueryCoroutine(
             OperationMessage(
                 OperationType.GQL_ERROR,
                 messageId,
-                listOf(MessageGraphQLError(cause.message))
-            )
+                listOf(MessageGraphQLError(cause.message)),
+            ),
         )
     }
 }
@@ -173,7 +173,7 @@ class GraphQLWebSocketConsumer(
     val adapter: GraphQLWebSocketAdapter,
     val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default, // default to default for the KA interval
     private val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
-    private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null
+    private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
 ) {
     private var keepAliveStarted = false // only allow one keepalive coroutine to launch
     private var connectionInitContainerRequest: ContainerRequestContext? = null
@@ -213,7 +213,8 @@ class GraphQLWebSocketConsumer(
 
                     // Query finished messages from child coroutines
                     OperationType.GQL_COMPLETE,
-                    OperationType.GQL_ERROR -> {
+                    OperationType.GQL_ERROR,
+                    -> {
                         log.info("Query ${message.id} completed: $message")
                         if (message.id != null) {
                             queries.remove(message.id)?.cancel()
@@ -226,8 +227,8 @@ class GraphQLWebSocketConsumer(
                         OperationMessage(
                             OperationType.GQL_PONG,
                             message.id,
-                            message.payload as Map<*, *>
-                        )
+                            message.payload as Map<*, *>,
+                        ),
                     )
 
                     OperationType.GQL_PONG -> {
@@ -238,8 +239,9 @@ class GraphQLWebSocketConsumer(
                     OperationType.GQL_CONNECTION_ERROR,
                     OperationType.GQL_CONNECTION_ACK,
                     OperationType.GQL_DATA,
-                    OperationType.GQL_CONNECTION_KEEP_ALIVE -> handleClientBoundMessage(
-                        message
+                    OperationType.GQL_CONNECTION_KEEP_ALIVE,
+                    -> handleClientBoundMessage(
+                        message,
                     )
 
                     // Unknown message type
@@ -266,7 +268,7 @@ class GraphQLWebSocketConsumer(
             upgradeContainerRequestContext.method,
             upgradeContainerRequestContext.securityContext,
             MapPropertiesDelegate(emptyMap()),
-            null
+            null,
         )
         // treat connectionParams as HTTP headers
         connectionParams?.forEach {
@@ -287,7 +289,7 @@ class GraphQLWebSocketConsumer(
             upgradeContainerRequestContext.method,
             upgradeContainerRequestContext.securityContext,
             MapPropertiesDelegate(emptyMap()),
-            null
+            null,
         )
         // copy the headers (cookies are set in headers so don't need to handle explicitly)
         upgradeContainerRequestContext.headers.forEach {
@@ -370,7 +372,7 @@ class GraphQLWebSocketConsumer(
                     graphQL,
                     channel,
                     message.id,
-                    message.payload.toExecutionInput(dataLoaderRegistryFactoryProvider, context)
+                    message.payload.toExecutionInput(dataLoaderRegistryFactoryProvider, context),
                 )
                 queryCoroutine.run()
             }
@@ -397,8 +399,8 @@ class GraphQLWebSocketConsumer(
                 OperationMessage(
                     OperationType.GQL_ERROR,
                     message.id,
-                    listOf(MessageGraphQLError("Query not running"))
-                )
+                    listOf(MessageGraphQLError("Query not running")),
+                ),
             )
         }
     }

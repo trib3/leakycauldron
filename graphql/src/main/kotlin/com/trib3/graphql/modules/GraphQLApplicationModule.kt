@@ -26,7 +26,7 @@ import javax.ws.rs.container.ContainerRequestContext
 typealias KotlinDataLoaderRegistryFactoryProvider = Function2<
     @JvmSuppressWildcards GraphQLServerRequest,
     @JvmSuppressWildcards Map<*, Any>,
-    @JvmSuppressWildcards KotlinDataLoaderRegistryFactory
+    @JvmSuppressWildcards KotlinDataLoaderRegistryFactory,
     >
 
 /**
@@ -35,7 +35,7 @@ typealias KotlinDataLoaderRegistryFactoryProvider = Function2<
  */
 fun GraphQLRequest.toExecutionInput(
     registryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider?,
-    contextMap: Map<*, Any> = emptyMap<Any, Any>()
+    contextMap: Map<*, Any> = emptyMap<Any, Any>(),
 ): ExecutionInput {
     val registry = registryFactoryProvider?.invoke(this, contextMap)?.generate()
     return this.toExecutionInput(registry, graphQLContextMap = contextMap)
@@ -47,7 +47,7 @@ fun GraphQLRequest.toExecutionInput(
  */
 typealias GraphQLWebSocketAuthenticator = Function1<
     @JvmSuppressWildcards ContainerRequestContext,
-    @JvmSuppressWildcards Principal?>
+    @JvmSuppressWildcards Principal?,>
 
 /**
  * Base class for GraphQL application guice modules.  Provides
@@ -82,7 +82,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     fun graphQLPackagesBinder(): KotlinMultibinder<String> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(GRAPHQL_PACKAGES_BIND_NAME)
+            Names.named(GRAPHQL_PACKAGES_BIND_NAME),
         )
     }
 
@@ -92,7 +92,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     fun graphQLQueriesBinder(): KotlinMultibinder<Any> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(GRAPHQL_QUERIES_BIND_NAME)
+            Names.named(GRAPHQL_QUERIES_BIND_NAME),
         )
     }
 
@@ -102,7 +102,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     fun graphQLMutationsBinder(): KotlinMultibinder<Any> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(GRAPHQL_MUTATIONS_BIND_NAME)
+            Names.named(GRAPHQL_MUTATIONS_BIND_NAME),
         )
     }
 
@@ -112,7 +112,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     fun graphQLSubscriptionsBinder(): KotlinMultibinder<Any> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME)
+            Names.named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME),
         )
     }
 

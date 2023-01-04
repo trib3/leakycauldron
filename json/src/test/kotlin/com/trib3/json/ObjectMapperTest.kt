@@ -33,7 +33,7 @@ private data class SimpleBean(
     val bar: Int,
     val maybe: String?,
     val date: LocalDate?,
-    val ignoreMe: String? = null
+    val ignoreMe: String? = null,
 )
 
 private data class InjectedValueBean(
@@ -44,7 +44,7 @@ private data class InjectedValueBean(
     @JacksonInject(useInput = OptBoolean.TRUE)
     val injectedBeanTrue: SimpleBean,
     @JacksonInject(useInput = OptBoolean.FALSE)
-    val injectedBeanFalse: SimpleBean
+    val injectedBeanFalse: SimpleBean,
 )
 
 private enum class SimpleEnum { ONE, TWO }
@@ -57,25 +57,25 @@ private class UnDeserializable(var enumValue: SimpleEnum) {
 
 private data class CantDeserializeBean(
     val foo: String,
-    val undeserializable: UnDeserializable
+    val undeserializable: UnDeserializable,
 )
 
 private data class InjectUnDeserializeBean(
     val foo: String,
     @JacksonInject
-    val undeserializable: UnDeserializable
+    val undeserializable: UnDeserializable,
 )
 
 private abstract class SimpleMixin(
     @JsonIgnore
-    val ignoreMe: String? = null
+    val ignoreMe: String? = null,
 )
 
 private val moduleInjectedBean = SimpleBean(
     "injectfoo",
     99,
     "injectmaybe",
-    LocalDate.of(2021, 5, 3)
+    LocalDate.of(2021, 5, 3),
 )
 
 private class SimpleMixinModule : KotlinModule() {
@@ -84,12 +84,12 @@ private class SimpleMixinModule : KotlinModule() {
             binder(),
             typeLiteral<KClass<*>>(),
             typeLiteral<KClass<*>>(),
-            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS)
+            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS),
         ).addBinding(SimpleBean::class).toInstance(SimpleMixin::class)
         bind<Int>().toInstance(25)
         bind<UnDeserializable>().toInstance(UnDeserializable(SimpleEnum.TWO))
         bind<SimpleBean>().toInstance(
-            moduleInjectedBean
+            moduleInjectedBean,
         )
     }
 }

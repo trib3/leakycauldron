@@ -25,7 +25,7 @@ class GraphQLWebSocketCreator(
     val containerRequestContext: ContainerRequestContext,
     private val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
     private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : WebSocketCreator {
     /**
      * Create the [GraphQLWebSocketAdapter]and its [Channel], and launch a [GraphQLWebSocketConsumer] coroutine
@@ -49,7 +49,7 @@ class GraphQLWebSocketCreator(
                 adapter,
                 dispatcher,
                 dataLoaderRegistryFactory,
-                graphQLWebSocketAuthenticator
+                graphQLWebSocketAuthenticator,
             )
         adapter.launch {
             consumer.consume(this)

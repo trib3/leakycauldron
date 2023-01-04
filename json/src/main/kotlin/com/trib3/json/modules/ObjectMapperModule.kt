@@ -19,7 +19,7 @@ class ObjectMapperModule : KotlinModule() {
             binder(),
             typeLiteral<KClass<*>>(),
             typeLiteral<KClass<*>>(),
-            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS)
+            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS),
         )
     }
 

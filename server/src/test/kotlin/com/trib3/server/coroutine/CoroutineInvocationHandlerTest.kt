@@ -172,7 +172,7 @@ open class InvocationHandlerTestResource {
     suspend fun sse(
         @Context sseEventSink: SseEventSink,
         @Context sse: Sse,
-        @QueryParam("q") q: String
+        @QueryParam("q") q: String,
     ) = coroutineScope<Unit> {
         launch {
             sseScopes[q] = this
@@ -283,7 +283,7 @@ class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestRes
                     bind<MetricRegistry>().toInstance(registry)
                     install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
                 }
-            }
+            },
         )
         return injector.getInstance()
     }

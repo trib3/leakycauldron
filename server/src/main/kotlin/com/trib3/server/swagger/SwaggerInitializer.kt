@@ -36,11 +36,11 @@ class SwaggerInitializer
                             listOf(
                                 Server().url("https://${appConfig.corsDomains[0]}/app"),
                                 Server().url("http://${appConfig.corsDomains[0]}/app"),
-                                Server().url("http://${appConfig.corsDomains[0]}:${appConfig.appPort}/app")
-                            )
-                        )
+                                Server().url("http://${appConfig.corsDomains[0]}:${appConfig.appPort}/app"),
+                            ),
+                        ),
                     )
-                    .scannerClass(JaxrsApplicationScanner::class.qualifiedName)
+                    .scannerClass(JaxrsApplicationScanner::class.qualifiedName),
             )
             .application(application)
             .ctxId(ctxId)

@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
  */
 abstract class CoroutineBaseLoader<K, V>(
     private val contextMap: Map<*, Any>,
-    coroutineContext: CoroutineContext = Dispatchers.Default
+    coroutineContext: CoroutineContext = Dispatchers.Default,
 ) :
     KotlinDataLoader<K, V>,
     CoroutineScope by (contextMap[CoroutineScope::class] as? CoroutineScope) ?: CoroutineScope(coroutineContext) {

@@ -23,7 +23,7 @@ class DbConfig
     configPath: String,
     healthCheckRegistry: HealthCheckRegistry,
     metricRegistry: MetricRegistry,
-    objectMapper: ObjectMapper
+    objectMapper: ObjectMapper,
 ) {
     val dialect: SQLDialect
     val dataSource: DataSource

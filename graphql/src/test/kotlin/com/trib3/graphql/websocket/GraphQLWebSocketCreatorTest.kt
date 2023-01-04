@@ -58,7 +58,7 @@ class GraphQLWebSocketCreatorTest {
             """{
             |  "a" : "b"
             |}
-            """.trimMargin()
+            """.trimMargin(),
         )
     }
 

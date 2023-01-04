@@ -32,8 +32,8 @@ class KMSStringReader(private val kms: KmsClient?) {
             if (kms != null) {
                 val rawKms = SdkBytes.fromByteArray(
                     base64.decode(
-                        rawValue.substring("KMS(".length, rawValue.length - 1)
-                    )
+                        rawValue.substring("KMS(".length, rawValue.length - 1),
+                    ),
                 )
                 val decryptRequest = DecryptRequest.builder().ciphertextBlob(rawKms).build()
                 return kms.decrypt(decryptRequest).plaintext().asUtf8String()
@@ -41,7 +41,7 @@ class KMSStringReader(private val kms: KmsClient?) {
                 log.warn(
                     "trying to decrypt KMS config value without a configured kmsClient, " +
                         "returning raw value at path {}",
-                    path
+                    path,
                 )
             }
         }

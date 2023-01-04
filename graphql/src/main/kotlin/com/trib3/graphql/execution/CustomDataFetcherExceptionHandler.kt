@@ -13,7 +13,7 @@ private val log = KotlinLogging.logger { }
  */
 class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
     override fun onException(
-        handlerParameters: DataFetcherExceptionHandlerParameters
+        handlerParameters: DataFetcherExceptionHandlerParameters,
     ): DataFetcherExceptionHandlerResult {
         val exception = handlerParameters.exception
         val sourceLocation = handlerParameters.sourceLocation

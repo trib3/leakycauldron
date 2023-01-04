@@ -17,7 +17,7 @@ class HoconConfigurationFactory<T>(
     private val klass: Class<T>,
     private val validator: Validator,
     mapperArg: ObjectMapper,
-    private val configLoader: ConfigLoader
+    private val configLoader: ConfigLoader,
 ) : ConfigurationFactory<T> {
 
     private val hoconFactory = HoconFactory()

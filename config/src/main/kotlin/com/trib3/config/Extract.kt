@@ -21,7 +21,7 @@ inline fun <reified T> Config.extract(path: String): T {
     } catch (e: Exception) {
         throw result?.let { e } ?: ConfigException.BadPath(
             path,
-            "take a look at your config"
+            "take a look at your config",
         )
     }
 }

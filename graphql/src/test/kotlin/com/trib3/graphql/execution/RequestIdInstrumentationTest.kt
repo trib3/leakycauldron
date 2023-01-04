@@ -22,8 +22,8 @@ class RequestIdInstrumentationTest {
         GraphQL.newGraphQL(
             toSchema(
                 config,
-                listOf(TopLevelObject(Query()))
-            )
+                listOf(TopLevelObject(Query())),
+            ),
         ).instrumentation(RequestIdInstrumentation()).build()
 
     @Test

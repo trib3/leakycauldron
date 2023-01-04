@@ -26,7 +26,7 @@ import kotlin.coroutines.Continuation
 @Provider
 class CoroutineModelProcessor @Inject constructor(
     private val injectionManager: InjectionManager,
-    private val asyncContextProvider: javax.inject.Provider<AsyncContext>
+    private val asyncContextProvider: javax.inject.Provider<AsyncContext>,
 ) : ModelProcessor {
 
     /**
@@ -56,12 +56,12 @@ class CoroutineModelProcessor @Inject constructor(
             .defineMethod(
                 method.invocable.definitionMethod.name,
                 getContinuationTypeParameter(method.invocable.parameters.last().type),
-                Visibility.PUBLIC
+                Visibility.PUBLIC,
             )
             .withParameters(
                 method.invocable.parameters
                     .slice(0 until method.invocable.parameters.size - 1)
-                    .map { it.type }
+                    .map { it.type },
             )
             .intercept(
                 InvocationHandlerAdapter.of(
@@ -73,9 +73,9 @@ class CoroutineModelProcessor @Inject constructor(
                         // provided asynchronously.  eg, processing SSE or providing return value
                         // explicitly through a @Suspended AsyncReturn.resume() callback.
                         // See org.glassfish.jersey.server.model.ResourceMethodInvoker.apply() for details.
-                        method.isSse || method.isSuspendDeclared
-                    )
-                )
+                        method.isSse || method.isSuspendDeclared,
+                    ),
+                ),
             )
             .annotateMethod(method.invocable.definitionMethod.annotations.toList())
             // copy the annotations for each parameter in the invocable method
@@ -120,7 +120,7 @@ class CoroutineModelProcessor @Inject constructor(
                 }
                 replacedMethod.handledBy(
                     proxyInstance,
-                    handlingMethod
+                    handlingMethod,
                 )
                 replacedMethod.handlingMethod(handlingMethod)
             }

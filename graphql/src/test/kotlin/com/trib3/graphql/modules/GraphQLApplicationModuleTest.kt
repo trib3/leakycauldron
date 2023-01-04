@@ -38,8 +38,8 @@ class DummyModule : GraphQLApplicationModule() {
         graphQLQueriesBinder().addBinding().to<DummyQuery>()
         graphQLInstrumentationsBinder().addBinding().toInstance(
             DataLoaderDispatcherInstrumentation(
-                DataLoaderDispatcherInstrumentationOptions.newOptions().includeStatistics(true)
-            )
+                DataLoaderDispatcherInstrumentationOptions.newOptions().includeStatistics(true),
+            ),
         )
     }
 }
@@ -49,7 +49,7 @@ class GraphQLApplicationModuleTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
     val resources: Set<Any>,
-    val graphQL: GraphQL
+    val graphQL: GraphQL,
 ) {
     @Test
     fun testBinding() {
@@ -74,7 +74,7 @@ class GraphQLApplicationModuleTest
             setOf(DummyQuery()),
             setOf(),
             setOf(),
-            setOf()
+            setOf(),
         )
         assertThat(graphQLInstance).isNotNull()
     }
@@ -94,12 +94,12 @@ class OverrideDataLoaderModule : GraphQLApplicationModule() {
                             CompletableFuture.completedFuture(
                                 listOf(
                                     "1",
-                                    "2"
-                                )
+                                    "2",
+                                ),
                             )
                         }
                     }
-                }
+                },
             )
             registry
         }
@@ -110,7 +110,7 @@ class OverrideDataLoaderModule : GraphQLApplicationModule() {
 class GraphQLApplicationModuleDataLoaderOverrideTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<Any>
+    val resources: Set<Any>,
 ) {
     @Test
     fun testBinding() {

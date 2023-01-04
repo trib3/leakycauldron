@@ -29,7 +29,7 @@ class TimestreamReportFactoryTestModule : KotlinModule() {
 @Guice(modules = [TimestreamReportFactoryTestModule::class])
 class TimestreamReporterFactoryTest @Inject constructor(
     val objectMapper: ObjectMapper,
-    val mockTimestreamWriteClient: TimestreamWriteClient
+    val mockTimestreamWriteClient: TimestreamWriteClient,
 ) {
     @Test
     fun testFactory() {
@@ -39,7 +39,7 @@ class TimestreamReporterFactoryTest @Inject constructor(
             TimestreamReporterFactory::class.java,
             BaseValidator.newValidator(),
             objectMapper,
-            testCaseConfigLoader
+            testCaseConfigLoader,
         )
         val factory = configFactory.build()
         val reporter = factory.build(registry)
@@ -51,7 +51,7 @@ class TimestreamReporterFactoryTest @Inject constructor(
             "hostname",
             "application",
             "env",
-            "key1"
+            "key1",
         )
         val dimMap = reporter.globalDimensionValues.associate { it.name() to it.value() }
         assertThat(dimMap["application"]).isEqualTo("Test")

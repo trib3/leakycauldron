@@ -44,7 +44,7 @@ class ProcessorTestResource {
     @Path("/sse")
     suspend fun sseMethod(
         @Context sseEventSink: SseEventSink,
-        @Context sse: Sse
+        @Context sse: Sse,
     ) {
         delay(1)
         sseEventSink.send(sse.newEvent("data", "value"))
@@ -68,18 +68,18 @@ class CoroutineModelProcessorTest {
         EasyMock.expect(mockInjector.getInstance(ProcessorTestResource::class.java)).andReturn(ProcessorTestResource())
         EasyMock.replay(mockInjector, mockAsyncProvider)
         val resourceList = listOf(
-            Resource.builder(ProcessorTestResource::class.java).build()
+            Resource.builder(ProcessorTestResource::class.java).build(),
         )
         val processor = CoroutineModelProcessor(mockInjector, mockAsyncProvider)
         val builtResources = listOf(
             processor.processResourceModel(
                 ResourceModel.Builder(resourceList, false).build(),
-                ResourceConfig()
+                ResourceConfig(),
             ),
             processor.processSubResource(
                 ResourceModel.Builder(resourceList, true).build(),
-                ResourceConfig()
-            )
+                ResourceConfig(),
+            ),
         )
         builtResources.forEach { builtResource ->
             assertThat(builtResource.resources).hasSize(1)

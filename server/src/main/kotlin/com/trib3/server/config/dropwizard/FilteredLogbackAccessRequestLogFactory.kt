@@ -28,7 +28,7 @@ private const val FAST_RESPONSE_TIME = 200
  */
 class RequestIdLogbackAccessRequestLayout(
     context: LoggerContext,
-    timeZone: TimeZone
+    timeZone: TimeZone,
 ) : LogbackAccessRequestLayout(context, timeZone) {
     init {
         pattern = "%t{ISO8601,UTC} [%responseHeader{X-Request-Id}] ${this.pattern}"
@@ -84,7 +84,7 @@ class FilteredLogbackAccessRequestLogFactory : LogbackAccessRequestLogFactory() 
                     }
                     return FilterReply.NEUTRAL
                 }
-            }
+            },
         )
         return requestLog
     }

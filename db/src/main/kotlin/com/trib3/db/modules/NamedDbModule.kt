@@ -25,7 +25,7 @@ private class DbConfigProvider
     @Named("configPath") private val configPath: String,
     private val healthCheckRegistry: HealthCheckRegistry,
     private val metricRegistry: MetricRegistry,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : Provider<DbConfig> {
     override fun get(): DbConfig {
         return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper)
@@ -41,7 +41,7 @@ private class DataSourceProvider
     @Named("configPath") private val configPath: String,
     private val healthCheckRegistry: HealthCheckRegistry,
     private val metricRegistry: MetricRegistry,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : Provider<DataSource> {
     override fun get(): DataSource {
         return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dataSource
@@ -57,7 +57,7 @@ private class DSLContextProvider
     @Named("configPath") private val configPath: String,
     private val healthCheckRegistry: HealthCheckRegistry,
     private val metricRegistry: MetricRegistry,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : Provider<DSLContext> {
     override fun get(): DSLContext {
         return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dslContext

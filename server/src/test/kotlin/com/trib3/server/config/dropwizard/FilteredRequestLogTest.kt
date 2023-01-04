@@ -34,14 +34,14 @@ class FilteredRequestLogTest {
                         _,
                         _,
                         _,
-                        _
+                        _,
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                }
+                },
             )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
@@ -49,7 +49,7 @@ class FilteredRequestLogTest {
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() + 200).anyTimes()
         EasyMock.expect(mockResponse.committedMetaData).andReturn(
-            MetaData.Response(null, HttpServletResponse.SC_OK, null)
+            MetaData.Response(null, HttpServletResponse.SC_OK, null),
         ).anyTimes()
         EasyMock.replay(mockRequest, mockResponse)
         logger.log(mockRequest, mockResponse)
@@ -66,14 +66,14 @@ class FilteredRequestLogTest {
                         _,
                         _,
                         _,
-                        _
+                        _,
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                }
+                },
             )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
@@ -81,7 +81,7 @@ class FilteredRequestLogTest {
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() - 300).anyTimes()
         EasyMock.expect(mockResponse.committedMetaData).andReturn(
-            MetaData.Response(null, HttpServletResponse.SC_OK, null)
+            MetaData.Response(null, HttpServletResponse.SC_OK, null),
         ).anyTimes()
         EasyMock.replay(mockRequest, mockResponse)
         logger.log(mockRequest, mockResponse)
@@ -98,14 +98,14 @@ class FilteredRequestLogTest {
                         _,
                         _,
                         _,
-                        _
+                        _,
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                }
+                },
             )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()
@@ -116,7 +116,7 @@ class FilteredRequestLogTest {
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() + 200).anyTimes()
         EasyMock.expect(mockResponse.committedMetaData).andReturn(
-            MetaData.Response(null, HttpServletResponse.SC_SERVICE_UNAVAILABLE, fields)
+            MetaData.Response(null, HttpServletResponse.SC_SERVICE_UNAVAILABLE, fields),
         ).anyTimes()
         val mockChannel = LeakyMock.niceMock<HttpChannel>()
         EasyMock.expect(mockResponse.httpChannel).andReturn(mockChannel).anyTimes()
@@ -145,14 +145,14 @@ class FilteredRequestLogTest {
                         _,
                         _,
                         _,
-                        _
+                        _,
                     ->
                     object : AppenderBase<IAccessEvent>() {
                         override fun append(eventObject: IAccessEvent) {
                             events.add(eventObject)
                         }
                     }.also { it.start() }
-                }
+                },
             )
         val logger = factory.build("test")
         val mockRequest = LeakyMock.niceMock<Request>()

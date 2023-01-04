@@ -77,12 +77,12 @@ class GraphQLResourceTest {
     val graphQL = GraphQL.newGraphQL(
         toSchema(
             SchemaGeneratorConfig(
-                listOf(this::class.java.packageName)
+                listOf(this::class.java.packageName),
             ),
             listOf(TopLevelObject(TestQuery())),
             listOf(),
-            listOf()
-        )
+            listOf(),
+        ),
     )
         .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
         .instrumentation(RequestIdInstrumentation())
@@ -97,14 +97,14 @@ class GraphQLResourceTest {
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceTest")),
             wsCreatorFactory,
-            appConfig = TribeApplicationConfig(ConfigLoader())
+            appConfig = TribeApplicationConfig(ConfigLoader()),
         )
     val lockedResource =
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
             wsCreatorFactory,
-            appConfig = TribeApplicationConfig(ConfigLoader())
+            appConfig = TribeApplicationConfig(ConfigLoader()),
         )
     val objectMapper = ObjectMapperProvider().get()
 
@@ -132,8 +132,8 @@ class GraphQLResourceTest {
                 Optional.empty(),
                 GraphQLBatchRequest(
                     GraphQLRequest("query {test(value:\"123\")}"),
-                    GraphQLRequest("query {test(value:\"456\")}")
-                )
+                    GraphQLRequest("query {test(value:\"456\")}"),
+                ),
             )
             val graphQLResult = result.entity as GraphQLBatchResponse
             assertThat(graphQLResult.responses).hasSize(2)
@@ -163,8 +163,8 @@ class GraphQLResourceTest {
             GraphQLRequest(
                 "query(${'$'}val:String!) {test(value:${'$'}val)}",
                 null,
-                mapOf("val" to "123")
-            )
+                mapOf("val" to "123"),
+            ),
         )
         val graphQLResult = result.entity as GraphQLResponse<*>
         assertThat((graphQLResult.data as Map<*, *>)["test"]).isEqualTo("123")
@@ -255,7 +255,7 @@ class GraphQLResourceTest {
                 val result =
                     lockedResource.graphQL(
                         Optional.of(UserPrincipal(User("bill"))),
-                        GraphQLRequest("query {cancellable}")
+                        GraphQLRequest("query {cancellable}"),
                     )
                 val entity = result.entity as GraphQLResponse<*>
                 assertThat((entity.data as Map<*, *>)["cancellable"]).isEqualTo("result")
@@ -271,8 +271,8 @@ class GraphQLResourceTest {
         assertThat(
             lockedResource.cancel(
                 Optional.of(UserPrincipal(User("bill"))),
-                "123"
-            ).status
+                "123",
+            ).status,
         ).isEqualTo(HttpStatus.NO_CONTENT_204)
         job.join()
         assertThat(reached).isTrue()
@@ -287,7 +287,7 @@ class GraphQLResourceTest {
                 val result =
                     lockedResource.graphQL(
                         Optional.of(UserPrincipal(User("bill"))),
-                        GraphQLRequest("query {cancellable}")
+                        GraphQLRequest("query {cancellable}"),
                     )
                 val entity = result.entity as GraphQLResponse<*>
                 assertThat((entity.data as Map<*, *>)["cancellable"]).isEqualTo("result")

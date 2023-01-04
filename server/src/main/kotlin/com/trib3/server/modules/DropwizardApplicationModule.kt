@@ -25,8 +25,8 @@ class DropwizardApplicationModule : TribeApplicationModule() {
             ServletConfig(
                 OpenApiServlet::class.java.simpleName,
                 OpenApiServlet(),
-                listOf("/openapi")
-            )
+                listOf("/openapi"),
+            ),
         )
         adminServletBinder().addBinding().toInstance(
             ServletConfig(
@@ -35,10 +35,10 @@ class DropwizardApplicationModule : TribeApplicationModule() {
                     "swagger",
                     "/swagger",
                     "index.html",
-                    Charsets.UTF_8
+                    Charsets.UTF_8,
                 ),
-                listOf("/swagger", "/swagger/*")
-            )
+                listOf("/swagger", "/swagger/*"),
+            ),
         )
 
         KotlinMultibinder.newSetBinder<JaxrsAppProcessor>(kotlinBinder).addBinding().to<SwaggerInitializer>()
@@ -58,8 +58,8 @@ class DropwizardApplicationModule : TribeApplicationModule() {
                 ServletFilterConfig(
                     AdminAuthFilter::class.java.simpleName,
                     AdminAuthFilter::class.java,
-                    mapOf("token" to it)
-                )
+                    mapOf("token" to it),
+                ),
             )
         }.orEmpty()
     }

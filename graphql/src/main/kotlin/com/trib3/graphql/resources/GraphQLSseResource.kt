@@ -67,7 +67,7 @@ internal data class StreamInfo(
     val scope: CoroutineScope,
     val principal: Principal?,
     val eventSink: SseEventSink,
-    val sse: Sse
+    val sse: Sse,
 )
 
 /**
@@ -87,7 +87,7 @@ open class GraphQLSseResource @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
     private val objectMapper: ObjectMapper,
-    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null
+    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
 ) {
     private val reservedStreams = ConcurrentHashMap<UUID, Optional<Principal>>()
     internal val activeStreams = ConcurrentHashMap<UUID, StreamInfo>()
@@ -116,7 +116,7 @@ open class GraphQLSseResource @Inject constructor(
         contextMap: Map<*, Any>,
         eventSink: SseEventSink,
         sse: Sse,
-        operationId: String?
+        operationId: String?,
     ) {
         try {
             val input = query.toExecutionInput(dataLoaderRegistryFactory, contextMap)
@@ -139,8 +139,8 @@ open class GraphQLSseResource @Inject constructor(
                 }
                 eventSink.send(
                     sse.newEventBuilder().name("next").data(
-                        objectMapper.writeValueAsString(nextMessage)
-                    ).build()
+                        objectMapper.writeValueAsString(nextMessage),
+                    ).build(),
                 )
             }.collect()
         } catch (e: Exception) {
@@ -150,15 +150,15 @@ open class GraphQLSseResource @Inject constructor(
             val nextMessage: Any = if (operationId != null) {
                 mapOf(
                     "id" to operationId,
-                    "payload" to gqlError
+                    "payload" to gqlError,
                 )
             } else {
                 gqlError
             }
             eventSink.send(
                 sse.newEventBuilder().name("next").data(
-                    objectMapper.writeValueAsString(nextMessage)
-                ).build()
+                    objectMapper.writeValueAsString(nextMessage),
+                ).build(),
             )
         } finally {
             log.info("Query ${operationId ?: RequestIdFilter.getRequestId()} completed.")
@@ -179,7 +179,7 @@ open class GraphQLSseResource @Inject constructor(
     @Timed
     open fun reserveEventStream(
         @Parameter(hidden = true) @Auth
-        principal: Optional<Principal>
+        principal: Optional<Principal>,
     ): Response {
         if (principal.isEmpty && graphQLConfig.checkAuthorization) {
             return unauthorizedResponse()
@@ -200,7 +200,7 @@ open class GraphQLSseResource @Inject constructor(
         @Context eventSink: SseEventSink,
         @Context sse: Sse,
         @HeaderParam(STREAM_TOKEN_HEADER) headerToken: UUID?,
-        @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?
+        @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?,
     ) {
         val streamToken = headerToken ?: paramToken
         val principal = if (streamToken != null) {
@@ -237,7 +237,7 @@ open class GraphQLSseResource @Inject constructor(
         principal: Optional<Principal>,
         query: GraphQLRequest,
         @HeaderParam(STREAM_TOKEN_HEADER) headerToken: UUID?,
-        @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?
+        @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?,
     ): Response {
         val streamToken = headerToken ?: paramToken ?: throw WebApplicationException(unauthorizedResponse())
         val streamInfo = activeStreams[streamToken]
@@ -268,7 +268,7 @@ open class GraphQLSseResource @Inject constructor(
     open fun cancelOperation(
         @QueryParam("operationId") operationId: String,
         @HeaderParam(STREAM_TOKEN_HEADER) headerToken: UUID?,
-        @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?
+        @QueryParam(STREAM_TOKEN_QUERY_PARAM) paramToken: UUID?,
     ) {
         val streamToken = headerToken ?: paramToken ?: throw WebApplicationException(unauthorizedResponse())
         runningOperations[streamToken]?.get(operationId)?.cancel()
@@ -288,7 +288,7 @@ open class GraphQLSseResource @Inject constructor(
         @Parameter(hidden = true) @Auth
         principal: Optional<Principal>,
         query: GraphQLRequest,
-        @Context containerRequestContext: ContainerRequestContext? = null
+        @Context containerRequestContext: ContainerRequestContext? = null,
     ) = coroutineScope {
         val contextMap = getGraphQLContextMap(this, principal.orElse(null)) + contextMap(containerRequestContext)
         val ka = launchKeepAlive(eventSink, sse)

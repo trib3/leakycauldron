@@ -23,7 +23,7 @@ open class GraphQLWebSocketAdapter(
     val subProtocol: GraphQLWebSocketSubProtocol,
     val channel: Channel<OperationMessage<*>>,
     val objectMapper: ObjectMapper,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WebSocketAdapter(), CoroutineScope by CoroutineScope(dispatcher) {
     val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()!!
 
@@ -34,7 +34,7 @@ open class GraphQLWebSocketAdapter(
             OperationType.GQL_STOP,
             OperationType.GQL_CONNECTION_TERMINATE,
             OperationType.GQL_PING,
-            OperationType.GQL_PONG
+            OperationType.GQL_PONG,
         )
     }
 

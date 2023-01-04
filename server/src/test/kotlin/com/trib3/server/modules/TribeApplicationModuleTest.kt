@@ -17,7 +17,7 @@ private class ArbitraryStringTribeAppModule : TribeApplicationModule() {
 class TribeApplicationModuleTest
 @Inject constructor(
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val bound: Set<Any>
+    val bound: Set<Any>,
 ) {
     @Test
     fun testResourceBound() {

@@ -28,7 +28,7 @@ class DefaultApplicationModuleTest
     val healthChecks: Set<HealthCheck>,
     val objectMapper: ObjectMapper,
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<Any>
+    val resources: Set<Any>,
 ) {
     @Test
     fun testBindings() {

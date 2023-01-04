@@ -63,7 +63,7 @@ open class CloudWatchReporterFactoryTestBase(val mapper: ObjectMapper) {
             CloudWatchReporterFactory::class.java,
             BaseValidator.newValidator(),
             mapper,
-            ConfigLoader(testCaseConfigPath)
+            ConfigLoader(testCaseConfigPath),
         )
         val factory = configFactory.build()
         factory.build(getMetricRegistry()).report()
@@ -91,7 +91,7 @@ class MockCloudWatchModuleDefault : MockCloudWatchModule()
 @Guice(modules = [MockCloudWatchModuleDefault::class])
 class CloudWatchReporterFactoryDefaultTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testDefaultConfig() {
@@ -103,11 +103,11 @@ class CloudWatchReporterFactoryDefaultTest @Inject constructor(
             assertThat(it.storageResolution()).isEqualTo(60)
             assertThat(
                 it.dimensions().first { d -> d.name() == "Hostname" }
-                    ?.value()
+                    ?.value(),
             ).isEqualTo(InetAddress.getLocalHost().hostName)
             assertThat(
                 it.dimensions().first { d -> d.name() == "Application" }
-                    ?.value()
+                    ?.value(),
             ).isEqualTo("Test")
         }
         assertThat(metricData[0].metricName()).isEqualTo("g1")
@@ -141,7 +141,7 @@ class MockCloudWatchModuleNamespace : MockCloudWatchModule()
 @Guice(modules = [MockCloudWatchModuleNamespace::class])
 class CloudWatchReporterFactoryNamespaceTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testNamespace() {
@@ -155,7 +155,7 @@ class MockCloudWatchModuleMeterRates : MockCloudWatchModule()
 @Guice(modules = [MockCloudWatchModuleMeterRates::class])
 class CloudWatchReporterFactoryMeterRatesTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testMeterRates() {
@@ -183,7 +183,7 @@ class MockCloudWatchModuleHistogramTimer : MockCloudWatchModule()
 @Guice(modules = [MockCloudWatchModuleHistogramTimer::class])
 class CloudWatchReporterFactoryHistogramTimerTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testHistogramTimer() {
@@ -222,7 +222,7 @@ class MockCloudWatchModuleJvmMetrics : MockCloudWatchModule()
 @Guice(modules = [MockCloudWatchModuleJvmMetrics::class])
 class CloudWatchReporterFactoryJvmMetricsTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testJvmMetrics() {
@@ -238,7 +238,7 @@ class MockCloudWatchModuleNonRawCount : MockCloudWatchModule()
 @Guice(modules = [MockCloudWatchModuleNonRawCount::class])
 class CloudWatchReporterFactoryNonRawCountTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testNonRawCount() {
@@ -246,7 +246,7 @@ class CloudWatchReporterFactoryNonRawCountTest @Inject constructor(
             CloudWatchReporterFactory::class.java,
             BaseValidator.newValidator(),
             mapper,
-            ConfigLoader("nonRawCountTestCase")
+            ConfigLoader("nonRawCountTestCase"),
         ).build()
         val registry = getMetricRegistry()
         val reporter = factory.build(registry)
@@ -261,7 +261,7 @@ class CloudWatchReporterFactoryNonRawCountTest @Inject constructor(
 @Guice(modules = [MockCloudWatchModuleRawCount::class])
 class CloudWatchReporterFactoryRawCountTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
 
     @Test
@@ -270,7 +270,7 @@ class CloudWatchReporterFactoryRawCountTest @Inject constructor(
             CloudWatchReporterFactory::class.java,
             BaseValidator.newValidator(),
             mapper,
-            ConfigLoader("rawCountTestCase")
+            ConfigLoader("rawCountTestCase"),
         ).build()
         val registry = getMetricRegistry()
         val reporter = factory.build(registry)
@@ -285,7 +285,7 @@ class CloudWatchReporterFactoryRawCountTest @Inject constructor(
 @Guice(modules = [MockCloudWatchModule::class])
 class CloudWatchReporterFactoryHighResolutionTest @Inject constructor(
     mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>
+    val putCapture: Capture<PutMetricDataRequest>,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
     @Test
     fun testHighResolution() {
@@ -310,7 +310,7 @@ class MockCloudWatchDryRunModule : KotlinModule() {
 
 @Guice(modules = [MockCloudWatchDryRunModule::class])
 class CloudWatchReporterDryRunFactoryTest @Inject constructor(
-    mapper: ObjectMapper
+    mapper: ObjectMapper,
 ) : CloudWatchReporterFactoryTestBase(mapper) {
 
     @Test

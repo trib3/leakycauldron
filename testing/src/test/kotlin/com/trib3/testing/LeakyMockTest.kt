@@ -45,35 +45,35 @@ class LeakyMockTest {
             mock.manipulateString(
                 LeakyMock.and(
                     LeakyMock.contains("foo"),
-                    LeakyMock.contains("bar")
-                )
-            )
+                    LeakyMock.contains("bar"),
+                ),
+            ),
         ).andReturn("baz!").once()
         EasyMock.expect(
             mock.manipulateString(
                 LeakyMock.and(
                     LeakyMock.contains("foo"),
                     LeakyMock.contains("bar"),
-                    LeakyMock.contains("baz")
-                )
-            )
+                    LeakyMock.contains("baz"),
+                ),
+            ),
         ).andReturn("bazh!").once()
         EasyMock.expect(
             mock.manipulateString(
                 LeakyMock.or(
                     LeakyMock.contains("foo"),
-                    LeakyMock.contains("bar")
-                )
-            )
+                    LeakyMock.contains("bar"),
+                ),
+            ),
         ).andReturn("bash!").times(2)
         EasyMock.expect(
             mock.manipulateString(
                 LeakyMock.or(
                     LeakyMock.contains("foo"),
                     LeakyMock.contains("bar"),
-                    LeakyMock.contains("baz")
-                )
-            )
+                    LeakyMock.contains("baz"),
+                ),
+            ),
         ).andReturn("bazh!!!").times(3)
         EasyMock.expect(mock.manipulateString(LeakyMock.not(LeakyMock.contains("foo")))).andReturn("bar!").once()
         EasyMock.expect(mock.manipulateString(LeakyMock.find("\\d+"))).andReturn("nums!").once()

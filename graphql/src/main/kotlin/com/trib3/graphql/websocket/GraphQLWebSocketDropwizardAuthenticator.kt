@@ -12,7 +12,7 @@ import javax.ws.rs.container.ContainerRequestContext
  * to a Dropwizard [AuthFilter] from the Guice injector.
  */
 class GraphQLWebSocketDropwizardAuthenticator @Inject constructor(
-    @Nullable val authFilter: AuthFilter<*, *>?
+    @Nullable val authFilter: AuthFilter<*, *>?,
 ) : GraphQLWebSocketAuthenticator {
     override fun invoke(containerRequestContext: ContainerRequestContext): Principal? {
         return runCatching {

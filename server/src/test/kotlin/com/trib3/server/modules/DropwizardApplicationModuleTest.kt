@@ -16,7 +16,7 @@ class DropwizardApplicationModuleTest
 @Inject constructor(
     val bundles: Set<ConfiguredBundle<Configuration>>,
     @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
-    val adminFilters: Set<ServletFilterConfig>
+    val adminFilters: Set<ServletFilterConfig>,
 ) {
     @Test
     fun testBindings() {

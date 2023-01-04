@@ -63,16 +63,16 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
         client.start()
         val session = client.connect(
             WebSocketAdapter(),
-            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "timeout").build()
+            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "timeout").build(),
         ).get()
         session.remote.sendString(
             mapper.writeValueAsString(
                 OperationMessage(
                     OperationType.GQL_START,
                     "launch",
-                    null
-                )
-            )
+                    null,
+                ),
+            ),
         )
         Thread.sleep(1100) // sleep for longer than the timeout to make sure we get an exception
         val job = getResource().webSocketCreator.coroutines["name=timeout"]!!
@@ -97,7 +97,7 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
         client.start()
         val session = client.connect(
             WebSocketAdapter(),
-            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "clientClose").build()
+            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "clientClose").build(),
         ).get()
         session.remote.sendString(mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)))
         var maybeJob = getResource().webSocketCreator.coroutines["name=clientClosechild"]
@@ -129,7 +129,7 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
         client.start()
         val session = client.connect(
             WebSocketAdapter(),
-            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "spin").build()
+            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "spin").build(),
         ).get()
         session.remote.sendString(mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)))
         launch(Dispatchers.IO) {
@@ -141,9 +141,9 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
                         OperationMessage(
                             OperationType.GQL_START,
                             "ping",
-                            null
-                        )
-                    )
+                            null,
+                        ),
+                    ),
                 )
             }
             session.close()

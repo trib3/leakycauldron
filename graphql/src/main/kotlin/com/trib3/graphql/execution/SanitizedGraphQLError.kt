@@ -12,7 +12,7 @@ import graphql.language.SourceLocation
 class SanitizedGraphQLError(
     path: ResultPath,
     exception: Throwable,
-    sourceLocation: SourceLocation
+    sourceLocation: SourceLocation,
 ) : ExceptionWhileDataFetching(path, exception, sourceLocation) {
 
     override fun getMessage(): String {

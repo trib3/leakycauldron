@@ -32,7 +32,7 @@ import javax.inject.Inject
  */
 class ConfigLoader
 constructor(
-    private val defaultPath: String // usually only specified for tests
+    private val defaultPath: String, // usually only specified for tests
 ) {
     @Inject
     constructor() : this("")
