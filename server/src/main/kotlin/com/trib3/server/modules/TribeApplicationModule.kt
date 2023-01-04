@@ -12,7 +12,7 @@ import javax.servlet.Servlet
 data class ServletConfig(
     val name: String,
     val servlet: Servlet,
-    val mappings: List<String>
+    val mappings: List<String>,
 )
 
 /**
@@ -34,7 +34,7 @@ open class TribeApplicationModule : KotlinModule() {
     fun resourceBinder(): KotlinMultibinder<Any> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(APPLICATION_RESOURCES_BIND_NAME)
+            Names.named(APPLICATION_RESOURCES_BIND_NAME),
         )
     }
 
@@ -44,7 +44,7 @@ open class TribeApplicationModule : KotlinModule() {
     fun appServletBinder(): KotlinMultibinder<ServletConfig> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(APPLICATION_SERVLETS_BIND_NAME)
+            Names.named(APPLICATION_SERVLETS_BIND_NAME),
         )
     }
 
@@ -54,7 +54,7 @@ open class TribeApplicationModule : KotlinModule() {
     fun adminServletBinder(): KotlinMultibinder<ServletConfig> {
         return KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
-            Names.named(ADMIN_SERVLETS_BIND_NAME)
+            Names.named(ADMIN_SERVLETS_BIND_NAME),
         )
     }
 

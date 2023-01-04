@@ -98,20 +98,20 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                             Optional.empty()
                         }
                     }
-                    .buildAuthFilter()
-            )
+                    .buildAuthFilter(),
+            ),
         )
     }
 
     val graphQL = GraphQL.newGraphQL(
         toSchema(
             SchemaGeneratorConfig(
-                listOf(this::class.java.packageName)
+                listOf(this::class.java.packageName),
             ),
             listOf(TopLevelObject(AuthTestQuery())),
             listOf(),
-            listOf()
-        )
+            listOf(),
+        ),
     )
         .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
         .instrumentation(RequestIdInstrumentation())
@@ -136,7 +136,7 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                     }
                 }
             },
-            appConfig = TribeApplicationConfig(ConfigLoader())
+            appConfig = TribeApplicationConfig(ConfigLoader()),
         )
 
     @Test
@@ -162,11 +162,11 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                             client,
                             client.httpClient,
                             uri,
-                            adapter
+                            adapter,
                         ).also {
                             it.cookie(HttpCookie("authCookie", "user"))
-                        }
-                    )
+                        },
+                    ),
                 ).get()
             }.isFailure().messageContains("Failed to upgrade")
         } finally {
@@ -206,11 +206,11 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                         client,
                         client.httpClient,
                         uri,
-                        adapter
+                        adapter,
                     ).also {
                         it.cookie(HttpCookie("authCookie", "user"))
-                    }
-                )
+                    },
+                ),
             ).get()
             lock.withLock() {
                 session.remote.sendString("Hi there")

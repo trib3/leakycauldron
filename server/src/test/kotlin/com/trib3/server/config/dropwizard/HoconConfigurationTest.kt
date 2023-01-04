@@ -19,7 +19,7 @@ class HoconConfigurationTest {
             Configuration::class.java,
             Bootstrap<Configuration>(null).validatorFactory.validator,
             ObjectMapperProvider().get(),
-            "dw"
+            "dw",
         )
         val config = factory.build(FileConfigurationSourceProvider(), "ignored")
         // Ensure the admin port is set to test hocon's 9080 instead of default 8080
@@ -28,7 +28,7 @@ class HoconConfigurationTest {
                 (config.serverFactory as SimpleServerFactory)
                     .connector as HttpConnectorFactory
                 )
-                .port
+                .port,
         ).isEqualTo(9080)
     }
 }

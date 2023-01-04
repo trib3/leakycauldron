@@ -24,7 +24,7 @@ import javax.ws.rs.core.Response
 @GraphQLDirective(
     name = "auth",
     description = "only allows given roles to access the annotated element",
-    locations = [Introspection.DirectiveLocation.FIELD_DEFINITION]
+    locations = [Introspection.DirectiveLocation.FIELD_DEFINITION],
 )
 annotation class GraphQLAuth(val roles: Array<String> = [])
 

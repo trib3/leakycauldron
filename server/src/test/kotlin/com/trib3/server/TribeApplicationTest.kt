@@ -149,7 +149,7 @@ class TribeApplicationTest {
             mockServlet,
             mockHealthChecks,
             mockServletRegistration,
-            mockFilterRegistration
+            mockFilterRegistration,
         )
         instance.run(mockConf, mockEnv)
         assertThat(authDynamicRegistered).isFalse()
@@ -161,7 +161,7 @@ class TribeApplicationTest {
             mockServlet,
             mockHealthChecks,
             mockServletRegistration,
-            mockFilterRegistration
+            mockFilterRegistration,
         )
     }
 
@@ -212,7 +212,7 @@ class TribeApplicationTest {
             mockServlet,
             mockHealthChecks,
             mockServletRegistration,
-            mockFilterRegistration
+            mockFilterRegistration,
         )
         authInstance.run(mockConf, mockEnv)
         assertThat(authDynamicRegistered).isTrue()
@@ -224,7 +224,7 @@ class TribeApplicationTest {
             mockServlet,
             mockHealthChecks,
             mockServletRegistration,
-            mockFilterRegistration
+            mockFilterRegistration,
         )
     }
 }

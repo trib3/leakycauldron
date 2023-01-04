@@ -55,7 +55,7 @@ class GraphQLWebSocketDropwizardAuthenticatorTest {
             null,
             null,
             MapPropertiesDelegate(emptyMap()),
-            null
+            null,
         ).apply {
             header("user", user)
         }

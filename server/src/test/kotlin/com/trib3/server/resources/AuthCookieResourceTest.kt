@@ -43,8 +43,8 @@ class AuthCookieResourceTest : ResourceTestBase<AuthCookieResource>() {
                             Optional.empty()
                         }
                     }
-                    .buildAuthFilter()
-            )
+                    .buildAuthFilter(),
+            ),
         )
     }
 

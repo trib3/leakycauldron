@@ -16,13 +16,13 @@ class HoconConfigurationFactoryFactory<T>
         klass: Class<T>,
         validator: Validator,
         objectMapper: ObjectMapper,
-        propertyPrefix: String
+        propertyPrefix: String,
     ): ConfigurationFactory<T> {
         return HoconConfigurationFactory<T>(
             klass,
             validator,
             objectMapper,
-            configLoader
+            configLoader,
         )
     }
 }

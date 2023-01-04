@@ -68,8 +68,8 @@ class RequestIdFilterTest {
         EasyMock.expect(
             mockResponse.setHeader(
                 EasyMock.eq(RequestIdFilter.REQUEST_ID_HEADER),
-                EasyMock.not(EasyMock.eq(requestId))
-            )
+                EasyMock.not(EasyMock.eq(requestId)),
+            ),
         ).once()
         EasyMock.replay(mockRequest, mockResponse)
         filter.doFilter(mockRequest, mockResponse) { _, _ ->
@@ -89,8 +89,8 @@ class RequestIdFilterTest {
             EasyMock.expect(
                 mockResponse.setHeader(
                     EasyMock.eq(RequestIdFilter.REQUEST_ID_HEADER),
-                    EasyMock.eq(requestId)
-                )
+                    EasyMock.eq(requestId),
+                ),
             ).once()
             EasyMock.replay(mockRequest, mockResponse)
             filter.doFilter(mockRequest, mockResponse) { _, _ ->

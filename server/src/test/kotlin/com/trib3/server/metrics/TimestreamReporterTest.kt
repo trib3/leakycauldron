@@ -47,7 +47,7 @@ class TimestreamReporterTest {
             "",
             MetricFilter.ALL,
             TimeUnit.MILLISECONDS,
-            TimeUnit.SECONDS
+            TimeUnit.SECONDS,
         )
         reporter.report()
 
@@ -56,7 +56,7 @@ class TimestreamReporterTest {
         assertThat(requestCapture.value.tableName()).isEqualTo("tableName")
         assertThat(requestCapture.value.commonAttributes().time()).isNotNull()
         assertThat(
-            requestCapture.value.commonAttributes().timeUnit()
+            requestCapture.value.commonAttributes().timeUnit(),
         ).isEqualTo(software.amazon.awssdk.services.timestreamwrite.model.TimeUnit.MILLISECONDS)
         assertThat(requestCapture.value.commonAttributes().dimensions()).isEqualTo(globalDimensions)
         with(requestCapture.value.records()) {

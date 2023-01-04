@@ -17,13 +17,13 @@ class RequestIdInstrumentation : SimplePerformantInstrumentation() {
     override fun instrumentExecutionResult(
         executionResult: ExecutionResult,
         parameters: InstrumentationExecutionParameters,
-        state: InstrumentationState?
+        state: InstrumentationState?,
     ): CompletableFuture<ExecutionResult> {
         return CompletableFuture.completedFuture(
             ExecutionResultImpl.newExecutionResult()
                 .from(executionResult)
                 .addExtension(RequestIdFilter.REQUEST_ID_KEY, RequestIdFilter.getRequestId())
-                .build()
+                .build(),
         )
     }
 }

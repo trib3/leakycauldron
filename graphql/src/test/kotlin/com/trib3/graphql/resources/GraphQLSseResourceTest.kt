@@ -54,7 +54,7 @@ class GraphQLSseResourceTest {
         resource = GraphQLSseResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLSseResourceTest")),
-            ObjectMapperProvider().get()
+            ObjectMapperProvider().get(),
         )
     }
 
@@ -72,7 +72,7 @@ class GraphQLSseResourceTest {
                 mockSink,
                 mockSse,
                 Optional.of(principal),
-                GraphQLRequest("query")
+                GraphQLRequest("query"),
             )
         }.isSuccess()
         assertThat(eventCapture.values[0].name).isEqualTo("next")
@@ -103,7 +103,7 @@ class GraphQLSseResourceTest {
                 Optional.empty(),
                 GraphQLRequest("query"),
                 token,
-                null
+                null,
             )
             // wait for stream events
             while (eventCapture.values.size < 2) {

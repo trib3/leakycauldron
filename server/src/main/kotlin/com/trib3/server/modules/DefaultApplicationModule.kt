@@ -29,7 +29,7 @@ import javax.servlet.Filter
 data class ServletFilterConfig(
     val name: String,
     val filterClass: Class<out Filter>,
-    val initParameters: Map<String, String> = emptyMap()
+    val initParameters: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -48,7 +48,7 @@ class DefaultApplicationModule : TribeApplicationModule() {
 
         val filterBinder = KotlinMultibinder.newSetBinder<ServletFilterConfig>(kotlinBinder)
         filterBinder.addBinding().toInstance(
-            ServletFilterConfig(RequestIdFilter::class.java.simpleName, RequestIdFilter::class.java)
+            ServletFilterConfig(RequestIdFilter::class.java.simpleName, RequestIdFilter::class.java),
         )
 
         // Bind standard resources resources
@@ -87,12 +87,12 @@ class DefaultApplicationModule : TribeApplicationModule() {
         val paramMap = mapOf(
             CrossOriginFilter.ALLOWED_ORIGINS_PARAM to corsDomain,
             CrossOriginFilter.ALLOWED_METHODS_PARAM to "GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD",
-            CrossOriginFilter.ALLOW_CREDENTIALS_PARAM to "true"
+            CrossOriginFilter.ALLOW_CREDENTIALS_PARAM to "true",
         )
         return ServletFilterConfig(
             CrossOriginFilter::class.java.simpleName,
             CrossOriginFilter::class.java,
-            paramMap
+            paramMap,
         )
     }
 

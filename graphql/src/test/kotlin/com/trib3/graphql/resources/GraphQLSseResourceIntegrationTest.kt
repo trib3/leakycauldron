@@ -79,12 +79,12 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
         toSchema(
             SchemaGeneratorConfig(
                 listOf(this::class.java.packageName),
-                hooks = FlowSubscriptionSchemaGeneratorHooks()
+                hooks = FlowSubscriptionSchemaGeneratorHooks(),
             ),
             listOf(TopLevelObject(SseQuery())),
             listOf(),
-            listOf(TopLevelObject(SseSubscription()))
-        )
+            listOf(TopLevelObject(SseSubscription())),
+        ),
     )
         .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
         .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
@@ -94,7 +94,7 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
     private val rawResource = GraphQLSseResource(
         graphQL,
         GraphQLConfig(ConfigLoader("GraphSSEQLResourceIntegrationTest")),
-        ObjectMapperProvider().get()
+        ObjectMapperProvider().get(),
     )
 
     private val target by lazy { resource.target("/graphql/stream") }

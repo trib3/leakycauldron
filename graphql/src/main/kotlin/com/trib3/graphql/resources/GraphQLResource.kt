@@ -57,7 +57,7 @@ inline fun <reified T> contextMap(value: T?): Map<*, Any> {
  */
 fun getGraphQLContextMap(
     scope: CoroutineScope,
-    principal: Principal? = null
+    principal: Principal? = null,
 ): Map<*, Any> {
     return contextMap(scope) + contextMap(principal)
 }
@@ -68,7 +68,7 @@ fun getGraphQLContextMap(
 internal fun unauthorizedResponse(): Response {
     return Response.status(HttpStatus.UNAUTHORIZED_401).header(
         "WWW-Authenticate",
-        "Basic realm=\"realm\""
+        "Basic realm=\"realm\"",
     ).build()
 }
 
@@ -84,7 +84,7 @@ open class GraphQLResource
     private val graphQLConfig: GraphQLConfig,
     private val creatorFactory: GraphQLContextWebSocketCreatorFactory,
     @Nullable val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
-    appConfig: TribeApplicationConfig
+    appConfig: TribeApplicationConfig,
 ) {
     // Using the CrossOriginFilter directly is tricky because it avoids setting
     // CORS headers on websocket requests, so mimic its regex and evaluate that
@@ -93,7 +93,7 @@ open class GraphQLResource
         appConfig.corsDomains.joinToString("|") {
             "https?://*.?$it|" +
                 "https?://*.?$it:${appConfig.appPort}"
-        }.replace(".", "\\.").replace("*", ".*")
+        }.replace(".", "\\.").replace("*", ".*"),
     )
 
     internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
@@ -122,7 +122,7 @@ open class GraphQLResource
         @Parameter(hidden = true) @Auth
         principal: Optional<Principal>,
         query: GraphQLServerRequest,
-        @Context requestContext: ContainerRequestContext? = null
+        @Context requestContext: ContainerRequestContext? = null,
     ): Response = supervisorScope {
         val responseBuilder = Response.ok()
         val contextMap =
@@ -167,7 +167,7 @@ open class GraphQLResource
     fun cancel(
         @Parameter(hidden = true) @Auth
         principal: Optional<Principal>,
-        @QueryParam("id") requestId: String
+        @QueryParam("id") requestId: String,
     ): Response {
         if (graphQLConfig.checkAuthorization && !principal.isPresent) {
             return unauthorizedResponse()
@@ -189,7 +189,7 @@ open class GraphQLResource
         principal: Optional<Principal>,
         @Context request: HttpServletRequest,
         @Context response: HttpServletResponse,
-        @Context containerRequestContext: ContainerRequestContext
+        @Context containerRequestContext: ContainerRequestContext,
     ): Response {
         val origin = request.getHeader("Origin")
         if (origin != null) {

@@ -25,7 +25,7 @@ class DbModuleTest
 @Inject constructor(
     val dbConfig: DbConfig,
     val dslContext: DSLContext,
-    val dataSource: DataSource
+    val dataSource: DataSource,
 ) {
     @Test
     fun testConfig() {

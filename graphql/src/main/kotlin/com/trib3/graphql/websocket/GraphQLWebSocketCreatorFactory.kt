@@ -23,7 +23,7 @@ class GraphQLWebSocketCreatorFactory
     private val objectMapper: ObjectMapper,
     private val graphQLConfig: GraphQLConfig,
     @Nullable private val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
-    @Nullable private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null
+    @Nullable private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
 ) : GraphQLContextWebSocketCreatorFactory {
 
     override fun getCreator(containerRequestContext: ContainerRequestContext): WebSocketCreator {
@@ -33,7 +33,7 @@ class GraphQLWebSocketCreatorFactory
             graphQLConfig,
             containerRequestContext,
             dataLoaderRegistryFactory,
-            graphQLWebSocketAuthenticator
+            graphQLWebSocketAuthenticator,
         )
     }
 }

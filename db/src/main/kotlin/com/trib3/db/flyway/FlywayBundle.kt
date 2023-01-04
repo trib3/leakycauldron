@@ -14,7 +14,7 @@ import javax.sql.DataSource
 class FlywayBundle
 @Inject constructor(
     internal val dataSource: DataSource,
-    internal val baseConfig: FluentConfiguration
+    internal val baseConfig: FluentConfiguration,
 ) : ConfiguredBundle<Configuration> {
 
     override fun run(configuration: Configuration?, env: Environment?) {

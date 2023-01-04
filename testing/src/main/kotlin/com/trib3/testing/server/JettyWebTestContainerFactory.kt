@@ -47,7 +47,7 @@ class JettyWebTestContainerFactory : TestContainerFactory {
     private class JettyWebTestContainer(private var uri: URI, context: DeploymentContext) : TestContainer {
         val server = create(
             UriBuilder.fromUri(uri).path(context.contextPath).build(),
-            ServletContainer(context.resourceConfig)
+            ServletContainer(context.resourceConfig),
         )
 
         override fun getClientConfig(): ClientConfig? {
@@ -70,7 +70,7 @@ class JettyWebTestContainerFactory : TestContainerFactory {
         // simplified version of JettyWebContainerFactory#create
         private fun create(
             uri: URI,
-            servlet: Servlet
+            servlet: Servlet,
         ): Server {
             requireNotNull(uri.path) { "The URI path, of the URI $uri, must be non-null" }
             require(uri.path.isNotEmpty()) { "The URI path, of the URI $uri, must be present" }
@@ -92,7 +92,7 @@ class JettyWebTestContainerFactory : TestContainerFactory {
 
         // simplified version of JettyHttpContainerFactory#createServer
         private fun createServer(
-            uri: URI
+            uri: URI,
         ): Server {
             require("http".equals(uri.scheme)) { LocalizationMessages.WRONG_SCHEME_WHEN_USING_HTTP() }
             val defaultPort = Container.DEFAULT_HTTP_PORT

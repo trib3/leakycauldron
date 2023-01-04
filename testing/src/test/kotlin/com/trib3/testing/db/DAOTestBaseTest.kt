@@ -31,7 +31,7 @@ class DAOTestBaseTest : DAOTestBase() {
         // ensure the db is usable via jdbc and configured for no autoCommit
         val autoCommit = dataSource.connection.use { conn ->
             conn.prepareStatement(
-                "select table_name from information_schema.tables where table_name = 'tables'"
+                "select table_name from information_schema.tables where table_name = 'tables'",
             ).use { ps ->
                 ps.executeQuery().use { rs ->
                     assertThat(rs.next()).isTrue()

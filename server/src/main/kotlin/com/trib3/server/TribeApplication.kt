@@ -59,7 +59,7 @@ constructor(
 
     @Named(TribeApplicationModule.ADMIN_SERVLETS_BIND_NAME)
     val adminServlets: Set<ServletConfig>,
-    @Nullable val authFilter: AuthFilter<*, *>?
+    @Nullable val authFilter: AuthFilter<*, *>?,
 ) : Application<Configuration>() {
     val versionHealthCheck: VersionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck
 
@@ -131,7 +131,7 @@ constructor(
             "Initializing service {} in environment {} with version info: {} ",
             appConfig.appName,
             appConfig.env,
-            versionHealthCheck.info()
+            versionHealthCheck.info(),
         )
     }
 }

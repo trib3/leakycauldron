@@ -55,7 +55,7 @@ class NamedDbModuleTest
 
     @Named("test3") val test3DbConfig: DbConfig,
     @Named("test3") val test3DataSource: DataSource,
-    @Named("test3") val test3DSLContext: DSLContext
+    @Named("test3") val test3DSLContext: DSLContext,
 ) {
     @Test
     fun testConfigs() {

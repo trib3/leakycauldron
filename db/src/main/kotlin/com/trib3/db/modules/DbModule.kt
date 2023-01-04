@@ -27,7 +27,7 @@ class DbModule : AbstractModule() {
         loader: ConfigLoader,
         healthCheckRegistry: HealthCheckRegistry,
         metricRegistry: MetricRegistry,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
     ): DbConfig {
         return DbConfig(loader, "db", healthCheckRegistry, metricRegistry, objectMapper)
     }

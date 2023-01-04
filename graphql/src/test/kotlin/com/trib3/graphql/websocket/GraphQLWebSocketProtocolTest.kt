@@ -49,7 +49,7 @@ class GraphQLWebSocketProtocolTest {
                     "operationName": "boo"
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
         assertThat(start.type).isEqualTo(OperationType.GQL_START)
         assertThat(start.id).isEqualTo("123")
@@ -69,9 +69,9 @@ class GraphQLWebSocketProtocolTest {
             Map::class to mapOf("a" to "b", "c" to "d"),
             List::class to listOf(
                 MessageGraphQLError("e").toSpecification(),
-                MessageGraphQLError("f").toSpecification()
+                MessageGraphQLError("f").toSpecification(),
             ),
-            GraphQLResponse::class to null // only need to support serialization right now, not round trip
+            GraphQLResponse::class to null, // only need to support serialization right now, not round trip
         )
         for (
         t in OperationType.Companion::class.memberProperties
@@ -82,7 +82,7 @@ class GraphQLWebSocketProtocolTest {
                 OperationMessage(
                     type,
                     "${type.type}_id",
-                    objectExample.getValue(type.payloadType)
+                    objectExample.getValue(type.payloadType),
                 )
             val serialized = mapper.writeValueAsString(message)
             val deserialized = mapper.readValue<OperationMessage<*>>(serialized)

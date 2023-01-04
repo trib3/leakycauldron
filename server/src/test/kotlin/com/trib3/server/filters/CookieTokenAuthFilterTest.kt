@@ -42,7 +42,7 @@ class CookieTokenAuthFilterTest {
     fun testAuthed() {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(
-            mapOf("cookieName" to Cookie("cookieName", "value"))
+            mapOf("cookieName" to Cookie("cookieName", "value")),
         )
         val captureContext = EasyMock.newCapture<SecurityContext>()
         EasyMock.expect(mockContext.setSecurityContext(EasyMock.capture(captureContext)))
@@ -59,7 +59,7 @@ class CookieTokenAuthFilterTest {
     fun testBadAuth() {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(
-            mapOf("cookieName" to Cookie("cookieName", "badvalue"))
+            mapOf("cookieName" to Cookie("cookieName", "badvalue")),
         )
         EasyMock.replay(mockContext)
         assertThat {
@@ -72,7 +72,7 @@ class CookieTokenAuthFilterTest {
     fun testWrongCookieAuth() {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(
-            mapOf("wrongCookieName" to Cookie("wrongCookieName", "value"))
+            mapOf("wrongCookieName" to Cookie("wrongCookieName", "value")),
         )
         EasyMock.replay(mockContext)
         assertThat {

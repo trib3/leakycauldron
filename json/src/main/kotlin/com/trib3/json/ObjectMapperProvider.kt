@@ -36,7 +36,7 @@ import kotlin.reflect.KClass
 class ObjectMapperProvider @Inject constructor(
     @Named(OBJECT_MAPPER_MIXINS)
     private val mixins: Map<KClass<*>, KClass<*>>,
-    private val injector: Injector?
+    private val injector: Injector?,
 ) : Provider<ObjectMapper> {
     constructor() : this(emptyMap(), null)
 
@@ -60,12 +60,12 @@ class ObjectMapperProvider @Inject constructor(
             mapper.setAnnotationIntrospectors(
                 AnnotationIntrospectorPair(
                     guiceIntrospector,
-                    mapper.serializationConfig.annotationIntrospector
+                    mapper.serializationConfig.annotationIntrospector,
                 ),
                 AnnotationIntrospectorPair(
                     guiceIntrospector,
-                    mapper.deserializationConfig.annotationIntrospector
-                )
+                    mapper.deserializationConfig.annotationIntrospector,
+                ),
             )
         }
         mixins.forEach {

@@ -30,7 +30,7 @@ enum class GraphQLWebSocketSubProtocol(
     messageMapping: Map<OperationType<*>, OperationType<*>>,
     private val onInvalidMessageCallback: (String?, String, GraphQLWebSocketAdapter) -> Unit,
     private val onDuplicateQueryCallback: (OperationMessage<*>, GraphQLWebSocketAdapter) -> Unit,
-    private val onDuplicateInitCallback: (OperationMessage<*>, GraphQLWebSocketAdapter) -> Unit
+    private val onDuplicateInitCallback: (OperationMessage<*>, GraphQLWebSocketAdapter) -> Unit,
 ) {
     APOLLO_PROTOCOL(
         "graphql-ws",
@@ -40,8 +40,8 @@ enum class GraphQLWebSocketSubProtocol(
                 OperationMessage(
                     OperationType.GQL_ERROR,
                     messageId,
-                    listOf(MessageGraphQLError("Invalid message `$messageBody`"))
-                )
+                    listOf(MessageGraphQLError("Invalid message `$messageBody`")),
+                ),
             )
         },
         onDuplicateQueryCallback = { message, adapter ->
@@ -49,8 +49,8 @@ enum class GraphQLWebSocketSubProtocol(
                 OperationMessage(
                     OperationType.GQL_ERROR,
                     message.id,
-                    listOf(MessageGraphQLError("Query with id ${message.id} already running!"))
-                )
+                    listOf(MessageGraphQLError("Query with id ${message.id} already running!")),
+                ),
             )
         },
         onDuplicateInitCallback = { message, adapter ->
@@ -58,10 +58,10 @@ enum class GraphQLWebSocketSubProtocol(
                 OperationMessage(
                     OperationType.GQL_CONNECTION_ERROR,
                     message.id,
-                    "Already connected!"
-                )
+                    "Already connected!",
+                ),
             )
-        }
+        },
     ),
     GRAPHQL_WS_PROTOCOL(
         "graphql-transport-ws",
@@ -69,13 +69,13 @@ enum class GraphQLWebSocketSubProtocol(
             OperationType.GQL_START to OperationType.GQL_SUBSCRIBE,
             OperationType.GQL_DATA to OperationType.GQL_NEXT,
             OperationType.GQL_STOP to OperationType.GQL_COMPLETE,
-            OperationType.GQL_CONNECTION_KEEP_ALIVE to OperationType.GQL_PONG
+            OperationType.GQL_CONNECTION_KEEP_ALIVE to OperationType.GQL_PONG,
         ),
         onInvalidMessageCallback = { msgId, msgBody, adapter ->
             adapter.session?.close(
                 GraphQLWebSocketCloseReason.INVALID_MESSAGE.code,
                 GraphQLWebSocketCloseReason.INVALID_MESSAGE.description.replace("<id>", msgId.orEmpty())
-                    .replace("<body>", msgBody)
+                    .replace("<body>", msgBody),
             )
         },
         onDuplicateQueryCallback = { message, adapter ->
@@ -83,14 +83,15 @@ enum class GraphQLWebSocketSubProtocol(
                 GraphQLWebSocketCloseReason.MULTIPLE_SUBSCRIBER.code,
                 GraphQLWebSocketCloseReason.MULTIPLE_SUBSCRIBER.description.replace(
                     "<unique-operation-id>",
-                    message.id.orEmpty()
-                )
+                    message.id.orEmpty(),
+                ),
             )
         },
         onDuplicateInitCallback = { _, adapter ->
             adapter.session?.close(GraphQLWebSocketCloseReason.MULTIPLE_INIT)
-        }
-    );
+        },
+    ),
+    ;
 
     private val apolloToGraphQlWsMapping = messageMapping.entries.associate { it.key.type to it.value.type }
 
@@ -159,8 +160,7 @@ enum class GraphQLWebSocketCloseReason(val code: Int, val description: String) {
     UNAUTHORIZED(4401, "Unauthorized"),
     TIMEOUT_INIT(4408, "Connection initialisation timeout"),
     MULTIPLE_SUBSCRIBER(4409, "Subscriber for <unique-operation-id> already exists"),
-    MULTIPLE_INIT(4429, "Too many initialisation requests")
-    ;
+    MULTIPLE_INIT(4429, "Too many initialisation requests"),
 }
 
 /**
@@ -185,7 +185,7 @@ data class OperationMessage<T : Any>(
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
-        property = "type"
+        property = "type",
     )
     @JsonSubTypes(
         Type(name = "start", value = GraphQLRequest::class),
@@ -201,10 +201,10 @@ data class OperationMessage<T : Any>(
         Type(name = "complete", value = Nothing::class),
         Type(name = "ka", value = Nothing::class),
         Type(name = "ping", value = Map::class),
-        Type(name = "pong", value = Map::class)
+        Type(name = "pong", value = Map::class),
     )
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val payload: T? = null
+    val payload: T? = null,
 )
 
 /**
@@ -213,7 +213,7 @@ data class OperationMessage<T : Any>(
 data class OperationType<T : Any>(
     @get:JsonValue val type: String,
     @JsonIgnore
-    val payloadType: KClass<T>
+    val payloadType: KClass<T>,
 ) {
     companion object {
         // client -> server

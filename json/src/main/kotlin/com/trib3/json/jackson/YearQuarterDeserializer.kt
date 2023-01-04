@@ -19,7 +19,7 @@ class YearQuarterDeserializer : JsonDeserializer<YearQuarter>() {
             YearQuarter::class.java,
             parser.currentToken,
             parser,
-            "Expected VALUE_STRING for YearQuarter but saw ${parser.currentToken}"
+            "Expected VALUE_STRING for YearQuarter but saw ${parser.currentToken}",
         ) as YearQuarter
     }
 }

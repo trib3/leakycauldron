@@ -63,10 +63,10 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
                     "graphiql",
                     "/graphiql",
                     "index.html",
-                    Charsets.UTF_8
+                    Charsets.UTF_8,
                 ),
-                listOf("/graphiql")
-            )
+                listOf("/graphiql"),
+            ),
         )
     }
 
@@ -82,19 +82,19 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         subscriptions: Set<Any>,
         instrumentations: Set<Instrumentation>,
         hooks: LeakyCauldronHooks = LeakyCauldronHooks(),
-        exceptionHandler: DataFetcherExceptionHandler = CustomDataFetcherExceptionHandler()
+        exceptionHandler: DataFetcherExceptionHandler = CustomDataFetcherExceptionHandler(),
     ): GraphQL {
         val config = SchemaGeneratorConfig(
             graphQLPackages.toList(),
-            hooks = hooks
+            hooks = hooks,
         )
         return GraphQL.newGraphQL(
             toSchema(
                 config,
                 queries.toList().map { TopLevelObject(it) },
                 mutations.toList().map { TopLevelObject(it) },
-                subscriptions.toList().map { TopLevelObject(it) }
-            )
+                subscriptions.toList().map { TopLevelObject(it) },
+            ),
         )
             .queryExecutionStrategy(AsyncExecutionStrategy(exceptionHandler))
             .mutationExecutionStrategy(AsyncExecutionStrategy(exceptionHandler))

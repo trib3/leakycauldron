@@ -30,8 +30,8 @@ class KMSStringReaderTest {
             mapOf(
                 "test" to "KMS(blah)",
                 "openOnly" to "KMS(blah",
-                "closeOnly" to "blah)"
-            )
+                "closeOnly" to "blah)",
+            ),
         )
         assertThat(reader.getValue(config, "test")).isEqualTo("bleh")
         assertThat(reader.getValue(config, "openOnly")).isEqualTo("KMS(blah")

@@ -25,7 +25,7 @@ class TimestreamReporterFactory(
     @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     private val appConfig: TribeApplicationConfig,
     @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
-    internal val timestreamWriteClient: TimestreamWriteClient
+    internal val timestreamWriteClient: TimestreamWriteClient,
 ) : BaseReporterFactory() {
     private val hostname = InetAddress.getLocalHost().hostName
 
@@ -50,7 +50,7 @@ class TimestreamReporterFactory(
         } + listOf(
             Dimension.builder().name("hostname").value(hostname).build(),
             Dimension.builder().name("application").value(appConfig.appName).build(),
-            Dimension.builder().name("env").value(appConfig.env).build()
+            Dimension.builder().name("env").value(appConfig.env).build(),
         )
         return TimestreamReporter(
             timestreamWriteClient,
@@ -61,7 +61,7 @@ class TimestreamReporterFactory(
             "timestream-reporter",
             filter,
             rateUnit,
-            durationUnit
+            durationUnit,
         )
     }
 }

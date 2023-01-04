@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response
 
 @Path("/")
 class AuthCookieResource @Inject constructor(
-    val appConfig: TribeApplicationConfig
+    val appConfig: TribeApplicationConfig,
 ) {
     /**
      * Create the cookie name based on the configured application name
@@ -39,7 +39,7 @@ class AuthCookieResource @Inject constructor(
     @Timed
     @PermitAll
     fun setAuthCookie(
-        @Context containerRequestContext: ContainerRequestContext
+        @Context containerRequestContext: ContainerRequestContext,
     ): Response {
         val authHeaderSplit = containerRequestContext
             .getHeaderString("Authorization")
@@ -58,8 +58,8 @@ class AuthCookieResource @Inject constructor(
                         NewCookie.DEFAULT_MAX_AGE, // expire in 30 days
                         null,
                         containerRequestContext.securityContext.isSecure,
-                        true
-                    )
+                        true,
+                    ),
                 )
             }.build()
     }

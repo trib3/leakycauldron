@@ -32,13 +32,13 @@ class TimestreamReporter(
     name: String,
     filter: MetricFilter,
     rateUnit: TimeUnit,
-    durationUnit: TimeUnit
+    durationUnit: TimeUnit,
 ) : ScheduledReporter(
     registry,
     name,
     filter,
     rateUnit,
-    durationUnit
+    durationUnit,
 ) {
 
     private val rateFactor = rateUnit.toSeconds(1)
@@ -52,7 +52,7 @@ class TimestreamReporter(
         counters: SortedMap<String, Counter>,
         histograms: SortedMap<String, Histogram>,
         meters: SortedMap<String, Meter>,
-        timers: SortedMap<String, Timer>
+        timers: SortedMap<String, Timer>,
     ) {
         val records = gauges.flatMap {
             getGaugeRecords(it.key, it.value)
@@ -72,8 +72,8 @@ class TimestreamReporter(
                     .time(System.currentTimeMillis().toString())
                     .timeUnit(software.amazon.awssdk.services.timestreamwrite.model.TimeUnit.MILLISECONDS)
                     .dimensions(
-                        globalDimensionValues
-                    ).build()
+                        globalDimensionValues,
+                    ).build(),
             )
 
         records.chunked(TIMESTREAM_MAX_RECORDS).forEach { chunk ->
@@ -110,7 +110,7 @@ class TimestreamReporter(
             "mean_rate" to (meter.meanRate * rateFactor),
             "m1_rate" to (meter.oneMinuteRate * rateFactor),
             "m5_rate" to (meter.fiveMinuteRate * rateFactor),
-            "m15_rate" to (meter.fifteenMinuteRate * rateFactor)
+            "m15_rate" to (meter.fifteenMinuteRate * rateFactor),
         ).mapNotNull { getRecord("$meterName.${it.first}" to it.second) }
     }
 
@@ -134,7 +134,7 @@ class TimestreamReporter(
             "p95" to (sampling.snapshot.get95thPercentile() * samplingFactor),
             "p98" to (sampling.snapshot.get98thPercentile() * samplingFactor),
             "p99" to (sampling.snapshot.get99thPercentile() * samplingFactor),
-            "p999" to (sampling.snapshot.get999thPercentile() * samplingFactor)
+            "p999" to (sampling.snapshot.get999thPercentile() * samplingFactor),
         ).mapNotNull { getRecord("$samplingName.${it.first}" to it.second) }
     }
 

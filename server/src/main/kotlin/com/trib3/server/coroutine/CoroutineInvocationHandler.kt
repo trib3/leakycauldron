@@ -29,12 +29,12 @@ class CoroutineInvocationHandler(
     private val asyncContextProvider: Provider<AsyncContext>,
     private val originalObjectProvider: () -> Any,
     private val originalInvocable: Invocable,
-    private val shouldIgnoreReturn: Boolean
+    private val shouldIgnoreReturn: Boolean,
 ) : InvocationHandler, CoroutineScope by CoroutineScope(Dispatchers.Unconfined) {
     private suspend fun executeCoroutine(
         originalObject: Any,
         args: Array<out Any>?,
-        asyncContext: AsyncContext
+        asyncContext: AsyncContext,
     ) {
         try {
             // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
@@ -81,7 +81,7 @@ class CoroutineInvocationHandler(
             asyncContext.register(
                 ConnectionCallback {
                     cancel()
-                }
+                },
             )
             executeCoroutine(originalObject, args, asyncContext)
         }
