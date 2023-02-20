@@ -85,7 +85,7 @@
         <version.java.release>17</version.java.release>
         <version.jaxb>2.3.3</version.jaxb>
         <version.jaxrs>2.1.6</version.jaxrs>
-        <version.jersey>2.38</version.jersey>
+        <version.jersey>2.39</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
         <version.jetty>9.4.50.v20221201</version.jetty>
         <version.jna>5.13.0</version.jna>
