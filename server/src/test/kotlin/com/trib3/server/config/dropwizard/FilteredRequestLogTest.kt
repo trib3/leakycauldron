@@ -10,7 +10,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.core.AppenderBase
 import com.google.common.collect.ImmutableList
 import com.trib3.testing.LeakyMock
-import io.dropwizard.logging.AppenderFactory
+import io.dropwizard.logging.common.AppenderFactory
 import org.easymock.EasyMock
 import org.eclipse.jetty.http.HttpField
 import org.eclipse.jetty.http.HttpFields
@@ -30,7 +30,8 @@ class FilteredRequestLogTest {
         val factory = FilteredLogbackAccessRequestLogFactory()
         factory.appenders =
             ImmutableList.of(
-                AppenderFactory<IAccessEvent> { _,
+                AppenderFactory<IAccessEvent> {
+                        _,
                         _,
                         _,
                         _,
@@ -62,7 +63,8 @@ class FilteredRequestLogTest {
         val factory = FilteredLogbackAccessRequestLogFactory()
         factory.appenders =
             ImmutableList.of(
-                AppenderFactory<IAccessEvent> { _,
+                AppenderFactory<IAccessEvent> {
+                        _,
                         _,
                         _,
                         _,
@@ -94,7 +96,8 @@ class FilteredRequestLogTest {
         val factory = FilteredLogbackAccessRequestLogFactory()
         factory.appenders =
             ImmutableList.of(
-                AppenderFactory<IAccessEvent> { _,
+                AppenderFactory<IAccessEvent> {
+                        _,
                         _,
                         _,
                         _,
@@ -111,8 +114,7 @@ class FilteredRequestLogTest {
         val mockRequest = LeakyMock.niceMock<Request>()
         val mockResponse = LeakyMock.niceMock<Response>()
         val fakeRequestId = "f74663ea-4da5-4890-91a7-e63f8d1ba82c"
-        val fields = HttpFields()
-        fields.add(HttpField(null, "X-Request-Id", fakeRequestId))
+        val fields = HttpFields.build(HttpFields.from(HttpField(null, "X-Request-Id", fakeRequestId)))
         EasyMock.expect(mockRequest.requestURI).andReturn("/app/ping").anyTimes()
         EasyMock.expect(mockRequest.timeStamp).andReturn(System.currentTimeMillis() + 200).anyTimes()
         EasyMock.expect(mockResponse.committedMetaData).andReturn(
@@ -141,7 +143,8 @@ class FilteredRequestLogTest {
         val factory = FilteredLogbackAccessRequestLogFactory()
         factory.appenders =
             ImmutableList.of(
-                AppenderFactory<IAccessEvent> { _,
+                AppenderFactory<IAccessEvent> {
+                        _,
                         _,
                         _,
                         _,

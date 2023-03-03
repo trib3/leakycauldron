@@ -17,9 +17,9 @@ jobs:
       # handle dependency caching and run build
       - restore_cache:
           keys:
-            - v4-dependencies-{{ .Branch }}-{{ .Revision }}
-            - v4-dependencies-{{ .Branch }}
-            - v4-dependencies-
+            - v5-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v5-dependencies-{{ .Branch }}
+            - v5-dependencies-
       - run:
           name: Setup GPG
           command: |
@@ -66,7 +66,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: v4-dependencies-{{ .Branch }}-{{ .Revision }}
+          key: v5-dependencies-{{ .Branch }}-{{ .Revision }}
       # collect test results and upload coverage
       - run: mkdir -p ~/test_results
       - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;
@@ -91,7 +91,7 @@ jobs:
             if [ $? -eq 0 ]; then
               chmod +x ~/codecov
               cd ~/repo
-              ~/codecov -t ${CODECOV_TOKEN}
+              ~/codecov -t ${CODECOV_TOKEN} -v
             else
               echo "bad checksum on codecov binary"
               exit 1

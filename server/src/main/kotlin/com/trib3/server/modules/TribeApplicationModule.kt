@@ -6,14 +6,26 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import io.dropwizard.auth.AuthFilter
 import io.dropwizard.auth.Authorizer
+import io.dropwizard.core.setup.Environment
 import java.security.Principal
 import javax.servlet.Servlet
 
+/**
+ * Configuration information for binding [Servlet] instances to either the dropwizard
+ * application context or admin context.
+ */
 data class ServletConfig(
     val name: String,
     val servlet: Servlet,
     val mappings: List<String>,
 )
+
+/**
+ * On startup, any bound implementation will be called against the dropwizard [Environment].
+ */
+fun interface EnvironmentCallback {
+    fun invoke(environment: Environment)
+}
 
 /**
  * Base class for modules that bind things for TribeApplication.
@@ -70,5 +82,12 @@ open class TribeApplicationModule : KotlinModule() {
      */
     fun authorizerBinder(): KotlinOptionalBinder<Authorizer<Principal>> {
         return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
+    }
+
+    /**
+     * Binder for [EnvironmentCallback]s
+     */
+    fun environmentCallbackBinder(): KotlinMultibinder<EnvironmentCallback> {
+        return KotlinMultibinder.newSetBinder(kotlinBinder)
     }
 }

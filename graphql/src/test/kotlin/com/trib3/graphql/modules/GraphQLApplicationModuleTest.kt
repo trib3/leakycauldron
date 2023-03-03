@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
@@ -15,17 +16,24 @@ import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.config.modules.KMSModule
 import com.trib3.graphql.resources.GraphQLResource
 import com.trib3.server.filters.RequestIdFilter
+import com.trib3.server.modules.EnvironmentCallback
 import com.trib3.server.modules.TribeApplicationModule
+import com.trib3.testing.LeakyMock
 import graphql.GraphQL
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentationOptions
+import io.dropwizard.core.setup.Environment
+import io.dropwizard.jetty.MutableServletContextHandler
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderFactory
+import org.easymock.EasyMock
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 import javax.inject.Named
+import javax.servlet.ServletContainerInitializer
 
 class DummyQuery {
     fun query(): String {
@@ -50,12 +58,14 @@ class GraphQLApplicationModuleTest
     @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
     val resources: Set<Any>,
     val graphQL: GraphQL,
+    val environmentCallbacks: Set<EnvironmentCallback>,
 ) {
     @Test
     fun testBinding() {
         val graphQLResources = resources.filterIsInstance<GraphQLResource>()
         assertThat(graphQLResources).size().isGreaterThan(0)
         assertThat(graphQLResources.first().dataLoaderRegistryFactoryProvider).isNull()
+        assertThat(environmentCallbacks).isNotEmpty()
         RequestIdFilter.withRequestId("graphQLInstrumentationBindingTest") {
             val result = graphQL.execute("query test")
             assertThat(result.extensions["RequestId"]).isEqualTo("graphQLInstrumentationBindingTest")
@@ -77,6 +87,23 @@ class GraphQLApplicationModuleTest
             setOf(),
         )
         assertThat(graphQLInstance).isNotNull()
+    }
+
+    @Test
+    fun testJettyWebSocketInitializer() {
+        val environment = LeakyMock.mock<Environment>()
+        val mockHandler = LeakyMock.mock<MutableServletContextHandler>()
+        val initializerCapture = EasyMock.newCapture<ServletContainerInitializer>()
+        EasyMock.expect(environment.applicationContext).andReturn(mockHandler)
+        EasyMock.expect(mockHandler.addServletContainerInitializer(LeakyMock.capture(initializerCapture)))
+            .andReturn(null)
+        EasyMock.expect(mockHandler.isStopped).andReturn(true)
+        EasyMock.replay(environment, mockHandler)
+        environmentCallbacks.forEach {
+            it.invoke(environment)
+        }
+        assertThat(initializerCapture.value).isInstanceOf(JettyWebSocketServletContainerInitializer::class.java)
+        EasyMock.verify(environment, mockHandler)
     }
 }
 

@@ -3,8 +3,8 @@ package com.trib3.db.modules
 import com.trib3.db.flyway.FlywayBundle
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
-import io.dropwizard.Configuration
-import io.dropwizard.ConfiguredBundle
+import io.dropwizard.core.Configuration
+import io.dropwizard.core.ConfiguredBundle
 
 /**
  * Module that binds in a Flyway Dropwizard Bundle to run db migrations at

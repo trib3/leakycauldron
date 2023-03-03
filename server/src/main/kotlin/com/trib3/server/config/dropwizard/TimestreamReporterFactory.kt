@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.OptBoolean
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.metrics.TimestreamReporter
-import io.dropwizard.metrics.BaseReporterFactory
+import io.dropwizard.metrics.common.BaseReporterFactory
 import software.amazon.awssdk.services.timestreamwrite.TimestreamWriteClient
 import software.amazon.awssdk.services.timestreamwrite.model.Dimension
 import java.net.InetAddress

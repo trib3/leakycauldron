@@ -10,8 +10,7 @@ import com.trib3.graphql.execution.LeakyCauldronHooks
 import com.trib3.graphql.execution.RequestIdInstrumentation
 import com.trib3.graphql.resources.GraphQLResource
 import com.trib3.graphql.resources.GraphQLSseResource
-import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
-import com.trib3.graphql.websocket.GraphQLWebSocketCreatorFactory
+import com.trib3.graphql.websocket.GraphQLWebSocketCreator
 import com.trib3.graphql.websocket.GraphQLWebSocketDropwizardAuthenticator
 import com.trib3.server.modules.ServletConfig
 import graphql.GraphQL
@@ -20,6 +19,8 @@ import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.ChainedInstrumentation
 import graphql.execution.instrumentation.Instrumentation
 import io.dropwizard.servlets.assets.AssetServlet
+import org.eclipse.jetty.websocket.core.server.WebSocketCreator
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import javax.inject.Named
 import javax.inject.Provider
 
@@ -30,7 +31,7 @@ import javax.inject.Provider
  */
 class DefaultGraphQLModule : GraphQLApplicationModule() {
     override fun configureApplication() {
-        bind<GraphQLContextWebSocketCreatorFactory>().to<GraphQLWebSocketCreatorFactory>()
+        bind<WebSocketCreator>().to<GraphQLWebSocketCreator>()
         // by default, null DataLoaderRegistryFactoryProvider is configured, applications can
         // override this by setting a binding
         dataLoaderRegistryFactoryProviderBinder()
@@ -68,6 +69,9 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
                 listOf("/graphiql"),
             ),
         )
+        environmentCallbackBinder().addBinding().toInstance {
+            JettyWebSocketServletContainerInitializer.configure(it.applicationContext, null)
+        }
     }
 
     @Provides

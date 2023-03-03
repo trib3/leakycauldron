@@ -4,8 +4,8 @@ import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
-import io.dropwizard.Configuration
-import io.dropwizard.ConfiguredBundle
+import io.dropwizard.core.Configuration
+import io.dropwizard.core.ConfiguredBundle
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import javax.inject.Inject

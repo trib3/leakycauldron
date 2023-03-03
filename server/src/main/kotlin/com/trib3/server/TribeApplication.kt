@@ -9,20 +9,21 @@ import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.DropwizardApplicationModule
+import com.trib3.server.modules.EnvironmentCallback
 import com.trib3.server.modules.ServletConfig
 import com.trib3.server.modules.ServletFilterConfig
 import com.trib3.server.modules.TribeApplicationModule
 import com.trib3.server.swagger.JaxrsAppProcessor
 import dev.misfitlabs.kotlinguice4.getInstance
-import io.dropwizard.Application
-import io.dropwizard.Configuration
-import io.dropwizard.ConfiguredBundle
 import io.dropwizard.auth.AuthDynamicFeature
 import io.dropwizard.auth.AuthFilter
 import io.dropwizard.configuration.ConfigurationFactoryFactory
+import io.dropwizard.core.Application
+import io.dropwizard.core.Configuration
+import io.dropwizard.core.ConfiguredBundle
+import io.dropwizard.core.setup.Bootstrap
+import io.dropwizard.core.setup.Environment
 import io.dropwizard.jetty.setup.ServletEnvironment
-import io.dropwizard.setup.Bootstrap
-import io.dropwizard.setup.Environment
 import mu.KotlinLogging
 import java.util.EnumSet
 import javax.annotation.Nullable
@@ -60,6 +61,7 @@ constructor(
     @Named(TribeApplicationModule.ADMIN_SERVLETS_BIND_NAME)
     val adminServlets: Set<ServletConfig>,
     @Nullable val authFilter: AuthFilter<*, *>?,
+    val envCallbacks: Set<EnvironmentCallback>,
 ) : Application<Configuration>() {
     val versionHealthCheck: VersionHealthCheck = healthChecks.first { it is VersionHealthCheck } as VersionHealthCheck
 
@@ -127,6 +129,7 @@ constructor(
         adminServlets.forEach { addServlet(env.admin(), it) }
 
         healthChecks.forEach { env.healthChecks().register(it::class.simpleName, it) }
+        envCallbacks.forEach { it.invoke(env) }
         log.info(
             "Initializing service {} in environment {} with version info: {} ",
             appConfig.appName,

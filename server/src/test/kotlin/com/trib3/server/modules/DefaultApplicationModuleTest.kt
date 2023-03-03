@@ -12,8 +12,8 @@ import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
 import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
-import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
+import io.dropwizard.core.Configuration
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.servlets.HeaderFilter
 import org.testng.annotations.Guice

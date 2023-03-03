@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.OptBoolean
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.runIf
-import io.dropwizard.metrics.BaseReporterFactory
+import io.dropwizard.metrics.common.BaseReporterFactory
 import io.github.azagniotov.metrics.reporter.cloudwatch.CloudWatchReporter
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit

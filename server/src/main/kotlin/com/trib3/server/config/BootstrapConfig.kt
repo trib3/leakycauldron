@@ -6,7 +6,7 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
-import io.dropwizard.logging.BootstrapLogging
+import io.dropwizard.logging.common.BootstrapLogging
 
 /**
  * Startup configuration object that allows for configuration of the application guice modules

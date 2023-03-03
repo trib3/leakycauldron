@@ -18,15 +18,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
-import org.eclipse.jetty.websocket.api.CloseException
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
+import org.eclipse.jetty.websocket.api.exceptions.WebSocketTimeoutException
 import org.eclipse.jetty.websocket.client.WebSocketClient
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
+import org.eclipse.jetty.websocket.core.Configuration
+import org.eclipse.jetty.websocket.core.server.ServerUpgradeRequest
+import org.eclipse.jetty.websocket.core.server.ServerUpgradeResponse
+import org.eclipse.jetty.websocket.core.server.WebSocketCreator
+import org.eclipse.jetty.websocket.core.server.WebSocketMappings
+import org.eclipse.jetty.websocket.server.internal.JettyServerFrameHandlerFactory
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
+import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -79,7 +82,7 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
         val childJob = getResource().webSocketCreator.coroutines["name=timeoutchild"]!!
         job.join()
         val potentialError = getResource().webSocketCreator.errors["name=timeout"]!!
-        assertThat(potentialError).isNotNull().isInstanceOf(CloseException::class)
+        assertThat(potentialError).isNotNull().isInstanceOf(WebSocketTimeoutException::class)
         for (j in listOf(job, childJob)) {
             assertThat(j.isActive).isFalse()
             assertThat(j.isCancelled).isTrue()
@@ -110,7 +113,6 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
         val job = getResource().webSocketCreator.coroutines["name=clientClose"]!!
         val childJob = getResource().webSocketCreator.coroutines["name=clientClosechild"]!!
         job.join()
-        assertThat(getResource().webSocketCreator.errors["name=clientClose"]).isNull()
         for (j in listOf(job, childJob)) {
             assertThat(j.isActive).isFalse()
             assertThat(j.isCancelled).isTrue()
@@ -151,12 +153,62 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
         val job = getResource().webSocketCreator.coroutines["name=spin"]!!
         val childJob = getResource().webSocketCreator.coroutines["name=spinchild"]!!
         job.join()
-        assertThat(getResource().webSocketCreator.errors["name=clientClose"]).isNull()
+        assertThat(getResource().webSocketCreator.errors["name=spin"]).isNull()
         for (j in listOf(job, childJob)) {
             assertThat(j.isActive).isFalse()
             assertThat(j.isCancelled).isTrue()
             assertThat(j.isCompleted).isTrue()
         }
+    }
+
+    /**
+     * Tests that a websocket client can start a child coroutine, have the session
+     * last longer than the idle timeout, and the main and child coroutines both get
+     * cancelled when the server closes the session.
+     */
+    @Test
+    fun testClientSendsMessagesAndFinishes() = runBlocking {
+        val client = WebSocketClient()
+        client.start()
+        val session = client.connect(
+            WebSocketAdapter(),
+            resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "finish").build(),
+        ).get()
+        session.remote.sendString(mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)))
+        launch(Dispatchers.IO) {
+            for (i in 0..19) {
+                delay(100)
+                log.info("FINISH: $i: $coroutineContext")
+                session.remote.sendString(
+                    mapper.writeValueAsString(
+                        OperationMessage(
+                            OperationType.GQL_START,
+                            "ping",
+                            null,
+                        ),
+                    ),
+                )
+            }
+            session.remote.sendString(
+                mapper.writeValueAsString(
+                    OperationMessage(
+                        OperationType.GQL_START,
+                        "finish",
+                        null,
+                    ),
+                ),
+            )
+        }.join()
+        val job = getResource().webSocketCreator.coroutines["name=finish"]!!
+        val childJob = getResource().webSocketCreator.coroutines["name=finishchild"]!!
+        job.join()
+        for (j in listOf(job, childJob)) {
+            assertThat(j.isActive).isFalse()
+            assertThat(j.isCompleted).isTrue()
+        }
+        assertThat(childJob.isCancelled).isTrue()
+        assertThat(job.isCancelled).isFalse()
+        assertThat(getResource().webSocketCreator.errors["name=finish"]).isNull()
     }
 }
 
@@ -168,7 +220,7 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
 class SessionTrackingCreator : WebSocketCreator {
     val coroutines = ConcurrentHashMap<String, Job>()
     val errors = ConcurrentHashMap<String, Throwable>()
-    override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
+    override fun createWebSocket(req: ServerUpgradeRequest, resp: ServerUpgradeResponse): Any {
         val channel = Channel<OperationMessage<*>>()
         val adapter = object : GraphQLWebSocketAdapter(GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL, channel, mapper) {
             override fun onWebSocketError(cause: Throwable) {
@@ -185,6 +237,9 @@ class SessionTrackingCreator : WebSocketCreator {
                             log.info("CHILD: ${req.queryString}: ping: $coroutineContext")
                         }
                     }
+                } else if (msg.id == "finish") {
+                    coroutines["${req.queryString}child"]?.cancel()
+                    break
                 } else {
                     log.info("PARENT: ${req.queryString}: pong: ${msg.id}: $coroutineContext")
                 }
@@ -203,21 +258,28 @@ class SimpleWebSocketResource {
 
     val webSocketCreator = SessionTrackingCreator()
 
-    private val webSocketFactory = WebSocketServerFactory().apply {
-        this.policy.idleTimeout = 1000 // timeout after 1 second to cause a WebSocketError
-        this.creator = webSocketCreator
-        this.start()
-    }
-
     @GET
     @Path("/websocket")
     @Timed
     fun webSocketUpgrade(@Context request: HttpServletRequest, @Context response: HttpServletResponse): Response {
-        if (webSocketFactory.isUpgradeRequest(request, response)) {
-            if (webSocketFactory.acceptWebSocket(request, response)) {
-                return Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
-            }
+        val webSocketMapping = WebSocketMappings.getMappings(request.servletContext)
+        val pathSpec = WebSocketMappings.parsePathSpec("/")
+        if (webSocketMapping.getWebSocketCreator(pathSpec) == null) {
+            webSocketMapping.addMapping(
+                pathSpec,
+                webSocketCreator,
+                JettyServerFrameHandlerFactory.getFactory(request.servletContext),
+                Configuration.ConfigurationCustomizer().apply {
+                    this.idleTimeout = Duration.ofSeconds(1)
+                },
+            )
         }
+
+        // Create a new WebSocketCreator for each request bound to an optional authorized principal
+        if (webSocketMapping.upgrade(request, response, null)) {
+            return Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
+        }
+
         return Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()
     }
 }

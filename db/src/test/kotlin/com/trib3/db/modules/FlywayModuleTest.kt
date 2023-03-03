@@ -5,8 +5,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import com.trib3.db.flyway.FlywayBundle
 import dev.misfitlabs.kotlinguice4.KotlinModule
-import io.dropwizard.Configuration
-import io.dropwizard.ConfiguredBundle
+import io.dropwizard.core.Configuration
+import io.dropwizard.core.ConfiguredBundle
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.testng.annotations.Guice
