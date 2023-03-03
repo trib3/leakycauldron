@@ -4,11 +4,11 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.trib3.config.ConfigLoader
 import com.trib3.json.ObjectMapperProvider
-import io.dropwizard.Configuration
 import io.dropwizard.configuration.FileConfigurationSourceProvider
+import io.dropwizard.core.Configuration
+import io.dropwizard.core.server.SimpleServerFactory
+import io.dropwizard.core.setup.Bootstrap
 import io.dropwizard.jetty.HttpConnectorFactory
-import io.dropwizard.server.SimpleServerFactory
-import io.dropwizard.setup.Bootstrap
 import org.testng.annotations.Test
 
 class HoconConfigurationTest {

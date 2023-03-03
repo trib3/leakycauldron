@@ -7,10 +7,10 @@ import ch.qos.logback.core.filter.Filter
 import ch.qos.logback.core.pattern.PatternLayoutBase
 import ch.qos.logback.core.spi.FilterReply
 import com.fasterxml.jackson.annotation.JsonTypeName
-import io.dropwizard.logging.async.AsyncAppenderFactory
-import io.dropwizard.logging.filter.LevelFilterFactory
-import io.dropwizard.logging.filter.NullLevelFilterFactory
-import io.dropwizard.logging.layout.LayoutFactory
+import io.dropwizard.logging.common.async.AsyncAppenderFactory
+import io.dropwizard.logging.common.filter.LevelFilterFactory
+import io.dropwizard.logging.common.filter.NullLevelFilterFactory
+import io.dropwizard.logging.common.layout.LayoutFactory
 import io.dropwizard.request.logging.LogbackAccessRequestLog
 import io.dropwizard.request.logging.LogbackAccessRequestLogFactory
 import io.dropwizard.request.logging.async.AsyncAccessEventAppenderFactory

@@ -18,7 +18,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -164,7 +163,6 @@ class QueryCoroutine(
  * Handlers for WebSocket events that don't launch child coroutines may use the [adapter]
  * to send data directly back to the WebSocket client.
  */
-@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class GraphQLWebSocketConsumer(
     val graphQL: GraphQL,
     val graphQLConfig: GraphQLConfig,

@@ -17,7 +17,6 @@ import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.RequestIdInstrumentation
-import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.CookieTokenAuthFilter
 import com.trib3.testing.server.JettyWebTestContainerFactory
@@ -31,8 +30,7 @@ import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest
 import org.eclipse.jetty.websocket.client.WebSocketClient
-import org.eclipse.jetty.websocket.client.WebSocketUpgradeRequest
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
+import org.eclipse.jetty.websocket.core.server.WebSocketCreator
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.net.HttpCookie
@@ -121,22 +119,18 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
-            object : GraphQLContextWebSocketCreatorFactory {
-                override fun getCreator(containerRequestContext: ContainerRequestContext): WebSocketCreator {
-                    return WebSocketCreator { request, _ ->
-                        if (request.queryString != null && request.queryString.contains("fail")) {
-                            null
-                        } else {
-                            object : WebSocketAdapter() { // simple echoing websocket implementation
-                                override fun onWebSocketText(message: String) {
-                                    remote.sendString("You said $message")
-                                }
-                            }
+            appConfig = TribeApplicationConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
+            creator = WebSocketCreator { request, _ ->
+                if (request.queryString != null && request.queryString.contains("fail")) {
+                    null
+                } else {
+                    object : WebSocketAdapter() { // simple echoing websocket implementation
+                        override fun onWebSocketText(message: String) {
+                            remote.sendString("You said $message")
                         }
                     }
                 }
             },
-            appConfig = TribeApplicationConfig(ConfigLoader()),
         )
 
     @Test
@@ -157,16 +151,9 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                 client.connect(
                     adapter,
                     uri,
-                    ClientUpgradeRequest(
-                        WebSocketUpgradeRequest(
-                            client,
-                            client.httpClient,
-                            uri,
-                            adapter,
-                        ).also {
-                            it.cookie(HttpCookie("authCookie", "user"))
-                        },
-                    ),
+                    ClientUpgradeRequest().also {
+                        it.cookies = listOf(HttpCookie("authCookie", "user"))
+                    },
                 ).get()
             }.isFailure().messageContains("Failed to upgrade")
         } finally {
@@ -201,16 +188,9 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
             val session = client.connect(
                 adapter,
                 uri,
-                ClientUpgradeRequest(
-                    WebSocketUpgradeRequest(
-                        client,
-                        client.httpClient,
-                        uri,
-                        adapter,
-                    ).also {
-                        it.cookie(HttpCookie("authCookie", "user"))
-                    },
-                ),
+                ClientUpgradeRequest().also {
+                    it.cookies = listOf(HttpCookie("authCookie", "user"))
+                },
             ).get()
             lock.withLock() {
                 session.remote.sendString("Hi there")

@@ -17,9 +17,9 @@ import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.resources.AuthCookieResource
 import com.trib3.server.resources.PingResource
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
-import io.dropwizard.Configuration
 import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.configuration.ConfigurationFactoryFactory
+import io.dropwizard.core.Configuration
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.servlets.HeaderFilter
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature

@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.35-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -60,7 +60,7 @@
         <version.config4k>0.5.0</version.config4k>
         <version.detekt>1.22.0</version.detekt>
         <version.dokka>1.8.10</version.dokka>
-        <version.dropwizard>2.1.5</version.dropwizard>
+        <version.dropwizard>3.0.0</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.2.18</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
@@ -76,8 +76,8 @@
         <version.hibernate.validator>6.2.5.Final</version.hibernate.validator>
         <version.hikaricp>5.0.1</version.hikaricp>
         <version.hk2>2.6.1</version.hk2>
-        <version.httpcomponents.client>4.5.14</version.httpcomponents.client>
-        <version.httpcomponents.core>4.4.16</version.httpcomponents.core>
+        <version.httpcomponents.client>5.2.1</version.httpcomponents.client>
+        <version.httpcomponents.core>5.2.1</version.httpcomponents.core>
         <version.jackson>2.14.2</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.jacoco>0.8.8</version.jacoco>
@@ -87,7 +87,7 @@
         <version.jaxrs>2.1.6</version.jaxrs>
         <version.jersey>2.39.1</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>9.4.50.v20221201</version.jetty>
+        <version.jetty>10.0.14</version.jetty>
         <version.jna>5.13.0</version.jna>
         <version.joda>2.12.5</version.joda>
         <version.jooq>3.18.2</version.jooq>
@@ -706,19 +706,19 @@
                 <version>${version.jetty}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
+                        <groupId>org.eclipse.jetty.toolchain</groupId>
+                        <artifactId>jetty-servlet-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty.websocket</groupId>
-                <artifactId>websocket-servlet</artifactId>
+                <artifactId>websocket-jetty-server</artifactId>
                 <version>${version.jetty}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
+                        <groupId>org.eclipse.jetty.toolchain</groupId>
+                        <artifactId>jetty-servlet-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -873,13 +873,13 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
                 <version>${version.httpcomponents.core}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
                 <version>${version.httpcomponents.client}</version>
             </dependency>
             <dependency>
@@ -1292,7 +1292,7 @@
                                     <exclude>org.apache.logging.log4j:log4j-core</exclude>
                                     <exclude>com.google.inject.extensions:guice-multibindings</exclude>
                                     <exclude>com.authzee.kotlinguice4:*</exclude>
-                                    <!-- use jakarta apis instead of javax apis for the following: -->
+                                    <!-- use jakarta apis instead of javax apis/jetty toolchains for the following: -->
                                     <exclude>javax.inject:javax.inject</exclude>
                                     <exclude>javax.xml.bind:jaxb-api</exclude>
                                     <exclude>javax.annotation:javax.annotation-api</exclude>
@@ -1301,6 +1301,7 @@
                                     <exclude>javax.servlet:javax.servlet-api</exclude>
                                     <exclude>javax.validation:validation-api</exclude>
                                     <exclude>javax.el:javax.el-api</exclude>
+                                    <exclude>org.eclipse.jetty.toolchain:jetty-servlet-api</exclude>
                                     <exclude>org.glassfish:javax.el</exclude>
                                     <!-- el impl includes el-api -->
                                     <exclude>jakarta.el:jakarta.el-api</exclude>

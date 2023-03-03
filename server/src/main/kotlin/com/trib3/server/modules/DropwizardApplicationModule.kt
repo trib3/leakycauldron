@@ -7,8 +7,8 @@ import com.trib3.server.filters.AdminAuthFilter
 import com.trib3.server.swagger.JaxrsAppProcessor
 import com.trib3.server.swagger.SwaggerInitializer
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
-import io.dropwizard.Configuration
-import io.dropwizard.ConfiguredBundle
+import io.dropwizard.core.Configuration
+import io.dropwizard.core.ConfiguredBundle
 import io.dropwizard.servlets.assets.AssetServlet
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import javax.inject.Named
@@ -46,8 +46,9 @@ class DropwizardApplicationModule : TribeApplicationModule() {
         // Set up a Bundle multibinder, but no Bundles to bind by default right now
         KotlinMultibinder.newSetBinder<ConfiguredBundle<Configuration>>(kotlinBinder)
 
-        // Make sure the app servlet binder is set up
+        // Make sure the default set binders are set up
         appServletBinder()
+        environmentCallbackBinder()
     }
 
     @Provides

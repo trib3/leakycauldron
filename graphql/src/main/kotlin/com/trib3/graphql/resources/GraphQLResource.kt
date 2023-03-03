@@ -8,14 +8,12 @@ import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
-import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import graphql.GraphQL
 import graphql.GraphQLContext
 import io.dropwizard.auth.Auth
-import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -23,8 +21,12 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.supervisorScope
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory
+import org.eclipse.jetty.websocket.core.Configuration
+import org.eclipse.jetty.websocket.core.server.WebSocketCreator
+import org.eclipse.jetty.websocket.core.server.WebSocketMappings
+import org.eclipse.jetty.websocket.server.internal.JettyServerFrameHandlerFactory
 import java.security.Principal
+import java.time.Duration
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Nullable
@@ -82,9 +84,9 @@ open class GraphQLResource
 @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
-    private val creatorFactory: GraphQLContextWebSocketCreatorFactory,
     @Nullable val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
     appConfig: TribeApplicationConfig,
+    private val creator: WebSocketCreator,
 ) {
     // Using the CrossOriginFilter directly is tricky because it avoids setting
     // CORS headers on websocket requests, so mimic its regex and evaluate that
@@ -95,21 +97,18 @@ open class GraphQLResource
                 "https?://*.?$it:${appConfig.appPort}"
         }.replace(".", "\\.").replace("*", ".*"),
     )
-
     internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
 
-    @get:Hidden
-    internal val webSocketFactory = WebSocketServerFactory().apply {
+    private val webSocketConfig = Configuration.ConfigurationCustomizer().apply {
         if (graphQLConfig.idleTimeout != null) {
-            this.policy.idleTimeout = graphQLConfig.idleTimeout
+            this.idleTimeout = Duration.ofMillis(graphQLConfig.idleTimeout)
         }
         if (graphQLConfig.maxBinaryMessageSize != null) {
-            this.policy.maxBinaryMessageSize = graphQLConfig.maxBinaryMessageSize
+            this.maxBinaryMessageSize = graphQLConfig.maxBinaryMessageSize
         }
         if (graphQLConfig.maxTextMessageSize != null) {
-            this.policy.maxTextMessageSize = graphQLConfig.maxTextMessageSize
+            this.maxTextMessageSize = graphQLConfig.maxTextMessageSize
         }
-        this.start()
     }
 
     /**
@@ -197,11 +196,21 @@ open class GraphQLResource
                 return unauthorizedResponse()
             }
         }
+        val webSocketMapping = request.servletContext?.let {
+            WebSocketMappings.getMappings(it)
+        }
+        val pathSpec = WebSocketMappings.parsePathSpec(request.pathInfo)
+        if (webSocketMapping != null && webSocketMapping.getWebSocketCreator(pathSpec) == null) {
+            webSocketMapping.addMapping(
+                pathSpec,
+                creator,
+                JettyServerFrameHandlerFactory.getFactory(request.servletContext),
+                webSocketConfig,
+            )
+        }
+
         // Create a new WebSocketCreator for each request bound to an optional authorized principal
-        val creator = creatorFactory.getCreator(containerRequestContext)
-        return if (webSocketFactory.isUpgradeRequest(request, response) &&
-            webSocketFactory.acceptWebSocket(creator, request, response)
-        ) {
+        return if (webSocketMapping != null && webSocketMapping.upgrade(request, response, null)) {
             Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
         } else {
             Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()

@@ -25,7 +25,6 @@ import com.trib3.config.ConfigLoader
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.RequestIdInstrumentation
-import com.trib3.graphql.websocket.GraphQLContextWebSocketCreatorFactory
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.filters.RequestIdFilter
@@ -40,7 +39,6 @@ import kotlinx.coroutines.runBlocking
 import org.easymock.EasyMock
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
@@ -87,33 +85,22 @@ class GraphQLResourceTest {
         .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
         .instrumentation(RequestIdInstrumentation())
         .build()
-    val wsCreatorFactory = object : GraphQLContextWebSocketCreatorFactory {
-        override fun getCreator(containerRequestContext: ContainerRequestContext): WebSocketCreator {
-            return WebSocketCreator { _, _ -> null }
-        }
-    }
+
     val resource =
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceTest")),
-            wsCreatorFactory,
             appConfig = TribeApplicationConfig(ConfigLoader()),
+            creator = { _, _ -> null },
         )
     val lockedResource =
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
-            wsCreatorFactory,
             appConfig = TribeApplicationConfig(ConfigLoader()),
+            creator = { _, _ -> null },
         )
     val objectMapper = ObjectMapperProvider().get()
-
-    @Test
-    fun testPolicy() {
-        assertThat(resource.webSocketFactory.policy.idleTimeout).isEqualTo(200000)
-        assertThat(resource.webSocketFactory.policy.maxBinaryMessageSize).isEqualTo(300000)
-        assertThat(resource.webSocketFactory.policy.maxTextMessageSize).isEqualTo(400000)
-    }
 
     @Test
     fun testSimpleQuery() = runBlocking {
@@ -148,9 +135,10 @@ class GraphQLResourceTest {
         val mockReq = LeakyMock.niceMock<HttpServletRequest>()
         val mockRes = LeakyMock.niceMock<HttpServletResponse>()
         val mockCtx = LeakyMock.niceMock<ContainerRequestContext>()
-        EasyMock.expect(mockReq.getHeader("Origin")).andReturn("http://localhost")
+        EasyMock.expect(mockReq.pathInfo).andReturn("/graphql")
+        EasyMock.expect(mockReq.getHeader("Origin")).andReturn("http://test1.leakycauldron.trib3.com")
         EasyMock.expect(mockRes.getHeader(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER))
-            .andReturn("http://localhost")
+            .andReturn("http://test1.leakycauldron.trib3.com")
         EasyMock.replay(mockReq, mockRes, mockCtx)
         val resp = resource.graphQLUpgrade(Optional.empty(), mockReq, mockRes, mockCtx)
         assertThat(resp.status).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405)

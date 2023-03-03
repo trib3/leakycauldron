@@ -8,8 +8,8 @@ class GraphQLConfig
 @Inject constructor(loader: ConfigLoader) {
     val keepAliveIntervalSeconds: Long
     val idleTimeout: Long?
-    val maxBinaryMessageSize: Int?
-    val maxTextMessageSize: Int?
+    val maxBinaryMessageSize: Long?
+    val maxTextMessageSize: Long?
     val checkAuthorization: Boolean
     val connectionInitWaitTimeout: Long
 

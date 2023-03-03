@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.testng.annotations.Test
 import java.security.Principal
+import javax.ws.rs.container.ContainerRequestContext
 
 class AuthQuery {
     @GraphQLAuth
@@ -39,7 +40,7 @@ class AuthQuery {
 }
 
 class TestAuthorizer : Authorizer<Principal> {
-    override fun authorize(principal: Principal, role: String): Boolean {
+    override fun authorize(principal: Principal, role: String, requestContext: ContainerRequestContext?): Boolean {
         return role != "ADMIN" || principal.name == "ADMIN"
     }
 }
