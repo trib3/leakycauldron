@@ -118,7 +118,7 @@
         <version.maven.resources>3.3.0</version.maven.resources>
         <version.maven.shade>3.4.1</version.maven.shade>
         <version.maven.source>3.2.1</version.maven.source>
-        <version.maven.surefire>3.0.0-M9</version.maven.surefire>
+        <version.maven.surefire>3.0.0</version.maven.surefire>
         <version.netty>4.1.89.Final</version.netty>
         <version.postgres>42.5.4</version.postgres>
         <version.reactivestreams>1.0.4</version.reactivestreams>
