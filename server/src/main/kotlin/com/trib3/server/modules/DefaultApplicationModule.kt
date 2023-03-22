@@ -21,6 +21,7 @@ import io.dropwizard.Configuration
 import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.eclipse.jetty.servlets.HeaderFilter
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature
 import java.security.Principal
 import javax.inject.Provider
@@ -92,6 +93,30 @@ class DefaultApplicationModule : TribeApplicationModule() {
         return ServletFilterConfig(
             CrossOriginFilter::class.java.simpleName,
             CrossOriginFilter::class.java,
+            paramMap,
+        )
+    }
+
+    /**
+     * Enables creation of a Jersey Servlet HeaderFilter that configures HTTPS headers to turn on specified
+     * security settings, such as HSTS, content-options, frame-options, XSS options and Content Security Policy.
+     * It returns a ServletFilterConfig object that specifies the HeaderFilter and the updated HTTPS header values.
+     * Header values are supplied via the application.httpHeaders parameter in [TribeApplicationConfig.httpsHeaders].
+     * The value of application.httpHeaders can be an empty list.
+     *
+     * @param appConfig the application configuration setting, including an httpHeaders value
+     * @return a ServletFilterConfig object for configuring the Jersey Servlet HeaderFilter.
+     */
+
+    @ProvidesIntoSet
+    fun provideHeaderFilter(appConfig: TribeApplicationConfig): ServletFilterConfig {
+        val headerConfig = appConfig.httpsHeaders.map { "Set $it" }.joinToString(",")
+        val paramMap = mapOf(
+            "headerConfig" to headerConfig,
+        )
+        return ServletFilterConfig(
+            HeaderFilter::class.java.simpleName,
+            HeaderFilter::class.java,
             paramMap,
         )
     }

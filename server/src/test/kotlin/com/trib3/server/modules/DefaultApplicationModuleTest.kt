@@ -15,6 +15,7 @@ import com.trib3.server.healthchecks.VersionHealthCheck
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.eclipse.jetty.servlets.HeaderFilter
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import javax.inject.Inject
@@ -44,6 +45,7 @@ class DefaultApplicationModuleTest
         assertThat(servletFilterConfigs.map { it.name }).all {
             contains(RequestIdFilter::class.simpleName)
             contains(CrossOriginFilter::class.simpleName)
+            contains(HeaderFilter::class.simpleName)
         }
         assertThat(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
     }
