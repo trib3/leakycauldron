@@ -9,6 +9,7 @@ import com.trib3.config.ConfigLoader
 import com.trib3.json.modules.ObjectMapperModule
 import com.trib3.testing.LeakyMock
 import dev.misfitlabs.kotlinguice4.KotlinModule
+import io.dropwizard.metrics.common.ReporterFactory
 import io.dropwizard.validation.BaseValidator
 import org.easymock.EasyMock
 import org.testng.annotations.Guice
@@ -36,12 +37,12 @@ class TimestreamReporterFactoryTest @Inject constructor(
         val registry = MetricRegistry()
         val testCaseConfigLoader = ConfigLoader("TimeStreamReporterFactoryTest")
         val configFactory = HoconConfigurationFactory(
-            TimestreamReporterFactory::class.java,
+            ReporterFactory::class.java,
             BaseValidator.newValidator(),
             objectMapper,
             testCaseConfigLoader,
         )
-        val factory = configFactory.build()
+        val factory = configFactory.build() as TimestreamReporterFactory
         val reporter = factory.build(registry)
         assertThat(reporter.databaseName).isEqualTo("TestDBName")
         assertThat(reporter.tableName).isEqualTo("TestTableName")
