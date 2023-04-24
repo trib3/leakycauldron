@@ -47,7 +47,8 @@ fun GraphQLRequest.toExecutionInput(
  */
 typealias GraphQLWebSocketAuthenticator = Function1<
     @JvmSuppressWildcards ContainerRequestContext,
-    @JvmSuppressWildcards Principal?,>
+    @JvmSuppressWildcards Principal?,
+    >
 
 /**
  * Base class for GraphQL application guice modules.  Provides
