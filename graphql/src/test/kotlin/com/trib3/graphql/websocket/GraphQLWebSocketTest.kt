@@ -22,6 +22,7 @@ import graphql.ExecutionInput
 import graphql.GraphQL
 import graphql.schema.DataFetchingEnvironment
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -116,7 +117,7 @@ class WebSocketTestAuthenticator : GraphQLWebSocketAuthenticator {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 class GraphQLWebSocketTest {
 
     val testGraphQL = GraphQL.newGraphQL(

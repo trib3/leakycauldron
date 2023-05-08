@@ -16,6 +16,7 @@ import graphql.GraphQL
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -48,7 +49,7 @@ private val log = KotlinLogging.logger {}
  * for sending messages back to the main coroutine channel for doing things like
  * sending messages back to the WebSocket client
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class)
 abstract class GraphQLCoroutine(private val channel: Channel<OperationMessage<*>>) {
     abstract suspend fun run()
 
