@@ -7,14 +7,14 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.trib3.testing.LeakyMock
+import jakarta.ws.rs.WebApplicationException
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.Cookie
+import jakarta.ws.rs.core.SecurityContext
 import org.easymock.EasyMock
 import org.testng.annotations.Test
 import java.security.Principal
 import java.util.Optional
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.Cookie
-import javax.ws.rs.core.SecurityContext
 
 data class Session(val email: String) : Principal {
     override fun getName(): String {

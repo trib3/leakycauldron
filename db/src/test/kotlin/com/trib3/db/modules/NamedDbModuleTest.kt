@@ -10,14 +10,14 @@ import com.google.inject.AbstractModule
 import com.google.inject.Module
 import com.trib3.db.config.DbConfig
 import com.zaxxer.hikari.HikariDataSource
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import org.jooq.DSLContext
 import org.jooq.impl.DataSourceConnectionProvider
 import org.testng.IModuleFactory
 import org.testng.ITestContext
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
-import javax.inject.Inject
-import javax.inject.Named
 import javax.sql.DataSource
 
 class ModuleFactory : IModuleFactory {

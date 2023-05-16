@@ -2,7 +2,7 @@ package com.trib3.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Helper class to allow for loading of config with environment based override support.

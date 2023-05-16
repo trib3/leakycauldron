@@ -2,10 +2,10 @@ package com.trib3.graphql.websocket
 
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
 import io.dropwizard.auth.AuthFilter
+import jakarta.inject.Inject
+import jakarta.ws.rs.container.ContainerRequestContext
 import java.security.Principal
 import javax.annotation.Nullable
-import javax.inject.Inject
-import javax.ws.rs.container.ContainerRequestContext
 
 /**
  * A [GraphQLWebSocketAuthenticator] that delegates authentication

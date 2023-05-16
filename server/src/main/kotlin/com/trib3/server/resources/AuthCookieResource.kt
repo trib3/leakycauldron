@@ -3,15 +3,15 @@ package com.trib3.server.resources
 import com.codahale.metrics.annotation.Timed
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.runIf
+import jakarta.annotation.security.PermitAll
+import jakarta.inject.Inject
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.NewCookie
+import jakarta.ws.rs.core.Response
 import org.eclipse.jetty.http.HttpStatus
-import javax.annotation.security.PermitAll
-import javax.inject.Inject
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.NewCookie
-import javax.ws.rs.core.Response
 
 @Path("/")
 class AuthCookieResource @Inject constructor(

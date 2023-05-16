@@ -7,8 +7,8 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import io.dropwizard.auth.AuthFilter
 import io.dropwizard.auth.Authorizer
 import io.dropwizard.core.setup.Environment
+import jakarta.servlet.Servlet
 import java.security.Principal
-import javax.servlet.Servlet
 
 /**
  * Configuration information for binding [Servlet] instances to either the dropwizard

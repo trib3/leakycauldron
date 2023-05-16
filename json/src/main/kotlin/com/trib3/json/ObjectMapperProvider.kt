@@ -6,17 +6,17 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair
-import com.fasterxml.jackson.module.guice.GuiceAnnotationIntrospector
 import com.fasterxml.jackson.module.guice.GuiceInjectableValues
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Injector
 import com.trib3.json.ObjectMapperProvider.Companion.OBJECT_MAPPER_MIXINS
+import com.trib3.json.jackson.Guice7AnnotationIntrospector
 import com.trib3.json.jackson.ThreeTenExtraModule
 import io.dropwizard.jackson.Jackson
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Provider
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /**
@@ -55,7 +55,7 @@ class ObjectMapperProvider @Inject constructor(
 
         // set up guice <-> jackson inject bridge like jackson's guice module does
         if (injector != null) {
-            val guiceIntrospector = GuiceAnnotationIntrospector()
+            val guiceIntrospector = Guice7AnnotationIntrospector()
             mapper.injectableValues = GuiceInjectableValues(injector)
             mapper.setAnnotationIntrospectors(
                 AnnotationIntrospectorPair(

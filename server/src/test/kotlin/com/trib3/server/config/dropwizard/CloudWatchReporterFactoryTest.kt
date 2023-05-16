@@ -11,6 +11,7 @@ import com.trib3.json.modules.ObjectMapperModule
 import com.trib3.testing.LeakyMock
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import io.dropwizard.validation.BaseValidator
+import jakarta.inject.Inject
 import org.easymock.Capture
 import org.easymock.EasyMock
 import org.testng.annotations.Guice
@@ -21,7 +22,6 @@ import software.amazon.awssdk.services.cloudwatch.model.PutMetricDataRequest
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import java.net.InetAddress
 import java.util.concurrent.CompletableFuture
-import javax.inject.Inject
 
 /**
  * Extension function to make it easier to find the Type dimension

@@ -12,13 +12,13 @@ import com.trib3.testing.server.ResourceTestBase
 import io.dropwizard.auth.AuthDynamicFeature
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter
 import io.dropwizard.testing.common.Resource
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.SecurityContext
 import org.easymock.EasyMock
 import org.eclipse.jetty.http.HttpStatus
 import org.testng.annotations.Test
 import java.security.Principal
 import java.util.Optional
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.SecurityContext
 
 data class UserPrincipal(private val _name: String) : Principal {
     override fun getName(): String {

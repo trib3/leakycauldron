@@ -14,8 +14,8 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import graphql.ExecutionInput
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.Instrumentation
+import jakarta.ws.rs.container.ContainerRequestContext
 import java.security.Principal
-import javax.ws.rs.container.ContainerRequestContext
 
 /**
  * Function that takes a [GraphQLRequest] and a contextMap and returns a [KotlinDataLoaderRegistryFactory]

@@ -8,7 +8,7 @@ import com.jasonclawson.jackson.dataformat.hocon.HoconFactory
 import com.trib3.config.ConfigLoader
 import io.dropwizard.configuration.ConfigurationFactory
 import io.dropwizard.configuration.ConfigurationSourceProvider
-import javax.validation.Validator
+import jakarta.validation.Validator
 
 /**
  * A ConfigurationFactory that returns config instantiated by parsing hocon from application.conf

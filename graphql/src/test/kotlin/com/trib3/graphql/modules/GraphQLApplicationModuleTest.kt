@@ -24,6 +24,9 @@ import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrume
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentationOptions
 import io.dropwizard.core.setup.Environment
 import io.dropwizard.jetty.MutableServletContextHandler
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.servlet.ServletContainerInitializer
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderFactory
 import org.easymock.EasyMock
@@ -31,9 +34,6 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import java.util.concurrent.CompletableFuture
-import javax.inject.Inject
-import javax.inject.Named
-import javax.servlet.ServletContainerInitializer
 
 class DummyQuery {
     fun query(): String {

@@ -31,6 +31,10 @@ import com.trib3.server.filters.RequestIdFilter
 import com.trib3.testing.LeakyMock
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.ws.rs.ClientErrorException
+import jakarta.ws.rs.container.ContainerRequestContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -42,10 +46,6 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import javax.ws.rs.ClientErrorException
-import javax.ws.rs.container.ContainerRequestContext
 import kotlin.coroutines.CoroutineContext
 
 class TestQuery : Query {

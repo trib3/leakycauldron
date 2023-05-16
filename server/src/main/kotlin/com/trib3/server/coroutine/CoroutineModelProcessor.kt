@@ -1,5 +1,8 @@
 package com.trib3.server.coroutine
 
+import jakarta.inject.Inject
+import jakarta.ws.rs.core.Configuration
+import jakarta.ws.rs.ext.Provider
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.description.modifier.Visibility
 import net.bytebuddy.implementation.InvocationHandlerAdapter
@@ -12,9 +15,6 @@ import org.glassfish.jersey.server.model.ResourceModel
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
-import javax.inject.Inject
-import javax.ws.rs.core.Configuration
-import javax.ws.rs.ext.Provider
 import kotlin.coroutines.Continuation
 
 /**
@@ -26,7 +26,7 @@ import kotlin.coroutines.Continuation
 @Provider
 class CoroutineModelProcessor @Inject constructor(
     private val injectionManager: InjectionManager,
-    private val asyncContextProvider: javax.inject.Provider<AsyncContext>,
+    private val asyncContextProvider: jakarta.inject.Provider<AsyncContext>,
 ) : ModelProcessor {
 
     /**

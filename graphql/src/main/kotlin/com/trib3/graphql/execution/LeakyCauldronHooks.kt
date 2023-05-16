@@ -12,6 +12,7 @@ import graphql.schema.CoercingSerializeException
 import graphql.schema.GraphQLScalarType
 import graphql.schema.GraphQLType
 import io.dropwizard.auth.Authorizer
+import jakarta.inject.Inject
 import org.threeten.extra.YearQuarter
 import java.math.BigDecimal
 import java.security.Principal
@@ -26,7 +27,6 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.UUID
 import javax.annotation.Nullable
-import javax.inject.Inject
 import kotlin.reflect.KType
 
 internal val YEAR_SCALAR = GraphQLScalarType.newScalar()

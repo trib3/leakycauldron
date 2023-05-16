@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.config.ConfigLoader
 import io.dropwizard.configuration.ConfigurationFactory
 import io.dropwizard.configuration.ConfigurationFactoryFactory
-import javax.inject.Inject
-import javax.validation.Validator
+import jakarta.inject.Inject
+import jakarta.validation.Validator
 
 /**
  * Bootstrap hook to allow dropwizard config to be provided by a [HoconConfigurationFactory]

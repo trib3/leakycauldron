@@ -14,6 +14,9 @@ import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.ExecutionResultImpl
 import graphql.GraphQL
+import jakarta.ws.rs.sse.OutboundSseEvent
+import jakarta.ws.rs.sse.Sse
+import jakarta.ws.rs.sse.SseEventSink
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -26,9 +29,6 @@ import org.testng.annotations.Test
 import java.util.Optional
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
-import javax.ws.rs.sse.OutboundSseEvent
-import javax.ws.rs.sse.Sse
-import javax.ws.rs.sse.SseEventSink
 
 /**
  * Most functional tests of SSE handling are in [GraphQLSseResourceIntegrationTest], but some
