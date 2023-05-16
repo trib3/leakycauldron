@@ -6,10 +6,10 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import io.dropwizard.core.Configuration
 import io.dropwizard.core.ConfiguredBundle
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
-import javax.inject.Inject
-import javax.inject.Named
 
 @Guice(modules = [DropwizardApplicationModule::class])
 class DropwizardApplicationModuleTest

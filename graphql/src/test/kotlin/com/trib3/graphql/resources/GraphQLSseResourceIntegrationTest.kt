@@ -24,6 +24,8 @@ import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
 import graphql.GraphQL
 import graphql.execution.AsyncExecutionStrategy
+import jakarta.ws.rs.client.Entity
+import jakarta.ws.rs.core.MediaType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -33,8 +35,6 @@ import org.glassfish.jersey.media.sse.EventInput
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.util.UUID
-import javax.ws.rs.client.Entity
-import javax.ws.rs.core.MediaType
 
 class SseQuery {
     fun hello(): String {

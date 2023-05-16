@@ -3,6 +3,12 @@ package com.trib3.testing.server
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.Response
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest
@@ -16,12 +22,6 @@ import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.locks.ReentrantLock
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.Response
 import kotlin.concurrent.withLock
 
 private val webSocketCreator = WebSocketCreator { _, _ ->

@@ -15,10 +15,10 @@ import io.dropwizard.request.logging.LogbackAccessRequestLog
 import io.dropwizard.request.logging.LogbackAccessRequestLogFactory
 import io.dropwizard.request.logging.async.AsyncAccessEventAppenderFactory
 import io.dropwizard.request.logging.layout.LogbackAccessRequestLayout
+import jakarta.servlet.http.HttpServletResponse
 import org.eclipse.jetty.server.RequestLog
 import org.slf4j.LoggerFactory
 import java.util.TimeZone
-import javax.servlet.http.HttpServletResponse
 
 private const val FAST_RESPONSE_TIME = 200
 

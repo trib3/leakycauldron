@@ -10,8 +10,8 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.Instrumentation
+import jakarta.ws.rs.container.ContainerRequestContext
 import java.security.Principal
-import javax.ws.rs.container.ContainerRequestContext
 
 /**
  * Function that takes a [ContainerRequestContext] from the websocket upgrade request

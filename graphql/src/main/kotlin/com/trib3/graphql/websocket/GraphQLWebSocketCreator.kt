@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
 import graphql.GraphQL
+import jakarta.inject.Inject
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.SecurityContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -16,9 +19,6 @@ import org.glassfish.jersey.internal.MapPropertiesDelegate
 import org.glassfish.jersey.server.ContainerRequest
 import java.security.Principal
 import javax.annotation.Nullable
-import javax.inject.Inject
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.SecurityContext
 
 /**
  * [WebSocketCreator] that creates a [GraphQLWebSocketAdapter], a [Channel] that gets sent

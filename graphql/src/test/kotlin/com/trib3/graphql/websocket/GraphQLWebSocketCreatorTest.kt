@@ -14,12 +14,12 @@ import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.GraphQLConfigTest
 import com.trib3.testing.LeakyMock
 import graphql.GraphQL
+import jakarta.servlet.http.HttpServletRequest
 import org.easymock.EasyMock
 import org.eclipse.jetty.websocket.core.server.ServerUpgradeRequest
 import org.eclipse.jetty.websocket.core.server.ServerUpgradeResponse
 import org.testng.annotations.Test
 import java.net.URI
-import javax.servlet.http.HttpServletRequest
 
 class GraphQLWebSocketCreatorTest {
     val mapper = ObjectMapper()

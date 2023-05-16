@@ -11,6 +11,7 @@ import ch.qos.logback.core.AppenderBase
 import com.google.common.collect.ImmutableList
 import com.trib3.testing.LeakyMock
 import io.dropwizard.logging.common.AppenderFactory
+import jakarta.servlet.http.HttpServletResponse
 import org.easymock.EasyMock
 import org.eclipse.jetty.http.HttpField
 import org.eclipse.jetty.http.HttpFields
@@ -21,7 +22,6 @@ import org.eclipse.jetty.server.Response
 import org.slf4j.LoggerFactory
 import org.testng.annotations.Test
 import java.util.TimeZone
-import javax.servlet.http.HttpServletResponse
 
 class FilteredRequestLogTest {
     @Test

@@ -8,8 +8,8 @@ import com.google.inject.Provides
 import com.trib3.config.ConfigLoader
 import com.trib3.config.modules.KMSModule
 import com.trib3.db.config.DbConfig
+import jakarta.inject.Singleton
 import org.jooq.DSLContext
-import javax.inject.Singleton
 import javax.sql.DataSource
 
 /**

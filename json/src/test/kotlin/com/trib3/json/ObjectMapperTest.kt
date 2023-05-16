@@ -21,11 +21,11 @@ import com.google.inject.name.Names
 import com.trib3.json.modules.ObjectMapperModule
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import dev.misfitlabs.kotlinguice4.typeLiteral
+import jakarta.inject.Inject
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import org.threeten.extra.YearQuarter
 import java.time.LocalDate
-import javax.inject.Inject
 import kotlin.reflect.KClass
 
 private data class SimpleBean(

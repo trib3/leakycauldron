@@ -2,7 +2,7 @@ package com.trib3.graphql
 
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class GraphQLConfig
 @Inject constructor(loader: ConfigLoader) {

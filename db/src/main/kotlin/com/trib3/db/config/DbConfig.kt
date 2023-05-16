@@ -8,11 +8,11 @@ import com.jasonclawson.jackson.dataformat.hocon.HoconTreeTraversingParser
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
 import com.zaxxer.hikari.HikariDataSource
+import jakarta.inject.Inject
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.Settings
 import org.jooq.impl.DSL
-import javax.inject.Inject
 import javax.sql.DataSource
 
 private const val POSTGRES_DEFAULT_PORT = 5432

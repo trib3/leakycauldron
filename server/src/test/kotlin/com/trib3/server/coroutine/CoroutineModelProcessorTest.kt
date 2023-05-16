@@ -5,6 +5,15 @@ import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import com.trib3.testing.LeakyMock
+import jakarta.inject.Provider
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.QueryParam
+import jakarta.ws.rs.container.AsyncResponse
+import jakarta.ws.rs.container.Suspended
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.sse.Sse
+import jakarta.ws.rs.sse.SseEventSink
 import kotlinx.coroutines.delay
 import org.easymock.EasyMock
 import org.glassfish.jersey.internal.inject.InjectionManager
@@ -15,15 +24,6 @@ import org.glassfish.jersey.server.model.Resource
 import org.glassfish.jersey.server.model.ResourceModel
 import org.testng.annotations.Test
 import java.util.Optional
-import javax.inject.Provider
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.QueryParam
-import javax.ws.rs.container.AsyncResponse
-import javax.ws.rs.container.Suspended
-import javax.ws.rs.core.Context
-import javax.ws.rs.sse.Sse
-import javax.ws.rs.sse.SseEventSink
 
 @Path("/")
 class ProcessorTestResource {

@@ -12,41 +12,9 @@ updates:
   - dependency-name: org.jetbrains:annotations
     versions:
     - "> 13.0"
-  # below are excluded until we migrate to jakarta ee9, 
-  # currently blocked by guice support
   - dependency-name: org.eclipse.jetty:*
     versions:
-    - ">= 11.0.0"
-  - dependency-name: org.glassfish.*:*
-    versions:
-    - ">= 3.0.0"
-  - dependency-name: org.hibernate.validator:hibernate-validator
-    versions:
-    - ">= 7.0.0"
-  - dependency-name: com.sun.activation:jakarta.activation
-    versions:
-    - ">= 2.0.0"
-  - dependency-name: jakarta.ws.rs:jakarta.ws.rs-api
-    versions:
-    - ">= 3.0.0"
-  - dependency-name: jakarta.annotation:jakarta.annotation-api
-    versions:
-    - ">= 2.0.0"
-  - dependency-name: jakarta.xml.bind:jakarta.xml.bind-api
-    versions:
-    - ">= 3.0.0"
+    - ">= 12.0.0"
   - dependency-name: jakarta.servlet:jakarta.servlet-api
     versions:
-    - ">= 5.0.0"
-  - dependency-name: jakarta.validation:jakarta.validation-api
-    versions:
-    - ">= 3.0.0"
-  - dependency-name: jakarta.inject:jakarta.inject-api
-    versions:
-    - ">= 2.0.0"
-  - dependency-name: ch.qos.logback:*
-    versions:
-    - ">= 1.4.0"
-  - dependency-name: io.dropwizard:*
-    versions:
-    - ">= 4.0.0"
+    - ">= 6.0.0"

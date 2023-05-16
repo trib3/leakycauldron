@@ -7,14 +7,14 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.trib3.testing.LeakyMock
+import jakarta.ws.rs.WebApplicationException
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.Cookie
+import jakarta.ws.rs.core.SecurityContext
 import org.easymock.EasyMock
 import org.testng.annotations.Test
 import java.security.Principal
 import java.util.Optional
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.Cookie
-import javax.ws.rs.core.SecurityContext
 
 data class Session(val email: String) : Principal {
     override fun getName(): String {
@@ -42,7 +42,7 @@ class CookieTokenAuthFilterTest {
     fun testAuthed() {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(
-            mapOf("cookieName" to Cookie("cookieName", "value")),
+            mapOf("cookieName" to Cookie.Builder("cookieName").value("value").build()),
         )
         val captureContext = EasyMock.newCapture<SecurityContext>()
         EasyMock.expect(mockContext.setSecurityContext(EasyMock.capture(captureContext)))
@@ -61,7 +61,7 @@ class CookieTokenAuthFilterTest {
     fun testBadAuth() {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(
-            mapOf("cookieName" to Cookie("cookieName", "badvalue")),
+            mapOf("cookieName" to Cookie.Builder("cookieName").value("badvalue").build()),
         )
         EasyMock.replay(mockContext)
         assertFailure {
@@ -74,7 +74,7 @@ class CookieTokenAuthFilterTest {
     fun testWrongCookieAuth() {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(
-            mapOf("wrongCookieName" to Cookie("wrongCookieName", "value")),
+            mapOf("wrongCookieName" to Cookie.Builder("wrongCookieName").value("value").build()),
         )
         EasyMock.replay(mockContext)
         assertFailure {

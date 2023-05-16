@@ -2,7 +2,7 @@ package com.trib3.server.config
 
 import com.trib3.config.ConfigLoader
 import com.trib3.config.extract
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 /**
  * Application config object that exposes basic things about the main service

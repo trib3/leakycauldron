@@ -20,9 +20,9 @@ import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.ChainedInstrumentation
 import graphql.execution.instrumentation.Instrumentation
 import io.dropwizard.servlets.assets.AssetServlet
+import jakarta.inject.Named
 import org.eclipse.jetty.websocket.core.server.WebSocketCreator
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
-import javax.inject.Named
 
 /**
  * Default Guice module for GraphQL applications.  Sets up

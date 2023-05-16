@@ -21,6 +21,9 @@ import com.trib3.testing.LeakyMock
 import graphql.ExecutionInput
 import graphql.GraphQL
 import graphql.schema.DataFetchingEnvironment
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.MultivaluedHashMap
+import jakarta.ws.rs.core.UriInfo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -42,9 +45,6 @@ import org.testng.annotations.Test
 import java.security.Principal
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.MultivaluedHashMap
-import javax.ws.rs.core.UriInfo
 
 class SocketQuery {
     suspend fun q(): List<String> {

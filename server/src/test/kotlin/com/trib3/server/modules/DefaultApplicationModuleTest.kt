@@ -14,12 +14,12 @@ import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import io.dropwizard.core.Configuration
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.servlets.HeaderFilter
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
-import javax.inject.Inject
-import javax.inject.Named
 
 @Guice(modules = [DefaultApplicationModule::class])
 class DefaultApplicationModuleTest

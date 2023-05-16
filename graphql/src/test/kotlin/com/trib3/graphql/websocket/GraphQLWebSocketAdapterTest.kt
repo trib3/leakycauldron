@@ -10,6 +10,12 @@ import com.codahale.metrics.annotation.Timed
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.Response
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -31,12 +37,6 @@ import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.Response
 
 private val mapper = ObjectMapperProvider().get()
 private val log = KotlinLogging.logger {}

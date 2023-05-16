@@ -14,6 +14,7 @@ import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.GraphQLContext
+import jakarta.ws.rs.container.ContainerRequestContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +40,6 @@ import org.glassfish.jersey.internal.MapPropertiesDelegate
 import org.glassfish.jersey.server.ContainerRequest
 import java.security.Principal
 import java.time.Duration
-import javax.ws.rs.container.ContainerRequestContext
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 

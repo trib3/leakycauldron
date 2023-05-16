@@ -7,12 +7,12 @@ import assertk.assertions.isFalse
 import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import com.trib3.testing.LeakyMock
+import jakarta.servlet.FilterConfig
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.easymock.EasyMock
 import org.testng.annotations.Test
 import java.util.Base64
-import javax.servlet.FilterConfig
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class AdminAuthFilterTest {
     @Test
