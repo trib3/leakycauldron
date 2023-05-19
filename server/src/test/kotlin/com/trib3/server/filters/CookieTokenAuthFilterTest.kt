@@ -1,8 +1,8 @@
 package com.trib3.server.filters
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
@@ -47,9 +47,11 @@ class CookieTokenAuthFilterTest {
         val captureContext = EasyMock.newCapture<SecurityContext>()
         EasyMock.expect(mockContext.setSecurityContext(EasyMock.capture(captureContext)))
         EasyMock.replay(mockContext)
-        assertThat {
-            filter.filter(mockContext)
-        }.isSuccess()
+        assertThat(
+            runCatching {
+                filter.filter(mockContext)
+            },
+        ).isSuccess()
         assertThat(captureContext.value.userPrincipal).isInstanceOf(Session::class)
         assertThat((captureContext.value.userPrincipal as Session).email).isEqualTo("blah@blee.com")
         EasyMock.verify(mockContext)
@@ -62,9 +64,9 @@ class CookieTokenAuthFilterTest {
             mapOf("cookieName" to Cookie("cookieName", "badvalue")),
         )
         EasyMock.replay(mockContext)
-        assertThat {
+        assertFailure {
             filter.filter(mockContext)
-        }.isFailure().isInstanceOf(WebApplicationException::class).messageContains("401 Unauthorized")
+        }.isInstanceOf(WebApplicationException::class).messageContains("401 Unauthorized")
         EasyMock.verify(mockContext)
     }
 
@@ -75,9 +77,9 @@ class CookieTokenAuthFilterTest {
             mapOf("wrongCookieName" to Cookie("wrongCookieName", "value")),
         )
         EasyMock.replay(mockContext)
-        assertThat {
+        assertFailure {
             filter.filter(mockContext)
-        }.isFailure().isInstanceOf(WebApplicationException::class).messageContains("401 Unauthorized")
+        }.isInstanceOf(WebApplicationException::class).messageContains("401 Unauthorized")
         EasyMock.verify(mockContext)
     }
 
@@ -86,9 +88,9 @@ class CookieTokenAuthFilterTest {
         val mockContext = LeakyMock.niceMock<ContainerRequestContext>()
         EasyMock.expect(mockContext.cookies).andReturn(mapOf())
         EasyMock.replay(mockContext)
-        assertThat {
+        assertFailure {
             filter.filter(mockContext)
-        }.isFailure().isInstanceOf(WebApplicationException::class).messageContains("401 Unauthorized")
+        }.isInstanceOf(WebApplicationException::class).messageContains("401 Unauthorized")
         EasyMock.verify(mockContext)
     }
 }

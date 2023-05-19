@@ -1,11 +1,11 @@
 package com.trib3.testing.db
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isSameAs
@@ -52,18 +52,18 @@ class DAOTestBaseTest : DAOTestBase() {
     override fun tearDown() {
         super.tearDown()
         // ensure db is no longer usable via jooq
-        assertThat {
+        assertFailure {
             ctx.select(DSL.field("table_name"))
                 .from("information_schema.tables")
                 .where("table_name='tables'").fetch()
-        }.isFailure().isInstanceOf(DataAccessException::class)
+        }.isInstanceOf(DataAccessException::class)
         // ensure db is no longer usable via jdbc
         var reached = false
-        assertThat {
+        assertFailure {
             dataSource.connection.use {
                 reached = true
             }
-        }.isFailure().isInstanceOf(SQLException::class)
+        }.isInstanceOf(SQLException::class)
         assertThat(reached).isFalse()
     }
 }

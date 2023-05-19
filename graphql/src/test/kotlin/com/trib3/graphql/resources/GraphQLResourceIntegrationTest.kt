@@ -1,9 +1,9 @@
 package com.trib3.graphql.resources
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.endsWith
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.messageContains
@@ -147,7 +147,7 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
         try {
             val uri = resource.target("/graphql").queryParam("fail", "true").uriBuilder.scheme("ws").build()
             val adapter = WebSocketAdapter()
-            assertThat {
+            assertFailure {
                 client.connect(
                     adapter,
                     uri,
@@ -155,7 +155,7 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
                         it.cookies = listOf(HttpCookie("authCookie", "user"))
                     },
                 ).get()
-            }.isFailure().messageContains("Failed to upgrade")
+            }.messageContains("Failed to upgrade")
         } finally {
             client.stop()
         }

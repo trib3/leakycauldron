@@ -67,14 +67,16 @@ class GraphQLSseResourceTest {
         val mockSse = LeakyMock.mock<Sse>()
         EasyMock.expect(mockSse.newEventBuilder()).andReturn(OutboundEvent.Builder()).anyTimes()
         EasyMock.replay(mockSink, mockSse)
-        assertThat {
-            resource.querySse(
-                mockSink,
-                mockSse,
-                Optional.of(principal),
-                GraphQLRequest("query"),
-            )
-        }.isSuccess()
+        assertThat(
+            runCatching {
+                resource.querySse(
+                    mockSink,
+                    mockSse,
+                    Optional.of(principal),
+                    GraphQLRequest("query"),
+                )
+            },
+        ).isSuccess()
         assertThat(eventCapture.values[0].name).isEqualTo("next")
         assertThat(eventCapture.values[0].data.toString()).contains(""""message":"fake error"""")
         assertThat(eventCapture.values[1].name).isEqualTo("complete")
