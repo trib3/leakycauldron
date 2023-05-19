@@ -301,8 +301,10 @@ class GraphQLResourceTest {
         EasyMock.expect(mockContext[Job]).andReturn(null).anyTimes()
         EasyMock.replay(mockScope, mockContext)
         resource.runningFutures["987"] = mockScope
-        assertThat {
-            resource.cancel(Optional.empty(), "987")
-        }.isSuccess()
+        assertThat(
+            runCatching {
+                resource.cancel(Optional.empty(), "987")
+            },
+        ).isSuccess()
     }
 }

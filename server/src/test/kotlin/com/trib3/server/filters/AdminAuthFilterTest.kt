@@ -1,8 +1,8 @@
 package com.trib3.server.filters
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasMessage
-import assertk.assertions.isFailure
 import assertk.assertions.isFalse
 import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
@@ -43,11 +43,13 @@ class AdminAuthFilterTest {
         val filter = AdminAuthFilter()
         filter.init(mockFilterConfig)
         var proceeded = false
-        assertThat {
-            filter.doFilter(mockRequest, mockResponse) { _, _ ->
-                proceeded = true
-            }
-        }.isSuccess()
+        assertThat(
+            runCatching {
+                filter.doFilter(mockRequest, mockResponse) { _, _ ->
+                    proceeded = true
+                }
+            },
+        ).isSuccess()
         assertThat(proceeded).isTrue()
     }
 
@@ -73,11 +75,11 @@ class AdminAuthFilterTest {
         val filter = AdminAuthFilter()
         filter.init(mockFilterConfig)
         var proceeded = false
-        assertThat {
+        assertFailure {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.isFailure().hasMessage("Invalid credentials")
+        }.hasMessage("Invalid credentials")
 
         assertThat(proceeded).isFalse()
         EasyMock.verify(mockResponse)
@@ -102,11 +104,11 @@ class AdminAuthFilterTest {
         val filter = AdminAuthFilter()
         filter.init(mockFilterConfig)
         var proceeded = false
-        assertThat {
+        assertFailure {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.isFailure().hasMessage("Invalid credentials")
+        }.hasMessage("Invalid credentials")
         assertThat(proceeded).isFalse()
         EasyMock.verify(mockResponse)
     }
@@ -128,11 +130,11 @@ class AdminAuthFilterTest {
         val filter = AdminAuthFilter()
         filter.init(mockFilterConfig)
         var proceeded = false
-        assertThat {
+        assertFailure {
             filter.doFilter(mockRequest, mockResponse) { _, _ ->
                 proceeded = true
             }
-        }.isFailure().hasMessage("Invalid credentials")
+        }.hasMessage("Invalid credentials")
         assertThat(proceeded).isFalse()
         EasyMock.verify(mockResponse)
     }

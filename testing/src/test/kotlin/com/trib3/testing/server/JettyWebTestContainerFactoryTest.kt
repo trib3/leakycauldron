@@ -1,9 +1,9 @@
 package com.trib3.testing.server
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.messageContains
 import org.eclipse.jetty.server.NetworkConnector
 import org.glassfish.jersey.server.ResourceConfig
@@ -21,12 +21,12 @@ class JettyWebTestContainerFactoryTest {
 
     @Test
     fun testNoUriPath() {
-        assertThat {
+        assertFailure {
             factory.create(
                 URI("http", "test.com", "", ""),
                 deploymentContext,
             )
-        }.isFailure().all {
+        }.all {
             messageContains("URI path")
             messageContains("must be present")
         }
@@ -34,12 +34,12 @@ class JettyWebTestContainerFactoryTest {
 
     @Test
     fun testNoSlashInUriPath() {
-        assertThat {
+        assertFailure {
             factory.create(
                 URI(null, null, "zzz", ""),
                 deploymentContext,
             )
-        }.isFailure().all {
+        }.all {
             messageContains("URI path")
             messageContains("must start with a '/'")
         }
@@ -47,12 +47,12 @@ class JettyWebTestContainerFactoryTest {
 
     @Test
     fun testWrongUriScheme() {
-        assertThat {
+        assertFailure {
             factory.create(
                 URI("https", "test.com", "/zzz", ""),
                 deploymentContext,
             )
-        }.isFailure().all {
+        }.all {
             messageContains("URI scheme")
             messageContains("must be http")
         }

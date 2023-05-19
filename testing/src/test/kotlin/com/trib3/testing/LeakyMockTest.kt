@@ -1,9 +1,9 @@
 package com.trib3.testing
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isSuccess
@@ -110,9 +110,9 @@ class LeakyMockTest {
         EasyMock.replay(mock, mockedThing)
         assertThat(mock.getThing()).isEqualTo(RealThing(1))
         assertThat(mock.manipulateThing(mockedThing)).isEqualTo(mockedThing)
-        assertThat { mock.processThing(mockedThing) }.isSuccess()
-        assertThat { mock.processThing(RealThing(2)) }.isSuccess()
-        assertThat { mock.processThing(RealThing(3)) }.isSuccess()
+        assertThat(runCatching { mock.processThing(mockedThing) }).isSuccess()
+        assertThat(runCatching { mock.processThing(RealThing(2)) }).isSuccess()
+        assertThat(runCatching { mock.processThing(RealThing(3)) }).isSuccess()
         EasyMock.verify(mock, mockedThing)
     }
 
@@ -144,21 +144,21 @@ class LeakyMockTest {
     @Test
     fun showNullProblems() {
         val mock = LeakyMock.niceMock("namedNiceMock", TestClass::class.java)
-        assertThat {
+        assertFailure {
             EasyMock.expect(mock.manipulateThing(EasyMock.anyObject()))
-        }.isFailure().message().isNotNull().contains("anyObject() must not be null")
-        assertThat {
+        }.message().isNotNull().contains("anyObject() must not be null")
+        assertFailure {
             EasyMock.expect(mock.manipulateString(EasyMock.anyString()))
-        }.isFailure().message().isNotNull().contains("anyString() must not be null")
+        }.message().isNotNull().contains("anyString() must not be null")
     }
 
     @Test
     fun testInvalidAndOr() {
-        assertThat {
+        assertFailure {
             LeakyMock.and<Boolean>()
-        }.isFailure().message().isNotNull().contains("at least one argument")
-        assertThat {
+        }.message().isNotNull().contains("at least one argument")
+        assertFailure {
             LeakyMock.or<Boolean>()
-        }.isFailure().message().isNotNull().contains("at least one argument")
+        }.message().isNotNull().contains("at least one argument")
     }
 }

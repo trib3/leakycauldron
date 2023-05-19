@@ -1,11 +1,11 @@
 package com.trib3.json
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
@@ -129,9 +129,9 @@ class ObjectMapperTest
         assertThat(mapper.writeValueAsString(yq)).isEqualTo("\"2010-Q1\"")
         assertThat(mapper.readValue<YearQuarter>("\"2010-Q1\"")).isEqualTo(yq)
         assertThat(mapper.readValue<YearQuarter>("\"\"")).isNull()
-        assertThat {
+        assertFailure {
             mapper.readValue<YearQuarter>("123")
-        }.isFailure().all {
+        }.all {
             isInstanceOf(JsonMappingException::class)
             message().isNotNull().contains("Expected VALUE_STRING for YearQuarter but saw")
         }
@@ -151,9 +151,9 @@ class ObjectMapperTest
         val map = mapOf(YearQuarter.of(2010, 1) to YearQuarter.of(2011, 2))
         assertThat(mapper.writeValueAsString(map)).isEqualTo("{\"2010-Q1\":\"2011-Q2\"}")
         assertThat(mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"2010-Q1\":\"2011-Q2\"}")).isEqualTo(map)
-        assertThat {
+        assertFailure {
             mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"abc\": \"2011-Q2\"}")
-        }.isFailure().all {
+        }.all {
             isInstanceOf(JsonMappingException::class)
             message().isNotNull().contains("Unexpected quarter")
         }
@@ -171,9 +171,9 @@ class ObjectMapperTest
 
     @Test
     fun testNeedInjectionForUnDeserializable() {
-        assertThat {
+        assertFailure {
             mapper.readValue<CantDeserializeBean>("""{"foo": "blah"}""")
-        }.isFailure()
+        }
     }
 
     @Test

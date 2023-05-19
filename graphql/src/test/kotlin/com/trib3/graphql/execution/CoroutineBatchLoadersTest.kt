@@ -1,8 +1,8 @@
 package com.trib3.graphql.execution
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isLessThan
 import assertk.assertions.messageContains
 import com.expediagroup.graphql.generator.extensions.get
@@ -80,9 +80,9 @@ class CoroutineBatchLoadersTest {
         val loading = loader.load(setOf("1", "2", "3"), mockEnv)
         this.coroutineContext[Job]?.cancelChildren()
         val startAwaitTime = System.currentTimeMillis()
-        assertThat {
+        assertFailure {
             loading.await()
-        }.isFailure().messageContains("was cancelled")
+        }.messageContains("was cancelled")
         // ensure the delay() is not hit, but allow for slow test machines
         assertThat(System.currentTimeMillis() - startAwaitTime).isLessThan(19000)
         EasyMock.verify(mockEnv)

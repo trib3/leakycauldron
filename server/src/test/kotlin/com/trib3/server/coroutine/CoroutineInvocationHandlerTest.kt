@@ -1,9 +1,9 @@
 package com.trib3.server.coroutine
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isLessThan
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
@@ -444,8 +444,8 @@ class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestRes
 
     @Test
     fun testAsyncError() {
-        assertThat {
+        assertFailure {
             resource.target("/asyncError").request().get(String::class.java)
-        }.isFailure()
+        }
     }
 }

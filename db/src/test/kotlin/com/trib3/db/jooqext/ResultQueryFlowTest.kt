@@ -1,14 +1,13 @@
 package com.trib3.db.jooqext
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasMessage
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -92,9 +91,9 @@ class ResultQueryFlowTest {
         val list = mutableListOf<Int>()
         runBlocking {
             val collectJob = launch {
-                assertThat {
+                assertFailure {
                     query.consumeAsFlow().map { it["value"] as Int }.toList(list)
-                }.isFailure().isInstanceOf(RuntimeException::class.java).hasMessage("cancelled")
+                }.isInstanceOf(RuntimeException::class.java).hasMessage("cancelled")
             }
             launch {
                 iterateLatch.await() // wait for collection to start
