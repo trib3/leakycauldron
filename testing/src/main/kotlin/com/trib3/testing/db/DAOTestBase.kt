@@ -6,6 +6,7 @@ import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
+import org.testcontainers.containers.JdbcDatabaseContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
@@ -18,7 +19,7 @@ import javax.sql.DataSource
 open class DAOTestBase {
     lateinit var dataSource: DataSource
     lateinit var ctx: DSLContext
-    private lateinit var postgres: PostgreSQLContainer<Nothing>
+    private lateinit var database: JdbcDatabaseContainer<*>
     private var inited: Boolean = false
 
     /**
@@ -28,6 +29,22 @@ open class DAOTestBase {
      */
     open fun getFlywayConfiguration(): FluentConfiguration {
         return Flyway.configure().dataSource(dataSource)
+    }
+
+    /**
+     * By default create a postgres container, but subclasses
+     * can override for other implementations
+     */
+    open fun getDatabaseContainer(): JdbcDatabaseContainer<*> {
+        return PostgreSQLContainer("postgres:13.4")
+    }
+
+    /**
+     * By default configure a POSTGRES dialect, but subclasses
+     * can override for other dialects
+     */
+    open fun getJooqDialect(): SQLDialect {
+        return SQLDialect.POSTGRES
     }
 
     /**
@@ -44,22 +61,22 @@ open class DAOTestBase {
     open fun setUp() {
         if (!inited) {
             inited = true
-            postgres = PostgreSQLContainer("postgres:13.4")
-            postgres.start()
+            database = getDatabaseContainer()
+            database.start()
             dataSource = HikariDataSource().apply {
-                jdbcUrl = postgres.jdbcUrl
-                username = postgres.username
-                password = postgres.password
+                jdbcUrl = database.jdbcUrl
+                username = database.username
+                password = database.password
                 configureDataSource(this)
             }
-            ctx = DSL.using(dataSource, SQLDialect.POSTGRES)
+            ctx = DSL.using(dataSource, getJooqDialect())
             getFlywayConfiguration().load().migrate()
         }
     }
 
     @AfterClass
     open fun tearDown() {
-        postgres.stop()
+        database.stop()
         (dataSource as HikariDataSource).close()
     }
 }
