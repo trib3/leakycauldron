@@ -1138,6 +1138,12 @@
                 <version>${version.testcontainers}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>jdbc</artifactId>
+                <version>${version.testcontainers}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!-- graphQL -->
             <dependency>
@@ -1336,6 +1342,7 @@
                     <artifactId>git-commit-id-maven-plugin</artifactId>
                     <version>${version.maven.git}</version>
                     <configuration>
+                        <offline>true</offline>
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
                         <generateGitPropertiesFilename>
                             ${project.build.outputDirectory}/${project.groupId}/${project.artifactId}.git.properties
