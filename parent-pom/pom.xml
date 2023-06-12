@@ -111,7 +111,7 @@
         <version.maven.deploy>3.1.1</version.maven.deploy>
         <version.maven.enforcer>3.0.0-M3</version.maven.enforcer>
         <version.maven.failsafe>3.1.2</version.maven.failsafe>
-        <version.maven.git>4.9.10</version.maven.git>
+        <version.maven.git>6.0.0</version.maven.git>
         <version.maven.gpg>3.1.0</version.maven.gpg>
         <version.maven.install>3.1.1</version.maven.install>
         <version.maven.jar>3.3.0</version.maven.jar>
@@ -1332,8 +1332,8 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>pl.project13.maven</groupId>
-                    <artifactId>git-commit-id-plugin</artifactId>
+                    <groupId>io.github.git-commit-id</groupId>
+                    <artifactId>git-commit-id-maven-plugin</artifactId>
                     <version>${version.maven.git}</version>
                     <configuration>
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
@@ -1920,8 +1920,8 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
