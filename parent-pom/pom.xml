@@ -60,12 +60,13 @@
         <version.config4k>0.6.0</version.config4k>
         <version.detekt>1.22.0</version.detekt>
         <version.dokka>1.8.20</version.dokka>
-        <version.dropwizard>3.0.0</version.dropwizard>
+        <version.dropwizard>3.0.1</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.2.19</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
         <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>5.1.0</version.easymock>
+        <version.errorprone>2.20.0</version.errorprone>
         <version.flyway>9.20.0</version.flyway>
         <version.graphql-kotlin>6.5.2</version.graphql-kotlin>
         <version.graphql-java>20.4</version.graphql-java>
@@ -227,12 +228,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${version.guava}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.errorprone</groupId>
-                        <artifactId>error_prone_annotations</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${version.errorprone}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.j2objc</groupId>
