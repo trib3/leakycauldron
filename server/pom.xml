@@ -118,8 +118,9 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.palominolabs.metrics</groupId>
+            <groupId>com.trib3</groupId>
             <artifactId>metrics-guice</artifactId>
+            <version>${version.leakycauldron}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>

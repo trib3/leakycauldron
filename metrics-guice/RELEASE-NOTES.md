@@ -1,0 +1,48 @@
+- 4.0.0
+    - Build system updates; update Gradle to 4.6
+    - Update to Metrics 4.0.2
+    - Update to Java 8
+- 3.3.0
+    - Change default `MetricNamer` implementation to one that is friendlier to re-using superclass gauges in multiple child classes. The previous behavior is still available as `DeclaringClassMetricNamer`.
+    - Change `MetricNamer.getNameForGauge` to take an additional parameter to support the superclass logic above.
+    - Add Animal Sniffer to build to ensure that only JDK6 types are used.
+    - Update to Gradle 4.0.1
+- 3.2.2
+    - Update to Metrics 3.2.3
+    - Update to Gradle 4.0
+- 3.2.1
+    - Update to Metrics 3.2 and SLF4J 1.7.25
+    - Update to Gradle 3.4
+- 3.2.0
+    - Update to Gradle 3.1
+    - Updated dependencies: SLF4J 1.7.21, Guice 4.1.0
+    - Allow customization in how annotations are resolved for a method. The default is the previous behavior (only looks on the method itself), but implementations for looking on the class and combining multiple resolvers are provided.
+    - `MetricsInstrumentationModule` is now constructed builder-style.
+- 3.1.4
+    - Switch to releasing in bintray
+    - Remove superclass traversal when looking for annotated methods to intercept because AOP on superclass methods doesn't appear to work anyway
+    - Switch build to Gradle
+    - License under COIL
+    - Add ability to have non-public @Gauge methods anywhere in the type hierarchy of an injected type
+    - Updated dependencies: Metrics 3.1.2, SLF4J 1.7.12, Guice 4.0
+- 3.1.3
+    - Add support for `@Counted`
+    - Move metric name creation into `MetricNamer` for easy customization
+    - Move AdminServletModule into [metrics-guice-servlet](https://github.com/palominolabs/metrics-guice-servlet)
+- 3.1.2
+    - Make injection listeners public
+    - Depend on Metrics 3.1.0
+    - Tweak metric naming to avoid duplicate names for different metrics
+- 3.1.1
+    - Allow specifying a custom matcher
+- 3.1.0
+    - Don't create MetricRegistry, HealthCheckRegistry, or JmxReporter for the user. This makes it easier to integrate with existing systems that already have instances that should be used.
+    - Rename InstrumentationModule to MetricsInstrumentationModule
+    - Update to SLF4J
+- 3.0.2
+    - Update to Metrics 3.0.2
+- 3.0.1
+    - Update to Jackson 2.0.2
+    - Update to Metrics 3.0.1
+    - Update to SLF4J 1.7.6
+    - Use javax.servlet:javax.servlet-api for servlet implementation

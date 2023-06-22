@@ -37,6 +37,7 @@
     </scm>
 
     <modules>
+        <module>metrics-guice</module>
         <module>build-resources</module>
         <module>parent-pom</module>
         <module>testing</module>
