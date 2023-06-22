@@ -64,7 +64,6 @@
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
         <version.dropwizard.metrics>4.2.19</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
-        <version.dropwizard.metrics.guice>4.0.0</version.dropwizard.metrics.guice>
         <version.easymock>5.1.0</version.easymock>
         <version.flyway>9.20.0</version.flyway>
         <version.graphql-kotlin>6.5.2</version.graphql-kotlin>
@@ -480,11 +479,6 @@
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
                 <version>${version.servlet}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.palominolabs.metrics</groupId>
-                <artifactId>metrics-guice</artifactId>
-                <version>${version.dropwizard.metrics.guice}</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
@@ -1332,6 +1326,8 @@
                                     <exclude>jakarta.activation:jakarta.activation-api</exclude>
                                     <!-- use org.glassfish.jaxb:jaxb-runtime -->
                                     <exclude>com.sun.xml.bind:jaxb-impl</exclude>
+                                    <!-- use com.trib3:metrics-guice since no longer available -->
+                                    <exclude>com.palominolabs.metrics:metrics-guice</exclude>
                                 </excludes>
                             </bannedDependencies>
                         </rules>
