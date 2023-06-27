@@ -97,7 +97,7 @@
         <version.junit>4.13.2</version.junit>
         <version.kotlin>1.8.22</version.kotlin>
         <version.kotlin.coroutines>1.7.1</version.kotlin.coroutines>
-        <version.kotlin.guice>1.6.0</version.kotlin.guice>
+        <version.kotlin.guice>3.0.0</version.kotlin.guice>
         <version.kotlin.logging>3.0.5</version.kotlin.logging>
         <version.ktlint>0.49.1</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
