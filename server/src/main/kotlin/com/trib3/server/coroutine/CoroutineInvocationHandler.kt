@@ -31,6 +31,7 @@ class CoroutineInvocationHandler(
     private val originalInvocable: Invocable,
     private val shouldIgnoreReturn: Boolean,
 ) : InvocationHandler, CoroutineScope by CoroutineScope(Dispatchers.Unconfined) {
+    @Suppress("RedundantSuspendModifier")
     private suspend fun executeCoroutine(
         originalObject: Any,
         args: Array<out Any>?,
