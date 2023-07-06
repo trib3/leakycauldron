@@ -17,9 +17,9 @@ jobs:
       # handle dependency caching and run build
       - restore_cache:
           keys:
-            - v5-dependencies-{{ .Branch }}-{{ .Revision }}
-            - v5-dependencies-{{ .Branch }}
-            - v5-dependencies-
+            - v6-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v6-dependencies-{{ .Branch }}
+            - v6-dependencies-
       - run:
           name: Setup GPG
           command: |
@@ -51,7 +51,7 @@ jobs:
             fi
             for i in build-resources parent-pom; do
                cd $i
-               mvn org.codehaus.mojo:versions-maven-plugin:2.7:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
+               mvn --no-transfer-progress -U org.codehaus.mojo:versions-maven-plugin:2.7:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
                cd ..
             done
             echo ${NEW_PROJECT_VERSION} > ~/repo/current_version.txt
@@ -59,14 +59,14 @@ jobs:
           name: Maven Build
           command: |
             if [ "$CIRCLE_BRANCH" = "main" ]; then
-              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} -U
+              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} --no-transfer-progress -U
             else
-              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} -U
+              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} --no-transfer-progress -U
             fi
       - save_cache:
           paths:
             - ~/.m2
-          key: v5-dependencies-{{ .Branch }}-{{ .Revision }}
+          key: v6-dependencies-{{ .Branch }}-{{ .Revision }}
       # collect test results and upload coverage
       - run: mkdir -p ~/test_results
       - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;
