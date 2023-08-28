@@ -126,7 +126,7 @@
         <version.redshift>2.1.0.17</version.redshift>
         <version.servlet>4.0.4</version.servlet>
         <version.slf4j>2.0.9</version.slf4j>
-        <version.snakeyaml>2.0</version.snakeyaml>
+        <version.snakeyaml>2.2</version.snakeyaml>
         <version.swagger>2.2.18</version.swagger>
         <version.testcontainers>1.19.1</version.testcontainers>
         <version.testng>7.8.0</version.testng>
