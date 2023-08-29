@@ -31,6 +31,7 @@ class CoroutineInvocationHandler(
     private val originalInvocable: Invocable,
     private val shouldIgnoreReturn: Boolean,
 ) : InvocationHandler, CoroutineScope by CoroutineScope(Dispatchers.Unconfined) {
+    @Suppress("RedundantSuspendModifier")
     private suspend fun executeCoroutine(
         originalObject: Any,
         args: Array<out Any>?,
@@ -39,6 +40,7 @@ class CoroutineInvocationHandler(
         try {
             // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
             // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
+            // This may be the reason the suppress statement is needed above.
             val nonNullArgs = args ?: arrayOf()
             val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
                 originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
