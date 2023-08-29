@@ -40,7 +40,7 @@ class CoroutineInvocationHandler(
         try {
             // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
             // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
-            // This may be the reason the suppress statement is needed above.
+            // This may be the reason the suppression statement is needed above.
             val nonNullArgs = args ?: arrayOf()
             val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
                 originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
