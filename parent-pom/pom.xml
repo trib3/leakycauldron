@@ -48,7 +48,7 @@
         <version.argparse4j>0.9.0</version.argparse4j>
         <version.assertk>0.26.1</version.assertk>
         <version.aws.java>2.21.12</version.aws.java>
-        <version.byte-buddy>1.14.5</version.byte-buddy>
+        <version.byte-buddy>1.14.9</version.byte-buddy>
         <version.caffeine>3.1.6</version.caffeine>
         <version.checker-qual>3.39.0</version.checker-qual>
         <version.classgraph>4.8.161</version.classgraph>
