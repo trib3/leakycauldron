@@ -71,7 +71,7 @@
         <version.graphql-java>21.3</version.graphql-java>
         <version.graphql-java-extended-scalars>21.0</version.graphql-java-extended-scalars>
         <version.graphql-java.dataloader>3.2.1</version.graphql-java.dataloader>
-        <version.guava>32.1.1-jre</version.guava>
+        <version.guava>32.1.3-jre</version.guava>
         <version.guice>5.1.0</version.guice>
         <version.hibernate.validator>6.2.5.Final</version.hibernate.validator>
         <version.hikaricp>5.0.1</version.hikaricp>
