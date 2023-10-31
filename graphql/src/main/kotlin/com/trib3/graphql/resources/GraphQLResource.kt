@@ -1,13 +1,13 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.types.GraphQLBatchResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
@@ -84,7 +84,7 @@ open class GraphQLResource
 @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
-    @Nullable val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
+    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
     appConfig: TribeApplicationConfig,
     private val creator: WebSocketCreator,
 ) {
@@ -134,8 +134,10 @@ open class GraphQLResource
             runningFutures[requestId] = this
         }
         try {
-            val factory = dataLoaderRegistryFactoryProvider?.invoke(query, contextMap)
-            val response = GraphQLRequestHandler(graphQL, factory).executeRequest(query, graphQLContext = contextMap)
+            val response = GraphQLRequestHandler(
+                graphQL,
+                dataLoaderRegistryFactory,
+            ).executeRequest(query, graphQLContext = GraphQLContext.of(contextMap))
             log.debug("$requestId finished with $response")
             val responses = when (response) {
                 is GraphQLResponse<*> -> listOf(response)

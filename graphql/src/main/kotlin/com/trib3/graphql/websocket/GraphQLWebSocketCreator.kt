@@ -1,9 +1,9 @@
 package com.trib3.graphql.websocket
 
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
-import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import graphql.GraphQL
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +28,7 @@ class GraphQLWebSocketCreator(
     val graphQL: GraphQL,
     val objectMapper: ObjectMapper,
     val graphQLConfig: GraphQLConfig,
-    private val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
+    private val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
     private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
     private val dispatcher: CoroutineDispatcher,
 ) : WebSocketCreator {
@@ -37,7 +37,7 @@ class GraphQLWebSocketCreator(
         graphQL: GraphQL,
         objectMapper: ObjectMapper,
         graphQLConfig: GraphQLConfig,
-        @Nullable dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
+        @Nullable dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
         @Nullable graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
     ) : this(
         graphQL,

@@ -1,18 +1,19 @@
 package com.trib3.graphql.websocket
 
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
+import com.expediagroup.graphql.server.extensions.toExecutionInput
 import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.extensions.toGraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.trib3.graphql.GraphQLConfig
 import com.trib3.graphql.execution.MessageGraphQLError
 import com.trib3.graphql.modules.GraphQLWebSocketAuthenticator
-import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
-import com.trib3.graphql.modules.toExecutionInput
 import com.trib3.graphql.resources.getGraphQLContextMap
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
+import graphql.GraphQLContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -171,7 +172,7 @@ class GraphQLWebSocketConsumer(
     val channel: Channel<OperationMessage<*>>,
     val adapter: GraphQLWebSocketAdapter,
     val keepAliveDispatcher: CoroutineDispatcher = Dispatchers.Default, // default to default for the KA interval
-    private val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
+    private val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
     private val graphQLWebSocketAuthenticator: GraphQLWebSocketAuthenticator? = null,
 ) {
     private var keepAliveStarted = false // only allow one keepalive coroutine to launch
@@ -366,12 +367,12 @@ class GraphQLWebSocketConsumer(
             adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
         } else {
             val job = scope.launch(MDCContext()) {
-                val context = getGraphQLContextMap(this, socketPrincipal)
+                val context = GraphQLContext.of(getGraphQLContextMap(this, socketPrincipal))
                 val queryCoroutine = QueryCoroutine(
                     graphQL,
                     channel,
                     message.id,
-                    message.payload.toExecutionInput(dataLoaderRegistryFactoryProvider, context),
+                    message.payload.toExecutionInput(context, dataLoaderRegistryFactory?.generate(context)),
                 )
                 queryCoroutine.run()
             }
