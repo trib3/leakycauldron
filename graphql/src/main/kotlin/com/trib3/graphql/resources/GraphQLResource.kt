@@ -21,6 +21,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.supervisorScope
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.util.URIUtil
 import org.eclipse.jetty.websocket.core.Configuration
 import org.eclipse.jetty.websocket.core.server.WebSocketCreator
 import org.eclipse.jetty.websocket.core.server.WebSocketMappings
@@ -201,7 +202,7 @@ open class GraphQLResource
         val webSocketMapping = request.servletContext?.let {
             WebSocketMappings.getMappings(it)
         }
-        val pathSpec = WebSocketMappings.parsePathSpec(request.pathInfo)
+        val pathSpec = WebSocketMappings.parsePathSpec(URIUtil.addPaths(request.servletPath, request.pathInfo))
         if (webSocketMapping != null && webSocketMapping.getWebSocketCreator(pathSpec) == null) {
             webSocketMapping.addMapping(
                 pathSpec,
