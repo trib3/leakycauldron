@@ -74,7 +74,7 @@
         <version.guava>32.1.1-jre</version.guava>
         <version.guice>5.1.0</version.guice>
         <version.hibernate.validator>6.2.5.Final</version.hibernate.validator>
-        <version.hikaricp>5.0.1</version.hikaricp>
+        <version.hikaricp>5.1.0</version.hikaricp>
         <version.hk2>2.6.1</version.hk2>
         <version.httpcomponents.client>5.2.1</version.httpcomponents.client>
         <version.httpcomponents.core>5.2.2</version.httpcomponents.core>
