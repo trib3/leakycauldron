@@ -8,7 +8,7 @@ import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
-import assertk.assertions.isSameAs
+import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
@@ -45,7 +45,7 @@ class DAOTestBaseTest : DAOTestBase() {
         // ensure multiple setup calls don't change the underlying datasource
         val ds = dataSource
         super.setUp()
-        assertThat(ds).isSameAs(dataSource)
+        assertThat(ds).isSameInstanceAs(dataSource)
     }
 
     @AfterClass

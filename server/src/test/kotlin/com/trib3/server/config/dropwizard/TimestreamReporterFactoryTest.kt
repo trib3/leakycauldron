@@ -1,7 +1,7 @@
 package com.trib3.server.config.dropwizard
 
 import assertk.assertThat
-import assertk.assertions.containsAll
+import assertk.assertions.containsAtLeast
 import assertk.assertions.isEqualTo
 import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -48,7 +48,7 @@ class TimestreamReporterFactoryTest @Inject constructor(
         assertThat(reporter.tableName).isEqualTo("TestTableName")
         assertThat(reporter.timestreamWriteClient).isEqualTo(mockTimestreamWriteClient)
         assertThat(factory.timestreamWriteClient).isEqualTo(mockTimestreamWriteClient)
-        assertThat(reporter.globalDimensionValues.map { it.name() }).containsAll(
+        assertThat(reporter.globalDimensionValues.map { it.name() }).containsAtLeast(
             "hostname",
             "application",
             "env",
