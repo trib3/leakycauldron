@@ -11,12 +11,12 @@ import com.trib3.testing.LeakyMock
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import io.dropwizard.metrics.common.ReporterFactory
 import io.dropwizard.validation.BaseValidator
+import jakarta.inject.Inject
 import org.easymock.EasyMock
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import software.amazon.awssdk.services.timestreamwrite.TimestreamWriteClient
 import java.net.InetAddress
-import javax.inject.Inject
 
 class TimestreamReportFactoryTestModule : KotlinModule() {
     override fun configure() {

@@ -2,44 +2,16 @@ package com.trib3.graphql.modules
 
 import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
 import com.expediagroup.graphql.generator.directives.KotlinSchemaDirectiveWiring
-import com.expediagroup.graphql.server.extensions.toExecutionInput
-import com.expediagroup.graphql.server.types.GraphQLRequest
-import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.google.inject.name.Names
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.TribeApplicationModule
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMapBinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import dev.misfitlabs.kotlinguice4.multibindings.KotlinOptionalBinder
-import graphql.ExecutionInput
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.Instrumentation
+import jakarta.ws.rs.container.ContainerRequestContext
 import java.security.Principal
-import javax.ws.rs.container.ContainerRequestContext
-
-/**
- * Function that takes a [GraphQLRequest] and a contextMap and returns a [KotlinDataLoaderRegistryFactory]
- * with registered [org.dataloader.DataLoader]s for use in resolvers
- *
- * Invoked per GraphQL request to allow for batching of data fetchers
- */
-typealias KotlinDataLoaderRegistryFactoryProvider = Function2<
-    @JvmSuppressWildcards GraphQLServerRequest,
-    @JvmSuppressWildcards Map<*, Any>,
-    @JvmSuppressWildcards KotlinDataLoaderRegistryFactory,
-    >
-
-/**
- * Convert a [GraphQLRequest] to an [ExecutionInput] using a [KotlinDataLoaderRegistryFactoryProvider]
- * and [graphql.GraphQLContext] map
- */
-fun GraphQLRequest.toExecutionInput(
-    registryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider?,
-    contextMap: Map<*, Any> = emptyMap<Any, Any>(),
-): ExecutionInput {
-    val registry = registryFactoryProvider?.invoke(this, contextMap)?.generate()
-    return this.toExecutionInput(registry, graphQLContextMap = contextMap)
-}
 
 /**
  * Function that takes a [ContainerRequestContext] from the websocket upgrade request
@@ -120,7 +92,7 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     /**
      * Optional binder for the dataLoaderRegistryFactory
      */
-    fun dataLoaderRegistryFactoryProviderBinder(): KotlinOptionalBinder<KotlinDataLoaderRegistryFactoryProvider> {
+    fun dataLoaderRegistryFactoryBinder(): KotlinOptionalBinder<KotlinDataLoaderRegistryFactory> {
         return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
     }
 

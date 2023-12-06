@@ -20,12 +20,12 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import io.dropwizard.core.Configuration
+import jakarta.inject.Provider
+import jakarta.servlet.Filter
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.eclipse.jetty.servlets.HeaderFilter
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature
 import java.security.Principal
-import javax.inject.Provider
-import javax.servlet.Filter
 
 data class ServletFilterConfig(
     val name: String,

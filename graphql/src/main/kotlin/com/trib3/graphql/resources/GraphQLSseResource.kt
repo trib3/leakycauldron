@@ -1,20 +1,37 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
+import com.expediagroup.graphql.server.extensions.toExecutionInput
 import com.expediagroup.graphql.server.extensions.toGraphQLError
 import com.expediagroup.graphql.server.extensions.toGraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
-import com.trib3.graphql.modules.toExecutionInput
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
 import graphql.ExecutionResult
 import graphql.ExecutionResultImpl
 import graphql.GraphQL
+import graphql.GraphQLContext
 import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Parameter
+import jakarta.inject.Inject
+import jakarta.ws.rs.DELETE
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.HeaderParam
+import jakarta.ws.rs.POST
+import jakarta.ws.rs.PUT
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.Produces
+import jakarta.ws.rs.QueryParam
+import jakarta.ws.rs.WebApplicationException
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
+import jakarta.ws.rs.sse.Sse
+import jakarta.ws.rs.sse.SseEventSink
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -36,22 +53,6 @@ import java.util.Optional
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Nullable
-import javax.inject.Inject
-import javax.ws.rs.DELETE
-import javax.ws.rs.GET
-import javax.ws.rs.HeaderParam
-import javax.ws.rs.POST
-import javax.ws.rs.PUT
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
-import javax.ws.rs.sse.Sse
-import javax.ws.rs.sse.SseEventSink
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -87,7 +88,7 @@ open class GraphQLSseResource @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
     private val objectMapper: ObjectMapper,
-    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactoryProvider? = null,
+    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
 ) {
     private val reservedStreams = ConcurrentHashMap<UUID, Optional<Principal>>()
     internal val activeStreams = ConcurrentHashMap<UUID, StreamInfo>()
@@ -113,13 +114,13 @@ open class GraphQLSseResource @Inject constructor(
      */
     private suspend fun runQuery(
         query: GraphQLRequest,
-        contextMap: Map<*, Any>,
+        graphQLContext: GraphQLContext,
         eventSink: SseEventSink,
         sse: Sse,
         operationId: String?,
     ) {
         try {
-            val input = query.toExecutionInput(dataLoaderRegistryFactory, contextMap)
+            val input = query.toExecutionInput(graphQLContext, dataLoaderRegistryFactory?.generate(graphQLContext))
             val result = graphQL.executeAsync(input).await()
             // if result data is a Flow, collect it as a flow
             // if it's not, just collect the result itself
@@ -252,8 +253,8 @@ open class GraphQLSseResource @Inject constructor(
         streamInfo.scope.launch(MDCContext()) {
             try {
                 queryMap[operationId] = this
-                val contextMap = getGraphQLContextMap(this, contextPrincipal)
-                runQuery(query, contextMap, streamInfo.eventSink, streamInfo.sse, operationId)
+                val graphQLContext = GraphQLContext.of(getGraphQLContextMap(this, contextPrincipal))
+                runQuery(query, graphQLContext, streamInfo.eventSink, streamInfo.sse, operationId)
             } finally {
                 queryMap.remove(operationId)
             }
@@ -290,10 +291,13 @@ open class GraphQLSseResource @Inject constructor(
         query: GraphQLRequest,
         @Context containerRequestContext: ContainerRequestContext? = null,
     ) = coroutineScope {
-        val contextMap = getGraphQLContextMap(this, principal.orElse(null)) + contextMap(containerRequestContext)
+        val graphQLContext = GraphQLContext.of(
+            getGraphQLContextMap(this, principal.orElse(null)) +
+                contextMap(containerRequestContext),
+        )
         val ka = launchKeepAlive(eventSink, sse)
         try {
-            runQuery(query, contextMap, eventSink, sse, null)
+            runQuery(query, graphQLContext, eventSink, sse, null)
         } finally {
             ka.cancel()
             eventSink.close()

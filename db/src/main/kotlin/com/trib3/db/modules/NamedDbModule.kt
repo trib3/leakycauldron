@@ -9,11 +9,11 @@ import com.trib3.config.modules.KMSModule
 import com.trib3.db.config.DbConfig
 import dev.misfitlabs.kotlinguice4.KotlinModule
 import dev.misfitlabs.kotlinguice4.KotlinPrivateModule
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Provider
 import org.jooq.DSLContext
 import java.util.Objects
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import javax.sql.DataSource
 
 /**

@@ -5,12 +5,12 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import io.dropwizard.auth.AuthFilter
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.SecurityContext
 import org.glassfish.jersey.internal.MapPropertiesDelegate
 import org.glassfish.jersey.server.ContainerRequest
 import org.testng.annotations.Test
 import java.security.Principal
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.SecurityContext
 
 data class TestPrincipal(val _name: String) : Principal {
     override fun getName(): String {

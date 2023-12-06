@@ -24,12 +24,12 @@ import io.dropwizard.core.ConfiguredBundle
 import io.dropwizard.core.setup.Bootstrap
 import io.dropwizard.core.setup.Environment
 import io.dropwizard.jetty.setup.ServletEnvironment
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.servlet.DispatcherType
 import mu.KotlinLogging
 import java.util.EnumSet
 import javax.annotation.Nullable
-import javax.inject.Inject
-import javax.inject.Named
-import javax.servlet.DispatcherType
 
 private val log = KotlinLogging.logger { }
 

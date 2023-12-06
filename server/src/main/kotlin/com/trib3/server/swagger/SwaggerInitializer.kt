@@ -8,8 +8,8 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration
 import io.swagger.v3.oas.integration.api.OpenApiContext
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.servers.Server
-import javax.inject.Inject
-import javax.ws.rs.core.Application
+import jakarta.inject.Inject
+import jakarta.ws.rs.core.Application
 
 // JaxrsOpenApiContextBuilder<T> needs to be subclassed in order to instantiate with a <T>
 private class SwaggerContextBuilder : JaxrsOpenApiContextBuilder<SwaggerContextBuilder>()

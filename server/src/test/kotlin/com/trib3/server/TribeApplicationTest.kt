@@ -11,6 +11,7 @@ import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.codahale.metrics.health.HealthCheckRegistry
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.google.inject.util.Providers
 import com.trib3.config.ConfigLoader
 import com.trib3.server.config.BootstrapConfig
 import com.trib3.server.config.dropwizard.HoconConfigurationFactoryFactory
@@ -33,15 +34,16 @@ import io.dropwizard.jersey.DropwizardResourceConfig
 import io.dropwizard.jersey.setup.JerseyEnvironment
 import io.dropwizard.jetty.setup.ServletEnvironment
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
+import jakarta.servlet.Filter
+import jakarta.servlet.FilterRegistration
+import jakarta.servlet.Servlet
+import jakarta.servlet.ServletRegistration
+import jakarta.ws.rs.container.ContainerRequestContext
 import org.easymock.EasyMock
 import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.glassfish.jersey.internal.inject.InjectionManager
 import org.testng.annotations.Test
 import java.security.Principal
-import javax.servlet.Filter
-import javax.servlet.FilterRegistration
-import javax.servlet.Servlet
-import javax.servlet.ServletRegistration
-import javax.ws.rs.container.ContainerRequestContext
 
 data class TestPrincipal(val _name: String) : Principal {
     override fun getName(): String {
@@ -58,6 +60,7 @@ class TestAuthFilter : AuthFilter<String, TestPrincipal>() {
 class TestModule : TribeApplicationModule() {
     override fun configure() {
         authFilterBinder().setBinding().to<TestAuthFilter>()
+        bind<InjectionManager>().toProvider(Providers.of(null))
     }
 }
 

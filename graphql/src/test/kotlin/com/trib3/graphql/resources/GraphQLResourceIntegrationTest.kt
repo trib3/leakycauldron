@@ -26,6 +26,10 @@ import graphql.execution.AsyncExecutionStrategy
 import graphql.schema.DataFetchingEnvironment
 import io.dropwizard.auth.AuthDynamicFeature
 import io.dropwizard.testing.common.Resource
+import jakarta.ws.rs.client.Entity
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.NewCookie
+import jakarta.ws.rs.core.Response.ResponseBuilder
 import org.eclipse.jetty.http.HttpStatus
 import org.eclipse.jetty.websocket.api.WebSocketAdapter
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest
@@ -37,10 +41,6 @@ import java.net.HttpCookie
 import java.security.Principal
 import java.util.Optional
 import java.util.concurrent.locks.ReentrantLock
-import javax.ws.rs.client.Entity
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.NewCookie
-import javax.ws.rs.core.Response.ResponseBuilder
 import kotlin.concurrent.withLock
 
 data class User(val name: String)
@@ -54,7 +54,9 @@ data class UserPrincipal(val user: User) : Principal {
 class AuthTestQuery : Query {
     fun context(dfe: DataFetchingEnvironment): User? {
         return if (dfe.graphQlContext.get<Principal>() == null) {
-            dfe.graphQlContext.get<ResponseBuilder>()?.cookie(NewCookie("testCookie", "testValue"))
+            dfe.graphQlContext.get<ResponseBuilder>()?.cookie(
+                NewCookie.Builder("testCookie").value("testValue").build(),
+            )
             null
         } else {
             (dfe.graphQlContext.get<Principal>() as UserPrincipal).user

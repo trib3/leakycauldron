@@ -2,11 +2,11 @@ package com.trib3.server.filters
 
 import com.trib3.server.filters.CookieTokenAuthFilter.Builder
 import io.dropwizard.auth.AuthFilter
+import jakarta.annotation.Priority
+import jakarta.ws.rs.Priorities
+import jakarta.ws.rs.WebApplicationException
+import jakarta.ws.rs.container.ContainerRequestContext
 import java.security.Principal
-import javax.annotation.Priority
-import javax.ws.rs.Priorities
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.container.ContainerRequestContext
 
 /**
  * [AuthFilter] that reads a token value out of a cookie and authenticates against the

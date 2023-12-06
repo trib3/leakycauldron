@@ -6,17 +6,17 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair
-import com.fasterxml.jackson.module.guice.GuiceAnnotationIntrospector
-import com.fasterxml.jackson.module.guice.GuiceInjectableValues
+import com.fasterxml.jackson.module.guice7.GuiceAnnotationIntrospector
+import com.fasterxml.jackson.module.guice7.GuiceInjectableValues
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Injector
 import com.trib3.json.ObjectMapperProvider.Companion.OBJECT_MAPPER_MIXINS
 import com.trib3.json.jackson.ThreeTenExtraModule
 import io.dropwizard.jackson.Jackson
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Provider
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import kotlin.reflect.KClass
 
 /**

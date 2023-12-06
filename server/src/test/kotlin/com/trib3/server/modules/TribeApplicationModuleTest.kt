@@ -2,10 +2,10 @@ package com.trib3.server.modules
 
 import assertk.assertThat
 import assertk.assertions.contains
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
-import javax.inject.Inject
-import javax.inject.Named
 
 private class ArbitraryStringTribeAppModule : TribeApplicationModule() {
     override fun configure() {

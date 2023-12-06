@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.trib3</groupId>
         <artifactId>leakycauldron</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -108,6 +108,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>

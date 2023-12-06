@@ -8,12 +8,12 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
 import com.trib3.db.config.DbConfig
 import com.zaxxer.hikari.HikariDataSource
+import jakarta.inject.Inject
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DataSourceConnectionProvider
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
-import javax.inject.Inject
 import javax.sql.DataSource
 
 /**

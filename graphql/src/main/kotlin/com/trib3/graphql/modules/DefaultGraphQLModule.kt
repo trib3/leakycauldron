@@ -5,6 +5,7 @@ import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.FlowSubscriptionExecutionStrategy
 import com.expediagroup.graphql.generator.toSchema
 import com.google.inject.Provides
+import com.google.inject.util.Providers
 import com.trib3.graphql.execution.CustomDataFetcherExceptionHandler
 import com.trib3.graphql.execution.LeakyCauldronHooks
 import com.trib3.graphql.execution.RequestIdInstrumentation
@@ -19,10 +20,9 @@ import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.instrumentation.ChainedInstrumentation
 import graphql.execution.instrumentation.Instrumentation
 import io.dropwizard.servlets.assets.AssetServlet
+import jakarta.inject.Named
 import org.eclipse.jetty.websocket.core.server.WebSocketCreator
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
-import javax.inject.Named
-import javax.inject.Provider
 
 /**
  * Default Guice module for GraphQL applications.  Sets up
@@ -34,8 +34,8 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         bind<WebSocketCreator>().to<GraphQLWebSocketCreator>()
         // by default, null DataLoaderRegistryFactoryProvider is configured, applications can
         // override this by setting a binding
-        dataLoaderRegistryFactoryProviderBinder()
-            .setDefault().toProvider(Provider { null })
+        dataLoaderRegistryFactoryBinder()
+            .setDefault().toProvider(Providers.of(null))
         // by default, any AuthFilter that is registered to guice will be used for
         // authenticating websocket connections during the websocket upgrade or
         // the [OperationType.GQL_CONNNECTION_INIT] message.  Applications can provide

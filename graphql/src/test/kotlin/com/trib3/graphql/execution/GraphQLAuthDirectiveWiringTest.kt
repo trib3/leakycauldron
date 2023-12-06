@@ -17,11 +17,11 @@ import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.schema.DataFetchingEnvironment
 import io.dropwizard.auth.Authorizer
+import jakarta.ws.rs.container.ContainerRequestContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.testng.annotations.Test
 import java.security.Principal
-import javax.ws.rs.container.ContainerRequestContext
 
 class AuthQuery {
     @GraphQLAuth

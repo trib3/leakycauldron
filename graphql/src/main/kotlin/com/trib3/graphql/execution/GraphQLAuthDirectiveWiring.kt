@@ -8,9 +8,9 @@ import graphql.introspection.Introspection
 import graphql.schema.DataFetcher
 import graphql.schema.GraphQLFieldDefinition
 import io.dropwizard.auth.Authorizer
+import jakarta.ws.rs.WebApplicationException
+import jakarta.ws.rs.core.Response
 import java.security.Principal
-import javax.ws.rs.WebApplicationException
-import javax.ws.rs.core.Response
 
 /**
  * Annotation to be used on field definitions to

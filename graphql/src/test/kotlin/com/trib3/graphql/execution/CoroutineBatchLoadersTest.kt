@@ -22,7 +22,7 @@ import org.testng.annotations.Test
 class CoroutineBatchLoadersTest {
     @Test
     fun testListLoad() = runBlocking {
-        val loader = object : CoroutineBatchLoader<String, String>(mapOf<Any, Any>()) {
+        val loader = object : CoroutineBatchLoader<String, String>() {
             override suspend fun loadSuspend(
                 keys: List<String>,
                 environment: BatchLoaderEnvironment,
@@ -37,6 +37,7 @@ class CoroutineBatchLoadersTest {
             override val dataLoaderName = "testLoad"
         }
         val mockEnv = LeakyMock.mock<BatchLoaderEnvironment>()
+        EasyMock.expect(mockEnv.getContext<GraphQLContext>()).andReturn(GraphQLContext.getDefault())
         EasyMock.replay(mockEnv)
         val loaded = loader.load(listOf("1", "2", "3"), mockEnv).await()
         assertThat(loaded).isEqualTo(listOf("a", "b", "c"))
@@ -45,7 +46,7 @@ class CoroutineBatchLoadersTest {
 
     @Test
     fun testMappedLoad() = runBlocking {
-        val loader = object : CoroutineMappedBatchLoader<String, String>(mapOf<Any, Any>()) {
+        val loader = object : CoroutineMappedBatchLoader<String, String>() {
             override suspend fun loadSuspend(
                 keys: Set<String>,
                 environment: BatchLoaderEnvironment,
@@ -56,6 +57,7 @@ class CoroutineBatchLoadersTest {
             override val dataLoaderName = "testLoad"
         }
         val mockEnv = LeakyMock.mock<BatchLoaderEnvironment>()
+        EasyMock.expect(mockEnv.getContext<GraphQLContext>()).andReturn(GraphQLContext.getDefault())
         EasyMock.replay(mockEnv)
         val loaded = loader.load(setOf("1", "2", "3"), mockEnv).await()
         assertThat(loaded).isEqualTo(mapOf("1" to "1", "2" to "2", "3" to "3"))
@@ -64,7 +66,7 @@ class CoroutineBatchLoadersTest {
 
     @Test
     fun testCancellation() = runBlocking(Dispatchers.Unconfined) {
-        val loader = object : CoroutineMappedBatchLoader<String, String>(mapOf(CoroutineScope::class to this)) {
+        val loader = object : CoroutineMappedBatchLoader<String, String>() {
             override suspend fun loadSuspend(
                 keys: Set<String>,
                 environment: BatchLoaderEnvironment,
@@ -76,6 +78,9 @@ class CoroutineBatchLoadersTest {
             override val dataLoaderName = "testCancel"
         }
         val mockEnv = LeakyMock.mock<BatchLoaderEnvironment>()
+        EasyMock.expect(
+            mockEnv.getContext<GraphQLContext>(),
+        ).andReturn(GraphQLContext.of(mapOf(CoroutineScope::class to this)))
         EasyMock.replay(mockEnv)
         val loading = loader.load(setOf("1", "2", "3"), mockEnv)
         this.coroutineContext[Job]?.cancelChildren()
@@ -91,7 +96,7 @@ class CoroutineBatchLoadersTest {
     @Test
     fun testListDataLoaderContext() {
         val batchLoader = object :
-            CoroutineBatchLoader<String, String>(mapOf(String::class to "test")) {
+            CoroutineBatchLoader<String, String>() {
             override suspend fun loadSuspend(
                 keys: List<String>,
                 environment: BatchLoaderEnvironment,
@@ -103,7 +108,7 @@ class CoroutineBatchLoadersTest {
 
             override val dataLoaderName = "testListDataLoaderContext"
         }
-        val dataLoader = batchLoader.getDataLoader()
+        val dataLoader = batchLoader.getDataLoader(GraphQLContext.of(mapOf(String::class to "test")))
         val loadFuture1 = dataLoader.load("1", "a")
         val loadFuture2 = dataLoader.load("2", "b")
         dataLoader.dispatch()
@@ -114,7 +119,7 @@ class CoroutineBatchLoadersTest {
     @Test
     fun testMappedDataLoaderContext() {
         val batchLoader = object :
-            CoroutineMappedBatchLoader<String, String>(mapOf(String::class to "test")) {
+            CoroutineMappedBatchLoader<String, String>() {
             override suspend fun loadSuspend(
                 keys: Set<String>,
                 environment: BatchLoaderEnvironment,
@@ -126,7 +131,7 @@ class CoroutineBatchLoadersTest {
 
             override val dataLoaderName = "testMappedDataLoaderContext"
         }
-        val dataLoader = batchLoader.getDataLoader()
+        val dataLoader = batchLoader.getDataLoader(GraphQLContext.of(mapOf(String::class to "test")))
         val loadFuture1 = dataLoader.load("1", "a")
         val loadFuture2 = dataLoader.load("2", "b")
         dataLoader.dispatch()

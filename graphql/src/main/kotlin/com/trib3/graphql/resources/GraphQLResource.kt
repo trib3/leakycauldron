@@ -1,13 +1,13 @@
 package com.trib3.graphql.resources
 
 import com.codahale.metrics.annotation.Timed
+import com.expediagroup.graphql.dataloader.KotlinDataLoaderRegistryFactory
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.types.GraphQLBatchResponse
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import com.trib3.graphql.GraphQLConfig
-import com.trib3.graphql.modules.KotlinDataLoaderRegistryFactoryProvider
 import com.trib3.server.config.TribeApplicationConfig
 import com.trib3.server.coroutine.AsyncDispatcher
 import com.trib3.server.filters.RequestIdFilter
@@ -15,12 +15,26 @@ import graphql.GraphQL
 import graphql.GraphQLContext
 import io.dropwizard.auth.Auth
 import io.swagger.v3.oas.annotations.Parameter
+import jakarta.inject.Inject
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.ws.rs.DELETE
+import jakarta.ws.rs.GET
+import jakarta.ws.rs.POST
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.Produces
+import jakarta.ws.rs.QueryParam
+import jakarta.ws.rs.container.ContainerRequestContext
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.supervisorScope
 import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.util.URIUtil
 import org.eclipse.jetty.websocket.core.Configuration
 import org.eclipse.jetty.websocket.core.server.WebSocketCreator
 import org.eclipse.jetty.websocket.core.server.WebSocketMappings
@@ -30,19 +44,6 @@ import java.time.Duration
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Nullable
-import javax.inject.Inject
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import javax.ws.rs.DELETE
-import javax.ws.rs.GET
-import javax.ws.rs.POST
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
-import javax.ws.rs.container.ContainerRequestContext
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
 import kotlin.collections.set
 
 private val log = KotlinLogging.logger {}
@@ -84,7 +85,7 @@ open class GraphQLResource
 @Inject constructor(
     private val graphQL: GraphQL,
     private val graphQLConfig: GraphQLConfig,
-    @Nullable val dataLoaderRegistryFactoryProvider: KotlinDataLoaderRegistryFactoryProvider? = null,
+    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
     appConfig: TribeApplicationConfig,
     private val creator: WebSocketCreator,
 ) {
@@ -134,8 +135,10 @@ open class GraphQLResource
             runningFutures[requestId] = this
         }
         try {
-            val factory = dataLoaderRegistryFactoryProvider?.invoke(query, contextMap)
-            val response = GraphQLRequestHandler(graphQL, factory).executeRequest(query, graphQLContext = contextMap)
+            val response = GraphQLRequestHandler(
+                graphQL,
+                dataLoaderRegistryFactory,
+            ).executeRequest(query, graphQLContext = GraphQLContext.of(contextMap))
             log.debug("$requestId finished with $response")
             val responses = when (response) {
                 is GraphQLResponse<*> -> listOf(response)
@@ -199,7 +202,7 @@ open class GraphQLResource
         val webSocketMapping = request.servletContext?.let {
             WebSocketMappings.getMappings(it)
         }
-        val pathSpec = WebSocketMappings.parsePathSpec(request.pathInfo)
+        val pathSpec = WebSocketMappings.parsePathSpec(URIUtil.addPaths(request.servletPath, request.pathInfo))
         if (webSocketMapping != null && webSocketMapping.getWebSocketCreator(pathSpec) == null) {
             webSocketMapping.addMapping(
                 pathSpec,

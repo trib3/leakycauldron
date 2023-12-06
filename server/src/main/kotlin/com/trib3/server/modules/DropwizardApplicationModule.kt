@@ -11,7 +11,7 @@ import io.dropwizard.core.Configuration
 import io.dropwizard.core.ConfiguredBundle
 import io.dropwizard.servlets.assets.AssetServlet
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
-import javax.inject.Named
+import jakarta.inject.Named
 
 /**
  * The default module for running as a dropwizard application.  Binds common functionality for all services.

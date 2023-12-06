@@ -1,5 +1,7 @@
 package com.trib3.server.coroutine
 
+import jakarta.inject.Provider
+import jakarta.ws.rs.container.ConnectionCallback
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,8 +12,6 @@ import org.glassfish.jersey.server.AsyncContext
 import org.glassfish.jersey.server.model.Invocable
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
-import javax.inject.Provider
-import javax.ws.rs.container.ConnectionCallback
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 

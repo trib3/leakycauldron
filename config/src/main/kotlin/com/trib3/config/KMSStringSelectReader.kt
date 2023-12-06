@@ -4,12 +4,12 @@ import com.google.common.base.CaseFormat
 import com.typesafe.config.Config
 import io.github.config4k.ClassContainer
 import io.github.config4k.readers.SelectReader
+import jakarta.inject.Inject
 import mu.KotlinLogging
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.kms.KmsClient
 import software.amazon.awssdk.services.kms.model.DecryptRequest
 import java.util.Base64
-import javax.inject.Inject
 
 private val log = KotlinLogging.logger { }
 private val base64 = Base64.getDecoder()!!

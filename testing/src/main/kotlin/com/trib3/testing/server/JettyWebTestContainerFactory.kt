@@ -1,5 +1,7 @@
 package com.trib3.testing.server
 
+import jakarta.servlet.Servlet
+import jakarta.ws.rs.core.UriBuilder
 import org.eclipse.jetty.annotations.AnnotationConfiguration
 import org.eclipse.jetty.server.Connector
 import org.eclipse.jetty.server.HttpConfiguration
@@ -18,8 +20,6 @@ import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.glassfish.jersey.uri.UriComponent
 import java.net.URI
 import java.util.Locale
-import javax.servlet.Servlet
-import javax.ws.rs.core.UriBuilder
 
 private const val DEFAULT_PORT = 9080
 

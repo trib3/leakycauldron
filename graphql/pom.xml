@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.trib3</groupId>
         <artifactId>leakycauldron</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -163,6 +163,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-http</artifactId>
         </dependency>
         <dependency>
@@ -183,7 +187,7 @@
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
