@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -85,7 +85,7 @@
         <version.jacoco>0.8.11</version.jacoco>
         <version.jakarta.inject>2.0.1.MR</version.jakarta.inject>
         <version.java.release>17</version.java.release>
-        <version.jaxb>3.0.1</version.jaxb>
+        <version.jaxb>4.0.1</version.jaxb>
         <version.jaxrs>3.1.0</version.jaxrs>
         <version.jboss.logging>3.5.3.Final</version.jboss.logging>
         <version.jersey>3.1.3</version.jersey>
@@ -1331,6 +1331,7 @@
                                     <exclude>org.eclipse.jetty.toolchain:jetty-servlet-api</exclude>
                                     <exclude>org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api</exclude>
                                     <exclude>org.glassfish:javax.el</exclude>
+                                    <exclude>com.sun.activation:jakarta.activation</exclude>
                                     <!-- use org.glassfish.jaxb:jaxb-runtime -->
                                     <exclude>com.sun.xml.bind:jaxb-impl</exclude>
                                     <!-- use com.trib3:metrics-guice since no longer available -->
