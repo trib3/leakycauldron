@@ -55,7 +55,7 @@
         <version.classgraph>4.8.165</version.classgraph>
         <version.commons-codec>1.16.0</version.commons-codec>
         <version.commons-compress>1.25.0</version.commons-compress>
-        <version.commons-io>2.15.0</version.commons-io>
+        <version.commons-io>2.15.1</version.commons-io>
         <version.commons-lang3>3.14.0</version.commons-lang3>
         <version.commons-text>1.11.0</version.commons-text>
         <version.config4k>0.6.0</version.config4k>
