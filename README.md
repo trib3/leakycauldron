@@ -39,7 +39,7 @@ Getting Started
 mvn clean install
 ```
 
-* View test coverage reports for each module at ${module}/target/site/jacoco/index.html
+* View test coverage report for each module at ${module}/target/site/jacoco/index.html
 
 * To use the Leaky Cauldron in a service of your own,
   see [this example](https://github.com/trib3/example-cauldron-service)
