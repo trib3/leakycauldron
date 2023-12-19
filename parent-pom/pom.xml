@@ -107,7 +107,7 @@
         <version.maven.assembly>3.6.0</version.maven.assembly>
         <version.maven.buildhelper>3.5.0</version.maven.buildhelper>
         <version.maven.clean>3.3.2</version.maven.clean>
-        <version.maven.compiler>3.11.0</version.maven.compiler>
+        <version.maven.compiler>3.12.0</version.maven.compiler>
         <version.maven.dependency>3.5.0</version.maven.dependency>
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
         <version.maven.deploy>3.1.1</version.maven.deploy>
