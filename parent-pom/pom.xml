@@ -76,7 +76,7 @@
         <version.guice>7.0.0</version.guice>
         <version.hibernate.validator>8.0.1.Final</version.hibernate.validator>
         <version.hikaricp>5.1.0</version.hikaricp>
-        <version.hk2>3.0.5</version.hk2>
+        <version.hk2>3.0.6</version.hk2>
         <version.httpcomponents.client>5.3.1</version.httpcomponents.client>
         <version.httpcomponents.core>5.2.4</version.httpcomponents.core>
         <version.j2objc>2.8</version.j2objc>
