@@ -1687,7 +1687,7 @@
                     </executions>
                     <configuration>
                         <skip>${skip.docs}</skip>
-                        <reportNotDocumented>false</reportNotDocumented>
+                        <reportUndocumented>false</reportUndocumented>
                         <jdkVersion>${version.java.release}</jdkVersion>
                         <perPackageOptions>
                             <packageOption>
