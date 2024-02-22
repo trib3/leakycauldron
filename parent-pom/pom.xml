@@ -1312,6 +1312,9 @@
                         <skip>${skip.checks}</skip>
                         <rules>
                             <dependencyConvergence/>
+                            <requireMavenVersion>
+                                <version>[3.9.2,)</version>
+			    </requireMavenVersion>
                             <bannedDependencies>
                                 <excludes>
                                     <exclude>org.glassfish.hk2.external</exclude>
