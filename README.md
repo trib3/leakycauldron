@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/trib3/leakycauldron.svg?style=svg&circle-token=75d8c0fddf399e7d6393730422d42be35ef4f3b2)](https://circleci.com/gh/trib3/leakycauldron)
+[![CircleCI](https://circleci.com/gh/trib3/leakycauldron.svg?style=svg)](https://circleci.com/gh/trib3/leakycauldron)
 [![codecov](https://codecov.io/gh/trib3/leakycauldron/branch/main/graph/badge.svg?token=MmCucLTttM)](https://codecov.io/gh/trib3/leakycauldron)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.trib3/leakycauldron/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.trib3/leakycauldron/)
 
