@@ -42,7 +42,7 @@
         <skip.source>false</skip.source>
         <skip.tests>false</skip.tests>
 
-        <version.activation>2.1.2</version.activation>
+        <version.activation>2.1.3</version.activation>
         <version.angus>2.0.1</version.angus>
         <version.annotation>2.1.1</version.annotation>
         <version.ant>1.10.14</version.ant>
