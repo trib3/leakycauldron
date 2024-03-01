@@ -103,12 +103,13 @@ class QueryCoroutine(
             val result = graphQL.executeAsync(executionQuery).await()
             // if result data is a Flow, collect it as a flow
             // if it's not, just collect the result itself
-            val flow = try {
-                result.getData<Flow<ExecutionResult>>() ?: flowOf(result)
-            } catch (e: Exception) {
-                log.debug("Could not get Flow result, collecting result directly", e)
-                flowOf(result)
-            }
+            val flow =
+                try {
+                    result.getData<Flow<ExecutionResult>>() ?: flowOf(result)
+                } catch (e: Exception) {
+                    log.debug("Could not get Flow result, collecting result directly", e)
+                    flowOf(result)
+                }
             flow.onEach {
                 yield() // allow for cancellations to abort the coroutine
                 queueMessage(
@@ -138,7 +139,10 @@ class QueryCoroutine(
      * the WebSocket open for further use (ie, recoverable errors shouldn't get thrown).
      * Rethrows any CancellationExceptions used for coroutine shutdown.
      */
-    private suspend fun onChildError(messageId: String?, cause: Throwable) {
+    private suspend fun onChildError(
+        messageId: String?,
+        cause: Throwable,
+    ) {
         if (cause is CancellationException) {
             log.trace("Rethrowing cancellation")
             throw cause
@@ -198,7 +202,10 @@ class GraphQLWebSocketConsumer(
     /**
      * Upon receiving WebSocket events, process them as appropriate
      */
-    suspend fun handleMessage(message: OperationMessage<*>, scope: CoroutineScope) {
+    suspend fun handleMessage(
+        message: OperationMessage<*>,
+        scope: CoroutineScope,
+    ) {
         RequestIdFilter.withRequestId(message.id) {
             try {
                 log.trace("WebSocket connection subscription processing $message")
@@ -223,13 +230,14 @@ class GraphQLWebSocketConsumer(
                     }
 
                     // Respond to pings with pongs, ignore pongs
-                    OperationType.GQL_PING -> handleClientBoundMessage(
-                        OperationMessage(
-                            OperationType.GQL_PONG,
-                            message.id,
-                            message.payload as Map<*, *>,
-                        ),
-                    )
+                    OperationType.GQL_PING ->
+                        handleClientBoundMessage(
+                            OperationMessage(
+                                OperationType.GQL_PONG,
+                                message.id,
+                                message.payload as Map<*, *>,
+                            ),
+                        )
 
                     OperationType.GQL_PONG -> {
                         // do nothing
@@ -240,9 +248,10 @@ class GraphQLWebSocketConsumer(
                     OperationType.GQL_CONNECTION_ACK,
                     OperationType.GQL_DATA,
                     OperationType.GQL_CONNECTION_KEEP_ALIVE,
-                    -> handleClientBoundMessage(
-                        message,
-                    )
+                    ->
+                        handleClientBoundMessage(
+                            message,
+                        )
 
                     // Unknown message type
                     else -> adapter.subProtocol.onInvalidMessage(message.id, message.toString(), adapter)
@@ -262,14 +271,15 @@ class GraphQLWebSocketConsumer(
      * in order to filter the connection for auth
      */
     private fun getContainerRequestContext(connectionParams: Map<String, *>?): ContainerRequestContext {
-        val context = ContainerRequest(
-            upgradeContainerRequestContext.uriInfo.baseUri,
-            upgradeContainerRequestContext.uriInfo.requestUri,
-            upgradeContainerRequestContext.method,
-            upgradeContainerRequestContext.securityContext,
-            MapPropertiesDelegate(emptyMap()),
-            null,
-        )
+        val context =
+            ContainerRequest(
+                upgradeContainerRequestContext.uriInfo.baseUri,
+                upgradeContainerRequestContext.uriInfo.requestUri,
+                upgradeContainerRequestContext.method,
+                upgradeContainerRequestContext.securityContext,
+                MapPropertiesDelegate(emptyMap()),
+                null,
+            )
         // treat connectionParams as HTTP headers
         connectionParams?.forEach {
             context.header(it.key, it.value)
@@ -283,14 +293,15 @@ class GraphQLWebSocketConsumer(
      * (Required because of statefulness of the request context object)
      */
     private fun getReusableUpgradeContainerRequestContext(): ContainerRequestContext {
-        val context = ContainerRequest(
-            upgradeContainerRequestContext.uriInfo.baseUri,
-            upgradeContainerRequestContext.uriInfo.requestUri,
-            upgradeContainerRequestContext.method,
-            upgradeContainerRequestContext.securityContext,
-            MapPropertiesDelegate(emptyMap()),
-            null,
-        )
+        val context =
+            ContainerRequest(
+                upgradeContainerRequestContext.uriInfo.baseUri,
+                upgradeContainerRequestContext.uriInfo.requestUri,
+                upgradeContainerRequestContext.method,
+                upgradeContainerRequestContext.securityContext,
+                MapPropertiesDelegate(emptyMap()),
+                null,
+            )
         // copy the headers (cookies are set in headers so don't need to handle explicitly)
         upgradeContainerRequestContext.headers.forEach {
             context.headers(it.key, it.value)
@@ -314,7 +325,10 @@ class GraphQLWebSocketConsumer(
      * has already initialized, send an error back to the client.  Otherwise acknowledge
      * the connection and start a keepalive timer.
      */
-    private suspend fun handleConnectionInit(message: OperationMessage<*>, scope: CoroutineScope) {
+    private suspend fun handleConnectionInit(
+        message: OperationMessage<*>,
+        scope: CoroutineScope,
+    ) {
         if (!keepAliveStarted) {
             val payload = message.payload as? Map<*, *>
             val payloadRequestContext = getContainerRequestContext(payload?.mapKeys { it.key.toString() })
@@ -352,7 +366,10 @@ class GraphQLWebSocketConsumer(
      * coroutine which will asynchronously emit new events as the query returns data or errors.
      * Tracks running queries by client specified id, and only allows one running query for a given id.
      */
-    private suspend fun handleQueryStart(message: OperationMessage<*>, scope: CoroutineScope) {
+    private suspend fun handleQueryStart(
+        message: OperationMessage<*>,
+        scope: CoroutineScope,
+    ) {
         val messageId = message.id
         // re-evaluate socket Principal on each query, in case creds have expired
         val socketPrincipal = getSocketPrincipal()
@@ -366,16 +383,18 @@ class GraphQLWebSocketConsumer(
         } else if (socketPrincipal == null && graphQLConfig.checkAuthorization) {
             adapter.session?.close(GraphQLWebSocketCloseReason.UNAUTHORIZED)
         } else {
-            val job = scope.launch(MDCContext()) {
-                val context = GraphQLContext.of(getGraphQLContextMap(this, socketPrincipal))
-                val queryCoroutine = QueryCoroutine(
-                    graphQL,
-                    channel,
-                    message.id,
-                    message.payload.toExecutionInput(context, dataLoaderRegistryFactory?.generate(context)),
-                )
-                queryCoroutine.run()
-            }
+            val job =
+                scope.launch(MDCContext()) {
+                    val context = GraphQLContext.of(getGraphQLContextMap(this, socketPrincipal))
+                    val queryCoroutine =
+                        QueryCoroutine(
+                            graphQL,
+                            channel,
+                            message.id,
+                            message.payload.toExecutionInput(context, dataLoaderRegistryFactory?.generate(context)),
+                        )
+                    queryCoroutine.run()
+                }
             queries[messageId] = job
         }
     }

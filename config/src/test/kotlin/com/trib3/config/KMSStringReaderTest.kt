@@ -26,13 +26,14 @@ class KMSStringReaderTest {
             .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String("bleh")).build()).anyTimes()
         EasyMock.replay(mockKms)
         val reader = KMSStringReader(mockKms)
-        val config = ConfigFactory.parseMap(
-            mapOf(
-                "test" to "KMS(blah)",
-                "openOnly" to "KMS(blah",
-                "closeOnly" to "blah)",
-            ),
-        )
+        val config =
+            ConfigFactory.parseMap(
+                mapOf(
+                    "test" to "KMS(blah)",
+                    "openOnly" to "KMS(blah",
+                    "closeOnly" to "blah)",
+                ),
+            )
         assertThat(reader.getValue(config, "test")).isEqualTo("bleh")
         assertThat(reader.getValue(config, "openOnly")).isEqualTo("KMS(blah")
         assertThat(reader.getValue(config, "closeOnly")).isEqualTo("blah)")

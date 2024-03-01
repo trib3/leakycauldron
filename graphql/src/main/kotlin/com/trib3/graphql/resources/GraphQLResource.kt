@@ -82,141 +82,148 @@ internal fun unauthorizedResponse(): Response {
 @Path("/graphql")
 @Produces(MediaType.APPLICATION_JSON)
 open class GraphQLResource
-@Inject constructor(
-    private val graphQL: GraphQL,
-    private val graphQLConfig: GraphQLConfig,
-    @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
-    appConfig: TribeApplicationConfig,
-    private val creator: WebSocketCreator,
-) {
-    // Using the CrossOriginFilter directly is tricky because it avoids setting
-    // CORS headers on websocket requests, so mimic its regex and evaluate that
-    // when doing CORS checking of websockets
-    private val corsRegex = Regex(
-        appConfig.corsDomains.joinToString("|") {
-            "https?://*.?$it|" +
-                "https?://*.?$it:${appConfig.appPort}"
-        }.replace(".", "\\.").replace("*", ".*"),
-    )
-    internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
+    @Inject
+    constructor(
+        private val graphQL: GraphQL,
+        private val graphQLConfig: GraphQLConfig,
+        @Nullable val dataLoaderRegistryFactory: KotlinDataLoaderRegistryFactory? = null,
+        appConfig: TribeApplicationConfig,
+        private val creator: WebSocketCreator,
+    ) {
+        // Using the CrossOriginFilter directly is tricky because it avoids setting
+        // CORS headers on websocket requests, so mimic its regex and evaluate that
+        // when doing CORS checking of websockets
+        private val corsRegex =
+            Regex(
+                appConfig.corsDomains.joinToString("|") {
+                    "https?://*.?$it|" +
+                        "https?://*.?$it:${appConfig.appPort}"
+                }.replace(".", "\\.").replace("*", ".*"),
+            )
+        internal val runningFutures = ConcurrentHashMap<String, CoroutineScope>()
 
-    private val webSocketConfig = Configuration.ConfigurationCustomizer().apply {
-        if (graphQLConfig.idleTimeout != null) {
-            this.idleTimeout = Duration.ofMillis(graphQLConfig.idleTimeout)
-        }
-        if (graphQLConfig.maxBinaryMessageSize != null) {
-            this.maxBinaryMessageSize = graphQLConfig.maxBinaryMessageSize
-        }
-        if (graphQLConfig.maxTextMessageSize != null) {
-            this.maxTextMessageSize = graphQLConfig.maxTextMessageSize
-        }
-    }
-
-    /**
-     * Execute the query specified by the [GraphQLRequest]
-     */
-    @POST
-    @Timed
-    @AsyncDispatcher("IO")
-    open suspend fun graphQL(
-        @Parameter(hidden = true) @Auth
-        principal: Optional<Principal>,
-        query: GraphQLServerRequest,
-        @Context requestContext: ContainerRequestContext? = null,
-    ): Response = supervisorScope {
-        val responseBuilder = Response.ok()
-        val contextMap =
-            getGraphQLContextMap(this, principal.orElse(null)) +
-                contextMap(responseBuilder) +
-                contextMap(requestContext)
-
-        val requestId = RequestIdFilter.getRequestId()
-        if (requestId != null) {
-            runningFutures[requestId] = this
-        }
-        try {
-            val response = GraphQLRequestHandler(
-                graphQL,
-                dataLoaderRegistryFactory,
-            ).executeRequest(query, graphQLContext = GraphQLContext.of(contextMap))
-            log.debug("$requestId finished with $response")
-            val responses = when (response) {
-                is GraphQLResponse<*> -> listOf(response)
-                is GraphQLBatchResponse -> response.responses
-            }
-            if (
-                responses.all { r -> r.data == null } &&
-                responses.all { r ->
-                    val errors = r.errors
-                    errors != null && errors.all { it.message == "HTTP 401 Unauthorized" }
+        private val webSocketConfig =
+            Configuration.ConfigurationCustomizer().apply {
+                if (graphQLConfig.idleTimeout != null) {
+                    this.idleTimeout = Duration.ofMillis(graphQLConfig.idleTimeout)
                 }
-            ) {
-                unauthorizedResponse()
-            } else {
-                responseBuilder.entity(response).build()
+                if (graphQLConfig.maxBinaryMessageSize != null) {
+                    this.maxBinaryMessageSize = graphQLConfig.maxBinaryMessageSize
+                }
+                if (graphQLConfig.maxTextMessageSize != null) {
+                    this.maxTextMessageSize = graphQLConfig.maxTextMessageSize
+                }
             }
-        } finally {
-            if (requestId != null) {
-                runningFutures.remove(requestId)
+
+        /**
+         * Execute the query specified by the [GraphQLRequest]
+         */
+        @POST
+        @Timed
+        @AsyncDispatcher("IO")
+        open suspend fun graphQL(
+            @Parameter(hidden = true) @Auth
+            principal: Optional<Principal>,
+            query: GraphQLServerRequest,
+            @Context requestContext: ContainerRequestContext? = null,
+        ): Response =
+            supervisorScope {
+                val responseBuilder = Response.ok()
+                val contextMap =
+                    getGraphQLContextMap(this, principal.orElse(null)) +
+                        contextMap(responseBuilder) +
+                        contextMap(requestContext)
+
+                val requestId = RequestIdFilter.getRequestId()
+                if (requestId != null) {
+                    runningFutures[requestId] = this
+                }
+                try {
+                    val response =
+                        GraphQLRequestHandler(
+                            graphQL,
+                            dataLoaderRegistryFactory,
+                        ).executeRequest(query, graphQLContext = GraphQLContext.of(contextMap))
+                    log.debug("$requestId finished with $response")
+                    val responses =
+                        when (response) {
+                            is GraphQLResponse<*> -> listOf(response)
+                            is GraphQLBatchResponse -> response.responses
+                        }
+                    if (
+                        responses.all { r -> r.data == null } &&
+                        responses.all { r ->
+                            val errors = r.errors
+                            errors != null && errors.all { it.message == "HTTP 401 Unauthorized" }
+                        }
+                    ) {
+                        unauthorizedResponse()
+                    } else {
+                        responseBuilder.entity(response).build()
+                    }
+                } finally {
+                    if (requestId != null) {
+                        runningFutures.remove(requestId)
+                    }
+                }
             }
-        }
-    }
 
-    /**
-     * Allow cancellation of running queries by [requestId].
-     */
-    @DELETE
-    fun cancel(
-        @Parameter(hidden = true) @Auth
-        principal: Optional<Principal>,
-        @QueryParam("id") requestId: String,
-    ): Response {
-        if (graphQLConfig.checkAuthorization && !principal.isPresent) {
-            return unauthorizedResponse()
-        }
-        val running = runningFutures[requestId]
-        if (running != null) {
-            running.coroutineContext[Job]?.cancelChildren()
-        }
-        return Response.status(HttpStatus.NO_CONTENT_204).build()
-    }
-
-    /**
-     * For websocket subscriptions, support upgrading from GET to a websocket
-     */
-    @GET
-    @Timed
-    open fun graphQLUpgrade(
-        @Parameter(hidden = true) @Auth
-        principal: Optional<Principal>,
-        @Context request: HttpServletRequest,
-        @Context response: HttpServletResponse,
-        @Context containerRequestContext: ContainerRequestContext,
-    ): Response {
-        val origin = request.getHeader("Origin")
-        if (origin != null) {
-            if (!origin.matches(corsRegex)) {
+        /**
+         * Allow cancellation of running queries by [requestId].
+         */
+        @DELETE
+        fun cancel(
+            @Parameter(hidden = true) @Auth
+            principal: Optional<Principal>,
+            @QueryParam("id") requestId: String,
+        ): Response {
+            if (graphQLConfig.checkAuthorization && !principal.isPresent) {
                 return unauthorizedResponse()
             }
-        }
-        val webSocketMapping = request.servletContext?.let {
-            WebSocketMappings.getMappings(it)
-        }
-        val pathSpec = WebSocketMappings.parsePathSpec(URIUtil.addPaths(request.servletPath, request.pathInfo))
-        if (webSocketMapping != null && webSocketMapping.getWebSocketCreator(pathSpec) == null) {
-            webSocketMapping.addMapping(
-                pathSpec,
-                creator,
-                JettyServerFrameHandlerFactory.getFactory(request.servletContext),
-                webSocketConfig,
-            )
+            val running = runningFutures[requestId]
+            if (running != null) {
+                running.coroutineContext[Job]?.cancelChildren()
+            }
+            return Response.status(HttpStatus.NO_CONTENT_204).build()
         }
 
-        // Create a new WebSocketCreator for each request bound to an optional authorized principal
-        return if (webSocketMapping != null && webSocketMapping.upgrade(request, response, null)) {
-            Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
-        } else {
-            Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()
+        /**
+         * For websocket subscriptions, support upgrading from GET to a websocket
+         */
+        @GET
+        @Timed
+        open fun graphQLUpgrade(
+            @Parameter(hidden = true) @Auth
+            principal: Optional<Principal>,
+            @Context request: HttpServletRequest,
+            @Context response: HttpServletResponse,
+            @Context containerRequestContext: ContainerRequestContext,
+        ): Response {
+            val origin = request.getHeader("Origin")
+            if (origin != null) {
+                if (!origin.matches(corsRegex)) {
+                    return unauthorizedResponse()
+                }
+            }
+            val webSocketMapping =
+                request.servletContext?.let {
+                    WebSocketMappings.getMappings(it)
+                }
+            val pathSpec = WebSocketMappings.parsePathSpec(URIUtil.addPaths(request.servletPath, request.pathInfo))
+            if (webSocketMapping != null && webSocketMapping.getWebSocketCreator(pathSpec) == null) {
+                webSocketMapping.addMapping(
+                    pathSpec,
+                    creator,
+                    JettyServerFrameHandlerFactory.getFactory(request.servletContext),
+                    webSocketConfig,
+                )
+            }
+
+            // Create a new WebSocketCreator for each request bound to an optional authorized principal
+            return if (webSocketMapping != null && webSocketMapping.upgrade(request, response, null)) {
+                Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
+            } else {
+                Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()
+            }
         }
     }
-}

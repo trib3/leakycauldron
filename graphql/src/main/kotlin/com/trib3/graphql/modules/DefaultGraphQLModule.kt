@@ -88,10 +88,11 @@ class DefaultGraphQLModule : GraphQLApplicationModule() {
         hooks: LeakyCauldronHooks = LeakyCauldronHooks(),
         exceptionHandler: DataFetcherExceptionHandler = CustomDataFetcherExceptionHandler(),
     ): GraphQL {
-        val config = SchemaGeneratorConfig(
-            graphQLPackages.toList(),
-            hooks = hooks,
-        )
+        val config =
+            SchemaGeneratorConfig(
+                graphQLPackages.toList(),
+                hooks = hooks,
+            )
         return GraphQL.newGraphQL(
             toSchema(
                 config,

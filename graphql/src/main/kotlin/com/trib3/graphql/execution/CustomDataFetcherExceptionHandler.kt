@@ -13,7 +13,6 @@ private val log = KotlinLogging.logger { }
  * Custom Exception Handler implantation allowing control over sanitation, relevance and specificity
  */
 class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
-
     override fun handleException(
         handlerParameters: DataFetcherExceptionHandlerParameters,
     ): CompletableFuture<DataFetcherExceptionHandlerResult> {

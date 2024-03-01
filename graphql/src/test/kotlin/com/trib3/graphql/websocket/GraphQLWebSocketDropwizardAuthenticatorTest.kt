@@ -20,34 +20,35 @@ data class TestPrincipal(val _name: String) : Principal {
 
 class TestAuthenticator : AuthFilter<String, TestPrincipal>() {
     override fun filter(requestContext: ContainerRequestContext) {
-        val principal = when (requestContext.getHeaderString("user")) {
-            "bill" -> TestPrincipal("billy")
-            "bob" -> TestPrincipal("bobby")
-            "evil" -> throw IllegalArgumentException("bad user")
-            else -> null
-        }
-        requestContext.securityContext = object : SecurityContext {
-            override fun getUserPrincipal(): Principal? {
-                return principal
+        val principal =
+            when (requestContext.getHeaderString("user")) {
+                "bill" -> TestPrincipal("billy")
+                "bob" -> TestPrincipal("bobby")
+                "evil" -> throw IllegalArgumentException("bad user")
+                else -> null
             }
+        requestContext.securityContext =
+            object : SecurityContext {
+                override fun getUserPrincipal(): Principal? {
+                    return principal
+                }
 
-            override fun isUserInRole(role: String?): Boolean {
-                return false
-            }
+                override fun isUserInRole(role: String?): Boolean {
+                    return false
+                }
 
-            override fun isSecure(): Boolean {
-                return false
-            }
+                override fun isSecure(): Boolean {
+                    return false
+                }
 
-            override fun getAuthenticationScheme(): String {
-                return "test"
+                override fun getAuthenticationScheme(): String {
+                    return "test"
+                }
             }
-        }
     }
 }
 
 class GraphQLWebSocketDropwizardAuthenticatorTest {
-
     private fun getContext(user: String?): ContainerRequestContext {
         return ContainerRequest(
             null,

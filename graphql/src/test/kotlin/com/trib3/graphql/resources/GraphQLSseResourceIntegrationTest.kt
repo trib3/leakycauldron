@@ -75,31 +75,36 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
         return JettyWebTestContainerFactory()
     }
 
-    private val graphQL = GraphQL.newGraphQL(
-        toSchema(
-            SchemaGeneratorConfig(
-                listOf(this::class.java.packageName),
-                hooks = FlowSubscriptionSchemaGeneratorHooks(),
+    private val graphQL =
+        GraphQL.newGraphQL(
+            toSchema(
+                SchemaGeneratorConfig(
+                    listOf(this::class.java.packageName),
+                    hooks = FlowSubscriptionSchemaGeneratorHooks(),
+                ),
+                listOf(TopLevelObject(SseQuery())),
+                listOf(),
+                listOf(TopLevelObject(SseSubscription())),
             ),
-            listOf(TopLevelObject(SseQuery())),
-            listOf(),
-            listOf(TopLevelObject(SseSubscription())),
-        ),
-    )
-        .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
-        .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
-        .instrumentation(RequestIdInstrumentation())
-        .build()
+        )
+            .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
+            .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy(CustomDataFetcherExceptionHandler()))
+            .instrumentation(RequestIdInstrumentation())
+            .build()
 
-    private val rawResource = GraphQLSseResource(
-        graphQL,
-        GraphQLConfig(ConfigLoader("GraphSSEQLResourceIntegrationTest")),
-        ObjectMapperProvider().get(),
-    )
+    private val rawResource =
+        GraphQLSseResource(
+            graphQL,
+            GraphQLConfig(ConfigLoader("GraphSSEQLResourceIntegrationTest")),
+            ObjectMapperProvider().get(),
+        )
 
     private val target by lazy { resource.target("/graphql/stream") }
 
-    private fun readEventInput(eventInput: EventInput, completePayload: String): List<String> {
+    private fun readEventInput(
+        eventInput: EventInput,
+        completePayload: String,
+    ): List<String> {
         val events = mutableListOf<String>()
         while (!eventInput.isClosed) {
             val event = eventInput.read()
@@ -124,8 +129,9 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
     @Test
     fun testSseQuery() {
-        val result = target.request().accept(MediaType.SERVER_SENT_EVENTS)
-            .post(Entity.json("""{"query":"query {hello}"}"""), EventInput::class.java)
+        val result =
+            target.request().accept(MediaType.SERVER_SENT_EVENTS)
+                .post(Entity.json("""{"query":"query {hello}"}"""), EventInput::class.java)
         val events = readEventInput(result, "")
         assertThat(events).hasSize(1)
         assertThat(events[0]).contains(""""data":{"hello":"world"}""")
@@ -133,8 +139,9 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
     @Test
     fun testSseSubscription() {
-        val result = target.request().accept(MediaType.SERVER_SENT_EVENTS)
-            .post(Entity.json("""{"query":"subscription {three}"}"""), EventInput::class.java)
+        val result =
+            target.request().accept(MediaType.SERVER_SENT_EVENTS)
+                .post(Entity.json("""{"query":"subscription {three}"}"""), EventInput::class.java)
         val events = readEventInput(result, "")
         assertThat(events).hasSize(3)
         for (i in 0..2) {
@@ -144,8 +151,9 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
     @Test
     fun testSseError() {
-        val result = target.request().accept(MediaType.SERVER_SENT_EVENTS)
-            .post(Entity.json("""{"query":"query {error}"}"""), EventInput::class.java)
+        val result =
+            target.request().accept(MediaType.SERVER_SENT_EVENTS)
+                .post(Entity.json("""{"query":"query {error}"}"""), EventInput::class.java)
         val events = readEventInput(result, "")
         assertThat(events).hasSize(1)
         assertThat(events[0]).contains(""""message":"Forced Error"""")
@@ -154,8 +162,9 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
     @Test
     fun testSseSubError() {
-        val result = target.request().accept(MediaType.SERVER_SENT_EVENTS)
-            .post(Entity.json("""{"query":"subscription {serror}"}"""), EventInput::class.java)
+        val result =
+            target.request().accept(MediaType.SERVER_SENT_EVENTS)
+                .post(Entity.json("""{"query":"subscription {serror}"}"""), EventInput::class.java)
         val events = readEventInput(result, "")
         assertThat(events).hasSize(1)
         assertThat(events[0]).contains(""""message":"Forced Error"""")
@@ -171,13 +180,15 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
         val eventInput = target.request().header("x-graphql-event-stream-token", token).get(EventInput::class.java)
         waitForStreamReady(tokenUUID)
-        val query = target.request().header("x-graphql-event-stream-token", token)
-            .post(Entity.json("""{"query":"query {hello}", "extensions":{"operationId":"clientspecified"}}"""))
+        val query =
+            target.request().header("x-graphql-event-stream-token", token)
+                .post(Entity.json("""{"query":"query {hello}", "extensions":{"operationId":"clientspecified"}}"""))
         assertThat(query.status).isEqualTo(202)
         assertThat(rawResource.activeStreams[tokenUUID]).isNotNull()
         assertThat(rawResource.runningOperations[tokenUUID]).isNotNull()
-        val query2 = target.request().header("x-graphql-event-stream-token", token)
-            .post(Entity.json("""{"query":"query {hello}", "extensions":{"operationId":"clientspecified2"}}"""))
+        val query2 =
+            target.request().header("x-graphql-event-stream-token", token)
+                .post(Entity.json("""{"query":"query {hello}", "extensions":{"operationId":"clientspecified2"}}"""))
         assertThat(query2.status).isEqualTo(202)
         var completeEvents = 0
         val events = mutableListOf<String>()
@@ -214,8 +225,11 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
         val eventInput = target.queryParam("token", token).request().get(EventInput::class.java)
         waitForStreamReady(tokenUUID)
-        val query = target.queryParam("token", token).request()
-            .post(Entity.json("""{"query":"subscription {three}", "extensions":{"operationId":"clientspecified"}}"""))
+        val query =
+            target.queryParam("token", token).request()
+                .post(
+                    Entity.json("""{"query":"subscription {three}", "extensions":{"operationId":"clientspecified"}}"""),
+                )
         assertThat(query.status).isEqualTo(202)
         val events = readEventInput(eventInput, """{"id":"clientspecified"}""")
         assertThat(events).hasSize(3)
@@ -234,8 +248,9 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
         val eventInput = target.request().header("x-graphql-event-stream-token", token).get(EventInput::class.java)
         waitForStreamReady(tokenUUID)
-        val query = target.request().header("x-graphql-event-stream-token", token)
-            .post(Entity.json("""{"query":"query {error}", "extensions":{"operationId":"clientspecified"}}"""))
+        val query =
+            target.request().header("x-graphql-event-stream-token", token)
+                .post(Entity.json("""{"query":"query {error}", "extensions":{"operationId":"clientspecified"}}"""))
         assertThat(query.status).isEqualTo(202)
         val events = readEventInput(eventInput, """{"id":"clientspecified"}""")
         assertThat(events).hasSize(1)
@@ -252,8 +267,13 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
         val eventInput = target.queryParam("token", token).request().get(EventInput::class.java)
         waitForStreamReady(tokenUUID)
-        val query = target.queryParam("token", token).request()
-            .post(Entity.json("""{"query":"subscription {serror}", "extensions":{"operationId":"clientspecified"}}"""))
+        val query =
+            target.queryParam("token", token).request()
+                .post(
+                    Entity.json(
+                        """{"query":"subscription {serror}", "extensions":{"operationId":"clientspecified"}}""",
+                    ),
+                )
         assertThat(query.status).isEqualTo(202)
         val events = readEventInput(eventInput, """{"id":"clientspecified"}""")
         assertThat(events).hasSize(1)
@@ -270,8 +290,9 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
 
         val eventInput = target.request().header("x-graphql-event-stream-token", token).get(EventInput::class.java)
         waitForStreamReady(tokenUUID)
-        val query = target.request().header("x-graphql-event-stream-token", token)
-            .post(Entity.json("""{"query":"subscription {inf}", "extensions":{"operationId":"infinitequery"}}"""))
+        val query =
+            target.request().header("x-graphql-event-stream-token", token)
+                .post(Entity.json("""{"query":"subscription {inf}", "extensions":{"operationId":"infinitequery"}}"""))
         assertThat(query.status).isEqualTo(202)
         while (!eventInput.isClosed) {
             val event = eventInput.read()
@@ -279,10 +300,11 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
                 break
             }
         }
-        val cancel = target.queryParam("operationId", "infinitequery")
-            .request()
-            .header("x-graphql-event-stream-token", token)
-            .delete()
+        val cancel =
+            target.queryParam("operationId", "infinitequery")
+                .request()
+                .header("x-graphql-event-stream-token", token)
+                .delete()
         assertThat(cancel.status).isEqualTo(204)
         val moreEvents = readEventInput(eventInput, """{"id":"infinitequery"}""")
         assertThat(moreEvents.size).isGreaterThanOrEqualTo(0)
@@ -294,8 +316,13 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
         val events = readEventInput(eventInput, "")
         assertThat(events).isEmpty()
 
-        val query = target.request()
-            .post(Entity.json("""{"query":"subscription {serror}", "extensions":{"operationId":"clientspecified"}}"""))
+        val query =
+            target.request()
+                .post(
+                    Entity.json(
+                        """{"query":"subscription {serror}", "extensions":{"operationId":"clientspecified"}}""",
+                    ),
+                )
         assertThat(query.status).isEqualTo(401)
     }
 
@@ -305,45 +332,56 @@ class GraphQLSseResourceIntegrationTest : ResourceTestBase<GraphQLSseResource>()
         val events = readEventInput(eventInput, "")
         assertThat(events).isEmpty()
 
-        val query = target.queryParam("token", UUID.randomUUID().toString()).request()
-            .post(Entity.json("""{"query":"subscription {serror}", "extensions":{"operationId":"clientspecified"}}"""))
+        val query =
+            target.queryParam("token", UUID.randomUUID().toString()).request()
+                .post(
+                    Entity.json(
+                        """{"query":"subscription {serror}", "extensions":{"operationId":"clientspecified"}}""",
+                    ),
+                )
         assertThat(query.status).isEqualTo(401)
     }
 
     @Test
-    fun testSingleConnBadCancellation() = runBlocking {
-        val cancelNoToken = target.queryParam("operationId", "badValue")
-            .request()
-            .delete()
-        assertThat(cancelNoToken.status).isEqualTo(401)
+    fun testSingleConnBadCancellation() =
+        runBlocking {
+            val cancelNoToken =
+                target.queryParam("operationId", "badValue")
+                    .request()
+                    .delete()
+            assertThat(cancelNoToken.status).isEqualTo(401)
 
-        val cancelBadTokenHeader = target.queryParam("operationId", "badValue")
-            .request()
-            .header("x-graphql-event-stream-token", UUID.randomUUID())
-            .delete()
-        assertThat(cancelBadTokenHeader.status).isEqualTo(204)
+            val cancelBadTokenHeader =
+                target.queryParam("operationId", "badValue")
+                    .request()
+                    .header("x-graphql-event-stream-token", UUID.randomUUID())
+                    .delete()
+            assertThat(cancelBadTokenHeader.status).isEqualTo(204)
 
-        val cancelBadTokenQueryParam = target.queryParam("operationId", "badValue")
-            .queryParam("token", UUID.randomUUID())
-            .request()
-            .delete()
-        assertThat(cancelBadTokenQueryParam.status).isEqualTo(204)
+            val cancelBadTokenQueryParam =
+                target.queryParam("operationId", "badValue")
+                    .queryParam("token", UUID.randomUUID())
+                    .request()
+                    .delete()
+            assertThat(cancelBadTokenQueryParam.status).isEqualTo(204)
 
-        val tokenResponse = target.request().put(Entity.text(""))
-        val token = tokenResponse.readEntity(String::class.java)
-        val tokenUUID = UUID.fromString(token)
-        assertThat(tokenResponse.status).isEqualTo(201)
+            val tokenResponse = target.request().put(Entity.text(""))
+            val token = tokenResponse.readEntity(String::class.java)
+            val tokenUUID = UUID.fromString(token)
+            assertThat(tokenResponse.status).isEqualTo(201)
 
-        val eventInput = target.request().header("x-graphql-event-stream-token", token).get(EventInput::class.java)
-        waitForStreamReady(tokenUUID)
-        val query = target.request().header("x-graphql-event-stream-token", token)
-            .post(Entity.json("""{"query":"query {hello}", "extensions":{"operationId":"clientspecified"}}"""))
-        assertThat(query.status).isEqualTo(202)
-        val cancelGoodTokenBadOperationId = target.queryParam("operationId", "badValue")
-            .queryParam("token", token)
-            .request()
-            .delete()
-        assertThat(cancelGoodTokenBadOperationId.status).isEqualTo(204)
-        eventInput.close()
-    }
+            val eventInput = target.request().header("x-graphql-event-stream-token", token).get(EventInput::class.java)
+            waitForStreamReady(tokenUUID)
+            val query =
+                target.request().header("x-graphql-event-stream-token", token)
+                    .post(Entity.json("""{"query":"query {hello}", "extensions":{"operationId":"clientspecified"}}"""))
+            assertThat(query.status).isEqualTo(202)
+            val cancelGoodTokenBadOperationId =
+                target.queryParam("operationId", "badValue")
+                    .queryParam("token", token)
+                    .request()
+                    .delete()
+            assertThat(cancelGoodTokenBadOperationId.status).isEqualTo(204)
+            eventInput.close()
+        }
 }

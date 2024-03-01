@@ -95,14 +95,18 @@ enum class GraphQLWebSocketSubProtocol(
 
     private val apolloToGraphQlWsMapping = messageMapping.entries.associate { it.key.type to it.value.type }
 
-    private val graphQlWsToApolloMapping = apolloToGraphQlWsMapping.entries.associate {
-        it.value to it.key
-    }.filter {
-        // don't map PONG to KEEPALIVE even though we map outgoing KEEPALIVE messages to PONGs
-        it.key != OperationType.GQL_PONG.type
-    }
+    private val graphQlWsToApolloMapping =
+        apolloToGraphQlWsMapping.entries.associate {
+            it.value to it.key
+        }.filter {
+            // don't map PONG to KEEPALIVE even though we map outgoing KEEPALIVE messages to PONGs
+            it.key != OperationType.GQL_PONG.type
+        }
 
-    private fun <T : Any> getMessage(message: OperationMessage<T>, mapping: Map<String, String>): OperationMessage<T> {
+    private fun <T : Any> getMessage(
+        message: OperationMessage<T>,
+        mapping: Map<String, String>,
+    ): OperationMessage<T> {
         return if (!mapping.containsKey(message.type?.type)) {
             message
         } else {
@@ -129,7 +133,11 @@ enum class GraphQLWebSocketSubProtocol(
      * graphql-ws closes the connection upon receiving an invalid message, while apollo just sends
      * an error message in response.
      */
-    fun onInvalidMessage(messageId: String?, messageBody: String, adapter: GraphQLWebSocketAdapter) {
+    fun onInvalidMessage(
+        messageId: String?,
+        messageBody: String,
+        adapter: GraphQLWebSocketAdapter,
+    ) {
         this.onInvalidMessageCallback(messageId, messageBody, adapter)
     }
 
@@ -137,7 +145,10 @@ enum class GraphQLWebSocketSubProtocol(
      * graphql-ws closes the connection upon receiving a duplicate subscription, while apollo just sends
      * an error message in response.
      */
-    fun onDuplicateQuery(message: OperationMessage<*>, adapter: GraphQLWebSocketAdapter) {
+    fun onDuplicateQuery(
+        message: OperationMessage<*>,
+        adapter: GraphQLWebSocketAdapter,
+    ) {
         this.onDuplicateQueryCallback(message, adapter)
     }
 
@@ -145,7 +156,10 @@ enum class GraphQLWebSocketSubProtocol(
      * graphql-ws closes the connection upon receiving duplicate connection_init requests, while apollo
      * just sends an error message in response.
      */
-    fun onDuplicateInit(message: OperationMessage<*>, adapter: GraphQLWebSocketAdapter) {
+    fun onDuplicateInit(
+        message: OperationMessage<*>,
+        adapter: GraphQLWebSocketAdapter,
+    ) {
         this.onDuplicateInitCallback(message, adapter)
     }
 }
@@ -181,7 +195,6 @@ fun Session.close(reason: GraphQLWebSocketCloseReason) {
 data class OperationMessage<T : Any>(
     val type: OperationType<T>?,
     val id: String?,
-
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXTERNAL_PROPERTY,

@@ -24,24 +24,30 @@ import java.time.Duration
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-private val webSocketCreator = WebSocketCreator { _, _ ->
-    object : WebSocketAdapter() {
-        override fun onWebSocketText(message: String) {
-            remote.sendString(message)
+private val webSocketCreator =
+    WebSocketCreator { _, _ ->
+        object : WebSocketAdapter() {
+            override fun onWebSocketText(message: String) {
+                remote.sendString(message)
+            }
         }
     }
-}
 
 @Path("/")
 class SimpleResource {
     @GET
-    fun getThing(@Context request: HttpServletRequest): String {
+    fun getThing(
+        @Context request: HttpServletRequest,
+    ): String {
         return request.getHeader("Test-Header")
     }
 
     @GET
     @Path("/websocket")
-    fun webSocketUpgrade(@Context request: HttpServletRequest, @Context response: HttpServletResponse): Response {
+    fun webSocketUpgrade(
+        @Context request: HttpServletRequest,
+        @Context response: HttpServletResponse,
+    ): Response {
         val webSocketMapping = WebSocketMappings.getMappings(request.servletContext)
         val pathSpec = WebSocketMappings.parsePathSpec("/")
         if (webSocketMapping.getWebSocketCreator(pathSpec) == null) {
@@ -83,14 +89,15 @@ class ResourceTestBaseJettyWebContainerTest : ResourceTestBase<SimpleResource>()
         val lock = ReentrantLock()
         val condition = lock.newCondition()
         var responseText: String? = null
-        val clientAdapter = object : WebSocketAdapter() {
-            override fun onWebSocketText(message: String) {
-                lock.withLock {
-                    responseText = message
-                    condition.signal()
+        val clientAdapter =
+            object : WebSocketAdapter() {
+                override fun onWebSocketText(message: String) {
+                    lock.withLock {
+                        responseText = message
+                        condition.signal()
+                    }
                 }
             }
-        }
         val session =
             client.connect(
                 clientAdapter,

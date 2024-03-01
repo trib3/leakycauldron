@@ -71,12 +71,13 @@ private abstract class SimpleMixin(
     val ignoreMe: String? = null,
 )
 
-private val moduleInjectedBean = SimpleBean(
-    "injectfoo",
-    99,
-    "injectmaybe",
-    LocalDate.of(2021, 5, 3),
-)
+private val moduleInjectedBean =
+    SimpleBean(
+        "injectfoo",
+        99,
+        "injectmaybe",
+        LocalDate.of(2021, 5, 3),
+    )
 
 private class SimpleMixinModule : KotlinModule() {
     override fun configure() {
@@ -96,90 +97,90 @@ private class SimpleMixinModule : KotlinModule() {
 
 @Guice(modules = [ObjectMapperModule::class, SimpleMixinModule::class])
 class ObjectMapperTest
-@Inject constructor(val mapper: ObjectMapper) {
+    @Inject
+    constructor(val mapper: ObjectMapper) {
+        @Test
+        fun testMapper() {
+            val bean = SimpleBean("hahaha", 3, "yes", LocalDate.of(2019, 1, 1))
+            val stringRep = mapper.writeValueAsString(bean)
+            assertThat(stringRep).contains("\"date\":\"2019-01-01\"")
+            assertThat(stringRep).doesNotContain("ignoreMe")
+            assertThat(ObjectMapperProvider().get().writeValueAsString(bean)).contains("ignoreMe")
+            val roundTrip = mapper.readValue<SimpleBean>(stringRep)
+            assertThat(bean).isEqualTo(roundTrip)
+        }
 
-    @Test
-    fun testMapper() {
-        val bean = SimpleBean("hahaha", 3, "yes", LocalDate.of(2019, 1, 1))
-        val stringRep = mapper.writeValueAsString(bean)
-        assertThat(stringRep).contains("\"date\":\"2019-01-01\"")
-        assertThat(stringRep).doesNotContain("ignoreMe")
-        assertThat(ObjectMapperProvider().get().writeValueAsString(bean)).contains("ignoreMe")
-        val roundTrip = mapper.readValue<SimpleBean>(stringRep)
-        assertThat(bean).isEqualTo(roundTrip)
-    }
+        @Test
+        fun testPermissive() {
+            val bean = mapper.readValue<SimpleBean>("{\"foo\": \"haha\", \"bar\": 3, \"baz\": \"extra\"}")
+            assertThat(bean.foo).isEqualTo("haha")
+            assertThat(bean.bar).isEqualTo(3)
+            assertThat(bean.maybe).isNull()
+            assertThat(bean.date).isNull()
+        }
 
-    @Test
-    fun testPermissive() {
-        val bean = mapper.readValue<SimpleBean>("{\"foo\": \"haha\", \"bar\": 3, \"baz\": \"extra\"}")
-        assertThat(bean.foo).isEqualTo("haha")
-        assertThat(bean.bar).isEqualTo(3)
-        assertThat(bean.maybe).isNull()
-        assertThat(bean.date).isNull()
-    }
+        @Test
+        fun testModuleEq() {
+            assertThat(ObjectMapperModule()).isEqualTo(ObjectMapperModule())
+        }
 
-    @Test
-    fun testModuleEq() {
-        assertThat(ObjectMapperModule()).isEqualTo(ObjectMapperModule())
-    }
+        @Test
+        fun testYearQuarter() {
+            val yq = YearQuarter.of(2010, 1)
+            assertThat(mapper.writeValueAsString(yq)).isEqualTo("\"2010-Q1\"")
+            assertThat(mapper.readValue<YearQuarter>("\"2010-Q1\"")).isEqualTo(yq)
+            assertThat(mapper.readValue<YearQuarter>("\"\"")).isNull()
+            assertFailure {
+                mapper.readValue<YearQuarter>("123")
+            }.all {
+                isInstanceOf(JsonMappingException::class)
+                message().isNotNull().contains("Expected VALUE_STRING for YearQuarter but saw")
+            }
+        }
 
-    @Test
-    fun testYearQuarter() {
-        val yq = YearQuarter.of(2010, 1)
-        assertThat(mapper.writeValueAsString(yq)).isEqualTo("\"2010-Q1\"")
-        assertThat(mapper.readValue<YearQuarter>("\"2010-Q1\"")).isEqualTo(yq)
-        assertThat(mapper.readValue<YearQuarter>("\"\"")).isNull()
-        assertFailure {
-            mapper.readValue<YearQuarter>("123")
-        }.all {
-            isInstanceOf(JsonMappingException::class)
-            message().isNotNull().contains("Expected VALUE_STRING for YearQuarter but saw")
+        private data class YQContainer(val yearQuarter: YearQuarter)
+
+        @Test
+        fun testYearQuarterContainer() {
+            val bean = YQContainer(YearQuarter.of(2010, 1))
+            assertThat(mapper.writeValueAsString(bean)).isEqualTo("{\"yearQuarter\":\"2010-Q1\"}")
+            assertThat(mapper.readValue<YQContainer>("{\"yearQuarter\":\"2010-Q1\"}")).isEqualTo(bean)
+        }
+
+        @Test
+        fun testYearQuarterMap() {
+            val map = mapOf(YearQuarter.of(2010, 1) to YearQuarter.of(2011, 2))
+            assertThat(mapper.writeValueAsString(map)).isEqualTo("{\"2010-Q1\":\"2011-Q2\"}")
+            assertThat(mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"2010-Q1\":\"2011-Q2\"}")).isEqualTo(map)
+            assertFailure {
+                mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"abc\": \"2011-Q2\"}")
+            }.all {
+                isInstanceOf(JsonMappingException::class)
+                message().isNotNull().contains("Unexpected quarter")
+            }
+        }
+
+        @Test
+        fun testInjection() {
+            val injectedBean = mapper.readValue<InjectedValueBean>("""{"foo": "blah", "bar": 15}""")
+            assertThat(injectedBean.foo).isEqualTo("blah")
+            assertThat(injectedBean.bar).isEqualTo(15)
+            assertThat(injectedBean.injectedBeanDefault).isEqualTo(moduleInjectedBean)
+            assertThat(injectedBean.injectedBeanTrue).isEqualTo(moduleInjectedBean)
+            assertThat(injectedBean.injectedBeanFalse).isEqualTo(moduleInjectedBean)
+        }
+
+        @Test
+        fun testNeedInjectionForUnDeserializable() {
+            assertFailure {
+                mapper.readValue<CantDeserializeBean>("""{"foo": "blah"}""")
+            }
+        }
+
+        @Test
+        fun testInjectUnDeserializableValue() {
+            val injectedUndeserializableBean = mapper.readValue<InjectUnDeserializeBean>("""{"foo": "blah"}""")
+            assertThat(injectedUndeserializableBean.foo).isEqualTo("blah")
+            assertThat(injectedUndeserializableBean.undeserializable.enumValue).isEqualTo(SimpleEnum.TWO)
         }
     }
-
-    private data class YQContainer(val yearQuarter: YearQuarter)
-
-    @Test
-    fun testYearQuarterContainer() {
-        val bean = YQContainer(YearQuarter.of(2010, 1))
-        assertThat(mapper.writeValueAsString(bean)).isEqualTo("{\"yearQuarter\":\"2010-Q1\"}")
-        assertThat(mapper.readValue<YQContainer>("{\"yearQuarter\":\"2010-Q1\"}")).isEqualTo(bean)
-    }
-
-    @Test
-    fun testYearQuarterMap() {
-        val map = mapOf(YearQuarter.of(2010, 1) to YearQuarter.of(2011, 2))
-        assertThat(mapper.writeValueAsString(map)).isEqualTo("{\"2010-Q1\":\"2011-Q2\"}")
-        assertThat(mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"2010-Q1\":\"2011-Q2\"}")).isEqualTo(map)
-        assertFailure {
-            mapper.readValue<Map<YearQuarter, YearQuarter>>("{\"abc\": \"2011-Q2\"}")
-        }.all {
-            isInstanceOf(JsonMappingException::class)
-            message().isNotNull().contains("Unexpected quarter")
-        }
-    }
-
-    @Test
-    fun testInjection() {
-        val injectedBean = mapper.readValue<InjectedValueBean>("""{"foo": "blah", "bar": 15}""")
-        assertThat(injectedBean.foo).isEqualTo("blah")
-        assertThat(injectedBean.bar).isEqualTo(15)
-        assertThat(injectedBean.injectedBeanDefault).isEqualTo(moduleInjectedBean)
-        assertThat(injectedBean.injectedBeanTrue).isEqualTo(moduleInjectedBean)
-        assertThat(injectedBean.injectedBeanFalse).isEqualTo(moduleInjectedBean)
-    }
-
-    @Test
-    fun testNeedInjectionForUnDeserializable() {
-        assertFailure {
-            mapper.readValue<CantDeserializeBean>("""{"foo": "blah"}""")
-        }
-    }
-
-    @Test
-    fun testInjectUnDeserializableValue() {
-        val injectedUndeserializableBean = mapper.readValue<InjectUnDeserializeBean>("""{"foo": "blah"}""")
-        assertThat(injectedUndeserializableBean.foo).isEqualTo("blah")
-        assertThat(injectedUndeserializableBean.undeserializable.enumValue).isEqualTo(SimpleEnum.TWO)
-    }
-}

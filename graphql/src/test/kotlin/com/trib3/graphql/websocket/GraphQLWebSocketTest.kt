@@ -73,6 +73,7 @@ class SocketSubscription {
     fun e(): Flow<String> {
         return object : Iterator<String> {
             var value = 1
+
             override fun hasNext(): Boolean {
                 return value < 4
             }
@@ -89,6 +90,7 @@ class SocketSubscription {
     fun inf(): Flow<String> {
         return object : Iterator<String> {
             var value = 1
+
             override fun hasNext(): Boolean {
                 return true
             }
@@ -119,18 +121,21 @@ class WebSocketTestAuthenticator : GraphQLWebSocketAuthenticator {
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 class GraphQLWebSocketTest {
-
-    val testGraphQL = GraphQL.newGraphQL(
-        toSchema(
-            SchemaGeneratorConfig(listOf(this::class.java.packageName), hooks = FlowSubscriptionSchemaGeneratorHooks()),
-            listOf(TopLevelObject(SocketQuery())),
-            listOf(),
-            listOf(TopLevelObject(SocketSubscription())),
-        ),
-    )
-        .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy())
-        .instrumentation(RequestIdInstrumentation())
-        .build()
+    val testGraphQL =
+        GraphQL.newGraphQL(
+            toSchema(
+                SchemaGeneratorConfig(
+                    listOf(this::class.java.packageName),
+                    hooks = FlowSubscriptionSchemaGeneratorHooks(),
+                ),
+                listOf(TopLevelObject(SocketQuery())),
+                listOf(),
+                listOf(TopLevelObject(SocketSubscription())),
+            ),
+        )
+            .subscriptionExecutionStrategy(FlowSubscriptionExecutionStrategy())
+            .instrumentation(RequestIdInstrumentation())
+            .build()
     val mapper = ObjectMapperProvider().get()
     val config = GraphQLConfig(ConfigLoader())
 
@@ -157,20 +162,22 @@ class GraphQLWebSocketTest {
         EasyMock.replay(containerRequestContext, mockUriInfo)
         val channel = Channel<OperationMessage<*>>()
         val adapter = GraphQLWebSocketAdapter(subProtocol, channel, mapper, dispatcher)
-        val authenticator = if (authenticate) {
-            WebSocketTestAuthenticator()
-        } else {
-            null
-        }
-        val consumer = GraphQLWebSocketConsumer(
-            graphQL,
-            overrideConfig ?: config,
-            containerRequestContext,
-            channel,
-            adapter,
-            keepAliveDispatcher,
-            graphQLWebSocketAuthenticator = authenticator,
-        )
+        val authenticator =
+            if (authenticate) {
+                WebSocketTestAuthenticator()
+            } else {
+                null
+            }
+        val consumer =
+            GraphQLWebSocketConsumer(
+                graphQL,
+                overrideConfig ?: config,
+                containerRequestContext,
+                channel,
+                adapter,
+                keepAliveDispatcher,
+                graphQLWebSocketAuthenticator = authenticator,
+            )
         adapter.launch {
             consumer.consume(this)
         }
@@ -862,10 +869,11 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsSubscription() {
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -933,10 +941,11 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsSubscriptionNoConnect() {
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -955,10 +964,11 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsDoubleConnect() {
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -985,10 +995,11 @@ class GraphQLWebSocketTest {
     @Test
     fun testGraphQlWsNeverConnect() {
         val testDispatcher = StandardTestDispatcher()
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            keepAliveDispatcher = testDispatcher,
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                keepAliveDispatcher = testDispatcher,
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -1009,10 +1020,11 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsDuplicateSubscription() {
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         val closeLatch = CountDownLatch(1)
@@ -1068,10 +1080,11 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsInvalidMessage() {
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()
@@ -1095,10 +1108,11 @@ class GraphQLWebSocketTest {
 
     @Test
     fun testGraphQlWsPingPong() {
-        val socket = getSocket(
-            subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
-            overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
-        )
+        val socket =
+            getSocket(
+                subProtocol = GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL,
+                overrideConfig = GraphQLConfig(ConfigLoader("nokeepalive")),
+            )
         val mockRemote = LeakyMock.mock<RemoteEndpoint>()
         val mockSession = LeakyMock.mock<Session>()
         EasyMock.expect(mockSession.remote).andReturn(mockRemote).anyTimes()

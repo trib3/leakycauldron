@@ -65,9 +65,10 @@ data class PageConditionComponent<T>(
                     SortDirection.ASC -> it.gt()
                 }
             }.reduceIndexed { listIndex, conditionSoFar, nextCondition ->
-                val priorEqualityCondition = pagingState.subList(0, listIndex)
-                    .map(PageConditionComponent<out Any>::eq)
-                    .reduce(Condition::and)
+                val priorEqualityCondition =
+                    pagingState.subList(0, listIndex)
+                        .map(PageConditionComponent<out Any>::eq)
+                        .reduce(Condition::and)
                 conditionSoFar.or(priorEqualityCondition.and(nextCondition))
             }
         }

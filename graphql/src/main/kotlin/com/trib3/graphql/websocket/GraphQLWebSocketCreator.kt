@@ -52,13 +52,17 @@ class GraphQLWebSocketCreator(
      * Create the [GraphQLWebSocketAdapter] and its [Channel], and launch a [GraphQLWebSocketConsumer] coroutine
      * to consume the events.  Also set the appropriate subprotocol in our upgrade response.
      */
-    override fun createWebSocket(req: ServerUpgradeRequest, resp: ServerUpgradeResponse): Any {
+    override fun createWebSocket(
+        req: ServerUpgradeRequest,
+        resp: ServerUpgradeResponse,
+    ): Any {
         val containerRequestContext = convertToRequestContext(req)
-        val subProtocol = if (req.hasSubProtocol(GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL.subProtocol)) {
-            GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL
-        } else {
-            GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL
-        }
+        val subProtocol =
+            if (req.hasSubProtocol(GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL.subProtocol)) {
+                GraphQLWebSocketSubProtocol.GRAPHQL_WS_PROTOCOL
+            } else {
+                GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL
+            }
         resp.acceptedSubProtocol = subProtocol.subProtocol
         val channel = Channel<OperationMessage<*>>()
         val adapter = GraphQLWebSocketAdapter(subProtocol, channel, objectMapper)
@@ -84,30 +88,31 @@ class GraphQLWebSocketCreator(
      * for doing auth in the [GraphQLWebSocketConsumer].
      */
     internal fun convertToRequestContext(req: ServerUpgradeRequest): ContainerRequestContext {
-        val containerRequestContext = ContainerRequest(
-            req.requestURI,
-            req.requestURI,
-            req.method,
-            object : SecurityContext {
-                override fun getUserPrincipal(): Principal? {
-                    return req.userPrincipal
-                }
+        val containerRequestContext =
+            ContainerRequest(
+                req.requestURI,
+                req.requestURI,
+                req.method,
+                object : SecurityContext {
+                    override fun getUserPrincipal(): Principal? {
+                        return req.userPrincipal
+                    }
 
-                override fun isUserInRole(role: String?): Boolean {
-                    return req.isUserInRole(role)
-                }
+                    override fun isUserInRole(role: String?): Boolean {
+                        return req.isUserInRole(role)
+                    }
 
-                override fun isSecure(): Boolean {
-                    return req.isSecure
-                }
+                    override fun isSecure(): Boolean {
+                        return req.isSecure
+                    }
 
-                override fun getAuthenticationScheme(): String {
-                    return req.httpServletRequest.authType
-                }
-            },
-            MapPropertiesDelegate(emptyMap()),
-            null,
-        )
+                    override fun getAuthenticationScheme(): String {
+                        return req.httpServletRequest.authType
+                    }
+                },
+                MapPropertiesDelegate(emptyMap()),
+                null,
+            )
         // transfer HTTP headers
         req.headersMap?.forEach {
             containerRequestContext.headers(it.key, it.value)

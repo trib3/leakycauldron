@@ -53,7 +53,10 @@ class LeakyMock private constructor() {
         /**
          * Create a named mock object of the specified type
          */
-        fun <T> mock(name: String, clazz: Class<T>): T {
+        fun <T> mock(
+            name: String,
+            clazz: Class<T>,
+        ): T {
             return EasyMock.mock(name, clazz)
         }
 
@@ -74,7 +77,10 @@ class LeakyMock private constructor() {
         /**
          * Create a named nice mock object of the specified type
          */
-        fun <T> niceMock(name: String, clazz: Class<T>): T {
+        fun <T> niceMock(
+            name: String,
+            clazz: Class<T>,
+        ): T {
             return EasyMock.niceMock(name, clazz)
         }
 

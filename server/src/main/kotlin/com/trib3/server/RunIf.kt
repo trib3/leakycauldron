@@ -6,7 +6,10 @@ package com.trib3.server
  *
  * Useful for interacting with builder/fluent APIs.
  */
-fun <T> T.runIf(condition: Boolean, block: T.() -> T): T {
+fun <T> T.runIf(
+    condition: Boolean,
+    block: T.() -> T,
+): T {
     return if (condition) {
         block()
     } else {

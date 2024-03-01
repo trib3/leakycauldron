@@ -28,6 +28,7 @@ data class UserPrincipal(private val _name: String) : Principal {
 
 class AuthCookieResourceTest : ResourceTestBase<AuthCookieResource>() {
     private val appConfig = TribeApplicationConfig(ConfigLoader())
+
     override fun getResource(): AuthCookieResource {
         return AuthCookieResource(appConfig)
     }

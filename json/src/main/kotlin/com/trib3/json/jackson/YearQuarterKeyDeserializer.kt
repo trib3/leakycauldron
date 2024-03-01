@@ -9,7 +9,10 @@ import java.time.format.DateTimeParseException
  * Jackson [KeyDeserializer] for [YearQuarter] objects.
  */
 class YearQuarterKeyDeserializer : KeyDeserializer() {
-    override fun deserializeKey(key: String, ctxt: DeserializationContext): Any {
+    override fun deserializeKey(
+        key: String,
+        ctxt: DeserializationContext,
+    ): Any {
         return try {
             YearQuarter.parse(key)
         } catch (e: DateTimeParseException) {

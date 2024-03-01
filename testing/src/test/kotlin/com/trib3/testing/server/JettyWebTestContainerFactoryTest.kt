@@ -60,10 +60,11 @@ class JettyWebTestContainerFactoryTest {
 
     @Test
     fun testDefaultPort() {
-        val server = factory.create(
-            URI("http", "test.com", "/zzz", ""),
-            deploymentContext,
-        )
+        val server =
+            factory.create(
+                URI("http", "test.com", "/zzz", ""),
+                deploymentContext,
+            )
         server.stop()
         val port = (server.server.connectors.firstOrNull() as? NetworkConnector)?.port
         assertThat(port).isEqualTo(9080)

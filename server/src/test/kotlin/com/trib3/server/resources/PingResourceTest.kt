@@ -6,7 +6,6 @@ import com.trib3.testing.server.ResourceTestBase
 import org.testng.annotations.Test
 
 class PingResourceTest : ResourceTestBase<PingResource>() {
-
     override fun getResource(): PingResource = PingResource()
 
     @Test

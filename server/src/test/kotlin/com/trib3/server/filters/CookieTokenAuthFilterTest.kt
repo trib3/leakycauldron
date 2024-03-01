@@ -23,15 +23,16 @@ data class Session(val email: String) : Principal {
 }
 
 class CookieTokenAuthFilterTest {
-    val filter = CookieTokenAuthFilter.Builder<Session>("cookieName")
-        .setAuthenticator {
-            if (it == "value") {
-                Optional.of(Session("blah@blee.com"))
-            } else {
-                Optional.empty()
+    val filter =
+        CookieTokenAuthFilter.Builder<Session>("cookieName")
+            .setAuthenticator {
+                if (it == "value") {
+                    Optional.of(Session("blah@blee.com"))
+                } else {
+                    Optional.empty()
+                }
             }
-        }
-        .buildAuthFilter()
+            .buildAuthFilter()
 
     @Test
     fun testBuilder() {

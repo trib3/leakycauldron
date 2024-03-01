@@ -28,36 +28,39 @@ class TimestreamReportFactoryTestModule : KotlinModule() {
 }
 
 @Guice(modules = [TimestreamReportFactoryTestModule::class])
-class TimestreamReporterFactoryTest @Inject constructor(
-    val objectMapper: ObjectMapper,
-    val mockTimestreamWriteClient: TimestreamWriteClient,
-) {
-    @Test
-    fun testFactory() {
-        val registry = MetricRegistry()
-        val testCaseConfigLoader = ConfigLoader("TimeStreamReporterFactoryTest")
-        val configFactory = HoconConfigurationFactory(
-            ReporterFactory::class.java,
-            BaseValidator.newValidator(),
-            objectMapper,
-            testCaseConfigLoader,
-        )
-        val factory = configFactory.build() as TimestreamReporterFactory
-        val reporter = factory.build(registry)
-        assertThat(reporter.databaseName).isEqualTo("TestDBName")
-        assertThat(reporter.tableName).isEqualTo("TestTableName")
-        assertThat(reporter.timestreamWriteClient).isEqualTo(mockTimestreamWriteClient)
-        assertThat(factory.timestreamWriteClient).isEqualTo(mockTimestreamWriteClient)
-        assertThat(reporter.globalDimensionValues.map { it.name() }).containsAtLeast(
-            "hostname",
-            "application",
-            "env",
-            "key1",
-        )
-        val dimMap = reporter.globalDimensionValues.associate { it.name() to it.value() }
-        assertThat(dimMap["application"]).isEqualTo("Test")
-        assertThat(dimMap["env"]).isEqualTo("dev")
-        assertThat(dimMap["key1"]).isEqualTo("value1")
-        assertThat(dimMap["hostname"]).isEqualTo(InetAddress.getLocalHost().hostName)
+class TimestreamReporterFactoryTest
+    @Inject
+    constructor(
+        val objectMapper: ObjectMapper,
+        val mockTimestreamWriteClient: TimestreamWriteClient,
+    ) {
+        @Test
+        fun testFactory() {
+            val registry = MetricRegistry()
+            val testCaseConfigLoader = ConfigLoader("TimeStreamReporterFactoryTest")
+            val configFactory =
+                HoconConfigurationFactory(
+                    ReporterFactory::class.java,
+                    BaseValidator.newValidator(),
+                    objectMapper,
+                    testCaseConfigLoader,
+                )
+            val factory = configFactory.build() as TimestreamReporterFactory
+            val reporter = factory.build(registry)
+            assertThat(reporter.databaseName).isEqualTo("TestDBName")
+            assertThat(reporter.tableName).isEqualTo("TestTableName")
+            assertThat(reporter.timestreamWriteClient).isEqualTo(mockTimestreamWriteClient)
+            assertThat(factory.timestreamWriteClient).isEqualTo(mockTimestreamWriteClient)
+            assertThat(reporter.globalDimensionValues.map { it.name() }).containsAtLeast(
+                "hostname",
+                "application",
+                "env",
+                "key1",
+            )
+            val dimMap = reporter.globalDimensionValues.associate { it.name() to it.value() }
+            assertThat(dimMap["application"]).isEqualTo("Test")
+            assertThat(dimMap["env"]).isEqualTo("dev")
+            assertThat(dimMap["key1"]).isEqualTo("value1")
+            assertThat(dimMap["hostname"]).isEqualTo(InetAddress.getLocalHost().hostName)
+        }
     }
-}

@@ -19,7 +19,6 @@ class HoconConfigurationFactory<T>(
     mapperArg: ObjectMapper,
     private val configLoader: ConfigLoader,
 ) : ConfigurationFactory<T> {
-
     private val hoconFactory = HoconFactory()
     private val mapper = mapperArg.copy()
 
@@ -30,7 +29,10 @@ class HoconConfigurationFactory<T>(
     /**
      * Builds the configuration by delegating to [build]
      */
-    override fun build(provider: ConfigurationSourceProvider, path: String): T {
+    override fun build(
+        provider: ConfigurationSourceProvider,
+        path: String,
+    ): T {
         return build()
     }
 

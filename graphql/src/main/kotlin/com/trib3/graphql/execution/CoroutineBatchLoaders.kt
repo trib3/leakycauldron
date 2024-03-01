@@ -54,9 +54,15 @@ abstract class CoroutineBatchLoader<K, V> :
     /**
      * Suspend function called to batch load the provided [keys] and return a list of loaded values.
      */
-    abstract suspend fun loadSuspend(keys: List<K>, environment: BatchLoaderEnvironment): List<V>
+    abstract suspend fun loadSuspend(
+        keys: List<K>,
+        environment: BatchLoaderEnvironment,
+    ): List<V>
 
-    override fun load(keys: List<K>, environment: BatchLoaderEnvironment): CompletionStage<List<V>> {
+    override fun load(
+        keys: List<K>,
+        environment: BatchLoaderEnvironment,
+    ): CompletionStage<List<V>> {
         return getScope(environment).future {
             loadSuspend(keys, environment)
         }
@@ -78,9 +84,15 @@ abstract class CoroutineMappedBatchLoader<K, V> :
     /**
      * Suspend function called to batch load the provided [keys] and return a map of loaded values.
      */
-    abstract suspend fun loadSuspend(keys: Set<K>, environment: BatchLoaderEnvironment): Map<K, V>
+    abstract suspend fun loadSuspend(
+        keys: Set<K>,
+        environment: BatchLoaderEnvironment,
+    ): Map<K, V>
 
-    override fun load(keys: Set<K>, environment: BatchLoaderEnvironment): CompletionStage<Map<K, V>> {
+    override fun load(
+        keys: Set<K>,
+        environment: BatchLoaderEnvironment,
+    ): CompletionStage<Map<K, V>> {
         return getScope(environment).future {
             loadSuspend(keys, environment)
         }

@@ -103,42 +103,45 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
         )
     }
 
-    val graphQL = GraphQL.newGraphQL(
-        toSchema(
-            SchemaGeneratorConfig(
-                listOf(this::class.java.packageName),
+    val graphQL =
+        GraphQL.newGraphQL(
+            toSchema(
+                SchemaGeneratorConfig(
+                    listOf(this::class.java.packageName),
+                ),
+                listOf(TopLevelObject(AuthTestQuery())),
+                listOf(),
+                listOf(),
             ),
-            listOf(TopLevelObject(AuthTestQuery())),
-            listOf(),
-            listOf(),
-        ),
-    )
-        .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
-        .instrumentation(RequestIdInstrumentation())
-        .build()
+        )
+            .queryExecutionStrategy(AsyncExecutionStrategy(CustomDataFetcherExceptionHandler()))
+            .instrumentation(RequestIdInstrumentation())
+            .build()
 
     val rawResource =
         GraphQLResource(
             graphQL,
             GraphQLConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
             appConfig = TribeApplicationConfig(ConfigLoader("GraphQLResourceIntegrationTest")),
-            creator = WebSocketCreator { request, _ ->
-                if (request.queryString != null && request.queryString.contains("fail")) {
-                    null
-                } else {
-                    object : WebSocketAdapter() { // simple echoing websocket implementation
-                        override fun onWebSocketText(message: String) {
-                            remote.sendString("You said $message")
+            creator =
+                WebSocketCreator { request, _ ->
+                    if (request.queryString != null && request.queryString.contains("fail")) {
+                        null
+                    } else {
+                        object : WebSocketAdapter() { // simple echoing websocket implementation
+                            override fun onWebSocketText(message: String) {
+                                remote.sendString("You said $message")
+                            }
                         }
                     }
-                }
-            },
+                },
         )
 
     @Test
     fun testWebSocketNoUpgrade() {
-        val result = resource.target("/graphql")
-            .request().cookie("authCookie", "user").get()
+        val result =
+            resource.target("/graphql")
+                .request().cookie("authCookie", "user").get()
         assertThat(result.status).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405)
     }
 
@@ -165,8 +168,9 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testWebSocketUpgradeUnauthenticated() {
-        val result = resource.target("/graphql").queryParam("fail", "true")
-            .request().header("Origin", "https://blah.com").get()
+        val result =
+            resource.target("/graphql").queryParam("fail", "true")
+                .request().header("Origin", "https://blah.com").get()
         assertThat(result.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
     }
 
@@ -179,22 +183,24 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
         val condition = lock.newCondition()
         try {
             val uri = resource.target("/graphql").uriBuilder.scheme("ws").build()
-            val adapter = object : WebSocketAdapter() {
-                override fun onWebSocketText(message: String) {
-                    lock.withLock {
-                        received = message
-                        condition.signal()
+            val adapter =
+                object : WebSocketAdapter() {
+                    override fun onWebSocketText(message: String) {
+                        lock.withLock {
+                            received = message
+                            condition.signal()
+                        }
                     }
                 }
-            }
-            val session = client.connect(
-                adapter,
-                uri,
-                ClientUpgradeRequest().also {
-                    it.cookies = listOf(HttpCookie("authCookie", "user"))
-                },
-            ).get()
-            lock.withLock() {
+            val session =
+                client.connect(
+                    adapter,
+                    uri,
+                    ClientUpgradeRequest().also {
+                        it.cookies = listOf(HttpCookie("authCookie", "user"))
+                    },
+                ).get()
+            lock.withLock {
                 session.remote.sendString("Hi there")
                 condition.await()
             }
@@ -206,9 +212,10 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testAuthed() {
-        val result = resource.target("/graphql").request()
-            .cookie("authCookie", "user")
-            .post(Entity.json("""{"query":"query {context {name}}"}"""))
+        val result =
+            resource.target("/graphql").request()
+                .cookie("authCookie", "user")
+                .post(Entity.json("""{"query":"query {context {name}}"}"""))
         assertThat(result.status).isEqualTo(HttpStatus.OK_200)
         assertThat(result.cookies["testCookie"]).isNull()
         val data = result.readEntity(Map::class.java)["data"] as Map<*, *>
@@ -218,8 +225,9 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testUnAuthed() {
-        val result = resource.target("/graphql").request()
-            .post(Entity.json("""{"query":"query {context {name}}"}"""))
+        val result =
+            resource.target("/graphql").request()
+                .post(Entity.json("""{"query":"query {context {name}}"}"""))
         assertThat(result.status).isEqualTo(HttpStatus.OK_200)
         assertThat(result.cookies["testCookie"]?.value).isEqualTo("testValue")
         val data = result.readEntity(Map::class.java)["data"] as Map<*, *>
@@ -228,8 +236,9 @@ class GraphQLResourceIntegrationTest : ResourceTestBase<GraphQLResource>() {
 
     @Test
     fun testRequestContextUri() {
-        val result = resource.target("/graphql").request().header("other-header", "other-value")
-            .post(Entity.json("""{"query":"query {requestContext}"}"""))
+        val result =
+            resource.target("/graphql").request().header("other-header", "other-value")
+                .post(Entity.json("""{"query":"query {requestContext}"}"""))
         assertThat(result.status).isEqualTo(HttpStatus.OK_200)
         val data = result.readEntity(Map::class.java)["data"] as Map<*, *>
         assertThat(data["requestContext"]?.toString()).isNotNull().endsWith("/graphql")

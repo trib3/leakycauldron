@@ -39,11 +39,14 @@ annotation class GraphQLAuth(val roles: Array<String> = [])
  * for an unauthenticated user.
  */
 class GraphQLAuthDirectiveWiring(private val authorizer: Authorizer<Principal>?) : KotlinSchemaDirectiveWiring {
-
-    private fun missingAllowedRole(principal: Principal, roles: Array<String>): Boolean {
-        return authorizer != null && roles.isNotEmpty() && roles.none {
-            authorizer.authorize(principal, it, null)
-        }
+    private fun missingAllowedRole(
+        principal: Principal,
+        roles: Array<String>,
+    ): Boolean {
+        return authorizer != null && roles.isNotEmpty() &&
+            roles.none {
+                authorizer.authorize(principal, it, null)
+            }
     }
 
     override fun onField(environment: KotlinFieldDirectiveEnvironment): GraphQLFieldDefinition {
@@ -51,19 +54,21 @@ class GraphQLAuthDirectiveWiring(private val authorizer: Authorizer<Principal>?)
         val roles = environment.directive.getArgument("roles").argumentValue.value as Array<String>
         val originalDataFetcher = environment.getDataFetcher()
 
-        val authFetcher = DataFetcher { dfe ->
-            val principal = dfe.graphQlContext.get<Principal>()
-            if (principal == null || missingAllowedRole(principal, roles)) {
-                val status = if (principal == null) {
-                    Response.Status.UNAUTHORIZED
+        val authFetcher =
+            DataFetcher { dfe ->
+                val principal = dfe.graphQlContext.get<Principal>()
+                if (principal == null || missingAllowedRole(principal, roles)) {
+                    val status =
+                        if (principal == null) {
+                            Response.Status.UNAUTHORIZED
+                        } else {
+                            Response.Status.FORBIDDEN
+                        }
+                    throw WebApplicationException(status.statusCode)
                 } else {
-                    Response.Status.FORBIDDEN
+                    originalDataFetcher.get(dfe)
                 }
-                throw WebApplicationException(status.statusCode)
-            } else {
-                originalDataFetcher.get(dfe)
             }
-        }
         environment.setDataFetcher(authFetcher)
         return super.onField(environment)
     }

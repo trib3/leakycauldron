@@ -30,10 +30,11 @@ private const val DEFAULT_PORT = 9080
  */
 class JettyWebTestContainerFactory : TestContainerFactory {
     class JettyWebTestContainer(private var uri: URI, context: DeploymentContext) : TestContainer {
-        val server = create(
-            UriBuilder.fromUri(uri).path(context.contextPath).build(),
-            ServletContainer(context.resourceConfig),
-        )
+        val server =
+            create(
+                UriBuilder.fromUri(uri).path(context.contextPath).build(),
+                ServletContainer(context.resourceConfig),
+            )
 
         override fun getClientConfig(): ClientConfig? {
             return null
@@ -78,15 +79,14 @@ class JettyWebTestContainerFactory : TestContainerFactory {
         }
 
         // simplified version of JettyHttpContainerFactory#createServer
-        private fun createServer(
-            uri: URI,
-        ): Server {
+        private fun createServer(uri: URI): Server {
             require("http" == uri.scheme) { "The URI scheme, of the URI $uri, must be http" }
-            val port = if (uri.port == -1) {
-                DEFAULT_PORT
-            } else {
-                uri.port
-            }
+            val port =
+                if (uri.port == -1) {
+                    DEFAULT_PORT
+                } else {
+                    uri.port
+                }
 
             val server = Server(QueuedThreadPool())
             val config = HttpConfiguration()
@@ -97,7 +97,10 @@ class JettyWebTestContainerFactory : TestContainerFactory {
         }
     }
 
-    override fun create(baseUri: URI, deploymentContext: DeploymentContext): JettyWebTestContainer {
+    override fun create(
+        baseUri: URI,
+        deploymentContext: DeploymentContext,
+    ): JettyWebTestContainer {
         return JettyWebTestContainer(baseUri, deploymentContext)
     }
 }

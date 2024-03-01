@@ -18,11 +18,14 @@ import software.amazon.awssdk.services.kms.model.DecryptResponse
 class KMSModuleTest {
     @Test
     fun testBind() {
-        val fakeKms = LeakyMock.mock<KmsClient>().also {
-            EasyMock.expect(it.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
-                .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build()).anyTimes()
-            EasyMock.replay(it)
-        }
+        val fakeKms =
+            LeakyMock.mock<KmsClient>().also {
+                EasyMock.expect(it.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
+                    .andReturn(
+                        DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build(),
+                    ).anyTimes()
+                EasyMock.replay(it)
+            }
         // construct a KMSStringSelectReader to fill in _INSTANCE kms so real kms doesn't get inserted for other tests
         KMSStringSelectReader(fakeKms)
         val kmsClient = Guice.createInjector(KMSModule()).getInstance<KmsClient>()

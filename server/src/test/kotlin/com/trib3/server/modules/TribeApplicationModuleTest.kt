@@ -15,12 +15,13 @@ private class ArbitraryStringTribeAppModule : TribeApplicationModule() {
 
 @Guice(modules = [ArbitraryStringTribeAppModule::class])
 class TribeApplicationModuleTest
-@Inject constructor(
-    @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val bound: Set<Any>,
-) {
-    @Test
-    fun testResourceBound() {
-        assertThat(bound).contains("arbitraryString".intern())
+    @Inject
+    constructor(
+        @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
+        val bound: Set<Any>,
+    ) {
+        @Test
+        fun testResourceBound() {
+            assertThat(bound).contains("arbitraryString".intern())
+        }
     }
-}

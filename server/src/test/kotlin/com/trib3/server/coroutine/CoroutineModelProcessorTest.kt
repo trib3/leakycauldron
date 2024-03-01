@@ -35,7 +35,9 @@ class ProcessorTestResource {
 
     @GET
     @Path("/coroutine")
-    suspend fun coroutineMethod(@QueryParam("a") a: Optional<String>): String {
+    suspend fun coroutineMethod(
+        @QueryParam("a") a: Optional<String>,
+    ): String {
         delay(1)
         return "coroutine${a.orElse("null")}"
     }
@@ -54,7 +56,9 @@ class ProcessorTestResource {
     @GET
     @Path("/managedAsync")
     @ManagedAsync
-    suspend fun managedAsync(@Suspended async: AsyncResponse) {
+    suspend fun managedAsync(
+        @Suspended async: AsyncResponse,
+    ) {
         delay(1)
         async.resume("async")
     }
@@ -67,20 +71,22 @@ class CoroutineModelProcessorTest {
         val mockAsyncProvider = LeakyMock.mock<Provider<AsyncContext>>()
         EasyMock.expect(mockInjector.getInstance(ProcessorTestResource::class.java)).andReturn(ProcessorTestResource())
         EasyMock.replay(mockInjector, mockAsyncProvider)
-        val resourceList = listOf(
-            Resource.builder(ProcessorTestResource::class.java).build(),
-        )
+        val resourceList =
+            listOf(
+                Resource.builder(ProcessorTestResource::class.java).build(),
+            )
         val processor = CoroutineModelProcessor(mockInjector, mockAsyncProvider)
-        val builtResources = listOf(
-            processor.processResourceModel(
-                ResourceModel.Builder(resourceList, false).build(),
-                ResourceConfig(),
-            ),
-            processor.processSubResource(
-                ResourceModel.Builder(resourceList, true).build(),
-                ResourceConfig(),
-            ),
-        )
+        val builtResources =
+            listOf(
+                processor.processResourceModel(
+                    ResourceModel.Builder(resourceList, false).build(),
+                    ResourceConfig(),
+                ),
+                processor.processSubResource(
+                    ResourceModel.Builder(resourceList, true).build(),
+                    ResourceConfig(),
+                ),
+            )
         builtResources.forEach { builtResource ->
             assertThat(builtResource.resources).hasSize(1)
             for (childResource in builtResource.resources[0].childResources) {

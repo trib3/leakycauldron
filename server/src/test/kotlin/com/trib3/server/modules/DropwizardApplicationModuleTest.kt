@@ -13,19 +13,20 @@ import org.testng.annotations.Test
 
 @Guice(modules = [DropwizardApplicationModule::class])
 class DropwizardApplicationModuleTest
-@Inject constructor(
-    val bundles: Set<ConfiguredBundle<Configuration>>,
-    @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
-    val adminFilters: Set<ServletFilterConfig>,
-) {
-    @Test
-    fun testBindings() {
-        assertThat(bundles).isEmpty()
-        assertThat(adminFilters).isNotNull()
-    }
+    @Inject
+    constructor(
+        val bundles: Set<ConfiguredBundle<Configuration>>,
+        @Named(TribeApplicationModule.ADMIN_SERVLET_FILTERS_BIND_NAME)
+        val adminFilters: Set<ServletFilterConfig>,
+    ) {
+        @Test
+        fun testBindings() {
+            assertThat(bundles).isEmpty()
+            assertThat(adminFilters).isNotNull()
+        }
 
-    @Test
-    fun testModuleEquals() {
-        assertThat(DropwizardApplicationModule()).isEqualTo(DropwizardApplicationModule())
+        @Test
+        fun testModuleEquals() {
+            assertThat(DropwizardApplicationModule()).isEqualTo(DropwizardApplicationModule())
+        }
     }
-}

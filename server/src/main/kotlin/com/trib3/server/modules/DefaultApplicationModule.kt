@@ -85,11 +85,12 @@ class DefaultApplicationModule : TribeApplicationModule() {
                 "https?://*.?$it," +
                     "https?://*.?$it:${appConfig.appPort}"
             }.joinToString(",")
-        val paramMap = mapOf(
-            CrossOriginFilter.ALLOWED_ORIGINS_PARAM to corsDomain,
-            CrossOriginFilter.ALLOWED_METHODS_PARAM to "GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD",
-            CrossOriginFilter.ALLOW_CREDENTIALS_PARAM to "true",
-        )
+        val paramMap =
+            mapOf(
+                CrossOriginFilter.ALLOWED_ORIGINS_PARAM to corsDomain,
+                CrossOriginFilter.ALLOWED_METHODS_PARAM to "GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD",
+                CrossOriginFilter.ALLOW_CREDENTIALS_PARAM to "true",
+            )
         return ServletFilterConfig(
             CrossOriginFilter::class.java.simpleName,
             CrossOriginFilter::class.java,
@@ -111,9 +112,10 @@ class DefaultApplicationModule : TribeApplicationModule() {
     @ProvidesIntoSet
     fun provideHeaderFilter(appConfig: TribeApplicationConfig): ServletFilterConfig {
         val headerConfig = appConfig.httpsHeaders.map { "Set $it" }.joinToString(",")
-        val paramMap = mapOf(
-            "headerConfig" to headerConfig,
-        )
+        val paramMap =
+            mapOf(
+                "headerConfig" to headerConfig,
+            )
         return ServletFilterConfig(
             HeaderFilter::class.java.simpleName,
             HeaderFilter::class.java,

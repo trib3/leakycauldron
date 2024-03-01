@@ -40,9 +40,10 @@ class CoroutineInvocationHandler(
             // Can't use .callSuspend() if the object gets subclassed dynamically by AOP,
             // so use suspendCoroutineUninterceptedOrReturn to get the current continuation
             val nonNullArgs = args ?: arrayOf()
-            val result: Any? = suspendCoroutineUninterceptedOrReturn { cont ->
-                originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
-            }
+            val result: Any? =
+                suspendCoroutineUninterceptedOrReturn { cont ->
+                    originalInvocable.handlingMethod.invoke(originalObject, *nonNullArgs, cont)
+                }
             if (!shouldIgnoreReturn) {
                 asyncContext.resume(result)
             }
@@ -59,7 +60,11 @@ class CoroutineInvocationHandler(
         }
     }
 
-    override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
+    override fun invoke(
+        proxy: Any,
+        method: Method,
+        args: Array<out Any>?,
+    ): Any? {
         val asyncContext = asyncContextProvider.get()
         check(asyncContext.isSuspended || asyncContext.suspend()) {
             "Can't suspend!"
@@ -68,13 +73,14 @@ class CoroutineInvocationHandler(
         val methodAnnotation = originalInvocable.definitionMethod.getAnnotation(AsyncDispatcher::class.java)
         val classAnnotation =
             originalInvocable.definitionMethod.declaringClass.getAnnotation(AsyncDispatcher::class.java)
-        val additionalContext = when ((methodAnnotation ?: classAnnotation)?.dispatcher) {
-            "Default" -> Dispatchers.Default
-            "IO" -> Dispatchers.IO
-            "Main" -> Dispatchers.Main
-            "Unconfined" -> Dispatchers.Unconfined
-            else -> EmptyCoroutineContext
-        }
+        val additionalContext =
+            when ((methodAnnotation ?: classAnnotation)?.dispatcher) {
+                "Default" -> Dispatchers.Default
+                "IO" -> Dispatchers.IO
+                "Main" -> Dispatchers.Main
+                "Unconfined" -> Dispatchers.Unconfined
+                else -> EmptyCoroutineContext
+            }
         val scope = (originalObject as? CoroutineScope) ?: this
         scope.launch(additionalContext + MDCContext()) {
             // cancel this coroutine when a client disconnection is detected by jersey

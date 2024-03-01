@@ -20,7 +20,7 @@ import java.security.Principal
 typealias GraphQLWebSocketAuthenticator = Function1<
     @JvmSuppressWildcards ContainerRequestContext,
     @JvmSuppressWildcards Principal?,
-    >
+>
 
 /**
  * Base class for GraphQL application guice modules.  Provides
@@ -29,7 +29,6 @@ typealias GraphQLWebSocketAuthenticator = Function1<
  */
 @Suppress("TooManyFunctions") // All functions are graphQL binding related
 abstract class GraphQLApplicationModule : TribeApplicationModule() {
-
     companion object {
         const val GRAPHQL_PACKAGES_BIND_NAME = "graphQLPackages"
         const val GRAPHQL_QUERIES_BIND_NAME = "graphQLQueries"
