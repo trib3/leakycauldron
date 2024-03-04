@@ -5,7 +5,7 @@ orbs:
 jobs:
   build:
     machine:
-      image: ubuntu-2204:2022.04.2
+      image: default
 
     working_directory: ~/repo
     environment:
