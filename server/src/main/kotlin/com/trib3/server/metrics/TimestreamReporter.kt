@@ -34,13 +34,12 @@ class TimestreamReporter(
     rateUnit: TimeUnit,
     durationUnit: TimeUnit,
 ) : ScheduledReporter(
-    registry,
-    name,
-    filter,
-    rateUnit,
-    durationUnit,
-) {
-
+        registry,
+        name,
+        filter,
+        rateUnit,
+        durationUnit,
+    ) {
     private val rateFactor = rateUnit.toSeconds(1)
     private val durationFactor = 1.0 / durationUnit.toNanos(1)
 
@@ -54,27 +53,32 @@ class TimestreamReporter(
         meters: SortedMap<String, Meter>,
         timers: SortedMap<String, Timer>,
     ) {
-        val records = gauges.flatMap {
-            getGaugeRecords(it.key, it.value)
-        } + (counters + histograms + meters + timers).flatMap {
-            getCounterRecords(it.key, it.value)
-        } + (meters + timers).flatMap {
-            getMeterRecords(it.key, it.value)
-        } + (histograms + timers).flatMap {
-            getSamplingRecords(it.key, it.value)
-        }
+        val records =
+            gauges.flatMap {
+                getGaugeRecords(it.key, it.value)
+            } +
+                (counters + histograms + meters + timers).flatMap {
+                    getCounterRecords(it.key, it.value)
+                } +
+                (meters + timers).flatMap {
+                    getMeterRecords(it.key, it.value)
+                } +
+                (histograms + timers).flatMap {
+                    getSamplingRecords(it.key, it.value)
+                }
 
-        val recordRequestBuilder = WriteRecordsRequest.builder()
-            .databaseName(databaseName)
-            .tableName(tableName)
-            .commonAttributes(
-                Record.builder()
-                    .time(System.currentTimeMillis().toString())
-                    .timeUnit(software.amazon.awssdk.services.timestreamwrite.model.TimeUnit.MILLISECONDS)
-                    .dimensions(
-                        globalDimensionValues,
-                    ).build(),
-            )
+        val recordRequestBuilder =
+            WriteRecordsRequest.builder()
+                .databaseName(databaseName)
+                .tableName(tableName)
+                .commonAttributes(
+                    Record.builder()
+                        .time(System.currentTimeMillis().toString())
+                        .timeUnit(software.amazon.awssdk.services.timestreamwrite.model.TimeUnit.MILLISECONDS)
+                        .dimensions(
+                            globalDimensionValues,
+                        ).build(),
+                )
 
         records.chunked(TIMESTREAM_MAX_RECORDS).forEach { chunk ->
             val recordRequest = recordRequestBuilder.records(chunk).build()
@@ -85,7 +89,10 @@ class TimestreamReporter(
     /**
      * For each [Gauge], send the current `value` as a metric.
      */
-    private fun getGaugeRecords(gaugeName: String, gauge: Gauge<*>): List<Record> {
+    private fun getGaugeRecords(
+        gaugeName: String,
+        gauge: Gauge<*>,
+    ): List<Record> {
         val gaugeValue = gauge.value
         return if (gaugeValue is Number) {
             listOfNotNull(getRecord("$gaugeName.value" to gaugeValue))
@@ -97,7 +104,10 @@ class TimestreamReporter(
     /**
      * For each [Counting] ([Counter], [Meter], [Histogram], and [Timer]), send the current `count` as a metric.
      */
-    private fun getCounterRecords(counterName: String, counter: Counting): List<Record> {
+    private fun getCounterRecords(
+        counterName: String,
+        counter: Counting,
+    ): List<Record> {
         return listOfNotNull(getRecord("$counterName.count" to counter.count))
     }
 
@@ -105,7 +115,10 @@ class TimestreamReporter(
      * For each [Metered] ([Meter] and [Timer]), send the `mean_rate`, `m1_rate`, `m5_rate` and `m15_rate`
      * as metrics.
      */
-    private fun getMeterRecords(meterName: String, meter: Metered): List<Record> {
+    private fun getMeterRecords(
+        meterName: String,
+        meter: Metered,
+    ): List<Record> {
         return listOf(
             "mean_rate" to (meter.meanRate * rateFactor),
             "m1_rate" to (meter.oneMinuteRate * rateFactor),
@@ -118,12 +131,16 @@ class TimestreamReporter(
      * For each [Sampling] ([Histogram] and [Timer]), send the `mean`, `max`, `min`, `stddev`,
      * and `p50`-`p999` percentiles as metrics.
      */
-    private fun getSamplingRecords(samplingName: String, sampling: Sampling): List<Record> {
-        val samplingFactor = if (sampling is Timer) {
-            durationFactor
-        } else {
-            1.0
-        }
+    private fun getSamplingRecords(
+        samplingName: String,
+        sampling: Sampling,
+    ): List<Record> {
+        val samplingFactor =
+            if (sampling is Timer) {
+                durationFactor
+            } else {
+                1.0
+            }
         return listOf(
             "mean" to (sampling.snapshot.mean * samplingFactor),
             "min" to (sampling.snapshot.min * samplingFactor),

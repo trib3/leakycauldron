@@ -24,9 +24,10 @@ import java.util.concurrent.CountDownLatch
 class ResultQueryFlowTest {
     val expectedData = (1..4).toList()
 
-    val mockData = expectedData.map {
-        DSL.using(SQLDialect.DEFAULT).newRecord(DSL.field("value")).values(it)
-    }.toMutableList()
+    val mockData =
+        expectedData.map {
+            DSL.using(SQLDialect.DEFAULT).newRecord(DSL.field("value")).values(it)
+        }.toMutableList()
 
     @Test
     fun testCollect() {
@@ -54,14 +55,15 @@ class ResultQueryFlowTest {
         EasyMock.replay(query, cursor)
         val list = mutableListOf<Int>()
         runBlocking {
-            val collectJob = launch {
-                query.consumeAsFlow().map { it["value"] as Int }.collect {
-                    // collect the first element and signal a value returned
-                    list.add(it)
-                    latch.countDown()
-                    delay(100000) // be "slow" so that only one element gets collected
+            val collectJob =
+                launch {
+                    query.consumeAsFlow().map { it["value"] as Int }.collect {
+                        // collect the first element and signal a value returned
+                        list.add(it)
+                        latch.countDown()
+                        delay(100000) // be "slow" so that only one element gets collected
+                    }
                 }
-            }
             launch(Dispatchers.IO) {
                 latch.await() // wait for a value returned
                 collectJob.cancel()
@@ -90,11 +92,12 @@ class ResultQueryFlowTest {
         EasyMock.replay(query)
         val list = mutableListOf<Int>()
         runBlocking {
-            val collectJob = launch {
-                assertFailure {
-                    query.consumeAsFlow().map { it["value"] as Int }.toList(list)
-                }.isInstanceOf(RuntimeException::class.java).hasMessage("cancelled")
-            }
+            val collectJob =
+                launch {
+                    assertFailure {
+                        query.consumeAsFlow().map { it["value"] as Int }.toList(list)
+                    }.isInstanceOf(RuntimeException::class.java).hasMessage("cancelled")
+                }
             launch {
                 iterateLatch.await() // wait for collection to start
                 collectJob.cancel()

@@ -11,13 +11,15 @@ import javax.annotation.Nullable
  * A [GraphQLWebSocketAuthenticator] that delegates authentication
  * to a Dropwizard [AuthFilter] from the Guice injector.
  */
-class GraphQLWebSocketDropwizardAuthenticator @Inject constructor(
-    @Nullable val authFilter: AuthFilter<*, *>?,
-) : GraphQLWebSocketAuthenticator {
-    override fun invoke(containerRequestContext: ContainerRequestContext): Principal? {
-        return runCatching {
-            authFilter?.filter(containerRequestContext)
-            containerRequestContext.securityContext?.userPrincipal
-        }.getOrNull()
+class GraphQLWebSocketDropwizardAuthenticator
+    @Inject
+    constructor(
+        @Nullable val authFilter: AuthFilter<*, *>?,
+    ) : GraphQLWebSocketAuthenticator {
+        override fun invoke(containerRequestContext: ContainerRequestContext): Principal? {
+            return runCatching {
+                authFilter?.filter(containerRequestContext)
+                containerRequestContext.securityContext?.userPrincipal
+            }.getOrNull()
+        }
     }
-}

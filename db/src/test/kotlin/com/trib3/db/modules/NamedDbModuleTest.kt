@@ -21,7 +21,10 @@ import org.testng.annotations.Test
 import javax.sql.DataSource
 
 class ModuleFactory : IModuleFactory {
-    override fun createModule(context: ITestContext?, testClass: Class<*>?): Module {
+    override fun createModule(
+        context: ITestContext?,
+        testClass: Class<*>?,
+    ): Module {
         return object : AbstractModule() {
             override fun configure() {
                 install(DbModule())
@@ -40,72 +43,70 @@ class ModuleFactory : IModuleFactory {
  */
 @Guice(moduleFactory = ModuleFactory::class)
 class NamedDbModuleTest
-@Inject constructor(
-    val defaultDbConfig: DbConfig,
-    val defaultDataSource: DataSource,
-    val defaultDSLContext: DSLContext,
-
-    @Named("test") val testDbConfig: DbConfig,
-    @Named("test") val testDataSource: DataSource,
-    @Named("test") val testDSLContext: DSLContext,
-
-    @Named("test2") val test2DbConfig: DbConfig,
-    @Named("test2") val test2DataSource: DataSource,
-    @Named("test2") val test2DSLContext: DSLContext,
-
-    @Named("test3") val test3DbConfig: DbConfig,
-    @Named("test3") val test3DataSource: DataSource,
-    @Named("test3") val test3DSLContext: DSLContext,
-) {
-    @Test
-    fun testConfigs() {
-        assertThat((defaultDbConfig.dataSource as HikariDataSource).jdbcUrl).contains("localhost")
-        assertThat((testDbConfig.dataSource as HikariDataSource).jdbcUrl).all {
-            contains("test")
-            doesNotContain("test2")
+    @Inject
+    constructor(
+        val defaultDbConfig: DbConfig,
+        val defaultDataSource: DataSource,
+        val defaultDSLContext: DSLContext,
+        @Named("test") val testDbConfig: DbConfig,
+        @Named("test") val testDataSource: DataSource,
+        @Named("test") val testDSLContext: DSLContext,
+        @Named("test2") val test2DbConfig: DbConfig,
+        @Named("test2") val test2DataSource: DataSource,
+        @Named("test2") val test2DSLContext: DSLContext,
+        @Named("test3") val test3DbConfig: DbConfig,
+        @Named("test3") val test3DataSource: DataSource,
+        @Named("test3") val test3DSLContext: DSLContext,
+    ) {
+        @Test
+        fun testConfigs() {
+            assertThat((defaultDbConfig.dataSource as HikariDataSource).jdbcUrl).contains("localhost")
+            assertThat((testDbConfig.dataSource as HikariDataSource).jdbcUrl).all {
+                contains("test")
+                doesNotContain("test2")
+            }
+            assertThat((test2DbConfig.dataSource as HikariDataSource).jdbcUrl).contains("test2")
+            assertThat((test3DbConfig.dataSource as HikariDataSource).jdbcUrl)
+                .isEqualTo("jdbc:postgres://test3:12345/test3")
         }
-        assertThat((test2DbConfig.dataSource as HikariDataSource).jdbcUrl).contains("test2")
-        assertThat((test3DbConfig.dataSource as HikariDataSource).jdbcUrl)
-            .isEqualTo("jdbc:postgres://test3:12345/test3")
-    }
 
-    @Test
-    fun testDataSources() {
-        assertThat((defaultDataSource as HikariDataSource).jdbcUrl).contains("localhost")
-        assertThat((testDataSource as HikariDataSource).jdbcUrl).all {
-            contains("test")
-            doesNotContain("test2")
+        @Test
+        fun testDataSources() {
+            assertThat((defaultDataSource as HikariDataSource).jdbcUrl).contains("localhost")
+            assertThat((testDataSource as HikariDataSource).jdbcUrl).all {
+                contains("test")
+                doesNotContain("test2")
+            }
+            assertThat((test2DataSource as HikariDataSource).jdbcUrl).contains("test2")
+            assertThat((test3DataSource as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
         }
-        assertThat((test2DataSource as HikariDataSource).jdbcUrl).contains("test2")
-        assertThat((test3DataSource as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
-    }
 
-    @Test
-    fun testDSLContexts() {
-        val defaultDS =
-            (defaultDSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
-        val testDS =
-            (testDSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
-        val test2DS =
-            (test2DSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
-        val test3DS =
-            (test3DSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
-        assertThat((defaultDS as HikariDataSource).jdbcUrl).contains("localhost")
-        assertThat((testDS as HikariDataSource).jdbcUrl).all {
-            contains("test")
-            doesNotContain("test2")
+        @Test
+        fun testDSLContexts() {
+            val defaultDS =
+                (defaultDSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
+            val testDS =
+                (testDSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
+            val test2DS =
+                (test2DSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
+            val test3DS =
+                (test3DSLContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
+            assertThat((defaultDS as HikariDataSource).jdbcUrl).contains("localhost")
+            assertThat((testDS as HikariDataSource).jdbcUrl).all {
+                contains("test")
+                doesNotContain("test2")
+            }
+            assertThat((test2DS as HikariDataSource).jdbcUrl).contains("test2")
+            assertThat((test3DS as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
+            assertThat(defaultDSLContext.settings().fetchSize).isEqualTo(0)
+            assertThat(test3DSLContext.settings().fetchSize).isEqualTo(1000)
         }
-        assertThat((test2DS as HikariDataSource).jdbcUrl).contains("test2")
-        assertThat((test3DS as HikariDataSource).jdbcUrl).isEqualTo("jdbc:postgres://test3:12345/test3")
-        assertThat(defaultDSLContext.settings().fetchSize).isEqualTo(0)
-        assertThat(test3DSLContext.settings().fetchSize).isEqualTo(1000)
-    }
 
-    @Test
-    fun testPropsAndEquals() {
-        assertThat(NamedDbModule("abc").name).isEqualTo("abc")
-        assertThat(NamedDbModule("abc")).isEqualTo(NamedDbModule("abc"))
-        assertThat(NamedDbModule("abc")).isNotEqualTo(NamedDbModule("def"))
-        assertThat(NamedDbModule("abc")).isNotEqualTo(DbModule())
+        @Test
+        fun testPropsAndEquals() {
+            assertThat(NamedDbModule("abc").name).isEqualTo("abc")
+            assertThat(NamedDbModule("abc")).isEqualTo(NamedDbModule("abc"))
+            assertThat(NamedDbModule("abc")).isNotEqualTo(NamedDbModule("def"))
+            assertThat(NamedDbModule("abc")).isNotEqualTo(DbModule())
+        }
     }
-}

@@ -23,11 +23,15 @@ class AdminAuthFilter : Filter {
      * the configured [token].  If unable to match, then set [HttpServletResponse.SC_UNAUTHORIZED]
      * and throw an Exception to prevent the chain from processing.
      */
-    private fun checkToken(request: ServletRequest, response: ServletResponse) {
-        val credentials = when (request) {
-            is HttpServletRequest -> request.getHeader("Authorization")
-            else -> null
-        }
+    private fun checkToken(
+        request: ServletRequest,
+        response: ServletResponse,
+    ) {
+        val credentials =
+            when (request) {
+                is HttpServletRequest -> request.getHeader("Authorization")
+                else -> null
+            }
         if (credentials != null) {
             val (scheme, encoded) = credentials.split(' ')
             if ("basic" == scheme.lowercase()) {
@@ -49,7 +53,11 @@ class AdminAuthFilter : Filter {
     /**
      * If there's a configured auth [token], call [checkToken] before resuming the chain processing
      */
-    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+    override fun doFilter(
+        request: ServletRequest,
+        response: ServletResponse,
+        chain: FilterChain,
+    ) {
         if (token != null) {
             checkToken(request, response)
         }

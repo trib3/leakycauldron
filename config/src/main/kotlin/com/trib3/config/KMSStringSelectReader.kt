@@ -15,7 +15,10 @@ private val log = KotlinLogging.logger { }
 private val base64 = Base64.getDecoder()!!
 
 class KMSStringReader(private val kms: KmsClient?) {
-    fun getValue(config: Config, path: String): String? {
+    fun getValue(
+        config: Config,
+        path: String,
+    ): String? {
         // If path not present, try converting it to hyphenated case and try again. This is the
         // preferred format for HOCON files.
         val lookupPath = if (config.hasPath(path)) path else CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, path)
@@ -27,14 +30,18 @@ class KMSStringReader(private val kms: KmsClient?) {
         return null
     }
 
-    fun process(rawValue: String, path: String): String {
+    fun process(
+        rawValue: String,
+        path: String,
+    ): String {
         if (rawValue.startsWith("KMS(") && rawValue.endsWith(")")) {
             if (kms != null) {
-                val rawKms = SdkBytes.fromByteArray(
-                    base64.decode(
-                        rawValue.substring("KMS(".length, rawValue.length - 1),
-                    ),
-                )
+                val rawKms =
+                    SdkBytes.fromByteArray(
+                        base64.decode(
+                            rawValue.substring("KMS(".length, rawValue.length - 1),
+                        ),
+                    )
                 val decryptRequest = DecryptRequest.builder().ciphertextBlob(rawKms).build()
                 return kms.decrypt(decryptRequest).plaintext().asUtf8String()
             } else {
@@ -50,32 +57,32 @@ class KMSStringReader(private val kms: KmsClient?) {
 }
 
 class KMSStringSelectReader
-@Inject constructor(private val kms: KmsClient?) {
+    @Inject
+    constructor(private val kms: KmsClient?) {
+        companion object {
+            private var _instance: KMSStringSelectReader = KMSStringSelectReader(null)
+            val instance: KMSStringSelectReader
+                get() = _instance
+        }
 
-    companion object {
-        private var _INSTANCE: KMSStringSelectReader = KMSStringSelectReader(null)
-        val INSTANCE: KMSStringSelectReader
-            get() = _INSTANCE
-    }
+        init {
+            @Suppress("SENSELESS_COMPARISON") // _instance _should_ never be null, but is at bootstrap
+            if (_instance == null || _instance.kms == null) {
+                _instance = this // first non-null kms instance wins
+            }
+        }
 
-    init {
-        @Suppress("SENSELESS_COMPARISON") // _INSTANCE _should_ never be null, but is at bootstrap
-        if (_INSTANCE == null || _INSTANCE.kms == null) {
-            _INSTANCE = this // first non-null kms instance wins
+        /**
+         * Add new case to support new type.
+         *
+         * @param clazz a instance got from the given type by reflection
+         * @throws Config4kException.UnSupportedType if the passed type is not supported
+         */
+        fun getReader(clazz: ClassContainer): (Config, String) -> Any? {
+            return when (clazz.mapperClass) {
+                String::class -> KMSStringReader(kms)::getValue
+                else ->
+                    SelectReader.getReader(clazz)
+            }
         }
     }
-
-    /**
-     * Add new case to support new type.
-     *
-     * @param clazz a instance got from the given type by reflection
-     * @throws Config4kException.UnSupportedType if the passed type is not supported
-     */
-    fun getReader(clazz: ClassContainer): (Config, String) -> Any? {
-        return when (clazz.mapperClass) {
-            String::class -> KMSStringReader(kms)::getValue
-            else ->
-                SelectReader.getReader(clazz)
-        }
-    }
-}

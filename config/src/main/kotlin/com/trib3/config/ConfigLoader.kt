@@ -31,49 +31,53 @@ import jakarta.inject.Inject
  *
  */
 class ConfigLoader
-constructor(
-    private val defaultPath: String, // usually only specified for tests
-) {
-    @Inject
-    constructor() : this("")
+    constructor(
+        private val defaultPath: String, // usually only specified for tests
+    ) {
+        @Inject
+        constructor() : this("")
 
-    /**
-     * Loads config from application.conf with environmental and global overrides
-     */
-    fun load(): Config {
-        return load(ConfigFactory.load())
-    }
+        /**
+         * Loads config from application.conf with environmental and global overrides
+         */
+        fun load(): Config {
+            return load(ConfigFactory.load())
+        }
 
-    /**
-     * Loads config from [path] inside application.conf with environmental and global overrides
-     */
-    fun load(path: String): Config {
-        return load().getConfig(path)
-    }
+        /**
+         * Loads config from [path] inside application.conf with environmental and global overrides
+         */
+        fun load(path: String): Config {
+            return load().getConfig(path)
+        }
 
-    /**
-     * Loads config from [path] inside [fullConfig] with environmental and global overrides
-     */
-    fun load(fullConfig: Config, path: String): Config {
-        return load(fullConfig).getConfig(path)
-    }
+        /**
+         * Loads config from [path] inside [fullConfig] with environmental and global overrides
+         */
+        fun load(
+            fullConfig: Config,
+            path: String,
+        ): Config {
+            return load(fullConfig).getConfig(path)
+        }
 
-    /**
-     * Applies environmental and global overrides to the config
-     */
-    internal fun load(fullConfig: Config): Config {
-        val env = fullConfig.extract("env") ?: "dev"
-        val envOverride = env.split(",").map {
-            fullConfig.extract(it) ?: ConfigFactory.empty()
-        }.reduce { first, second -> first.withFallback(second) }
-        val finalOverrides = fullConfig.extract("overrides") ?: ConfigFactory.empty()
-        val fallbacks = envOverride.withFallback(fullConfig)
-        // always have overrides take precedence, then fallback to defaultPath if there is one,
-        // then fallback to env overrides, then fallback to fullConfig
-        return if (defaultPath.isNotEmpty()) {
-            finalOverrides.withFallback(fullConfig.getConfig(defaultPath)).withFallback(fallbacks)
-        } else {
-            finalOverrides.withFallback(fallbacks)
+        /**
+         * Applies environmental and global overrides to the config
+         */
+        internal fun load(fullConfig: Config): Config {
+            val env = fullConfig.extract("env") ?: "dev"
+            val envOverride =
+                env.split(",").map {
+                    fullConfig.extract(it) ?: ConfigFactory.empty()
+                }.reduce { first, second -> first.withFallback(second) }
+            val finalOverrides = fullConfig.extract("overrides") ?: ConfigFactory.empty()
+            val fallbacks = envOverride.withFallback(fullConfig)
+            // always have overrides take precedence, then fallback to defaultPath if there is one,
+            // then fallback to env overrides, then fallback to fullConfig
+            return if (defaultPath.isNotEmpty()) {
+                finalOverrides.withFallback(fullConfig.getConfig(defaultPath)).withFallback(fallbacks)
+            } else {
+                finalOverrides.withFallback(fallbacks)
+            }
         }
     }
-}

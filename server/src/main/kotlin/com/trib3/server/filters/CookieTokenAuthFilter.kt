@@ -15,9 +15,10 @@ import java.security.Principal
 @Priority(Priorities.AUTHENTICATION)
 class CookieTokenAuthFilter<P : Principal>(val cookieName: String) : AuthFilter<String?, P>() {
     override fun filter(requestContext: ContainerRequestContext) {
-        val credentials = requestContext.cookies
-            .filter { it.key == cookieName }
-            .values.map { it.value }.firstOrNull()
+        val credentials =
+            requestContext.cookies
+                .filter { it.key == cookieName }
+                .values.map { it.value }.firstOrNull()
         if (!authenticate(requestContext, credentials, "Bearer")) {
             throw WebApplicationException(unauthorizedHandler.buildResponse(prefix, realm))
         }

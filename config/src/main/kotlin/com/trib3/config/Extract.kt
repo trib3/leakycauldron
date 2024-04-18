@@ -14,7 +14,7 @@ import io.github.config4k.TypeReference
 inline fun <reified T> Config.extract(path: String): T {
     val genericType = object : TypeReference<T>() {}.genericType()
 
-    val result = KMSStringSelectReader.INSTANCE.getReader(ClassContainer(T::class, genericType))(this, path)
+    val result = KMSStringSelectReader.instance.getReader(ClassContainer(T::class, genericType))(this, path)
 
     return try {
         result as T

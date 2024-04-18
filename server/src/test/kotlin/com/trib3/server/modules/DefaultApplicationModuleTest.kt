@@ -23,30 +23,31 @@ import org.testng.annotations.Test
 
 @Guice(modules = [DefaultApplicationModule::class])
 class DefaultApplicationModuleTest
-@Inject constructor(
-    val configurationFactoryFactory: ConfigurationFactoryFactory<Configuration>,
-    val servletFilterConfigs: Set<ServletFilterConfig>,
-    val healthChecks: Set<HealthCheck>,
-    val objectMapper: ObjectMapper,
-    @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
-    val resources: Set<Any>,
-) {
-    @Test
-    fun testBindings() {
-        assertThat(healthChecks.map { it::class }).all {
-            contains(VersionHealthCheck::class)
-            contains(PingHealthCheck::class)
+    @Inject
+    constructor(
+        val configurationFactoryFactory: ConfigurationFactoryFactory<Configuration>,
+        val servletFilterConfigs: Set<ServletFilterConfig>,
+        val healthChecks: Set<HealthCheck>,
+        val objectMapper: ObjectMapper,
+        @Named(TribeApplicationModule.APPLICATION_RESOURCES_BIND_NAME)
+        val resources: Set<Any>,
+    ) {
+        @Test
+        fun testBindings() {
+            assertThat(healthChecks.map { it::class }).all {
+                contains(VersionHealthCheck::class)
+                contains(PingHealthCheck::class)
+            }
+            assertThat(configurationFactoryFactory).isInstanceOf(HoconConfigurationFactoryFactory::class)
+            assertThat(servletFilterConfigs.map { it.filterClass }).all {
+                contains(RequestIdFilter::class.java)
+                contains(CrossOriginFilter::class.java)
+            }
+            assertThat(servletFilterConfigs.map { it.name }).all {
+                contains(RequestIdFilter::class.simpleName)
+                contains(CrossOriginFilter::class.simpleName)
+                contains(HeaderFilter::class.simpleName)
+            }
+            assertThat(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
         }
-        assertThat(configurationFactoryFactory).isInstanceOf(HoconConfigurationFactoryFactory::class)
-        assertThat(servletFilterConfigs.map { it.filterClass }).all {
-            contains(RequestIdFilter::class.java)
-            contains(CrossOriginFilter::class.java)
-        }
-        assertThat(servletFilterConfigs.map { it.name }).all {
-            contains(RequestIdFilter::class.simpleName)
-            contains(CrossOriginFilter::class.simpleName)
-            contains(HeaderFilter::class.simpleName)
-        }
-        assertThat(objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()
     }
-}

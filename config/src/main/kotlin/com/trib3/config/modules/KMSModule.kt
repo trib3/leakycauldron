@@ -7,7 +7,6 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.kms.KmsClient
 
 class KMSModule : KotlinModule() {
-
     override fun configure() {
         bind<KMSStringSelectReader>().asEagerSingleton()
     }

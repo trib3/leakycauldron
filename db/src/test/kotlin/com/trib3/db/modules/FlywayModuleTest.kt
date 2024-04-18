@@ -15,22 +15,23 @@ import org.testng.annotations.Test
 
 @Guice(modules = [FlywayModule::class])
 class DefaultFlywayModuleTest
-@Inject constructor(
-    val dropwizardBundles: Set<ConfiguredBundle<Configuration>>,
-) {
-    @Test
-    fun testFlyway() {
-        val flywayBundle = dropwizardBundles.filterIsInstance<FlywayBundle>().first()
-        assertThat(flywayBundle.dataSource).isNotNull()
-        assertThat(flywayBundle.baseConfig).isNotNull()
-        assertThat(flywayBundle.baseConfig.sqlMigrationSuffixes.toList()).isEqualTo(listOf(".sql"))
-    }
+    @Inject
+    constructor(
+        val dropwizardBundles: Set<ConfiguredBundle<Configuration>>,
+    ) {
+        @Test
+        fun testFlyway() {
+            val flywayBundle = dropwizardBundles.filterIsInstance<FlywayBundle>().first()
+            assertThat(flywayBundle.dataSource).isNotNull()
+            assertThat(flywayBundle.baseConfig).isNotNull()
+            assertThat(flywayBundle.baseConfig.sqlMigrationSuffixes.toList()).isEqualTo(listOf(".sql"))
+        }
 
-    @Test
-    fun testEquals() {
-        assertThat(FlywayModule()).isEqualTo(FlywayModule())
+        @Test
+        fun testEquals() {
+            assertThat(FlywayModule()).isEqualTo(FlywayModule())
+        }
     }
-}
 
 private class ConfiguredFlywayModule : KotlinModule() {
     override fun configure() {
@@ -40,14 +41,15 @@ private class ConfiguredFlywayModule : KotlinModule() {
 
 @Guice(modules = [FlywayModule::class, ConfiguredFlywayModule::class])
 class ConfiguredFlywayModuleTest
-@Inject constructor(
-    val dropwizardBundles: Set<ConfiguredBundle<Configuration>>,
-) {
-    @Test
-    fun testFlyway() {
-        val flywayBundle = dropwizardBundles.filterIsInstance<FlywayBundle>().first()
-        assertThat(flywayBundle.dataSource).isNotNull()
-        assertThat(flywayBundle.baseConfig).isNotNull()
-        assertThat(flywayBundle.baseConfig.sqlMigrationSuffixes.toList()).isEqualTo(listOf(".sql", ".test"))
+    @Inject
+    constructor(
+        val dropwizardBundles: Set<ConfiguredBundle<Configuration>>,
+    ) {
+        @Test
+        fun testFlyway() {
+            val flywayBundle = dropwizardBundles.filterIsInstance<FlywayBundle>().first()
+            assertThat(flywayBundle.dataSource).isNotNull()
+            assertThat(flywayBundle.baseConfig).isNotNull()
+            assertThat(flywayBundle.baseConfig.sqlMigrationSuffixes.toList()).isEqualTo(listOf(".sql", ".test"))
+        }
     }
-}

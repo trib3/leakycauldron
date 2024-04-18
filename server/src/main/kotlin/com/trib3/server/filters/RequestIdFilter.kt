@@ -22,7 +22,6 @@ private val log = KotlinLogging.logger { }
  * RequestId value in it.
  */
 class RequestIdFilter : Filter {
-
     companion object {
         const val REQUEST_ID_KEY = "RequestId"
         const val REQUEST_ID_HEADER = "X-Request-Id"
@@ -33,7 +32,10 @@ class RequestIdFilter : Filter {
          * @param requestId the RequestId to set, defaults to a new random UUID
          * @param block the block of code to execute
          */
-        inline fun <T> withRequestId(requestId: String? = null, block: () -> T): T {
+        inline fun <T> withRequestId(
+            requestId: String? = null,
+            block: () -> T,
+        ): T {
             val createdId = createRequestId(requestId ?: UUID.randomUUID().toString())
             try {
                 return block()
@@ -77,16 +79,21 @@ class RequestIdFilter : Filter {
 
     override fun destroy() = Unit
 
-    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-        val clientUUID = (request as? HttpServletRequest)?.getHeader(REQUEST_ID_HEADER)?.let {
-            try {
-                UUID.fromString(it).toString()
-            } catch (e: IllegalArgumentException) {
-                val newId = UUID.randomUUID().toString()
-                log.warn("Ignoring invalidly formatted requestId: $it, and using $newId instead", e)
-                newId
+    override fun doFilter(
+        request: ServletRequest,
+        response: ServletResponse,
+        chain: FilterChain,
+    ) {
+        val clientUUID =
+            (request as? HttpServletRequest)?.getHeader(REQUEST_ID_HEADER)?.let {
+                try {
+                    UUID.fromString(it).toString()
+                } catch (e: IllegalArgumentException) {
+                    val newId = UUID.randomUUID().toString()
+                    log.warn("Ignoring invalidly formatted requestId: $it, and using $newId instead", e)
+                    newId
+                }
             }
-        }
         withRequestId(clientUUID) {
             (response as? HttpServletResponse)?.setHeader(REQUEST_ID_HEADER, getRequestId())
             chain.doFilter(request, response)

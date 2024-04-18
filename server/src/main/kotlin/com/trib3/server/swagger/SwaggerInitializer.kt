@@ -20,30 +20,31 @@ interface JaxrsAppProcessor {
 }
 
 class SwaggerInitializer
-@Inject constructor(val appConfig: TribeApplicationConfig) : JaxrsAppProcessor {
-    override fun process(application: Application) {
-        // this is tricky, but we want to document the jersey exposed APIs
-        // from within the admin servlet, and the swagger libraries don't
-        // make things easy.  Fake out the servlet context -> swagger context
-        // with what ServletConfigContextUtils.getContextIdFromServletConfig
-        // will generate for the actual servlet, then add the swagger servlet
-        val ctxId = OpenApiContext.OPENAPI_CONTEXT_ID_PREFIX + "servlet." + OpenApiServlet::class.simpleName
-        SwaggerContextBuilder()
-            .openApiConfiguration(
-                SwaggerConfiguration()
-                    .openAPI(
-                        OpenAPI().servers(
-                            listOf(
-                                Server().url("https://${appConfig.corsDomains[0]}/app"),
-                                Server().url("http://${appConfig.corsDomains[0]}/app"),
-                                Server().url("http://${appConfig.corsDomains[0]}:${appConfig.appPort}/app"),
+    @Inject
+    constructor(val appConfig: TribeApplicationConfig) : JaxrsAppProcessor {
+        override fun process(application: Application) {
+            // this is tricky, but we want to document the jersey exposed APIs
+            // from within the admin servlet, and the swagger libraries don't
+            // make things easy.  Fake out the servlet context -> swagger context
+            // with what ServletConfigContextUtils.getContextIdFromServletConfig
+            // will generate for the actual servlet, then add the swagger servlet
+            val ctxId = OpenApiContext.OPENAPI_CONTEXT_ID_PREFIX + "servlet." + OpenApiServlet::class.simpleName
+            SwaggerContextBuilder()
+                .openApiConfiguration(
+                    SwaggerConfiguration()
+                        .openAPI(
+                            OpenAPI().servers(
+                                listOf(
+                                    Server().url("https://${appConfig.corsDomains[0]}/app"),
+                                    Server().url("http://${appConfig.corsDomains[0]}/app"),
+                                    Server().url("http://${appConfig.corsDomains[0]}:${appConfig.appPort}/app"),
+                                ),
                             ),
-                        ),
-                    )
-                    .scannerClass(JaxrsApplicationScanner::class.qualifiedName),
-            )
-            .application(application)
-            .ctxId(ctxId)
-            .buildContext(true)
+                        )
+                        .scannerClass(JaxrsApplicationScanner::class.qualifiedName),
+                )
+                .application(application)
+                .ctxId(ctxId)
+                .buildContext(true)
+        }
     }
-}

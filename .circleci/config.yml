@@ -5,7 +5,7 @@ orbs:
 jobs:
   build:
     machine:
-      image: ubuntu-2204:2022.04.2
+      image: default
 
     working_directory: ~/repo
     environment:
@@ -25,25 +25,28 @@ jobs:
           command: |
             echo $GPG_KEY | sed 's/\$/\n/g' |  gpg --import
       - run:
+          name: Set JAVA_HOME for mvnw commands
+          command: echo 'export JAVA_HOME=`java -XshowSettings:properties -version 2>&1 |grep java.home | sed "s/.*java\.home = //"`' >> "$BASH_ENV"
+      - run:
           name: Maven Setup
           command: |
-            mvn --version
+            ./mvnw --version
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             if [ "$CIRCLE_BRANCH" = "main" ]; then
                 set +o pipefail # it's ok to keep going if grep doesn't match anything 
-                REPOIDS=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+                REPOIDS=`./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
                 set -o pipefail
                 if [ -n "$REPOIDS" ]; then
                     echo "Cleaning existing $REPOIDS"
                     for REPOID in $REPOIDS; do 
-                    mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+                    ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
                     done
                 fi
             fi
             export MAVEN_OPTS=""
-            cd build-resources && BASE_VERSION=$(mvn -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
+            cd build-resources && BASE_VERSION=$(../mvnw -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
             if [ "$CIRCLE_BRANCH" = "main" ]; then
               NEW_PROJECT_VERSION=${BASE_VERSION}.${CIRCLE_BUILD_NUM}
             else
@@ -51,7 +54,7 @@ jobs:
             fi
             for i in build-resources parent-pom; do
                cd $i
-               mvn --no-transfer-progress -U org.codehaus.mojo:versions-maven-plugin:2.7:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
+               ../mvnw --no-transfer-progress -U org.codehaus.mojo:versions-maven-plugin:2.7:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
                cd ..
             done
             echo ${NEW_PROJECT_VERSION} > ~/repo/current_version.txt
@@ -59,9 +62,9 @@ jobs:
           name: Maven Build
           command: |
             if [ "$CIRCLE_BRANCH" = "main" ]; then
-              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} --no-transfer-progress -U
             else
-              mvn deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} --no-transfer-progress -U
             fi
       - save_cache:
           paths:
@@ -133,14 +136,17 @@ jobs:
       - attach_workspace:
           at: ~/jars
       - run:
+          name: Set JAVA_HOME for mvnw commands
+          command: echo 'export JAVA_HOME=`java -XshowSettings:properties -version 2>&1 |grep java.home | sed "s/.*java\.home = //"`' >> "$BASH_ENV"
+      - run:
           name: Complete release
           command: |
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
-            REPOID=`mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-            mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
-            mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            REPOID=`./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+            ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
       - release/execute_release:
           release_dir: ~/jars/release
 

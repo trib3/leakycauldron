@@ -14,7 +14,6 @@ class SanitizedGraphQLError(
     exception: Throwable,
     sourceLocation: SourceLocation,
 ) : ExceptionWhileDataFetching(path, exception, sourceLocation) {
-
     override fun getMessage(): String {
         return getCause(super.getException()).message ?: super.getMessage()
     }

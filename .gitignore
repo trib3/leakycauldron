@@ -3,3 +3,4 @@ target/
 .attach_pid*
 *.iml
 service.log*
+.mvn/wrapper/maven-wrapper.jar

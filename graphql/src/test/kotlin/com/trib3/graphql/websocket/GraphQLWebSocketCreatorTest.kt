@@ -26,11 +26,12 @@ class GraphQLWebSocketCreatorTest {
 
     private fun getCreatorAndGraphQL(): Pair<GraphQLWebSocketCreator, GraphQL> {
         val graphQL = LeakyMock.mock<GraphQL>()
-        val creator = GraphQLWebSocketCreator(
-            graphQL,
-            mapper,
-            GraphQLConfig(ConfigLoader()),
-        )
+        val creator =
+            GraphQLWebSocketCreator(
+                graphQL,
+                mapper,
+                GraphQLConfig(ConfigLoader()),
+            )
         assertThat(creator).isInstanceOf(GraphQLWebSocketCreator::class)
         assertThat(creator.graphQL).isEqualTo(graphQL)
         assertThat(creator.objectMapper).isEqualTo(mapper)

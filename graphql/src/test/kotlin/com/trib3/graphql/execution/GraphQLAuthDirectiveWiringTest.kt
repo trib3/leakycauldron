@@ -40,7 +40,11 @@ class AuthQuery {
 }
 
 class TestAuthorizer : Authorizer<Principal> {
-    override fun authorize(principal: Principal, role: String, requestContext: ContainerRequestContext?): Boolean {
+    override fun authorize(
+        principal: Principal,
+        role: String,
+        requestContext: ContainerRequestContext?,
+    ): Boolean {
         return role != "ADMIN" || principal.name == "ADMIN"
     }
 }
@@ -50,7 +54,10 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
     val regularUser = Principal { "bill" }
     val superUser = Principal { "ADMIN" }
 
-    fun query(principal: Principal?, authorizer: Authorizer<Principal>? = TestAuthorizer()): ExecutionResult {
+    fun query(
+        principal: Principal?,
+        authorizer: Authorizer<Principal>? = TestAuthorizer(),
+    ): ExecutionResult {
         val hooks = LeakyCauldronHooks(authorizer, emptyMap())
         val config =
             SchemaGeneratorConfig(
@@ -153,13 +160,14 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
                 listOf(this::class.java.packageName),
                 hooks = hooks,
             )
-        val result = GraphQL.newGraphQL(
-            toSchema(config, listOf(TopLevelObject(AuthQuery()))),
-        ).build().execute(
-            ExecutionInput.newExecutionInput()
-                .query("{ needUser noUser needSuperUser }")
-                .build(),
-        )
+        val result =
+            GraphQL.newGraphQL(
+                toSchema(config, listOf(TopLevelObject(AuthQuery()))),
+            ).build().execute(
+                ExecutionInput.newExecutionInput()
+                    .query("{ needUser noUser needSuperUser }")
+                    .build(),
+            )
         val data = result.getData<Map<String, String>>()
         val errors = result.errors
         assertThat(data["needUser"]).isNull()

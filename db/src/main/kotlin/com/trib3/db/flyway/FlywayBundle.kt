@@ -12,12 +12,15 @@ import javax.sql.DataSource
  * with configuration supplied by guice.
  */
 class FlywayBundle
-@Inject constructor(
-    internal val dataSource: DataSource,
-    internal val baseConfig: FluentConfiguration,
-) : ConfiguredBundle<Configuration> {
-
-    override fun run(configuration: Configuration?, env: Environment?) {
-        baseConfig.dataSource(dataSource).load().migrate()
+    @Inject
+    constructor(
+        internal val dataSource: DataSource,
+        internal val baseConfig: FluentConfiguration,
+    ) : ConfiguredBundle<Configuration> {
+        override fun run(
+            configuration: Configuration?,
+            env: Environment?,
+        ) {
+            baseConfig.dataSource(dataSource).load().migrate()
+        }
     }
-}

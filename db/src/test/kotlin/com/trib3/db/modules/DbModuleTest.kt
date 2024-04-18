@@ -22,37 +22,38 @@ import javax.sql.DataSource
  */
 @Guice(modules = [DbModule::class])
 class DbModuleTest
-@Inject constructor(
-    val dbConfig: DbConfig,
-    val dslContext: DSLContext,
-    val dataSource: DataSource,
-) {
-    @Test
-    fun testConfig() {
-        val ctxDataSource =
-            (dslContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
-        assertThat(dbConfig.dataSource).all {
-            isEqualTo(dataSource)
-            isEqualTo(ctxDataSource)
+    @Inject
+    constructor(
+        val dbConfig: DbConfig,
+        val dslContext: DSLContext,
+        val dataSource: DataSource,
+    ) {
+        @Test
+        fun testConfig() {
+            val ctxDataSource =
+                (dslContext.configuration().connectionProvider() as DataSourceConnectionProvider).dataSource()
+            assertThat(dbConfig.dataSource).all {
+                isEqualTo(dataSource)
+                isEqualTo(ctxDataSource)
+            }
+            assertThat(dbConfig.dslContext).isEqualTo(this.dslContext)
+            assertThat(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES)
+            assertThat((dataSource as HikariDataSource).jdbcUrl).contains("localhost:5432")
+            assertThat(dataSource.username).isEqualTo("tribe")
+            assertThat(dataSource.healthCheckRegistry).isNotNull()
+            assertThat(dataSource.metricRegistry).isNotNull()
+            assertThat(dataSource.isAutoCommit).isFalse()
+            // these settings are set in config to be slightly different than hikariCP defaults
+            assertThat(dataSource.connectionTimeout).isEqualTo(30001)
+            assertThat(dataSource.idleTimeout).isEqualTo(600001)
+            assertThat(dataSource.maxLifetime).isEqualTo(1800001)
+            assertThat(dataSource.connectionTestQuery).isEqualTo("select 1")
+            assertThat(dataSource.minimumIdle).isEqualTo(11)
+            assertThat(dataSource.maximumPoolSize).isEqualTo(11)
         }
-        assertThat(dbConfig.dslContext).isEqualTo(this.dslContext)
-        assertThat(dbConfig.dialect).isEqualTo(SQLDialect.POSTGRES)
-        assertThat((dataSource as HikariDataSource).jdbcUrl).contains("localhost:5432")
-        assertThat(dataSource.username).isEqualTo("tribe")
-        assertThat(dataSource.healthCheckRegistry).isNotNull()
-        assertThat(dataSource.metricRegistry).isNotNull()
-        assertThat(dataSource.isAutoCommit).isFalse()
-        // these settings are set in config to be slightly different than hikariCP defaults
-        assertThat(dataSource.connectionTimeout).isEqualTo(30001)
-        assertThat(dataSource.idleTimeout).isEqualTo(600001)
-        assertThat(dataSource.maxLifetime).isEqualTo(1800001)
-        assertThat(dataSource.connectionTestQuery).isEqualTo("select 1")
-        assertThat(dataSource.minimumIdle).isEqualTo(11)
-        assertThat(dataSource.maximumPoolSize).isEqualTo(11)
-    }
 
-    @Test
-    fun testEquals() {
-        assertThat(DbModule()).isEqualTo(DbModule())
+        @Test
+        fun testEquals() {
+            assertThat(DbModule()).isEqualTo(DbModule())
+        }
     }
-}

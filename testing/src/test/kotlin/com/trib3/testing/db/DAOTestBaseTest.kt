@@ -8,7 +8,7 @@ import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
-import assertk.assertions.isSameAs
+import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
@@ -29,23 +29,24 @@ class DAOTestBaseTest : DAOTestBase() {
             contains("tables")
         }
         // ensure the db is usable via jdbc and configured for no autoCommit
-        val autoCommit = dataSource.connection.use { conn ->
-            conn.prepareStatement(
-                "select table_name from information_schema.tables where table_name = 'tables'",
-            ).use { ps ->
-                ps.executeQuery().use { rs ->
-                    assertThat(rs.next()).isTrue()
-                    assertThat(rs.getString(1)).isEqualTo("tables")
-                    assertThat(rs.next()).isFalse()
-                    conn.autoCommit
+        val autoCommit =
+            dataSource.connection.use { conn ->
+                conn.prepareStatement(
+                    "select table_name from information_schema.tables where table_name = 'tables'",
+                ).use { ps ->
+                    ps.executeQuery().use { rs ->
+                        assertThat(rs.next()).isTrue()
+                        assertThat(rs.getString(1)).isEqualTo("tables")
+                        assertThat(rs.next()).isFalse()
+                        conn.autoCommit
+                    }
                 }
             }
-        }
         assertThat(autoCommit).isFalse()
         // ensure multiple setup calls don't change the underlying datasource
         val ds = dataSource
         super.setUp()
-        assertThat(ds).isSameAs(dataSource)
+        assertThat(ds).isSameInstanceAs(dataSource)
     }
 
     @AfterClass

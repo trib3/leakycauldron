@@ -13,7 +13,6 @@ import io.dropwizard.logging.common.BootstrapLogging
  * and provides a way to get a guice injector
  */
 class BootstrapConfig(configLoader: ConfigLoader = ConfigLoader()) {
-
     val appModules: List<String>
 
     init {
@@ -27,9 +26,10 @@ class BootstrapConfig(configLoader: ConfigLoader = ConfigLoader()) {
         BootstrapLogging.bootstrap(Level.WARN)
         System.setProperty("org.jooq.no-logo", "true")
         System.setProperty("org.jooq.no-tips", "true")
-        val appModules = appModules.map {
-            Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
-        }
+        val appModules =
+            appModules.map {
+                Class.forName(it).getDeclaredConstructor().newInstance() as AbstractModule
+            }
         return Guice.createInjector(builtinModules + appModules)
     }
 }

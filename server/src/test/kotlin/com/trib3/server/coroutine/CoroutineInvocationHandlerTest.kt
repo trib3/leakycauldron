@@ -57,7 +57,6 @@ private val sseScopes = ConcurrentHashMap<String, CoroutineScope>()
 @OptIn(ExperimentalStdlibApi::class)
 @Path("/")
 open class InvocationHandlerTestResource {
-
     @Path("/regular")
     @GET
     fun regularMethod(): String {
@@ -66,7 +65,9 @@ open class InvocationHandlerTestResource {
 
     @Path("/regularQ")
     @GET
-    fun regularQueryParameter(@QueryParam("q") q: String?): String {
+    fun regularQueryParameter(
+        @QueryParam("q") q: String?,
+    ): String {
         return "regular$q"
     }
 
@@ -89,7 +90,9 @@ open class InvocationHandlerTestResource {
 
     @Path("/coroutineQ")
     @GET
-    suspend fun coroutineQueryParameter(@QueryParam("q") q: Optional<String>): String {
+    suspend fun coroutineQueryParameter(
+        @QueryParam("q") q: Optional<String>,
+    ): String {
         if (coroutineContext[CoroutineDispatcher].toString() != "Dispatchers.Unconfined") {
             throw IllegalStateException("wrong dispatcher ${coroutineContext[CoroutineDispatcher]}")
         }
@@ -192,7 +195,9 @@ open class InvocationHandlerTestResource {
     @Path("/async")
     @GET
     @ManagedAsync
-    suspend fun async(@Suspended async: AsyncResponse) {
+    suspend fun async(
+        @Suspended async: AsyncResponse,
+    ) {
         delay(1)
         async.resume("async")
     }
@@ -200,7 +205,9 @@ open class InvocationHandlerTestResource {
     @Path("/asyncError")
     @GET
     @ManagedAsync
-    suspend fun asyncError(@Suspended async: AsyncResponse) {
+    suspend fun asyncError(
+        @Suspended async: AsyncResponse,
+    ) {
         delay(1)
         async.toString()
         throw IllegalStateException("asyncoops")
@@ -260,7 +267,6 @@ class InvocationHandlerClassScopeTestResource : CoroutineScope by CoroutineScope
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestResource>() {
-
     private val mainDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     @BeforeClass
@@ -276,15 +282,16 @@ class CoroutineInvocationHandlerTest : ResourceTestBase<InvocationHandlerTestRes
 
     // create through guice  w/ metrics instrumentation so we get a dynamically subclassed instance
     override fun getResource(): InvocationHandlerTestResource {
-        val injector = Guice.createInjector(
-            object : KotlinModule() {
-                override fun configure() {
-                    val registry = MetricRegistry()
-                    bind<MetricRegistry>().toInstance(registry)
-                    install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
-                }
-            },
-        )
+        val injector =
+            Guice.createInjector(
+                object : KotlinModule() {
+                    override fun configure() {
+                        val registry = MetricRegistry()
+                        bind<MetricRegistry>().toInstance(registry)
+                        install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
+                    }
+                },
+            )
         return injector.getInstance()
     }
 

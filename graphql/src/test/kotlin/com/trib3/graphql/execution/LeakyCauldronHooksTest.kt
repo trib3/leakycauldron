@@ -108,11 +108,12 @@ class LeakyCauldronHooksTest {
 
     @Test
     fun testYearVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: Year!) {year(y:${'$'}input)}""")
-                .variables(mapOf("input" to "2019")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: Year!) {year(y:${'$'}input)}""")
+                    .variables(mapOf("input" to "2019")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["year"]).isEqualTo("2020")
     }
 
@@ -139,11 +140,12 @@ class LeakyCauldronHooksTest {
 
     @Test
     fun testQuarterVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: Quarter!) {quarter(q:${'$'}input)}""")
-                .variables(mapOf("input" to "2019-Q1")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: Quarter!) {quarter(q:${'$'}input)}""")
+                    .variables(mapOf("input" to "2019-Q1")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["quarter"]).isEqualTo("2019-Q2")
     }
 
@@ -170,18 +172,20 @@ class LeakyCauldronHooksTest {
 
     @Test
     fun testMonthVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: Month!) {month(m:${'$'}input)}""")
-                .variables(mapOf("input" to "2019-01")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: Month!) {month(m:${'$'}input)}""")
+                    .variables(mapOf("input" to "2019-01")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["month"]).isEqualTo("2019-02")
     }
 
     @Test
     fun testLocalDateTime() {
-        val result = graphQL.execute("""query {localDateTime(l:"2019-10-30T00:01")}""")
-            .getData<Map<String, String>>()
+        val result =
+            graphQL.execute("""query {localDateTime(l:"2019-10-30T00:01")}""")
+                .getData<Map<String, String>>()
         assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01:00.000")
         assertValidationErrors("""query {localDateTime(l:123)}""", """query {localDateTime(l:"123")}""")
 
@@ -202,72 +206,80 @@ class LeakyCauldronHooksTest {
 
     @Test
     fun testLocalDateTimeVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: LocalDateTime!) {localDateTime(l:${'$'}input)}""")
-                .variables(mapOf("input" to "2019-10-30T00:01")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: LocalDateTime!) {localDateTime(l:${'$'}input)}""")
+                    .variables(mapOf("input" to "2019-10-30T00:01")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["localDateTime"]).isEqualTo("2019-10-31T01:01:00.000")
     }
 
     @Test
     fun testLocalDate() {
-        val result = graphQL.execute("""query {localDate(l:"2019-10-30")}""")
-            .getData<Map<String, String>>()
+        val result =
+            graphQL.execute("""query {localDate(l:"2019-10-30")}""")
+                .getData<Map<String, String>>()
         assertThat(result["localDate"]).isEqualTo("2019-10-31")
         assertValidationErrors("""query {localDate(l:123)}""", """query {localDate(l:"123")}""")
     }
 
     @Test
     fun testLocalDateVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: Date!) {localDate(l:${'$'}input)}""")
-                .variables(mapOf("input" to "2019-10-30")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: Date!) {localDate(l:${'$'}input)}""")
+                    .variables(mapOf("input" to "2019-10-30")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["localDate"]).isEqualTo("2019-10-31")
     }
 
     @Test
     fun testLocalTime() {
-        val result = graphQL.execute("""query {localTime(l:"00:01")}""")
-            .getData<Map<String, String>>()
+        val result =
+            graphQL.execute("""query {localTime(l:"00:01")}""")
+                .getData<Map<String, String>>()
         assertThat(result["localTime"]).isEqualTo("01:01:00")
         assertValidationErrors("""query {localTime(l:123)}""", """query {localTime(l:"123")}""")
     }
 
     @Test
     fun testLocalTimeVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: LocalTime!) {localTime(l:${'$'}input)}""")
-                .variables(mapOf("input" to "00:01")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: LocalTime!) {localTime(l:${'$'}input)}""")
+                    .variables(mapOf("input" to "00:01")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["localTime"]).isEqualTo("01:01:00")
     }
 
     @Test
     fun testOffsetDateTime() {
-        val result = graphQL.execute("""query {offsetDateTime(o:"2019-10-30T03:01-08:00")}""")
-            .getData<Map<String, String>>()
+        val result =
+            graphQL.execute("""query {offsetDateTime(o:"2019-10-30T03:01-08:00")}""")
+                .getData<Map<String, String>>()
         assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T03:01:00.000-08:00")
         assertValidationErrors("""query {offsetDateTime(o:123)}""", """query {offsetDateTime(o:"123")}""")
     }
 
     @Test
     fun testOffsetDateTimeVariable() {
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: DateTime!) {offsetDateTime(o:${'$'}input)}""")
-                .variables(mapOf("input" to "2019-10-30T00:01-07:00")).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: DateTime!) {offsetDateTime(o:${'$'}input)}""")
+                    .variables(mapOf("input" to "2019-10-30T00:01-07:00")).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["offsetDateTime"]).isEqualTo("2019-10-31T00:01:00.000-07:00")
     }
 
     @Test
     fun testUUIDGeneration() {
-        val result = graphQL.execute("""query { newuuid }""")
-            .getData<Map<String, String>>()
+        val result =
+            graphQL.execute("""query { newuuid }""")
+                .getData<Map<String, String>>()
         assertThat(
             runCatching {
                 UUID.fromString(result["newuuid"])
@@ -278,8 +290,9 @@ class LeakyCauldronHooksTest {
     @Test
     fun testUUIDInput() {
         val uuid = UUID.randomUUID()
-        val result = graphQL.execute("""query { existinguuid(uuid:"$uuid") }""")
-            .getData<Map<String, String>>()
+        val result =
+            graphQL.execute("""query { existinguuid(uuid:"$uuid") }""")
+                .getData<Map<String, String>>()
         assertThat(result["existinguuid"]).isEqualTo(uuid.toString())
         assertValidationErrors("""query {existinguuid(uuid:123)}""", """query {existinguuid(uuid:"123")}""")
     }
@@ -287,11 +300,12 @@ class LeakyCauldronHooksTest {
     @Test
     fun testUUIDVariable() {
         val uuid = UUID.randomUUID()
-        val result = graphQL.execute(
-            ExecutionInput.newExecutionInput()
-                .query("""query(${'$'}input: UUID!) { existinguuid(uuid:${'$'}input) }""")
-                .variables(mapOf("input" to uuid.toString())).build(),
-        ).getData<Map<String, String>>()
+        val result =
+            graphQL.execute(
+                ExecutionInput.newExecutionInput()
+                    .query("""query(${'$'}input: UUID!) { existinguuid(uuid:${'$'}input) }""")
+                    .variables(mapOf("input" to uuid.toString())).build(),
+            ).getData<Map<String, String>>()
         assertThat(result["existinguuid"]).isEqualTo(uuid.toString())
     }
 

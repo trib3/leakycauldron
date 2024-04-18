@@ -63,12 +63,13 @@ open class DAOTestBase {
             inited = true
             database = getDatabaseContainer()
             database.start()
-            dataSource = HikariDataSource().apply {
-                jdbcUrl = database.jdbcUrl
-                username = database.username
-                password = database.password
-                configureDataSource(this)
-            }
+            dataSource =
+                HikariDataSource().apply {
+                    jdbcUrl = database.jdbcUrl
+                    username = database.username
+                    password = database.password
+                    configureDataSource(this)
+                }
             ctx = DSL.using(dataSource, getJooqDialect())
             getFlywayConfiguration().load().migrate()
         }

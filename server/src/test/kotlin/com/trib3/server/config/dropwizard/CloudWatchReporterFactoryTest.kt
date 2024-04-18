@@ -59,12 +59,13 @@ open class MockCloudWatchModule : KotlinModule() {
  */
 open class CloudWatchReporterFactoryTestBase(val mapper: ObjectMapper) {
     fun runReporter(testCaseConfigPath: String) {
-        val configFactory = HoconConfigurationFactory(
-            CloudWatchReporterFactory::class.java,
-            BaseValidator.newValidator(),
-            mapper,
-            ConfigLoader(testCaseConfigPath),
-        )
+        val configFactory =
+            HoconConfigurationFactory(
+                CloudWatchReporterFactory::class.java,
+                BaseValidator.newValidator(),
+                mapper,
+                ConfigLoader(testCaseConfigPath),
+            )
         val factory = configFactory.build()
         factory.build(getMetricRegistry()).report()
         EasyMock.verify(factory.cloudwatch)
@@ -89,215 +90,233 @@ open class CloudWatchReporterFactoryTestBase(val mapper: ObjectMapper) {
 class MockCloudWatchModuleDefault : MockCloudWatchModule()
 
 @Guice(modules = [MockCloudWatchModuleDefault::class])
-class CloudWatchReporterFactoryDefaultTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testDefaultConfig() {
-        runReporter("emptyTestCase")
-        val metricData = putCapture.value.metricData()
-        assertThat(putCapture.value.namespace()).isEqualTo("dev")
-        assertThat(metricData.size).isEqualTo(11)
-        metricData.forEach {
-            assertThat(it.storageResolution()).isEqualTo(60)
-            assertThat(
-                it.dimensions().first { d -> d.name() == "Hostname" }
-                    ?.value(),
-            ).isEqualTo(InetAddress.getLocalHost().hostName)
-            assertThat(
-                it.dimensions().first { d -> d.name() == "Application" }
-                    ?.value(),
-            ).isEqualTo("Test")
+class CloudWatchReporterFactoryDefaultTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testDefaultConfig() {
+            runReporter("emptyTestCase")
+            val metricData = putCapture.value.metricData()
+            assertThat(putCapture.value.namespace()).isEqualTo("dev")
+            assertThat(metricData.size).isEqualTo(11)
+            metricData.forEach {
+                assertThat(it.storageResolution()).isEqualTo(60)
+                assertThat(
+                    it.dimensions().first { d -> d.name() == "Hostname" }
+                        ?.value(),
+                ).isEqualTo(InetAddress.getLocalHost().hostName)
+                assertThat(
+                    it.dimensions().first { d -> d.name() == "Application" }
+                        ?.value(),
+                ).isEqualTo("Test")
+            }
+            assertThat(metricData[0].metricName()).isEqualTo("g1")
+            assertThat(metricData[0].typeDimension()).isEqualTo("gauge")
+            assertThat(metricData[1].metricName()).isEqualTo("c1")
+            assertThat(metricData[1].typeDimension()).isEqualTo("count")
+            assertThat(metricData[2].metricName()).isEqualTo("h1")
+            assertThat(metricData[2].typeDimension()).isEqualTo("count")
+            assertThat(metricData[3].metricName()).isEqualTo("h1")
+            assertThat(metricData[3].typeDimension()).isEqualTo("75%")
+            assertThat(metricData[4].metricName()).isEqualTo("h1")
+            assertThat(metricData[4].typeDimension()).isEqualTo("95%")
+            assertThat(metricData[5].metricName()).isEqualTo("h1")
+            assertThat(metricData[5].typeDimension()).isEqualTo("99.9%")
+            assertThat(metricData[6].metricName()).isEqualTo("m1")
+            assertThat(metricData[6].typeDimension()).isEqualTo("count")
+            assertThat(metricData[6].unit()).isEqualTo(StandardUnit.COUNT)
+            assertThat(metricData[7].metricName()).isEqualTo("t1")
+            assertThat(metricData[7].typeDimension()).isEqualTo("count")
+            assertThat(metricData[8].metricName()).isEqualTo("t1")
+            assertThat(metricData[8].typeDimension()).isEqualTo("75%")
+            assertThat(metricData[9].metricName()).isEqualTo("t1")
+            assertThat(metricData[9].typeDimension()).isEqualTo("95%")
+            assertThat(metricData[10].metricName()).isEqualTo("t1")
+            assertThat(metricData[10].typeDimension()).isEqualTo("99.9%")
         }
-        assertThat(metricData[0].metricName()).isEqualTo("g1")
-        assertThat(metricData[0].typeDimension()).isEqualTo("gauge")
-        assertThat(metricData[1].metricName()).isEqualTo("c1")
-        assertThat(metricData[1].typeDimension()).isEqualTo("count")
-        assertThat(metricData[2].metricName()).isEqualTo("h1")
-        assertThat(metricData[2].typeDimension()).isEqualTo("count")
-        assertThat(metricData[3].metricName()).isEqualTo("h1")
-        assertThat(metricData[3].typeDimension()).isEqualTo("75%")
-        assertThat(metricData[4].metricName()).isEqualTo("h1")
-        assertThat(metricData[4].typeDimension()).isEqualTo("95%")
-        assertThat(metricData[5].metricName()).isEqualTo("h1")
-        assertThat(metricData[5].typeDimension()).isEqualTo("99.9%")
-        assertThat(metricData[6].metricName()).isEqualTo("m1")
-        assertThat(metricData[6].typeDimension()).isEqualTo("count")
-        assertThat(metricData[6].unit()).isEqualTo(StandardUnit.COUNT)
-        assertThat(metricData[7].metricName()).isEqualTo("t1")
-        assertThat(metricData[7].typeDimension()).isEqualTo("count")
-        assertThat(metricData[8].metricName()).isEqualTo("t1")
-        assertThat(metricData[8].typeDimension()).isEqualTo("75%")
-        assertThat(metricData[9].metricName()).isEqualTo("t1")
-        assertThat(metricData[9].typeDimension()).isEqualTo("95%")
-        assertThat(metricData[10].metricName()).isEqualTo("t1")
-        assertThat(metricData[10].typeDimension()).isEqualTo("99.9%")
     }
-}
 
 class MockCloudWatchModuleNamespace : MockCloudWatchModule()
 
 @Guice(modules = [MockCloudWatchModuleNamespace::class])
-class CloudWatchReporterFactoryNamespaceTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testNamespace() {
-        runReporter("namespaceTestCase")
-        assertThat(putCapture.value.namespace()).isEqualTo("overrideNamespace")
+class CloudWatchReporterFactoryNamespaceTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testNamespace() {
+            runReporter("namespaceTestCase")
+            assertThat(putCapture.value.namespace()).isEqualTo("overrideNamespace")
+        }
     }
-}
 
 class MockCloudWatchModuleMeterRates : MockCloudWatchModule()
 
 @Guice(modules = [MockCloudWatchModuleMeterRates::class])
-class CloudWatchReporterFactoryMeterRatesTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testMeterRates() {
-        runReporter("meterRatesTestCase")
-        val metricData = putCapture.value.metricData()
-        assertThat(metricData.size).isEqualTo(5)
-        putCapture.value.metricData().forEach {
-            assertThat(it.metricName()).isEqualTo("m1")
-            if (it.dimensions().find { d -> d.name() == "Type" }?.value() == "count") {
-                assertThat(it.unit()).isEqualTo(StandardUnit.COUNT)
-            } else {
-                assertThat(it.unit()).isEqualTo(StandardUnit.MILLISECONDS)
+class CloudWatchReporterFactoryMeterRatesTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testMeterRates() {
+            runReporter("meterRatesTestCase")
+            val metricData = putCapture.value.metricData()
+            assertThat(metricData.size).isEqualTo(5)
+            putCapture.value.metricData().forEach {
+                assertThat(it.metricName()).isEqualTo("m1")
+                if (it.dimensions().find { d -> d.name() == "Type" }?.value() == "count") {
+                    assertThat(it.unit()).isEqualTo(StandardUnit.COUNT)
+                } else {
+                    assertThat(it.unit()).isEqualTo(StandardUnit.MILLISECONDS)
+                }
             }
+            assertThat(metricData[0].typeDimension()).isEqualTo("count")
+            assertThat(metricData[1].typeDimension()).isEqualTo("1-min-mean-rate [per-second]")
+            assertThat(metricData[2].typeDimension()).isEqualTo("5-min-mean-rate [per-second]")
+            assertThat(metricData[3].typeDimension()).isEqualTo("15-min-mean-rate [per-second]")
+            assertThat(metricData[4].typeDimension()).isEqualTo("mean-rate [per-second]")
         }
-        assertThat(metricData[0].typeDimension()).isEqualTo("count")
-        assertThat(metricData[1].typeDimension()).isEqualTo("1-min-mean-rate [per-second]")
-        assertThat(metricData[2].typeDimension()).isEqualTo("5-min-mean-rate [per-second]")
-        assertThat(metricData[3].typeDimension()).isEqualTo("15-min-mean-rate [per-second]")
-        assertThat(metricData[4].typeDimension()).isEqualTo("mean-rate [per-second]")
     }
-}
 
 class MockCloudWatchModuleHistogramTimer : MockCloudWatchModule()
 
 @Guice(modules = [MockCloudWatchModuleHistogramTimer::class])
-class CloudWatchReporterFactoryHistogramTimerTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testHistogramTimer() {
-        runReporter("histoTimerTestCase")
-        val metricData = putCapture.value.metricData()
-        assertThat(metricData.size).isEqualTo(12)
-        assertThat(metricData[0].metricName()).isEqualTo("h1")
-        assertThat(metricData[0].typeDimension()).isEqualTo("count")
-        assertThat(metricData[1].metricName()).isEqualTo("h1")
-        assertThat(metricData[1].typeDimension()).isEqualTo("50%")
-        assertThat(metricData[2].metricName()).isEqualTo("h1")
-        assertThat(metricData[2].typeDimension()).isEqualTo("99%")
-        assertThat(metricData[3].metricName()).isEqualTo("h1")
-        assertThat(metricData[3].typeDimension()).isEqualTo("snapshot-mean")
-        assertThat(metricData[4].metricName()).isEqualTo("h1")
-        assertThat(metricData[4].typeDimension()).isEqualTo("snapshot-std-dev")
-        assertThat(metricData[5].metricName()).isEqualTo("h1")
-        assertThat(metricData[5].typeDimension()).isEqualTo("snapshot-summary")
-        assertThat(metricData[6].metricName()).isEqualTo("t1")
-        assertThat(metricData[6].typeDimension()).isEqualTo("count")
-        assertThat(metricData[7].metricName()).isEqualTo("t1")
-        assertThat(metricData[7].typeDimension()).isEqualTo("50%")
-        assertThat(metricData[8].metricName()).isEqualTo("t1")
-        assertThat(metricData[8].typeDimension()).isEqualTo("99%")
-        assertThat(metricData[9].metricName()).isEqualTo("t1")
-        assertThat(metricData[9].typeDimension()).isEqualTo("snapshot-mean [in-milliseconds]")
-        assertThat(metricData[10].metricName()).isEqualTo("t1")
-        assertThat(metricData[10].typeDimension()).isEqualTo("snapshot-std-dev [in-milliseconds]")
-        assertThat(metricData[11].metricName()).isEqualTo("t1")
-        assertThat(metricData[11].typeDimension()).isEqualTo("snapshot-summary")
+class CloudWatchReporterFactoryHistogramTimerTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testHistogramTimer() {
+            runReporter("histoTimerTestCase")
+            val metricData = putCapture.value.metricData()
+            assertThat(metricData.size).isEqualTo(12)
+            assertThat(metricData[0].metricName()).isEqualTo("h1")
+            assertThat(metricData[0].typeDimension()).isEqualTo("count")
+            assertThat(metricData[1].metricName()).isEqualTo("h1")
+            assertThat(metricData[1].typeDimension()).isEqualTo("50%")
+            assertThat(metricData[2].metricName()).isEqualTo("h1")
+            assertThat(metricData[2].typeDimension()).isEqualTo("99%")
+            assertThat(metricData[3].metricName()).isEqualTo("h1")
+            assertThat(metricData[3].typeDimension()).isEqualTo("snapshot-mean")
+            assertThat(metricData[4].metricName()).isEqualTo("h1")
+            assertThat(metricData[4].typeDimension()).isEqualTo("snapshot-std-dev")
+            assertThat(metricData[5].metricName()).isEqualTo("h1")
+            assertThat(metricData[5].typeDimension()).isEqualTo("snapshot-summary")
+            assertThat(metricData[6].metricName()).isEqualTo("t1")
+            assertThat(metricData[6].typeDimension()).isEqualTo("count")
+            assertThat(metricData[7].metricName()).isEqualTo("t1")
+            assertThat(metricData[7].typeDimension()).isEqualTo("50%")
+            assertThat(metricData[8].metricName()).isEqualTo("t1")
+            assertThat(metricData[8].typeDimension()).isEqualTo("99%")
+            assertThat(metricData[9].metricName()).isEqualTo("t1")
+            assertThat(metricData[9].typeDimension()).isEqualTo("snapshot-mean [in-milliseconds]")
+            assertThat(metricData[10].metricName()).isEqualTo("t1")
+            assertThat(metricData[10].typeDimension()).isEqualTo("snapshot-std-dev [in-milliseconds]")
+            assertThat(metricData[11].metricName()).isEqualTo("t1")
+            assertThat(metricData[11].typeDimension()).isEqualTo("snapshot-summary")
+        }
     }
-}
 
 class MockCloudWatchModuleJvmMetrics : MockCloudWatchModule()
 
 @Guice(modules = [MockCloudWatchModuleJvmMetrics::class])
-class CloudWatchReporterFactoryJvmMetricsTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testJvmMetrics() {
-        runReporter("jvmMetricsTestCase")
-        val metricData = putCapture.value.metricData()
-        assertThat(metricData.filter { it.metricName().startsWith("jvm.") }).isNotEmpty()
+class CloudWatchReporterFactoryJvmMetricsTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testJvmMetrics() {
+            runReporter("jvmMetricsTestCase")
+            val metricData = putCapture.value.metricData()
+            assertThat(metricData.filter { it.metricName().startsWith("jvm.") }).isNotEmpty()
+        }
     }
-}
 
 class MockCloudWatchModuleRawCount : MockCloudWatchModule()
+
 class MockCloudWatchModuleNonRawCount : MockCloudWatchModule()
 
 @Guice(modules = [MockCloudWatchModuleNonRawCount::class])
-class CloudWatchReporterFactoryNonRawCountTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testNonRawCount() {
-        val factory = HoconConfigurationFactory(
-            CloudWatchReporterFactory::class.java,
-            BaseValidator.newValidator(),
-            mapper,
-            ConfigLoader("nonRawCountTestCase"),
-        ).build()
-        val registry = getMetricRegistry()
-        val reporter = factory.build(registry)
-        reporter.report()
-        registry.counter("c1").inc()
-        reporter.report()
-        EasyMock.verify(factory.cloudwatch)
-        assertThat(putCapture.value.metricData()[0].value()).isEqualTo(1.0)
-    }
-}
-
-@Guice(modules = [MockCloudWatchModuleRawCount::class])
-class CloudWatchReporterFactoryRawCountTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-
-    @Test
-    fun testRawCount() {
-        val factory = HoconConfigurationFactory(
-            CloudWatchReporterFactory::class.java,
-            BaseValidator.newValidator(),
-            mapper,
-            ConfigLoader("rawCountTestCase"),
-        ).build()
-        val registry = getMetricRegistry()
-        val reporter = factory.build(registry)
-        reporter.report()
-        registry.counter("c1").inc()
-        reporter.report()
-        EasyMock.verify(factory.cloudwatch)
-        assertThat(putCapture.value.metricData()[0].value()).isEqualTo(2.0)
-    }
-}
-
-@Guice(modules = [MockCloudWatchModule::class])
-class CloudWatchReporterFactoryHighResolutionTest @Inject constructor(
-    mapper: ObjectMapper,
-    val putCapture: Capture<PutMetricDataRequest>,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-    @Test
-    fun testHighResolution() {
-        runReporter("highResolutionTestCase")
-        val metricData = putCapture.value.metricData()
-        assertThat(putCapture.value.namespace()).isEqualTo("dev")
-        assertThat(metricData.size).isEqualTo(11)
-        metricData.forEach {
-            assertThat(it.storageResolution()).isEqualTo(1)
+class CloudWatchReporterFactoryNonRawCountTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testNonRawCount() {
+            val factory =
+                HoconConfigurationFactory(
+                    CloudWatchReporterFactory::class.java,
+                    BaseValidator.newValidator(),
+                    mapper,
+                    ConfigLoader("nonRawCountTestCase"),
+                ).build()
+            val registry = getMetricRegistry()
+            val reporter = factory.build(registry)
+            reporter.report()
+            registry.counter("c1").inc()
+            reporter.report()
+            EasyMock.verify(factory.cloudwatch)
+            assertThat(putCapture.value.metricData()[0].value()).isEqualTo(1.0)
         }
     }
-}
+
+@Guice(modules = [MockCloudWatchModuleRawCount::class])
+class CloudWatchReporterFactoryRawCountTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testRawCount() {
+            val factory =
+                HoconConfigurationFactory(
+                    CloudWatchReporterFactory::class.java,
+                    BaseValidator.newValidator(),
+                    mapper,
+                    ConfigLoader("rawCountTestCase"),
+                ).build()
+            val registry = getMetricRegistry()
+            val reporter = factory.build(registry)
+            reporter.report()
+            registry.counter("c1").inc()
+            reporter.report()
+            EasyMock.verify(factory.cloudwatch)
+            assertThat(putCapture.value.metricData()[0].value()).isEqualTo(2.0)
+        }
+    }
+
+@Guice(modules = [MockCloudWatchModule::class])
+class CloudWatchReporterFactoryHighResolutionTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+        val putCapture: Capture<PutMetricDataRequest>,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testHighResolution() {
+            runReporter("highResolutionTestCase")
+            val metricData = putCapture.value.metricData()
+            assertThat(putCapture.value.namespace()).isEqualTo("dev")
+            assertThat(metricData.size).isEqualTo(11)
+            metricData.forEach {
+                assertThat(it.storageResolution()).isEqualTo(1)
+            }
+        }
+    }
 
 class MockCloudWatchDryRunModule : KotlinModule() {
     override fun configure() {
@@ -309,12 +328,13 @@ class MockCloudWatchDryRunModule : KotlinModule() {
 }
 
 @Guice(modules = [MockCloudWatchDryRunModule::class])
-class CloudWatchReporterDryRunFactoryTest @Inject constructor(
-    mapper: ObjectMapper,
-) : CloudWatchReporterFactoryTestBase(mapper) {
-
-    @Test
-    fun testDryRun() {
-        runReporter("dryRunTestCase")
+class CloudWatchReporterDryRunFactoryTest
+    @Inject
+    constructor(
+        mapper: ObjectMapper,
+    ) : CloudWatchReporterFactoryTestBase(mapper) {
+        @Test
+        fun testDryRun() {
+            runReporter("dryRunTestCase")
+        }
     }
-}

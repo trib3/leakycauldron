@@ -16,8 +16,11 @@ interface Thing
 
 interface TestClass {
     fun manipulateString(str: String): String
+
     fun manipulateThing(thing: Thing): Thing
+
     fun processThing(thing: Thing)
+
     fun getThing(): Thing
 }
 

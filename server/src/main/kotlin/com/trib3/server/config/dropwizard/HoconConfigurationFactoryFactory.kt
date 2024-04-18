@@ -11,18 +11,19 @@ import jakarta.validation.Validator
  * Bootstrap hook to allow dropwizard config to be provided by a [HoconConfigurationFactory]
  */
 class HoconConfigurationFactoryFactory<T>
-@Inject constructor(val configLoader: ConfigLoader) : ConfigurationFactoryFactory<T> {
-    override fun create(
-        klass: Class<T>,
-        validator: Validator,
-        objectMapper: ObjectMapper,
-        propertyPrefix: String,
-    ): ConfigurationFactory<T> {
-        return HoconConfigurationFactory<T>(
-            klass,
-            validator,
-            objectMapper,
-            configLoader,
-        )
+    @Inject
+    constructor(val configLoader: ConfigLoader) : ConfigurationFactoryFactory<T> {
+        override fun create(
+            klass: Class<T>,
+            validator: Validator,
+            objectMapper: ObjectMapper,
+            propertyPrefix: String,
+        ): ConfigurationFactory<T> {
+            return HoconConfigurationFactory<T>(
+                klass,
+                validator,
+                objectMapper,
+                configLoader,
+            )
+        }
     }
-}

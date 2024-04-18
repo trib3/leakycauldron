@@ -10,7 +10,10 @@ import org.threeten.extra.YearQuarter
  * Jackson [JsonDeserializer] for [YearQuarter] objects.
  */
 class YearQuarterDeserializer : JsonDeserializer<YearQuarter>() {
-    override fun deserialize(parser: JsonParser, ctxt: DeserializationContext): YearQuarter? {
+    override fun deserialize(
+        parser: JsonParser,
+        ctxt: DeserializationContext,
+    ): YearQuarter? {
         if (parser.hasToken(JsonToken.VALUE_STRING)) {
             val string = parser.text.trim()
             return if (string.isEmpty()) null else YearQuarter.parse(string)

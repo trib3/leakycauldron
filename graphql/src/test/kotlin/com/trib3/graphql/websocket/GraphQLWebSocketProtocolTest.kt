@@ -38,19 +38,20 @@ class GraphQLWebSocketProtocolTest {
 
     @Test
     fun testOperationMessageJsonDeserialization() {
-        val start = mapper.readValue<OperationMessage<*>>(
-            """
-            {
-                "type": "start",
-                "id": "123",
-                "payload": {
-                    "query": "hi",
-                    "variables": {},
-                    "operationName": "boo"
+        val start =
+            mapper.readValue<OperationMessage<*>>(
+                """
+                {
+                    "type": "start",
+                    "id": "123",
+                    "payload": {
+                        "query": "hi",
+                        "variables": {},
+                        "operationName": "boo"
+                    }
                 }
-            }
-            """.trimIndent(),
-        )
+                """.trimIndent(),
+            )
         assertThat(start.type).isEqualTo(OperationType.GQL_START)
         assertThat(start.id).isEqualTo("123")
         assertThat(start.payload).isNotNull().isInstanceOf(GraphQLRequest::class)
@@ -62,17 +63,19 @@ class GraphQLWebSocketProtocolTest {
 
     @Test
     fun testJsonRoundTrips() {
-        val objectExample = mapOf(
-            Nothing::class to null,
-            String::class to "message",
-            GraphQLRequest::class to GraphQLRequest("query {q}"),
-            Map::class to mapOf("a" to "b", "c" to "d"),
-            List::class to listOf(
-                MessageGraphQLError("e").toSpecification(),
-                MessageGraphQLError("f").toSpecification(),
-            ),
-            GraphQLResponse::class to null, // only need to support serialization right now, not round trip
-        )
+        val objectExample =
+            mapOf(
+                Nothing::class to null,
+                String::class to "message",
+                GraphQLRequest::class to GraphQLRequest("query {q}"),
+                Map::class to mapOf("a" to "b", "c" to "d"),
+                List::class to
+                    listOf(
+                        MessageGraphQLError("e").toSpecification(),
+                        MessageGraphQLError("f").toSpecification(),
+                    ),
+                GraphQLResponse::class to null, // only need to support serialization right now, not round trip
+            )
         for (
         t in OperationType.Companion::class.memberProperties
             .filterIsInstance<KProperty1<OperationType.Companion, OperationType<Any>>>()

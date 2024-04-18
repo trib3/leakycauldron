@@ -20,49 +20,52 @@ import javax.sql.DataSource
  * Provides a [DbConfig] with the appropriate [configPath]
  */
 private class DbConfigProvider
-@Inject constructor(
-    private val loader: ConfigLoader,
-    @Named("configPath") private val configPath: String,
-    private val healthCheckRegistry: HealthCheckRegistry,
-    private val metricRegistry: MetricRegistry,
-    private val objectMapper: ObjectMapper,
-) : Provider<DbConfig> {
-    override fun get(): DbConfig {
-        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper)
+    @Inject
+    constructor(
+        private val loader: ConfigLoader,
+        @Named("configPath") private val configPath: String,
+        private val healthCheckRegistry: HealthCheckRegistry,
+        private val metricRegistry: MetricRegistry,
+        private val objectMapper: ObjectMapper,
+    ) : Provider<DbConfig> {
+        override fun get(): DbConfig {
+            return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper)
+        }
     }
-}
 
 /**
  * Provides a [DataSource] from the [DbConfig] with the appropriate [configPath]
  */
 private class DataSourceProvider
-@Inject constructor(
-    private val loader: ConfigLoader,
-    @Named("configPath") private val configPath: String,
-    private val healthCheckRegistry: HealthCheckRegistry,
-    private val metricRegistry: MetricRegistry,
-    private val objectMapper: ObjectMapper,
-) : Provider<DataSource> {
-    override fun get(): DataSource {
-        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dataSource
+    @Inject
+    constructor(
+        private val loader: ConfigLoader,
+        @Named("configPath") private val configPath: String,
+        private val healthCheckRegistry: HealthCheckRegistry,
+        private val metricRegistry: MetricRegistry,
+        private val objectMapper: ObjectMapper,
+    ) : Provider<DataSource> {
+        override fun get(): DataSource {
+            return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dataSource
+        }
     }
-}
 
 /**
  * Provides a [DSLContext] from the [DbConfig] with the appropriate [configPath]
  */
 private class DSLContextProvider
-@Inject constructor(
-    private val loader: ConfigLoader,
-    @Named("configPath") private val configPath: String,
-    private val healthCheckRegistry: HealthCheckRegistry,
-    private val metricRegistry: MetricRegistry,
-    private val objectMapper: ObjectMapper,
-) : Provider<DSLContext> {
-    override fun get(): DSLContext {
-        return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dslContext
+    @Inject
+    constructor(
+        private val loader: ConfigLoader,
+        @Named("configPath") private val configPath: String,
+        private val healthCheckRegistry: HealthCheckRegistry,
+        private val metricRegistry: MetricRegistry,
+        private val objectMapper: ObjectMapper,
+    ) : Provider<DSLContext> {
+        override fun get(): DSLContext {
+            return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dslContext
+        }
     }
-}
 
 /**
  * Private module that implements the bindings for [NamedDbModule] and allows for multiple

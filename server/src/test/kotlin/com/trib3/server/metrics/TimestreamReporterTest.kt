@@ -38,17 +38,18 @@ class TimestreamReporterTest {
         registry.histogram("histo").update(1)
         registry.timer("timer").time().stop()
         val globalDimensions = listOf(Dimension.builder().name("key").value("val").build())
-        val reporter = TimestreamReporter(
-            mockClient,
-            "dbName",
-            "tableName",
-            globalDimensions,
-            registry,
-            "",
-            MetricFilter.ALL,
-            TimeUnit.MILLISECONDS,
-            TimeUnit.SECONDS,
-        )
+        val reporter =
+            TimestreamReporter(
+                mockClient,
+                "dbName",
+                "tableName",
+                globalDimensions,
+                registry,
+                "",
+                MetricFilter.ALL,
+                TimeUnit.MILLISECONDS,
+                TimeUnit.SECONDS,
+            )
         reporter.report()
 
         EasyMock.verify(mockClient)

@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -42,96 +42,97 @@
         <skip.source>false</skip.source>
         <skip.tests>false</skip.tests>
 
-        <version.activation>2.1.2</version.activation>
-        <version.angus>2.0.1</version.angus>
-        <version.annotation>2.1.1</version.annotation>
+        <version.activation>2.1.3</version.activation>
+        <version.angus>2.0.2</version.angus>
+        <version.annotation>3.0.0</version.annotation>
         <version.ant>1.10.14</version.ant>
         <version.argparse4j>0.9.0</version.argparse4j>
-        <version.assertk>0.27.0</version.assertk>
-        <version.aws.java>2.21.30</version.aws.java>
-        <version.byte-buddy>1.14.10</version.byte-buddy>
+        <version.assertk>0.28.0</version.assertk>
+        <version.aws.java>2.25.28</version.aws.java>
+        <version.byte-buddy>1.14.13</version.byte-buddy>
         <version.caffeine>3.1.8</version.caffeine>
-        <version.checker-qual>3.40.0</version.checker-qual>
-        <version.classgraph>4.8.165</version.classgraph>
-        <version.commons-codec>1.16.0</version.commons-codec>
-        <version.commons-compress>1.25.0</version.commons-compress>
-        <version.commons-io>2.15.0</version.commons-io>
+        <version.checker-qual>3.42.0</version.checker-qual>
+        <version.classgraph>4.8.170</version.classgraph>
+        <version.commons-codec>1.16.1</version.commons-codec>
+        <version.commons-compress>1.26.1</version.commons-compress>
+        <version.commons-io>2.16.1</version.commons-io>
         <version.commons-lang3>3.14.0</version.commons-lang3>
         <version.commons-text>1.11.0</version.commons-text>
         <version.config4k>0.6.0</version.config4k>
-        <version.detekt>1.23.4</version.detekt>
-        <version.dokka>1.9.10</version.dokka>
-        <version.dropwizard>4.0.4</version.dropwizard>
+        <version.detekt>1.23.6</version.detekt>
+        <version.dokka>1.9.20</version.dokka>
+        <version.dropwizard>4.0.7</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
-        <version.dropwizard.metrics>4.2.22</version.dropwizard.metrics>
+        <version.dropwizard.metrics>4.2.25</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
         <version.easymock>5.2.0</version.easymock>
-        <version.errorprone>2.23.0</version.errorprone>
-        <version.flyway>10.1.0</version.flyway>
+        <version.errorprone>2.26.1</version.errorprone>
+        <version.flyway>10.11.0</version.flyway>
         <version.graphql-kotlin>7.0.2</version.graphql-kotlin>
-        <version.graphql-java>21.3</version.graphql-java>
+        <version.graphql-java>21.5</version.graphql-java>
         <version.graphql-java-extended-scalars>21.0</version.graphql-java-extended-scalars>
         <version.graphql-java.dataloader>3.2.2</version.graphql-java.dataloader>
-        <version.guava>32.1.3-jre</version.guava>
+        <version.guava>33.1.0-jre</version.guava>
         <version.guice>7.0.0</version.guice>
-        <version.hibernate.validator>7.0.5.Final</version.hibernate.validator>
+        <version.hibernate.validator>8.0.1.Final</version.hibernate.validator>
         <version.hikaricp>5.1.0</version.hikaricp>
-        <version.hk2>3.0.5</version.hk2>
-        <version.httpcomponents.client>5.2.2</version.httpcomponents.client>
-        <version.httpcomponents.core>5.2.3</version.httpcomponents.core>
-        <version.j2objc>2.8</version.j2objc>
-        <version.jackson>2.16.0</version.jackson>
+        <version.hk2>3.1.0</version.hk2>
+        <version.httpcomponents.client>5.3.1</version.httpcomponents.client>
+        <version.httpcomponents.core>5.2.4</version.httpcomponents.core>
+        <version.j2objc>3.0.0</version.j2objc>
+        <version.jackson>2.17.0</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
-        <version.jacoco>0.8.11</version.jacoco>
-        <version.jakarta.inject>2.0.1.MR</version.jakarta.inject>
+        <version.jacoco>0.8.12</version.jacoco>
+        <version.jakarta.inject>2.0.1</version.jakarta.inject>
         <version.java.release>17</version.java.release>
-        <version.jaxb>3.0.1</version.jaxb>
+        <version.jaxb>4.0.2</version.jaxb>
+        <version.jaxb.runtime>4.0.5</version.jaxb.runtime>
         <version.jaxrs>3.1.0</version.jaxrs>
         <version.jboss.logging>3.5.3.Final</version.jboss.logging>
-        <version.jersey>3.1.3</version.jersey>
+        <version.jersey>3.1.6</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>11.0.18</version.jetty>
-        <version.jna>5.13.0</version.jna>
-        <version.joda>2.12.5</version.joda>
-        <version.jooq>3.18.7</version.jooq>
+        <version.jetty>11.0.20</version.jetty>
+        <version.jna>5.14.0</version.jna>
+        <version.joda>2.12.7</version.joda>
+        <version.jooq>3.19.7</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.junit>4.13.2</version.junit>
-        <version.kotlin>1.9.21</version.kotlin>
-        <version.kotlin.coroutines>1.7.3</version.kotlin.coroutines>
+        <version.kotlin>1.9.23</version.kotlin>
+        <version.kotlin.coroutines>1.8.0</version.kotlin.coroutines>
         <version.kotlin.guice>3.0.0</version.kotlin.guice>
         <version.kotlin.logging>3.0.5</version.kotlin.logging>
-        <version.ktlint>0.50.0</version.ktlint>
+        <version.ktlint>1.2.1</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
         <version.logback>1.4.14</version.logback>
         <version.maven.antrun>3.1.0</version.maven.antrun>
-        <version.maven.assembly>3.6.0</version.maven.assembly>
+        <version.maven.assembly>3.7.1</version.maven.assembly>
         <version.maven.buildhelper>3.5.0</version.maven.buildhelper>
         <version.maven.clean>3.3.2</version.maven.clean>
-        <version.maven.compiler>3.11.0</version.maven.compiler>
-        <version.maven.dependency>3.5.0</version.maven.dependency>
+        <version.maven.compiler>3.13.0</version.maven.compiler>
+        <version.maven.dependency>3.6.1</version.maven.dependency>
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
         <version.maven.deploy>3.1.1</version.maven.deploy>
-        <version.maven.enforcer>3.0.0-M3</version.maven.enforcer>
-        <version.maven.failsafe>3.2.2</version.maven.failsafe>
-        <version.maven.git>7.0.0</version.maven.git>
-        <version.maven.gpg>3.1.0</version.maven.gpg>
+        <version.maven.enforcer>3.4.1</version.maven.enforcer>
+        <version.maven.failsafe>3.2.5</version.maven.failsafe>
+        <version.maven.git>8.0.2</version.maven.git>
+        <version.maven.gpg>3.2.2</version.maven.gpg>
         <version.maven.install>3.1.1</version.maven.install>
         <version.maven.jar>3.3.0</version.maven.jar>
         <version.maven.properties>1.2.1</version.maven.properties>
         <version.maven.resources>3.3.1</version.maven.resources>
-        <version.maven.shade>3.5.1</version.maven.shade>
-        <version.maven.source>3.3.0</version.maven.source>
-        <version.maven.surefire>3.2.2</version.maven.surefire>
-        <version.netty>4.1.101.Final</version.netty>
-        <version.postgres>42.7.0</version.postgres>
+        <version.maven.shade>3.5.2</version.maven.shade>
+        <version.maven.source>3.3.1</version.maven.source>
+        <version.maven.surefire>3.2.5</version.maven.surefire>
+        <version.netty>4.1.108.Final</version.netty>
+        <version.postgres>42.7.3</version.postgres>
         <version.reactivestreams>1.0.4</version.reactivestreams>
-        <version.redshift>2.1.0.23</version.redshift>
+        <version.redshift>2.1.0.26</version.redshift>
         <version.servlet>5.0.0</version.servlet>
-        <version.slf4j>2.0.9</version.slf4j>
+        <version.slf4j>2.0.12</version.slf4j>
         <version.snakeyaml>2.2</version.snakeyaml>
-        <version.swagger>2.2.19</version.swagger>
-        <version.testcontainers>1.19.3</version.testcontainers>
-        <version.testng>7.8.0</version.testng>
+        <version.swagger>2.2.21</version.swagger>
+        <version.testcontainers>1.19.7</version.testcontainers>
+        <version.testng>7.10.1</version.testng>
         <version.threeten>1.7.2</version.threeten>
         <version.typesafe.config>1.4.3</version.typesafe.config>
         <version.validation>3.0.2</version.validation>
@@ -417,7 +418,7 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>${version.jaxb}</version>
+                <version>${version.jaxb.runtime}</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
@@ -801,6 +802,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
+                <version>${version.jackson}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>joda-time</groupId>
@@ -1312,6 +1314,9 @@
                         <skip>${skip.checks}</skip>
                         <rules>
                             <dependencyConvergence/>
+                            <requireMavenVersion>
+                                <version>[3.9.2,)</version>
+			    </requireMavenVersion>
                             <bannedDependencies>
                                 <excludes>
                                     <exclude>org.glassfish.hk2.external</exclude>
@@ -1331,6 +1336,7 @@
                                     <exclude>org.eclipse.jetty.toolchain:jetty-servlet-api</exclude>
                                     <exclude>org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api</exclude>
                                     <exclude>org.glassfish:javax.el</exclude>
+                                    <exclude>com.sun.activation:jakarta.activation</exclude>
                                     <!-- use org.glassfish.jaxb:jaxb-runtime -->
                                     <exclude>com.sun.xml.bind:jaxb-impl</exclude>
                                     <!-- use com.trib3:metrics-guice since no longer available -->
@@ -1524,8 +1530,8 @@
                             <version>${version.ant}</version>
                         </dependency>
                         <dependency>
-                            <groupId>com.pinterest</groupId>
-                            <artifactId>ktlint</artifactId>
+                            <groupId>com.pinterest.ktlint</groupId>
+                            <artifactId>ktlint-cli</artifactId>
                             <version>${version.ktlint}</version>
                         </dependency>
                     </dependencies>
@@ -1686,7 +1692,7 @@
                     </executions>
                     <configuration>
                         <skip>${skip.docs}</skip>
-                        <reportNotDocumented>false</reportNotDocumented>
+                        <reportUndocumented>false</reportUndocumented>
                         <jdkVersion>${version.java.release}</jdkVersion>
                         <perPackageOptions>
                             <packageOption>

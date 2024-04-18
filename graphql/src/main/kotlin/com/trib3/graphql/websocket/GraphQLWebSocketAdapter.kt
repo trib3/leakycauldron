@@ -28,40 +28,48 @@ open class GraphQLWebSocketAdapter(
     val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()!!
 
     companion object {
-        private val CLIENT_SOURCED_MESSAGES = listOf(
-            OperationType.GQL_CONNECTION_INIT,
-            OperationType.GQL_START,
-            OperationType.GQL_STOP,
-            OperationType.GQL_CONNECTION_TERMINATE,
-            OperationType.GQL_PING,
-            OperationType.GQL_PONG,
-        )
+        private val CLIENT_SOURCED_MESSAGES =
+            listOf(
+                OperationType.GQL_CONNECTION_INIT,
+                OperationType.GQL_START,
+                OperationType.GQL_STOP,
+                OperationType.GQL_CONNECTION_TERMINATE,
+                OperationType.GQL_PING,
+                OperationType.GQL_PONG,
+            )
     }
 
     /**
      * Parse incoming messages as [OperationMessage]s, then send them to the channel consumer
      */
-    override fun onWebSocketText(message: String) = runBlocking {
-        try {
-            val operation = subProtocol.getClientToServerMessage(objectMapper.readValue<OperationMessage<*>>(message))
-            // Only send client->server messages downstream, otherwise kill the socket per graphql-ws protocol
-            if (operation.type in CLIENT_SOURCED_MESSAGES) {
-                channel.send(operation)
-            } else {
-                subProtocol.onInvalidMessage(operation.id, message, this@GraphQLWebSocketAdapter)
+    override fun onWebSocketText(message: String) =
+        runBlocking {
+            try {
+                val operation =
+                    subProtocol.getClientToServerMessage(
+                        objectMapper.readValue<OperationMessage<*>>(message),
+                    )
+                // Only send client->server messages downstream, otherwise kill the socket per graphql-ws protocol
+                if (operation.type in CLIENT_SOURCED_MESSAGES) {
+                    channel.send(operation)
+                } else {
+                    subProtocol.onInvalidMessage(operation.id, message, this@GraphQLWebSocketAdapter)
+                }
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Throwable) {
+                log.error("Error parsing message: ${error.message}", error)
+                subProtocol.onInvalidMessage(null, message, this@GraphQLWebSocketAdapter)
             }
-        } catch (cancellation: CancellationException) {
-            throw cancellation
-        } catch (error: Throwable) {
-            log.error("Error parsing message: ${error.message}", error)
-            subProtocol.onInvalidMessage(null, message, this@GraphQLWebSocketAdapter)
         }
-    }
 
     /**
      * Notify channel that the stream is finished
      */
-    override fun onWebSocketClose(statusCode: Int, reason: String?) {
+    override fun onWebSocketClose(
+        statusCode: Int,
+        reason: String?,
+    ) {
         val msg = "WebSocket close $statusCode $reason"
         log.debug(msg)
         super.onWebSocketClose(statusCode, reason)
@@ -88,7 +96,11 @@ open class GraphQLWebSocketAdapter(
      * Convenience method for writing the components of an [OperationMessage] back to the client in json format
      * Must be called from the Subscriber's observation context
      */
-    internal fun <T : Any> sendMessage(type: OperationType<T>, id: String?, payload: T? = null) {
+    internal fun <T : Any> sendMessage(
+        type: OperationType<T>,
+        id: String?,
+        payload: T? = null,
+    ) {
         sendMessage(OperationMessage(type, id, payload))
     }
 }

@@ -32,7 +32,6 @@ fun interface EnvironmentCallback {
  * Provides binder methods for commonly bound members of the TribeApplication.
  */
 open class TribeApplicationModule : KotlinModule() {
-
     companion object {
         const val APPLICATION_RESOURCES_BIND_NAME = "ApplicationResources"
         const val APPLICATION_SERVLETS_BIND_NAME = "ApplicationServlets"

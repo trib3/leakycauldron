@@ -31,20 +31,22 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
     val query = this
     return flow {
         coroutineScope {
-            val fetchJob = async(coroutineContext) {
-                query.fetchLazy()
-            }
+            val fetchJob =
+                async(coroutineContext) {
+                    query.fetchLazy()
+                }
             launch(coroutineContext, CoroutineStart.ATOMIC) {
                 // wait until the fetch job is cancelled or complete before doing anything
                 log.trace("fetch monitor awaiting job cancellation or completion")
-                val cancelException = try {
-                    while (fetchJob.isActive) {
-                        delay(DELAY_TIME)
+                val cancelException =
+                    try {
+                        while (fetchJob.isActive) {
+                            delay(DELAY_TIME)
+                        }
+                        null
+                    } catch (e: CancellationException) {
+                        e
                     }
-                    null
-                } catch (e: CancellationException) {
-                    e
-                }
                 log.trace("fetch monitor awaiting job completion")
                 // wait until the fetch job is actually complete, cancelling the query to speed its completion
                 while (!fetchJob.isCompleted) {

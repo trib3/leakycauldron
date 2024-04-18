@@ -39,7 +39,10 @@ class RequestIdLogbackAccessRequestLayout(
  * Layout factory that returns a [RequestIdLogbackAccessRequestLayout]
  */
 class RequestIdLogbackAccessRequestLayoutFactory : LayoutFactory<IAccessEvent> {
-    override fun build(context: LoggerContext, timeZone: TimeZone): PatternLayoutBase<IAccessEvent> {
+    override fun build(
+        context: LoggerContext,
+        timeZone: TimeZone,
+    ): PatternLayoutBase<IAccessEvent> {
         return RequestIdLogbackAccessRequestLayout(context, timeZone)
     }
 }
@@ -51,7 +54,6 @@ class RequestIdLogbackAccessRequestLayoutFactory : LayoutFactory<IAccessEvent> {
  */
 @JsonTypeName("filtered-logback-access")
 class FilteredLogbackAccessRequestLogFactory : LogbackAccessRequestLogFactory() {
-
     override fun build(name: String): RequestLog {
         // almost the same as super.build(), differences are commented
         val logger =

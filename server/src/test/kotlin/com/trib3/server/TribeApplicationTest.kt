@@ -170,9 +170,10 @@ class TribeApplicationTest {
 
     @Test
     fun testRunWithAuthFilter() {
-        val authInstance = BootstrapConfig(ConfigLoader("withTestModule"))
-            .getInjector(listOf(DefaultApplicationModule(), DropwizardApplicationModule()))
-            .getInstance<TribeApplication>()
+        val authInstance =
+            BootstrapConfig(ConfigLoader("withTestModule"))
+                .getInjector(listOf(DefaultApplicationModule(), DropwizardApplicationModule()))
+                .getInstance<TribeApplication>()
         val mockConf = LeakyMock.mock<Configuration>()
         val mockEnv = LeakyMock.mock<Environment>()
         val mockJersey = LeakyMock.mock<JerseyEnvironment>()
