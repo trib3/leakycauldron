@@ -70,7 +70,7 @@
         <version.flyway>10.11.0</version.flyway>
         <version.graphql-kotlin>7.0.2</version.graphql-kotlin>
         <version.graphql-java>21.5</version.graphql-java>
-        <version.graphql-java-extended-scalars>21.0</version.graphql-java-extended-scalars>
+        <version.graphql-java-extended-scalars>22.0</version.graphql-java-extended-scalars>
         <version.graphql-java.dataloader>3.2.2</version.graphql-java.dataloader>
         <version.guava>33.1.0-jre</version.guava>
         <version.guice>7.0.0</version.guice>
