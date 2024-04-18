@@ -123,7 +123,7 @@
         <version.maven.shade>3.5.2</version.maven.shade>
         <version.maven.source>3.3.1</version.maven.source>
         <version.maven.surefire>3.2.5</version.maven.surefire>
-        <version.netty>4.1.108.Final</version.netty>
+        <version.netty>4.1.109.Final</version.netty>
         <version.postgres>42.7.3</version.postgres>
         <version.reactivestreams>1.0.4</version.reactivestreams>
         <version.redshift>2.1.0.26</version.redshift>
