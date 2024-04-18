@@ -125,16 +125,18 @@ jobs:
       - store_artifacts:
           path: ~/jars
       - persist_to_workspace:
-          root: ~/jars
+          root: ~/
           paths:
-            - .
+            - jars/.
+            - repo/mvnw
+            - repo/.mvn/wrapper/maven-wrapper.properties
 
   deploy:
     docker:
       - image: cimg/openjdk:17.0
     steps:
       - attach_workspace:
-          at: ~/jars
+          at: ~/
       - run:
           name: Set JAVA_HOME for mvnw commands
           command: echo 'export JAVA_HOME=`java -XshowSettings:properties -version 2>&1 |grep java.home | sed "s/.*java\.home = //"`' >> "$BASH_ENV"
@@ -142,11 +144,12 @@ jobs:
           name: Complete release
           command: |
             mkdir -p ~/.m2
+            cd ~/jars
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
-            REPOID=`./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-            ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
-            ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            REPOID=`../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
+            ../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            ../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
       - release/execute_release:
           release_dir: ~/jars/release
 
