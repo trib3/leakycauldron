@@ -58,7 +58,7 @@
         <version.commons-io>2.16.1</version.commons-io>
         <version.commons-lang3>3.14.0</version.commons-lang3>
         <version.commons-text>1.11.0</version.commons-text>
-        <version.config4k>0.6.0</version.config4k>
+        <version.config4k>0.7.0</version.config4k>
         <version.detekt>1.23.6</version.detekt>
         <version.dokka>1.9.20</version.dokka>
         <version.dropwizard>4.0.7</version.dropwizard>
