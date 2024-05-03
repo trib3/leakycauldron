@@ -87,7 +87,7 @@
         <version.java.release>17</version.java.release>
         <version.jaxb>4.0.2</version.jaxb>
         <version.jaxb.runtime>4.0.5</version.jaxb.runtime>
-        <version.jaxrs>3.1.0</version.jaxrs>
+        <version.jaxrs>4.0.0</version.jaxrs>
         <version.jboss.logging>3.5.3.Final</version.jboss.logging>
         <version.jersey>3.1.6</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
