@@ -1,0 +1,4 @@
+secrets:
+  - id: placeholder
+    statement: placeholder
+    path: "^placeholder$"
