@@ -1,0 +1,10 @@
+timeout: 10m
+severity:
+  - HIGH
+  - CRITICAL
+  - MEDIUM
+
+ignorefile: .trivyignore.yaml
+
+vulnerability:
+  ignore-unfixed: true
