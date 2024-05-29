@@ -9,7 +9,7 @@ Description
 -----------
 Leaky Cauldron contains a collection of libraries used for building kotlin services.
 
-It's where [drop]wizards get their guice! -Jooq can come too...
+It's where [drop]wizards get their guice!
 
 Versioning
 ----------
