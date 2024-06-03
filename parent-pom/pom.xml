@@ -47,18 +47,18 @@
         <version.annotation>3.0.0</version.annotation>
         <version.ant>1.10.14</version.ant>
         <version.argparse4j>0.9.0</version.argparse4j>
-        <version.assertk>0.28.0</version.assertk>
-        <version.aws.java>2.25.28</version.aws.java>
-        <version.byte-buddy>1.14.13</version.byte-buddy>
+        <version.assertk>0.28.1</version.assertk>
+        <version.aws.java>2.25.64</version.aws.java>
+        <version.byte-buddy>1.14.17</version.byte-buddy>
         <version.caffeine>3.1.8</version.caffeine>
-        <version.checker-qual>3.42.0</version.checker-qual>
-        <version.classgraph>4.8.170</version.classgraph>
-        <version.commons-codec>1.16.1</version.commons-codec>
-        <version.commons-compress>1.26.1</version.commons-compress>
+        <version.checker-qual>3.43.0</version.checker-qual>
+        <version.classgraph>4.8.172</version.classgraph>
+        <version.commons-codec>1.17.0</version.commons-codec>
+        <version.commons-compress>1.26.2</version.commons-compress>
         <version.commons-io>2.16.1</version.commons-io>
         <version.commons-lang3>3.14.0</version.commons-lang3>
-        <version.commons-text>1.11.0</version.commons-text>
-        <version.config4k>0.6.0</version.config4k>
+        <version.commons-text>1.12.0</version.commons-text>
+        <version.config4k>0.7.0</version.config4k>
         <version.detekt>1.23.6</version.detekt>
         <version.dokka>1.9.20</version.dokka>
         <version.dropwizard>4.0.7</version.dropwizard>
@@ -66,13 +66,14 @@
         <version.dropwizard.metrics>4.2.25</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
         <version.easymock>5.2.0</version.easymock>
-        <version.errorprone>2.26.1</version.errorprone>
-        <version.flyway>10.11.0</version.flyway>
-        <version.graphql-kotlin>7.0.2</version.graphql-kotlin>
+        <version.errorprone>2.28.0</version.errorprone>
+        <version.expressly>5.0.0</version.expressly>
+        <version.flyway>10.13.0</version.flyway>
+        <version.graphql-kotlin>7.1.1</version.graphql-kotlin>
         <version.graphql-java>21.5</version.graphql-java>
-        <version.graphql-java-extended-scalars>21.0</version.graphql-java-extended-scalars>
-        <version.graphql-java.dataloader>3.2.2</version.graphql-java.dataloader>
-        <version.guava>33.1.0-jre</version.guava>
+        <version.graphql-java-extended-scalars>22.0</version.graphql-java-extended-scalars>
+        <version.graphql-java.dataloader>3.3.0</version.graphql-java.dataloader>
+        <version.guava>33.2.1-jre</version.guava>
         <version.guice>7.0.0</version.guice>
         <version.hibernate.validator>8.0.1.Final</version.hibernate.validator>
         <version.hikaricp>5.1.0</version.hikaricp>
@@ -80,25 +81,25 @@
         <version.httpcomponents.client>5.3.1</version.httpcomponents.client>
         <version.httpcomponents.core>5.2.4</version.httpcomponents.core>
         <version.j2objc>3.0.0</version.j2objc>
-        <version.jackson>2.17.0</version.jackson>
+        <version.jackson>2.17.1</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
         <version.jacoco>0.8.12</version.jacoco>
         <version.jakarta.inject>2.0.1</version.jakarta.inject>
         <version.java.release>17</version.java.release>
         <version.jaxb>4.0.2</version.jaxb>
         <version.jaxb.runtime>4.0.5</version.jaxb.runtime>
-        <version.jaxrs>3.1.0</version.jaxrs>
-        <version.jboss.logging>3.5.3.Final</version.jboss.logging>
-        <version.jersey>3.1.6</version.jersey>
+        <version.jaxrs>4.0.0</version.jaxrs>
+        <version.jboss.logging>3.6.0.Final</version.jboss.logging>
+        <version.jersey>3.1.7</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>11.0.20</version.jetty>
+        <version.jetty>11.0.21</version.jetty>
         <version.jna>5.14.0</version.jna>
         <version.joda>2.12.7</version.joda>
-        <version.jooq>3.19.7</version.jooq>
+        <version.jooq>3.19.9</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.junit>4.13.2</version.junit>
-        <version.kotlin>1.9.23</version.kotlin>
-        <version.kotlin.coroutines>1.8.0</version.kotlin.coroutines>
+        <version.kotlin>2.0.0</version.kotlin>
+        <version.kotlin.coroutines>1.8.1</version.kotlin.coroutines>
         <version.kotlin.guice>3.0.0</version.kotlin.guice>
         <version.kotlin.logging>3.0.5</version.kotlin.logging>
         <version.ktlint>1.2.1</version.ktlint>
@@ -106,36 +107,36 @@
         <version.logback>1.4.14</version.logback>
         <version.maven.antrun>3.1.0</version.maven.antrun>
         <version.maven.assembly>3.7.1</version.maven.assembly>
-        <version.maven.buildhelper>3.5.0</version.maven.buildhelper>
+        <version.maven.buildhelper>3.6.0</version.maven.buildhelper>
         <version.maven.clean>3.3.2</version.maven.clean>
         <version.maven.compiler>3.13.0</version.maven.compiler>
         <version.maven.dependency>3.6.1</version.maven.dependency>
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
-        <version.maven.deploy>3.1.1</version.maven.deploy>
-        <version.maven.enforcer>3.4.1</version.maven.enforcer>
+        <version.maven.deploy>3.1.2</version.maven.deploy>
+        <version.maven.enforcer>3.5.0</version.maven.enforcer>
         <version.maven.failsafe>3.2.5</version.maven.failsafe>
         <version.maven.git>8.0.2</version.maven.git>
-        <version.maven.gpg>3.2.2</version.maven.gpg>
-        <version.maven.install>3.1.1</version.maven.install>
-        <version.maven.jar>3.3.0</version.maven.jar>
+        <version.maven.gpg>3.2.4</version.maven.gpg>
+        <version.maven.install>3.1.2</version.maven.install>
+        <version.maven.jar>3.4.1</version.maven.jar>
         <version.maven.properties>1.2.1</version.maven.properties>
         <version.maven.resources>3.3.1</version.maven.resources>
-        <version.maven.shade>3.5.2</version.maven.shade>
+        <version.maven.shade>3.6.0</version.maven.shade>
         <version.maven.source>3.3.1</version.maven.source>
         <version.maven.surefire>3.2.5</version.maven.surefire>
-        <version.netty>4.1.108.Final</version.netty>
+        <version.netty>4.1.110.Final</version.netty>
         <version.postgres>42.7.3</version.postgres>
         <version.reactivestreams>1.0.4</version.reactivestreams>
-        <version.redshift>2.1.0.26</version.redshift>
+        <version.redshift>2.1.0.28</version.redshift>
         <version.servlet>5.0.0</version.servlet>
-        <version.slf4j>2.0.12</version.slf4j>
+        <version.slf4j>2.0.13</version.slf4j>
         <version.snakeyaml>2.2</version.snakeyaml>
-        <version.swagger>2.2.21</version.swagger>
-        <version.testcontainers>1.19.7</version.testcontainers>
-        <version.testng>7.10.1</version.testng>
-        <version.threeten>1.7.2</version.threeten>
+        <version.swagger>2.2.22</version.swagger>
+        <version.testcontainers>1.19.8</version.testcontainers>
+        <version.testng>7.10.2</version.testng>
+        <version.threeten>1.8.0</version.threeten>
         <version.typesafe.config>1.4.3</version.typesafe.config>
-        <version.validation>3.0.2</version.validation>
+        <version.validation>3.1.0</version.validation>
     </properties>
 
     <dependencyManagement>
@@ -361,6 +362,12 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-validation</artifactId>
                 <version>${version.dropwizard}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.glassfish</groupId>
+                        <artifactId>jakarta.el</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
@@ -667,6 +674,11 @@
                         <artifactId>jakarta.inject</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.expressly</groupId>
+                <artifactId>expressly</artifactId>
+                <version>${version.expressly}</version>
             </dependency>
 
             <!-- jetty -->
@@ -1339,6 +1351,8 @@
                                     <exclude>com.sun.activation:jakarta.activation</exclude>
                                     <!-- use org.glassfish.jaxb:jaxb-runtime -->
                                     <exclude>com.sun.xml.bind:jaxb-impl</exclude>
+                                    <!-- use org.glassfish.expressly:expressly -->
+                                    <exclude>org.glassfish:jakarta.el</exclude>
                                     <!-- use com.trib3:metrics-guice since no longer available -->
                                     <exclude>com.palominolabs.metrics:metrics-guice</exclude>
                                 </excludes>
