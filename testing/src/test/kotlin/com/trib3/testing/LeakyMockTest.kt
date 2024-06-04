@@ -143,17 +143,19 @@ class LeakyMockTest {
         assertThat(capture.value).isEqualTo(RealThing(2))
         EasyMock.verify(mock)
     }
-
-    @Test
-    fun showNullProblems() {
-        val mock = LeakyMock.niceMock("namedNiceMock", TestClass::class.java)
-        assertFailure {
-            EasyMock.expect(mock.manipulateThing(EasyMock.anyObject()))
-        }.message().isNotNull().contains("must not be null")
-        assertFailure {
-            EasyMock.expect(mock.manipulateString(EasyMock.anyString()))
-        }.message().isNotNull().contains("must not be null")
-    }
+//    This test runs standalone, but interferes with other tests because it leaves
+//    EasyMock in an invalid state -- commenting out as it doesn't actually test our
+//    code, it just provides a demonstration of why LeakyMock.any* methods exist.
+//    @Test
+//    fun showNullProblems() {
+//        val mock = LeakyMock.niceMock("namedNiceMock", TestClass::class.java)
+//        assertFailure {
+//            EasyMock.expect(mock.manipulateThing(EasyMock.anyObject()))
+//        }.message().isNotNull().contains("must not be null")
+//        assertFailure {
+//            EasyMock.expect(mock.manipulateString(EasyMock.anyString()))
+//        }.message().isNotNull().contains("must not be null")
+//    }
 
     @Test
     fun testInvalidAndOr() {
