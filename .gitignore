@@ -4,3 +4,8 @@ target/
 *.iml
 service.log*
 .mvn/wrapper/maven-wrapper.jar
+
+# security checks reports
+license-scan.txt
+vuln-scan.txt
+secret-scan.txt
