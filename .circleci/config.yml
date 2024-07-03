@@ -279,7 +279,7 @@ workflows:
           filters:
             branches:
               only:
-              - /^.*DEVOPS-6666.*$/
+              - main
       - hold:
           type: approval
           requires:
