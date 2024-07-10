@@ -3,6 +3,55 @@ orbs:
   release: trib3/release@2.0.2
 
 jobs:
+  security_checks:
+    docker:
+    - image: cimg/openjdk:17.0
+    working_directory: ~/repo
+    steps:
+      # get code
+      - checkout
+      - run:
+          name: Install Trivy
+          command: |
+            sudo apt install apt-transport-https gnupg lsb-release
+            echo $TRIVY_PGP_KEY | sed 's/\$/\n/g' | sudo apt-key add -
+            echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+            sudo apt update
+            sudo apt install trivy
+      - run:
+          name: Vulnerability check
+          command: |
+            make vuln-check
+            if [[ -s ./vuln-scan.txt ]]; then
+              echo -e "[WARNING]Vulnerabilities have been found..."
+              cat ./vuln-scan.txt
+              # TODO: exit 1 or send some notification to slack about vulnerabilities
+            else 
+              echo -e "[INFO]Vulnerabilities have not been found, everything looks fine"
+            fi
+      - run:
+          name: Secret check
+          command: |
+            make secret-check
+            if [[ -s ./secret-scan.txt ]]; then
+              echo -e "[WARNING]Secrets have been found..."
+              cat ./secret-scan.txt
+              # exit 1
+            else 
+              echo -e "[INFO]Secrets have not been found, everything looks fine"
+            fi
+      - run:
+          name: License check
+          command: |
+            make license-check
+            if [[ -s ./license-scan.txt ]]; then
+              echo -e "[WARNING]Prohibited licenses have been found..."
+              cat ./license-scan.txt
+              # exit 1
+            else
+              echo -e "[INFO]Prohibited licenses have not been found, everything looks fine"
+            fi
+
   build:
     machine:
       image: default
@@ -131,6 +180,63 @@ jobs:
             - repo/mvnw
             - repo/.mvn/wrapper/maven-wrapper.properties
 
+  sonar_check:
+    resource_class: trib3/k8s-runner
+    docker:
+    - image: cimg/openjdk:17.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install SonarQube scanner
+          command: |
+            sudo apt update && sudo apt install awscli
+            curl -O -L "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip"
+            curl -O -L "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip.asc"
+            curl -O -L "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip.md5"
+            gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys $SONAR_PGP_KEY
+
+            gpg --verify sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip.asc sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip
+            if [ $? -ne 0 ]; then
+              echo "bad signature on sonar-scanner zip file"
+              exit 1
+            fi
+
+            echo "$(cat sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip.md5) sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip" | md5sum -c
+            if [ $? -eq 0 ]; then
+              unzip -uq sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip
+              mkdir -p ${SONAR_SCANNER_HOME}
+              mv sonar-scanner-${SONAR_SCANNER_VERSION}-linux/* ${SONAR_SCANNER_HOME}
+            else
+              echo "bad checksum on sonar-scanner zip file"
+              exit 1
+            fi
+          environment:
+            SONAR_SCANNER_VERSION: "5.0.1.3006"
+            SONAR_SCANNER_HOME: "~/.sonar"
+      - run:
+          name: SonarQube check
+          command: |
+            export PATH=${SONAR_SCANNER_HOME}/bin/:${PATH}
+            unset AWS_ACCESS_KEY_ID
+            unset AWS_SECRET_ACCESS_KEY
+            unset AWS_SESSION_TOKEN
+            AWS_CREDENTIALS=$(aws sts assume-role --role-arn arn:aws:iam::315805068186:role/SMR=sonarqube-admin-ci --role-session-name gitlab-secretsmanager-access)
+            export AWS_ACCESS_KEY_ID=$(echo $AWS_CREDENTIALS | jq .Credentials | jq -r .AccessKeyId)
+            export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDENTIALS | jq .Credentials | jq -r .SecretAccessKey)
+            export AWS_SESSION_TOKEN=$(echo $AWS_CREDENTIALS | jq .Credentials | jq -r .SessionToken)
+            export SONAR_SECRET=$(aws secretsmanager get-secret-value --secret-id sonarqube/admin/ci --region us-west-1)
+            export SONAR_HOST_URL=$(echo $SONAR_SECRET | jq .SecretString | jq fromjson | jq -r .SONAR_HOST_URL)
+            export SONAR_TOKEN=$(echo $SONAR_SECRET | jq .SecretString | jq fromjson | jq -r .SONAR_GITLAB_TOKEN)
+            unset AWS_ACCESS_KEY_ID
+            unset AWS_SECRET_ACCESS_KEY
+            unset AWS_SESSION_TOKEN
+            ${SONAR_SCANNER_HOME}/bin/sonar-scanner
+          environment:
+            SONAR_USER_HOME: "~/.sonar-cache"  # Defines the location of the analysis task cache
+            SONAR_SCANNER_HOME: "~/.sonar"
+
+
   deploy:
     docker:
       - image: cimg/openjdk:17.0
@@ -157,8 +263,23 @@ workflows:
   version: 2.1
   build_pipeline:
     jobs:
+      - security_checks:
+          context: 
+            - trivy
+            - nexus
       - build:
           context: terraform
+          requires:
+            - security_checks
+      - sonar_check:
+          context: 
+            - sonarqube
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+              - main
       - hold:
           type: approval
           requires:
