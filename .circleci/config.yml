@@ -9,7 +9,8 @@ jobs:
     working_directory: ~/repo
     steps:
       # get code
-      - checkout
+      - checkout:
+          method: full
       - run:
           name: Install Trivy
           command: |
@@ -62,13 +63,14 @@ jobs:
 
     steps:
       # get code
-      - checkout
+      - checkout:
+          method: full
       # handle dependency caching and run build
       - restore_cache:
           keys:
-            - v6-dependencies-{{ .Branch }}-{{ .Revision }}
-            - v6-dependencies-{{ .Branch }}
-            - v6-dependencies-
+            - v7-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v7-dependencies-{{ .Branch }}
+            - v7-dependencies-
       - run:
           name: Setup GPG
           command: |
@@ -118,7 +120,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: v6-dependencies-{{ .Branch }}-{{ .Revision }}
+          key: v7-dependencies-{{ .Branch }}-{{ .Revision }}
       # collect test results and upload coverage
       - run: mkdir -p ~/test_results
       - run: find . -type f -regex ".*/target/surefire-reports/junitreports/.*xml" -exec cp {} ~/test_results/ \;
@@ -186,7 +188,8 @@ jobs:
     - image: cimg/openjdk:17.0
     working_directory: ~/repo
     steps:
-      - checkout
+      - checkout:
+          method: full
       - run:
           name: Install SonarQube scanner
           command: |
