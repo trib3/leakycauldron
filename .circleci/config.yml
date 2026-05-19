@@ -114,9 +114,9 @@ jobs:
           name: Maven Build
           command: |
             if [ "$CIRCLE_BRANCH" = "main" ]; then
-              ./mvnw deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/ --no-transfer-progress -U
             else
-              ./mvnw deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/ --no-transfer-progress -U
             fi
       - save_cache:
           paths:
