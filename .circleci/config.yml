@@ -95,7 +95,8 @@ jobs:
                 if [ -n "$REPOIDS" ]; then
                     echo "Cleaning existing $REPOIDS"
                     for REPOID in $REPOIDS; do
-                        curl -sf -X DELETE -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$REPOID"
+                        curl -sf -X DELETE -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$REPOID" \
+                            || echo "[WARN] Failed to drop staging repo $REPOID. It may have already been removed; continuing."
                     done
                 fi
             fi
