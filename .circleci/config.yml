@@ -258,9 +258,10 @@ jobs:
             cd ~/jars
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
-            REPOID=`../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-            ../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
-            ../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
+            OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
+            AUTH_HEADER="Authorization: Bearer $(printf '%s:%s' "$OSSRH_USER" "$OSSRH_PASS" | base64 -w0)"
+            curl -sf -X POST -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/comtrib3"
       - release/execute_release:
           release_dir: ~/jars/release
 
