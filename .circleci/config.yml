@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   release: trib3/release@2.0.2
+  security: trib3/security@volatile
 
 jobs:
   security_checks:
@@ -10,17 +11,7 @@ jobs:
     steps:
       # get code
       - checkout
-      - run:
-          name: Install Trivy
-          environment:
-            TRIVY_VERSION: "0.69.3"
-          command: |
-            sudo apt install apt-transport-https gnupg lsb-release
-            echo $TRIVY_PGP_KEY | sed 's/\$/\n/g' | sudo apt-key add -
-            echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-            sudo apt-get update
-            sudo apt-get install -y "trivy=${TRIVY_VERSION}"
-            trivy --version
+      - security/trivy_install
       - run:
           name: Vulnerability check
           command: |
@@ -122,7 +113,7 @@ jobs:
             if [ "$CIRCLE_BRANCH" = "main" ]; then
               ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/ --no-transfer-progress -U
             else
-              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/ --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://central.sonatype.com/repository/maven-snapshots/ --no-transfer-progress -U
             fi
       - save_cache:
           paths:
