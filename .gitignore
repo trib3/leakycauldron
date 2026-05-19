@@ -9,3 +9,10 @@ service.log*
 license-scan.txt
 vuln-scan.txt
 secret-scan.txt
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Design docs
+docs/
