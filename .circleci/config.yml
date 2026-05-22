@@ -32,7 +32,7 @@ commands:
 jobs:
   security_checks:
     docker:
-    - image: cimg/openjdk:17.0
+    - image: cimg/openjdk:17.0.19
     working_directory: ~/repo
     steps:
       # get code
@@ -84,7 +84,7 @@ jobs:
 
   build:
     machine:
-      image: default
+      image: ubuntu-2204:2025.09.1
 
     working_directory: ~/repo
     environment:
@@ -217,7 +217,7 @@ jobs:
   sonar_check:
     resource_class: trib3/k8s-runner
     docker:
-    - image: cimg/openjdk:17.0
+    - image: cimg/openjdk:17.0.19
     working_directory: ~/repo
     steps:
       - checkout
