@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   release: trib3/release@2.0.2
+  security: trib3/security@volatile
   aws-cli: circleci/aws-cli@5.4.1
 commands:
   aws-auth:
@@ -37,50 +38,17 @@ jobs:
     steps:
       # get code
       - checkout
-      - run:
-          name: Install Trivy
-          environment:
-            TRIVY_VERSION: "0.70.0"
-          command: |
-            sudo apt install apt-transport-https gnupg
-            echo $TRIVY_PGP_KEY | sed 's/\$/\n/g' | sudo apt-key add -
-            echo deb https://aquasecurity.github.io/trivy-repo/deb generic main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-            sudo apt-get update
-            sudo apt-get install -y "trivy=${TRIVY_VERSION}"
-            trivy --version
-      - run:
-          name: Vulnerability check
-          command: |
-            make vuln-check
-            if [[ -s ./vuln-scan.txt ]]; then
-              echo -e "[WARNING]Vulnerabilities have been found..."
-              cat ./vuln-scan.txt
-              # TODO: exit 1 or send some notification to slack about vulnerabilities
-            else
-              echo -e "[INFO]Vulnerabilities have not been found, everything looks fine"
-            fi
-      - run:
-          name: Secret check
-          command: |
-            make secret-check
-            if [[ -s ./secret-scan.txt ]]; then
-              echo -e "[WARNING]Secrets have been found..."
-              cat ./secret-scan.txt
-              # exit 1
-            else
-              echo -e "[INFO]Secrets have not been found, everything looks fine"
-            fi
-      - run:
-          name: License check
-          command: |
-            make license-check
-            if [[ -s ./license-scan.txt ]]; then
-              echo -e "[WARNING]Prohibited licenses have been found..."
-              cat ./license-scan.txt
-              # exit 1
-            else
-              echo -e "[INFO]Prohibited licenses have not been found, everything looks fine"
-            fi
+      - security/check_dependency_constraints
+      - security/trivy_install
+      - security/trivy_scan_vuln:
+          allow_failure: true #TODO: switch to false when all findings will be fixed
+      - security/trivy_scan_secrets:
+          allow_failure: true #TODO: switch to false when all findings will be fixed
+      - security/trivy_scan_license:
+          allow_failure: true #TODO: switch to false when all findings will be fixed
+          python_virtualenv_path: ~/venv
+      - security/trivy_scan_misconfig:
+          allow_failure: true #TODO: switch to false when all findings will be fixed
 
   build:
     machine:
