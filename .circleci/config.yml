@@ -38,7 +38,7 @@ jobs:
     steps:
       # get code
       - checkout
-      # - security/check_dependency_constraints
+      - security/check_dependency_constraints
       - security/trivy_install
       - security/trivy_scan_vuln:
           allow_failure: true #TODO: switch to false when all findings will be fixed
