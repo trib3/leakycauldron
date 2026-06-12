@@ -1327,7 +1327,7 @@
                         <rules>
                             <dependencyConvergence/>
                             <requireMavenVersion>
-                                <version>[3.9.2,)</version>
+                                <version>3.9.6</version>
 			    </requireMavenVersion>
                             <bannedDependencies>
                                 <excludes>
