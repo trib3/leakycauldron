@@ -77,23 +77,6 @@ jobs:
             mkdir -p ~/.m2
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
-            if [ "$CIRCLE_BRANCH" = "main" ]; then
-                OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
-                OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
-                AUTH_HEADER="Authorization: Bearer $(printf '%s:%s' "$OSSRH_USER" "$OSSRH_PASS" | base64 -w0)"
-                REPOIDS=$(curl -sf -H "$AUTH_HEADER" https://ossrh-staging-api.central.sonatype.com/manual/search/repositories \
-                          | jq -r '.repositories[]? | select(.key | startswith("comtrib3")) | .key')
-                if [ -n "$REPOIDS" ]; then
-                    echo "Cleaning existing $REPOIDS"
-                    for REPOID in $REPOIDS; do
-                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$REPOID")
-                        case "$HTTP_CODE" in
-                            2*) ;;
-                            *) echo "[WARN] Failed to drop staging repo $REPOID (HTTP $HTTP_CODE). It may have already been removed; continuing." ;;
-                        esac
-                    done
-                fi
-            fi
             export MAVEN_OPTS=""
             cd build-resources && BASE_VERSION=$(../mvnw -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
             if [ "$CIRCLE_BRANCH" = "main" ]; then
@@ -111,7 +94,10 @@ jobs:
           name: Maven Build
           command: |
             if [ "$CIRCLE_BRANCH" = "main" ]; then
-              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/ --no-transfer-progress -U
+              # Build, test and sign locally only. The OSSRH staging upload + promote
+              # happens in the gated deploy job, which must run from a single IP
+              # (the OSSRH Staging API scopes staging repositories by client IP).
+              ./mvnw install --no-transfer-progress -U
             else
               ./mvnw deploy -DaltDeploymentRepository=ossrh::https://central.sonatype.com/repository/maven-snapshots/ --no-transfer-progress -U
             fi
@@ -179,6 +165,7 @@ jobs:
             - jars/.
             - repo/mvnw
             - repo/.mvn/wrapper/maven-wrapper.properties
+            - repo/current_version.txt
 
   sonar_check:
     resource_class: trib3/k8s-runner
@@ -238,11 +225,27 @@ jobs:
 
 
   deploy:
-    docker:
-      - image: cimg/openjdk:17.0
+    machine:
+      image: default
+    working_directory: ~/repo
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:MaxRAM=2g
     steps:
+      # Full source is required because this job re-runs mvn deploy so that the
+      # OSSRH staging upload and the promote happen from the same IP (the OSSRH
+      # Staging API scopes staging repositories by client IP).
+      - checkout
       - attach_workspace:
           at: ~/
+      - restore_cache:
+          keys:
+            - v6-dependencies-{{ .Branch }}-{{ .Revision }}
+            - v6-dependencies-{{ .Branch }}
+            - v6-dependencies-
+      - run:
+          name: Setup GPG
+          command: |
+            echo $GPG_KEY | sed 's/\$/\n/g' |  gpg --import
       - run:
           name: Set JAVA_HOME for mvnw commands
           command: echo 'export JAVA_HOME=`java -XshowSettings:properties -version 2>&1 |grep java.home | sed "s/.*java\.home = //"`' >> "$BASH_ENV"
@@ -250,13 +253,46 @@ jobs:
           name: Complete release
           command: |
             mkdir -p ~/.m2
-            cd ~/jars
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
             OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
             AUTH_HEADER="Authorization: Bearer $(printf '%s:%s' "$OSSRH_USER" "$OSSRH_PASS" | base64 -w0)"
-            curl -sf -X POST -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.trib3?publishing_type=automatic"
+            # Drop any stale staging repositories for this IP/namespace before deploying
+            REPOIDS=$(curl -sf -H "$AUTH_HEADER" https://ossrh-staging-api.central.sonatype.com/manual/search/repositories \
+                      | jq -r '.repositories[]? | select(.key | startswith("comtrib3")) | .key')
+            if [ -n "$REPOIDS" ]; then
+                echo "Cleaning existing $REPOIDS"
+                for REPOID in $REPOIDS; do
+                    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$REPOID")
+                    case "$HTTP_CODE" in
+                        2*) ;;
+                        *) echo "[WARN] Failed to drop staging repo $REPOID (HTTP $HTTP_CODE). It may have already been removed; continuing." ;;
+                    esac
+                done
+            fi
+            # Re-apply the exact version computed during the build job
+            NEW_PROJECT_VERSION=$(cat ~/repo/current_version.txt)
+            for i in build-resources parent-pom; do
+               cd $i
+               ../mvnw --no-transfer-progress -U org.codehaus.mojo:versions-maven-plugin:2.7:set -DgenerateBackupPoms=false -DnewVersion=${NEW_PROJECT_VERSION}
+               cd ..
+            done
+            # Upload to OSSRH staging from this job's IP, then promote from the same IP
+            ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/ -DskipTests --no-transfer-progress -U
+            echo "=== Staging repositories visible to API ==="
+            curl -s -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories"
+            echo
+            echo "=== Promoting default repository for com.trib3 ==="
+            HTTP_CODE=$(curl -s -o /tmp/promote_resp.txt -w "%{http_code}" -X POST -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.trib3?publishing_type=automatic")
+            echo "HTTP $HTTP_CODE"
+            echo "Response body:"
+            cat /tmp/promote_resp.txt
+            echo
+            case "$HTTP_CODE" in
+                2*) echo "Release promote succeeded" ;;
+                *) echo "Release promote failed (HTTP $HTTP_CODE)"; exit 1 ;;
+            esac
       - release/execute_release:
           release_dir: ~/jars/release
 
