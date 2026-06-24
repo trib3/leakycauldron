@@ -256,7 +256,19 @@ jobs:
             OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
             OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
             AUTH_HEADER="Authorization: Bearer $(printf '%s:%s' "$OSSRH_USER" "$OSSRH_PASS" | base64 -w0)"
-            curl -sf -X POST -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.trib3?publishing_type=automatic"
+            echo "=== Staging repositories visible to API ==="
+            curl -s -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories"
+            echo
+            echo "=== Promoting default repository for com.trib3 ==="
+            HTTP_CODE=$(curl -s -o /tmp/promote_resp.txt -w "%{http_code}" -X POST -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.trib3?publishing_type=automatic")
+            echo "HTTP $HTTP_CODE"
+            echo "Response body:"
+            cat /tmp/promote_resp.txt
+            echo
+            case "$HTTP_CODE" in
+                2*) echo "Release promote succeeded" ;;
+                *) echo "Release promote failed (HTTP $HTTP_CODE)"; exit 1 ;;
+            esac
       - release/execute_release:
           release_dir: ~/jars/release
 
