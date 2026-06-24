@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   release: trib3/release@2.0.2
+  security: trib3/security@volatile
 
 jobs:
   security_checks:
@@ -10,17 +11,7 @@ jobs:
     steps:
       # get code
       - checkout
-      - run:
-          name: Install Trivy
-          environment:
-            TRIVY_VERSION: "0.69.3"
-          command: |
-            sudo apt install apt-transport-https gnupg lsb-release
-            echo $TRIVY_PGP_KEY | sed 's/\$/\n/g' | sudo apt-key add -
-            echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-            sudo apt-get update
-            sudo apt-get install -y "trivy=${TRIVY_VERSION}"
-            trivy --version
+      - security/trivy_install
       - run:
           name: Vulnerability check
           command: |
@@ -87,13 +78,19 @@ jobs:
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             if [ "$CIRCLE_BRANCH" = "main" ]; then
-                set +o pipefail # it's ok to keep going if grep doesn't match anything 
-                REPOIDS=`./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-                set -o pipefail
+                OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
+                OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
+                AUTH_HEADER="Authorization: Bearer $(printf '%s:%s' "$OSSRH_USER" "$OSSRH_PASS" | base64 -w0)"
+                REPOIDS=$(curl -sf -H "$AUTH_HEADER" https://ossrh-staging-api.central.sonatype.com/manual/search/repositories \
+                          | jq -r '.repositories[]? | select(.key | startswith("comtrib3")) | .key')
                 if [ -n "$REPOIDS" ]; then
                     echo "Cleaning existing $REPOIDS"
-                    for REPOID in $REPOIDS; do 
-                    ./mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-drop -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+                    for REPOID in $REPOIDS; do
+                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/$REPOID")
+                        case "$HTTP_CODE" in
+                            2*) ;;
+                            *) echo "[WARN] Failed to drop staging repo $REPOID (HTTP $HTTP_CODE). It may have already been removed; continuing." ;;
+                        esac
                     done
                 fi
             fi
@@ -114,9 +111,9 @@ jobs:
           name: Maven Build
           command: |
             if [ "$CIRCLE_BRANCH" = "main" ]; then
-              ./mvnw deploy -DaltDeploymentRepository=ossrh::${MAVEN_RELEASE_REPO} --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/ --no-transfer-progress -U
             else
-              ./mvnw deploy -DaltDeploymentRepository=ossrh::${MAVEN_SNAPSHOT_REPO} --no-transfer-progress -U
+              ./mvnw deploy -DaltDeploymentRepository=ossrh::https://central.sonatype.com/repository/maven-snapshots/ --no-transfer-progress -U
             fi
       - save_cache:
           paths:
@@ -256,9 +253,10 @@ jobs:
             cd ~/jars
             echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
-            REPOID=`../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/   |grep comtrib3 |awk '{print $2}'`
-            ../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
-            ../repo/mvnw org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release -DserverId=ossrh -DnexusUrl=https://oss.sonatype.org/ -DstagingRepositoryId=$REPOID -DstagingProgressTimeoutMinutes=30
+            OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
+            OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
+            AUTH_HEADER="Authorization: Bearer $(printf '%s:%s' "$OSSRH_USER" "$OSSRH_PASS" | base64 -w0)"
+            curl -sf -X POST -H "$AUTH_HEADER" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/comtrib3"
       - release/execute_release:
           release_dir: ~/jars/release
 
@@ -272,8 +270,6 @@ workflows:
             - nexus
       - build:
           context: terraform
-          requires:
-            - security_checks
       - sonar_check:
           context: 
             - sonarqube
