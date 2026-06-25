@@ -15,6 +15,9 @@
     <groupId>com.trib3</groupId>
     <artifactId>json</artifactId>
 
+    <name>Leaky Cauldron :: JSON</name>
+    <description>JSON libraries for building kotlin services</description>
+
     <dependencies>
         <!-- guice -->
         <dependency>

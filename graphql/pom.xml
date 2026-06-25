@@ -15,6 +15,9 @@
     <groupId>com.trib3</groupId>
     <artifactId>graphql</artifactId>
 
+    <name>Leaky Cauldron :: GraphQL</name>
+    <description>GraphQL libraries for building kotlin services</description>
+
     <dependencies>
         <dependency>
             <groupId>com.trib3</groupId>

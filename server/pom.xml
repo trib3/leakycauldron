@@ -15,6 +15,9 @@
     <groupId>com.trib3</groupId>
     <artifactId>server</artifactId>
 
+    <name>Leaky Cauldron :: Server</name>
+    <description>Server libraries for building kotlin services</description>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
