@@ -15,6 +15,9 @@
     <groupId>com.trib3</groupId>
     <artifactId>testing</artifactId>
 
+    <name>Leaky Cauldron :: Testing</name>
+    <description>Testing libraries for building kotlin services</description>
+
     <dependencies>
         <dependency>
             <groupId>com.trib3</groupId>
