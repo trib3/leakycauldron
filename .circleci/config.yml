@@ -53,11 +53,9 @@ jobs:
   build:
     machine:
       image: ubuntu-2204:2025.09.1
-
     working_directory: ~/repo
     environment:
       JAVA_TOOL_OPTIONS: -XX:MaxRAM=2g
-
     steps:
       # get code
       - checkout
@@ -238,10 +236,9 @@ jobs:
             SONAR_USER_HOME: "~/.sonar-cache"  # Defines the location of the analysis task cache
             SONAR_SCANNER_HOME: "~/.sonar"
 
-
   deploy:
     machine:
-      image: default
+      image: ubuntu-2204:2025.09.1
     working_directory: ~/repo
     environment:
       JAVA_TOOL_OPTIONS: -XX:MaxRAM=2g
@@ -300,6 +297,8 @@ workflows:
             - nexus
       - build:
           context: terraform
+          requires:
+            - security_checks
       - sonar_check:
           context:
             - sonarqube
