@@ -72,12 +72,30 @@ jobs:
       - run:
           name: Set JAVA_HOME for mvnw commands
           command: echo 'export JAVA_HOME=`java -XshowSettings:properties -version 2>&1 |grep java.home | sed "s/.*java\.home = //"`' >> "$BASH_ENV"
+      - aws-auth
+      - run:
+          name: Get OSSRH credentials
+          command: |
+            AWS_CREDENTIALS=$(aws sts assume-role --role-arn arn:aws:iam::315805068186:role/SMR=maven-tribe_ossrh_creds-live --role-session-name circleci-secretsmanager-access)
+            export AWS_ACCESS_KEY_ID=$(echo $AWS_CREDENTIALS | jq .Credentials | jq -r .AccessKeyId)
+            export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDENTIALS | jq .Credentials | jq -r .SecretAccessKey)
+            export AWS_SESSION_TOKEN=$(echo $AWS_CREDENTIALS | jq .Credentials | jq -r .SessionToken)
+            export OSSRH_SECRET=$(aws secretsmanager get-secret-value --secret-id maven/tribe_ossrh_creds/live --region us-west-1)
+            export OSSRH_USERNAME=$(echo $OSSRH_SECRET | jq .SecretString | jq fromjson | jq -r .username)
+            export OSSRH_PASSWORD=$(echo $OSSRH_SECRET | jq .SecretString | jq fromjson | jq -r .password)
+            unset AWS_ACCESS_KEY_ID
+            unset AWS_SECRET_ACCESS_KEY
+            unset AWS_SESSION_TOKEN
+            mkdir -p ~/.m2
+            cat > ~/.m2/settings.xml \<<EOF
+            <settings><servers><server><id>ossrh</id><username>${OSSRH_USERNAME}</username><password>${OSSRH_PASSWORD}</password></server></servers></settings>
+            EOF
       - run:
           name: Maven Setup
           command: |
             ./mvnw --version
-            mkdir -p ~/.m2
-            echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
+            # mkdir -p ~/.m2
+            # echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             export MAVEN_OPTS=""
             cd build-resources && BASE_VERSION=$(../mvnw -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
@@ -168,6 +186,7 @@ jobs:
             - repo/mvnw
             - repo/.mvn/wrapper/maven-wrapper.properties
             - repo/current_version.txt
+            - .m2/settings.xml
 
   sonar_check:
     resource_class: trib3/k8s-runner
@@ -253,8 +272,8 @@ jobs:
       - run:
           name: Complete release
           command: |
-            mkdir -p ~/.m2
-            echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
+            # mkdir -p ~/.m2
+            # echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
             OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
