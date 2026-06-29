@@ -1114,7 +1114,7 @@
                         <rules>
                             <dependencyConvergence/>
                             <requireJavaVersion>
-                                <version>[${version.java.release},)</version>
+                                <version>${version.java.release}</version>
                             </requireJavaVersion>
                             <requireMavenVersion>
                                 <version>3.9.6</version>
