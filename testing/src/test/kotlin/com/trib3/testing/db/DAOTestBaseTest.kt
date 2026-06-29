@@ -21,9 +21,11 @@ class DAOTestBaseTest : DAOTestBase() {
     fun testDb() {
         // ensure the db is usable via jooq
         val tableTables =
-            ctx.select(DSL.field("table_name"))
+            ctx
+                .select(DSL.field("table_name"))
                 .from("information_schema.tables")
-                .where("table_name='tables'").fetch()
+                .where("table_name='tables'")
+                .fetch()
         assertThat(tableTables.map { it.get(0) }).all {
             hasSize(1)
             contains("tables")
@@ -31,16 +33,17 @@ class DAOTestBaseTest : DAOTestBase() {
         // ensure the db is usable via jdbc and configured for no autoCommit
         val autoCommit =
             dataSource.connection.use { conn ->
-                conn.prepareStatement(
-                    "select table_name from information_schema.tables where table_name = 'tables'",
-                ).use { ps ->
-                    ps.executeQuery().use { rs ->
-                        assertThat(rs.next()).isTrue()
-                        assertThat(rs.getString(1)).isEqualTo("tables")
-                        assertThat(rs.next()).isFalse()
-                        conn.autoCommit
+                conn
+                    .prepareStatement(
+                        "select table_name from information_schema.tables where table_name = 'tables'",
+                    ).use { ps ->
+                        ps.executeQuery().use { rs ->
+                            assertThat(rs.next()).isTrue()
+                            assertThat(rs.getString(1)).isEqualTo("tables")
+                            assertThat(rs.next()).isFalse()
+                            conn.autoCommit
+                        }
                     }
-                }
             }
         assertThat(autoCommit).isFalse()
         // ensure multiple setup calls don't change the underlying datasource
@@ -54,9 +57,11 @@ class DAOTestBaseTest : DAOTestBase() {
         super.tearDown()
         // ensure db is no longer usable via jooq
         assertFailure {
-            ctx.select(DSL.field("table_name"))
+            ctx
+                .select(DSL.field("table_name"))
                 .from("information_schema.tables")
-                .where("table_name='tables'").fetch()
+                .where("table_name='tables'")
+                .fetch()
         }.isInstanceOf(DataAccessException::class)
         // ensure db is no longer usable via jdbc
         var reached = false

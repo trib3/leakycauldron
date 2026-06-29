@@ -23,17 +23,11 @@ data class PageConditionComponent<T>(
     val value: String,
     val extractor: ((String) -> T),
 ) {
-    fun eq(): Condition {
-        return field.eq(extractor.invoke(value))
-    }
+    fun eq(): Condition = field.eq(extractor.invoke(value))
 
-    fun lt(): Condition {
-        return field.lt(extractor.invoke(value))
-    }
+    fun lt(): Condition = field.lt(extractor.invoke(value))
 
-    fun gt(): Condition {
-        return field.gt(extractor.invoke(value))
-    }
+    fun gt(): Condition = field.gt(extractor.invoke(value))
 
     companion object {
         /**
@@ -42,9 +36,7 @@ data class PageConditionComponent<T>(
         fun getPageCondition(
             sortDirection: SortDirection,
             vararg pagingState: PageConditionComponent<out Any>,
-        ): Condition {
-            return getPageCondition(sortDirection, pagingState.asList())
-        }
+        ): Condition = getPageCondition(sortDirection, pagingState.asList())
 
         /**
          * Generates a jooq [Condition] from the current paging state and desired sort direction.
@@ -58,19 +50,20 @@ data class PageConditionComponent<T>(
         fun getPageCondition(
             sortDirection: SortDirection,
             pagingState: List<PageConditionComponent<out Any>>,
-        ): Condition {
-            return pagingState.map {
-                when (sortDirection) {
-                    SortDirection.DESC -> it.lt()
-                    SortDirection.ASC -> it.gt()
+        ): Condition =
+            pagingState
+                .map {
+                    when (sortDirection) {
+                        SortDirection.DESC -> it.lt()
+                        SortDirection.ASC -> it.gt()
+                    }
+                }.reduceIndexed { listIndex, conditionSoFar, nextCondition ->
+                    val priorEqualityCondition =
+                        pagingState
+                            .subList(0, listIndex)
+                            .map(PageConditionComponent<out Any>::eq)
+                            .reduce(Condition::and)
+                    conditionSoFar.or(priorEqualityCondition.and(nextCondition))
                 }
-            }.reduceIndexed { listIndex, conditionSoFar, nextCondition ->
-                val priorEqualityCondition =
-                    pagingState.subList(0, listIndex)
-                        .map(PageConditionComponent<out Any>::eq)
-                        .reduce(Condition::and)
-                conditionSoFar.or(priorEqualityCondition.and(nextCondition))
-            }
-        }
     }
 }

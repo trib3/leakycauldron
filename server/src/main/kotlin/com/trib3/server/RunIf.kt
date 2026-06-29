@@ -9,10 +9,9 @@ package com.trib3.server
 fun <T> T.runIf(
     condition: Boolean,
     block: T.() -> T,
-): T {
-    return if (condition) {
+): T =
+    if (condition) {
         block()
     } else {
         this
     }
-}

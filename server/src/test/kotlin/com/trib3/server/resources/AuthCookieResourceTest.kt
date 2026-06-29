@@ -20,31 +20,29 @@ import org.testng.annotations.Test
 import java.security.Principal
 import java.util.Optional
 
-data class UserPrincipal(private val _name: String) : Principal {
-    override fun getName(): String {
-        return _name
-    }
+data class UserPrincipal(
+    private val _name: String,
+) : Principal {
+    override fun getName(): String = _name
 }
 
 class AuthCookieResourceTest : ResourceTestBase<AuthCookieResource>() {
     private val appConfig = TribeApplicationConfig(ConfigLoader())
 
-    override fun getResource(): AuthCookieResource {
-        return AuthCookieResource(appConfig)
-    }
+    override fun getResource(): AuthCookieResource = AuthCookieResource(appConfig)
 
     override fun buildAdditionalResources(resourceBuilder: Resource.Builder<*>) {
         resourceBuilder.addProvider(
             AuthDynamicFeature(
-                BasicCredentialAuthFilter.Builder<UserPrincipal>()
+                BasicCredentialAuthFilter
+                    .Builder<UserPrincipal>()
                     .setAuthenticator {
                         if (it.username == "user") {
                             Optional.of(UserPrincipal("bill"))
                         } else {
                             Optional.empty()
                         }
-                    }
-                    .buildAuthFilter(),
+                    }.buildAuthFilter(),
             ),
         )
     }
@@ -58,19 +56,45 @@ class AuthCookieResourceTest : ResourceTestBase<AuthCookieResource>() {
 
     @Test
     fun testBadAuthorization() {
-        val response = resource.target("/auth_cookie").request().header("Authorization", "Basic YmxhaDoxMjM0NQ==").get()
+        val response =
+            resource
+                .target("/auth_cookie")
+                .request()
+                .header("Authorization", "Basic YmxhaDoxMjM0NQ==")
+                .get()
         assertThat(response.status).isEqualTo(HttpStatus.UNAUTHORIZED_401)
         assertThat(response.cookies).isEmpty()
     }
 
     @Test
     fun testGoodAuthorization() {
-        val response = resource.target("/auth_cookie").request().header("Authorization", "Basic dXNlcjoxMjM0NQ==").get()
+        val response =
+            resource
+                .target("/auth_cookie")
+                .request()
+                .header("Authorization", "Basic dXNlcjoxMjM0NQ==")
+                .get()
         assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT_204)
         assertThat(response.cookies["TEST_AUTHORIZATION"]?.name).isEqualTo("TEST_AUTHORIZATION")
         assertThat(response.cookies["TEST_AUTHORIZATION"]?.value).isEqualTo("dXNlcjoxMjM0NQ==")
         assertThat(response.cookies["TEST_AUTHORIZATION"]?.maxAge).isEqualTo(-1) // session cookie
         assertThat(response.cookies["TEST_AUTHORIZATION"]?.isHttpOnly).isNotNull().isTrue()
+    }
+
+    @Test
+    fun testCustomContextPathCookiePath() {
+        val customAppConfig = TribeApplicationConfig(ConfigLoader("appContextPathTestCase"))
+        val rawResource = AuthCookieResource(customAppConfig)
+        val mockRequest = LeakyMock.mock<ContainerRequestContext>()
+        val mockSecContext = LeakyMock.mock<SecurityContext>()
+        EasyMock.expect(mockRequest.getHeaderString("Authorization")).andReturn("Basic dXNlcjoxMjM0NQ==")
+        EasyMock.expect(mockRequest.securityContext).andReturn(mockSecContext)
+        EasyMock.expect(mockSecContext.isSecure).andReturn(false)
+        EasyMock.replay(mockRequest, mockSecContext)
+        val response = rawResource.setAuthCookie(mockRequest)
+        assertThat(response.status).isEqualTo(HttpStatus.NO_CONTENT_204)
+        val cookie = response.cookies["TEST_AUTHORIZATION"]
+        assertThat(cookie?.path).isEqualTo("/custom")
     }
 
     @Test

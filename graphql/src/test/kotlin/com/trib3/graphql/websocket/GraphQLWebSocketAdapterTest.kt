@@ -7,9 +7,12 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.codahale.metrics.annotation.Timed
+import com.trib3.graphql.execution.MessageGraphQLError
+import com.trib3.graphql.resources.doWebSocketUpgrade
 import com.trib3.json.ObjectMapperProvider
 import com.trib3.testing.server.JettyWebTestContainerFactory
 import com.trib3.testing.server.ResourceTestBase
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.ws.rs.GET
@@ -22,17 +25,14 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
-import org.eclipse.jetty.http.HttpStatus
-import org.eclipse.jetty.websocket.api.WebSocketAdapter
+import org.eclipse.jetty.util.Callback
+import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.exceptions.WebSocketTimeoutException
 import org.eclipse.jetty.websocket.client.WebSocketClient
 import org.eclipse.jetty.websocket.core.Configuration
 import org.eclipse.jetty.websocket.core.server.ServerUpgradeRequest
 import org.eclipse.jetty.websocket.core.server.ServerUpgradeResponse
 import org.eclipse.jetty.websocket.core.server.WebSocketCreator
-import org.eclipse.jetty.websocket.core.server.WebSocketMappings
-import org.eclipse.jetty.websocket.server.internal.JettyServerFrameHandlerFactory
 import org.glassfish.jersey.test.spi.TestContainerFactory
 import org.testng.annotations.Test
 import java.time.Duration
@@ -48,12 +48,32 @@ private val log = KotlinLogging.logger {}
 class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() {
     val rawResource = SimpleWebSocketResource()
 
-    override fun getResource(): SimpleWebSocketResource {
-        return rawResource
+    override fun getResource(): SimpleWebSocketResource = rawResource
+
+    override fun getContainerFactory(): TestContainerFactory = JettyWebTestContainerFactory()
+
+    suspend fun getJob(name: String): Job {
+        var maybeJob: Job? = null
+        while (maybeJob == null) {
+            maybeJob = getResource().webSocketCreator.coroutines[name]
+            if (maybeJob == null) {
+                delay(10)
+            }
+        }
+        return maybeJob
     }
 
-    override fun getContainerFactory(): TestContainerFactory {
-        return JettyWebTestContainerFactory()
+    @Test
+    fun testNullSessionSendDoesntCrash() {
+        val channel = Channel<OperationMessage<*>>()
+        val adapter = GraphQLWebSocketAdapter(GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL, channel, mapper)
+        adapter.sendMessage(
+            OperationMessage(
+                OperationType.GQL_ERROR,
+                "blah",
+                listOf(MessageGraphQLError("Invalid message")),
+            ),
+        )
     }
 
     /**
@@ -66,22 +86,23 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
             val client = WebSocketClient()
             client.start()
             val session =
-                client.connect(
-                    WebSocketAdapter(),
-                    resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "timeout").build(),
-                ).get()
-            session.remote.sendString(
-                mapper.writeValueAsString(
-                    OperationMessage(
-                        OperationType.GQL_START,
-                        "launch",
-                        null,
-                    ),
-                ),
+                client
+                    .connect(
+                        object : Session.Listener.AutoDemanding {},
+                        resource
+                            .target("/websocket")
+                            .uriBuilder
+                            .scheme("ws")
+                            .queryParam("name", "timeout")
+                            .build(),
+                    ).get()
+            session.sendText(
+                mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)),
+                null,
             )
             Thread.sleep(1100) // sleep for longer than the timeout to make sure we get an exception
             val job = getResource().webSocketCreator.coroutines["name=timeout"]!!
-            val childJob = getResource().webSocketCreator.coroutines["name=timeoutchild"]!!
+            val childJob = getJob("name=timeoutchild")
             job.join()
             val potentialError = getResource().webSocketCreator.errors["name=timeout"]!!
             assertThat(potentialError).isNotNull().isInstanceOf(WebSocketTimeoutException::class)
@@ -102,22 +123,23 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
             val client = WebSocketClient()
             client.start()
             val session =
-                client.connect(
-                    WebSocketAdapter(),
-                    resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "clientClose").build(),
-                ).get()
-            session.remote.sendString(
+                client
+                    .connect(
+                        object : Session.Listener.AutoDemanding {},
+                        resource
+                            .target("/websocket")
+                            .uriBuilder
+                            .scheme("ws")
+                            .queryParam("name", "clientClose")
+                            .build(),
+                    ).get()
+            session.sendText(
                 mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)),
+                null,
             )
-            var maybeJob = getResource().webSocketCreator.coroutines["name=clientClosechild"]
-            // ensure the start message gets processed and starts a child
-            while (maybeJob == null) {
-                delay(10)
-                maybeJob = getResource().webSocketCreator.coroutines["name=clientClosechild"]
-            }
-            session.disconnect()
             val job = getResource().webSocketCreator.coroutines["name=clientClose"]!!
-            val childJob = getResource().webSocketCreator.coroutines["name=clientClosechild"]!!
+            val childJob = getJob("name=clientClosechild")
+            session.disconnect()
             job.join()
             for (j in listOf(job, childJob)) {
                 assertThat(j.isActive).isFalse()
@@ -137,18 +159,25 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
             val client = WebSocketClient()
             client.start()
             val session =
-                client.connect(
-                    WebSocketAdapter(),
-                    resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "spin").build(),
-                ).get()
-            session.remote.sendString(
+                client
+                    .connect(
+                        object : Session.Listener.AutoDemanding {},
+                        resource
+                            .target("/websocket")
+                            .uriBuilder
+                            .scheme("ws")
+                            .queryParam("name", "spin")
+                            .build(),
+                    ).get()
+            session.sendText(
                 mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)),
+                null,
             )
             launch(Dispatchers.IO) {
                 for (i in 0..19) {
                     delay(100)
-                    log.info("SPIN: $i: $coroutineContext")
-                    session.remote.sendString(
+                    log.info { "SPIN: $i: $coroutineContext" }
+                    session.sendText(
                         mapper.writeValueAsString(
                             OperationMessage(
                                 OperationType.GQL_START,
@@ -156,12 +185,13 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
                                 null,
                             ),
                         ),
+                        null,
                     )
                 }
                 session.close()
             }.join()
             val job = getResource().webSocketCreator.coroutines["name=spin"]!!
-            val childJob = getResource().webSocketCreator.coroutines["name=spinchild"]!!
+            val childJob = getJob("name=spinchild")
             job.join()
             assertThat(getResource().webSocketCreator.errors["name=spin"]).isNull()
             for (j in listOf(job, childJob)) {
@@ -182,18 +212,25 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
             val client = WebSocketClient()
             client.start()
             val session =
-                client.connect(
-                    WebSocketAdapter(),
-                    resource.target("/websocket").uriBuilder.scheme("ws").queryParam("name", "finish").build(),
-                ).get()
-            session.remote.sendString(
+                client
+                    .connect(
+                        object : Session.Listener.AutoDemanding {},
+                        resource
+                            .target("/websocket")
+                            .uriBuilder
+                            .scheme("ws")
+                            .queryParam("name", "finish")
+                            .build(),
+                    ).get()
+            session.sendText(
                 mapper.writeValueAsString(OperationMessage(OperationType.GQL_START, "launch", null)),
+                null,
             )
             launch(Dispatchers.IO) {
                 for (i in 0..19) {
                     delay(100)
-                    log.info("FINISH: $i: $coroutineContext")
-                    session.remote.sendString(
+                    log.info { "FINISH: $i: $coroutineContext" }
+                    session.sendText(
                         mapper.writeValueAsString(
                             OperationMessage(
                                 OperationType.GQL_START,
@@ -201,9 +238,10 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
                                 null,
                             ),
                         ),
+                        null,
                     )
                 }
-                session.remote.sendString(
+                session.sendText(
                     mapper.writeValueAsString(
                         OperationMessage(
                             OperationType.GQL_START,
@@ -211,10 +249,11 @@ class GraphQLWebSocketAdapterTest : ResourceTestBase<SimpleWebSocketResource>() 
                             null,
                         ),
                     ),
+                    null,
                 )
             }.join()
             val job = getResource().webSocketCreator.coroutines["name=finish"]!!
-            val childJob = getResource().webSocketCreator.coroutines["name=finishchild"]!!
+            val childJob = getJob("name=finishchild")
             job.join()
             for (j in listOf(job, childJob)) {
                 assertThat(j.isActive).isFalse()
@@ -238,34 +277,35 @@ class SessionTrackingCreator : WebSocketCreator {
     override fun createWebSocket(
         req: ServerUpgradeRequest,
         resp: ServerUpgradeResponse,
+        callback: Callback,
     ): Any {
         val channel = Channel<OperationMessage<*>>()
         val adapter =
             object : GraphQLWebSocketAdapter(GraphQLWebSocketSubProtocol.APOLLO_PROTOCOL, channel, mapper) {
                 override fun onWebSocketError(cause: Throwable) {
-                    errors[req.queryString] = cause
+                    errors[req.httpURI.query] = cause
                     super.onWebSocketError(cause)
                 }
             }
-        coroutines[req.queryString] =
+        coroutines[req.httpURI.query] =
             adapter.launch {
                 for (msg in channel) {
                     if (msg.id == "launch") {
-                        coroutines["${req.queryString}child"] =
+                        coroutines["${req.httpURI.query}child"] =
                             launch {
                                 while (true) {
                                     delay(100)
-                                    log.info("CHILD: ${req.queryString}: ping: $coroutineContext")
+                                    log.info { "CHILD: ${req.httpURI.query}: ping: $coroutineContext" }
                                 }
                             }
                     } else if (msg.id == "finish") {
-                        coroutines["${req.queryString}child"]?.cancel()
+                        coroutines["${req.httpURI.query}child"]?.cancel()
                         break
                     } else {
-                        log.info("PARENT: ${req.queryString}: pong: ${msg.id}: $coroutineContext")
+                        log.info { "PARENT: ${req.httpURI.query}: pong: ${msg.id}: $coroutineContext" }
                     }
                 }
-                log.info("DONE: ${req.queryString}: $coroutineContext")
+                log.info { "DONE: ${req.httpURI.query}: $coroutineContext" }
             }
         return adapter
     }
@@ -284,25 +324,13 @@ class SimpleWebSocketResource {
     fun webSocketUpgrade(
         @Context request: HttpServletRequest,
         @Context response: HttpServletResponse,
-    ): Response {
-        val webSocketMapping = WebSocketMappings.getMappings(request.servletContext)
-        val pathSpec = WebSocketMappings.parsePathSpec("/")
-        if (webSocketMapping.getWebSocketCreator(pathSpec) == null) {
-            webSocketMapping.addMapping(
-                pathSpec,
-                webSocketCreator,
-                JettyServerFrameHandlerFactory.getFactory(request.servletContext),
-                Configuration.ConfigurationCustomizer().apply {
-                    this.idleTimeout = Duration.ofSeconds(1)
-                },
-            )
-        }
-
-        // Create a new WebSocketCreator for each request bound to an optional authorized principal
-        if (webSocketMapping.upgrade(request, response, null)) {
-            return Response.status(HttpStatus.SWITCHING_PROTOCOLS_101).build()
-        }
-
-        return Response.status(HttpStatus.METHOD_NOT_ALLOWED_405).build()
-    }
+    ): Response =
+        doWebSocketUpgrade(
+            request,
+            response,
+            webSocketCreator,
+            Configuration.ConfigurationCustomizer().apply {
+                this.idleTimeout = Duration.ofSeconds(1)
+            },
+        )
 }

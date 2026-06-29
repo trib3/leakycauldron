@@ -23,9 +23,9 @@ import java.net.InetAddress
  */
 @JsonTypeName("cloudwatch")
 class CloudWatchReporterFactory(
-    @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
+    @param:JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     private val appConfig: TribeApplicationConfig,
-    @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
+    @param:JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     internal val cloudwatch: CloudWatchAsyncClient,
 ) : BaseReporterFactory() {
     private val hostname = InetAddress.getLocalHost().hostName
@@ -136,7 +136,8 @@ class CloudWatchReporterFactory(
 
     override fun build(registry: MetricRegistry): CloudWatchReporter {
         val finalDimensions = globalDimensions + listOf("Hostname=$hostname", "Application=${appConfig.appName}")
-        return CloudWatchReporter.forRegistry(registry, cloudwatch, namespace ?: appConfig.env)
+        return CloudWatchReporter
+            .forRegistry(registry, cloudwatch, namespace ?: appConfig.env)
             .withGlobalDimensions(*finalDimensions.toTypedArray())
             .convertDurationsTo(durationUnit)
             .convertRatesTo(rateUnit)

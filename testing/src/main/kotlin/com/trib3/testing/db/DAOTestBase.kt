@@ -7,7 +7,7 @@ import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.testcontainers.containers.JdbcDatabaseContainer
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import javax.sql.DataSource
@@ -27,25 +27,19 @@ open class DAOTestBase {
      * pointing at the postgres [DataSource].  Subclasses
      * can override for additional configuration.
      */
-    open fun getFlywayConfiguration(): FluentConfiguration {
-        return Flyway.configure().dataSource(dataSource)
-    }
+    open fun getFlywayConfiguration(): FluentConfiguration = Flyway.configure().dataSource(dataSource)
 
     /**
      * By default create a postgres container, but subclasses
      * can override for other implementations
      */
-    open fun getDatabaseContainer(): JdbcDatabaseContainer<*> {
-        return PostgreSQLContainer("postgres:13.4")
-    }
+    open fun getDatabaseContainer(): JdbcDatabaseContainer<*> = PostgreSQLContainer("postgres:13.4")
 
     /**
      * By default configure a POSTGRES dialect, but subclasses
      * can override for other dialects
      */
-    open fun getJooqDialect(): SQLDialect {
-        return SQLDialect.POSTGRES
-    }
+    open fun getJooqDialect(): SQLDialect = SQLDialect.POSTGRES
 
     /**
      * By default configure autoCommit to false since

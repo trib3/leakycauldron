@@ -1,5 +1,6 @@
 package com.trib3.testing.server
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.trib3.json.ObjectMapperProvider
 import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.testing.common.Resource
@@ -8,9 +9,11 @@ import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import java.security.Principal
 
-private class Builder : Resource.Builder<Builder>() {
+private class Builder(
+    val objectMapper: ObjectMapper,
+) : Resource.Builder<Builder>() {
     public override fun buildResource(): Resource {
-        val mapper = ObjectMapperProvider().get()
+        val mapper = objectMapper
         this.setMapper(mapper)
         this.addProvider(AuthValueFactoryProvider.Binder(Principal::class.java))
         return super.buildResource()
@@ -27,7 +30,7 @@ private class Builder : Resource.Builder<Builder>() {
  */
 abstract class ResourceTestBase<T> {
     val resource: Resource by lazy {
-        val resourceBuilder = Builder()
+        val resourceBuilder = Builder(getObjectMapper())
         resourceBuilder.setTestContainerFactory(getContainerFactory())
         // try to add the CoroutineModelProcessor without directly depending on the server jar
         runCatching {
@@ -42,9 +45,9 @@ abstract class ResourceTestBase<T> {
 
     abstract fun getResource(): T
 
-    open fun getContainerFactory(): TestContainerFactory {
-        return JettyWebTestContainerFactory()
-    }
+    open fun getObjectMapper(): ObjectMapper = ObjectMapperProvider().get()
+
+    open fun getContainerFactory(): TestContainerFactory = JettyWebTestContainerFactory()
 
     open fun buildAdditionalResources(resourceBuilder: Resource.Builder<*>) {
         // do nothing

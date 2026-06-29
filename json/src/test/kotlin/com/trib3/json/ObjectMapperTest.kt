@@ -16,17 +16,13 @@ import com.fasterxml.jackson.annotation.OptBoolean
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.google.inject.multibindings.MapBinder
-import com.google.inject.name.Names
 import com.trib3.json.modules.ObjectMapperModule
 import dev.misfitlabs.kotlinguice4.KotlinModule
-import dev.misfitlabs.kotlinguice4.typeLiteral
 import jakarta.inject.Inject
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import org.threeten.extra.YearQuarter
 import java.time.LocalDate
-import kotlin.reflect.KClass
 
 private data class SimpleBean(
     val foo: String,
@@ -39,17 +35,19 @@ private data class SimpleBean(
 private data class InjectedValueBean(
     val foo: String,
     val bar: Int,
-    @JacksonInject
+    @param:JacksonInject
     val injectedBeanDefault: SimpleBean,
-    @JacksonInject(useInput = OptBoolean.TRUE)
+    @param:JacksonInject(useInput = OptBoolean.TRUE)
     val injectedBeanTrue: SimpleBean,
-    @JacksonInject(useInput = OptBoolean.FALSE)
+    @param:JacksonInject(useInput = OptBoolean.FALSE)
     val injectedBeanFalse: SimpleBean,
 )
 
 private enum class SimpleEnum { ONE, TWO }
 
-private class UnDeserializable(var enumValue: SimpleEnum) {
+private class UnDeserializable(
+    var enumValue: SimpleEnum,
+) {
     fun setFoo(strValue: String) {
         enumValue = SimpleEnum.valueOf(strValue)
     }
@@ -81,12 +79,10 @@ private val moduleInjectedBean =
 
 private class SimpleMixinModule : KotlinModule() {
     override fun configure() {
-        MapBinder.newMapBinder(
-            binder(),
-            typeLiteral<KClass<*>>(),
-            typeLiteral<KClass<*>>(),
-            Names.named(ObjectMapperProvider.OBJECT_MAPPER_MIXINS),
-        ).addBinding(SimpleBean::class).toInstance(SimpleMixin::class)
+        ObjectMapperModule
+            .objectMapperMixinBinder { binder() }
+            .addBinding(SimpleBean::class)
+            .toInstance(SimpleMixin::class)
         bind<Int>().toInstance(25)
         bind<UnDeserializable>().toInstance(UnDeserializable(SimpleEnum.TWO))
         bind<SimpleBean>().toInstance(
@@ -98,7 +94,9 @@ private class SimpleMixinModule : KotlinModule() {
 @Guice(modules = [ObjectMapperModule::class, SimpleMixinModule::class])
 class ObjectMapperTest
     @Inject
-    constructor(val mapper: ObjectMapper) {
+    constructor(
+        val mapper: ObjectMapper,
+    ) {
         @Test
         fun testMapper() {
             val bean = SimpleBean("hahaha", 3, "yes", LocalDate.of(2019, 1, 1))
@@ -129,7 +127,7 @@ class ObjectMapperTest
             val yq = YearQuarter.of(2010, 1)
             assertThat(mapper.writeValueAsString(yq)).isEqualTo("\"2010-Q1\"")
             assertThat(mapper.readValue<YearQuarter>("\"2010-Q1\"")).isEqualTo(yq)
-            assertThat(mapper.readValue<YearQuarter>("\"\"")).isNull()
+            assertThat(mapper.readValue<YearQuarter?>("\"\"")).isNull()
             assertFailure {
                 mapper.readValue<YearQuarter>("123")
             }.all {
@@ -138,7 +136,9 @@ class ObjectMapperTest
             }
         }
 
-        private data class YQContainer(val yearQuarter: YearQuarter)
+        private data class YQContainer(
+            val yearQuarter: YearQuarter,
+        )
 
         @Test
         fun testYearQuarterContainer() {

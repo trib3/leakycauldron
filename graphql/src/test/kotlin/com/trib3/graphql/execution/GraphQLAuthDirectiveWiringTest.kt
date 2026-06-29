@@ -25,18 +25,12 @@ import java.security.Principal
 
 class AuthQuery {
     @GraphQLAuth
-    fun needUser(dfe: DataFetchingEnvironment): String? {
-        return dfe.graphQlContext.get<Principal>()?.name
-    }
+    fun needUser(dfe: DataFetchingEnvironment): String? = dfe.graphQlContext.get<Principal>()?.name
 
-    fun noUser(): String {
-        return "nope"
-    }
+    fun noUser(): String = "nope"
 
     @GraphQLAuth(["ADMIN"])
-    fun needSuperUser(dfe: DataFetchingEnvironment): String? {
-        return dfe.graphQlContext.get<Principal>()?.name
-    }
+    fun needSuperUser(dfe: DataFetchingEnvironment): String? = dfe.graphQlContext.get<Principal>()?.name
 }
 
 class TestAuthorizer : Authorizer<Principal> {
@@ -44,9 +38,7 @@ class TestAuthorizer : Authorizer<Principal> {
         principal: Principal,
         role: String,
         requestContext: ContainerRequestContext?,
-    ): Boolean {
-        return role != "ADMIN" || principal.name == "ADMIN"
-    }
+    ): Boolean = role != "ADMIN" || principal.name == "ADMIN"
 }
 
 class GraphQLGraphQLAuthDirectiveWiringTest {
@@ -64,16 +56,18 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
                 listOf(this::class.java.packageName),
                 hooks = hooks,
             )
-        return GraphQL.newGraphQL(
-            toSchema(config, listOf(TopLevelObject(AuthQuery()))),
-        ).build().execute(
-            ExecutionInput.newExecutionInput()
-                .query("{ needUser noUser needSuperUser }")
-                .graphQLContext(
-                    getGraphQLContextMap(scope, principal),
-                )
-                .build(),
-        )
+        return GraphQL
+            .newGraphQL(
+                toSchema(config, listOf(TopLevelObject(AuthQuery()))),
+            ).build()
+            .execute(
+                ExecutionInput
+                    .newExecutionInput()
+                    .query("{ needUser noUser needSuperUser }")
+                    .graphQLContext(
+                        getGraphQLContextMap(scope, principal),
+                    ).build(),
+            )
     }
 
     @Test
@@ -161,13 +155,16 @@ class GraphQLGraphQLAuthDirectiveWiringTest {
                 hooks = hooks,
             )
         val result =
-            GraphQL.newGraphQL(
-                toSchema(config, listOf(TopLevelObject(AuthQuery()))),
-            ).build().execute(
-                ExecutionInput.newExecutionInput()
-                    .query("{ needUser noUser needSuperUser }")
-                    .build(),
-            )
+            GraphQL
+                .newGraphQL(
+                    toSchema(config, listOf(TopLevelObject(AuthQuery()))),
+                ).build()
+                .execute(
+                    ExecutionInput
+                        .newExecutionInput()
+                        .query("{ needUser noUser needSuperUser }")
+                        .build(),
+                )
         val data = result.getData<Map<String, String>>()
         val errors = result.errors
         assertThat(data["needUser"]).isNull()

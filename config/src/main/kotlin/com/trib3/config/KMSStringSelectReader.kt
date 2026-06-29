@@ -4,8 +4,8 @@ import com.google.common.base.CaseFormat
 import com.typesafe.config.Config
 import io.github.config4k.ClassContainer
 import io.github.config4k.readers.SelectReader
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
-import mu.KotlinLogging
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.kms.KmsClient
 import software.amazon.awssdk.services.kms.model.DecryptRequest
@@ -14,7 +14,9 @@ import java.util.Base64
 private val log = KotlinLogging.logger { }
 private val base64 = Base64.getDecoder()!!
 
-class KMSStringReader(private val kms: KmsClient?) {
+class KMSStringReader(
+    private val kms: KmsClient?,
+) {
     fun getValue(
         config: Config,
         path: String,
@@ -45,11 +47,10 @@ class KMSStringReader(private val kms: KmsClient?) {
                 val decryptRequest = DecryptRequest.builder().ciphertextBlob(rawKms).build()
                 return kms.decrypt(decryptRequest).plaintext().asUtf8String()
             } else {
-                log.warn(
+                log.warn {
                     "trying to decrypt KMS config value without a configured kmsClient, " +
-                        "returning raw value at path {}",
-                    path,
-                )
+                        "returning raw value at path $path"
+                }
             }
         }
         return rawValue
@@ -58,7 +59,9 @@ class KMSStringReader(private val kms: KmsClient?) {
 
 class KMSStringSelectReader
     @Inject
-    constructor(private val kms: KmsClient?) {
+    constructor(
+        private val kms: KmsClient?,
+    ) {
         companion object {
             private var _instance: KMSStringSelectReader = KMSStringSelectReader(null)
             val instance: KMSStringSelectReader
@@ -78,11 +81,14 @@ class KMSStringSelectReader
          * @param clazz a instance got from the given type by reflection
          * @throws Config4kException.UnSupportedType if the passed type is not supported
          */
-        fun getReader(clazz: ClassContainer): (Config, String) -> Any? {
-            return when (clazz.mapperClass) {
-                String::class -> KMSStringReader(kms)::getValue
-                else ->
+        fun getReader(clazz: ClassContainer): (Config, String) -> Any? =
+            when (clazz.mapperClass) {
+                String::class -> {
+                    KMSStringReader(kms)::getValue
+                }
+
+                else -> {
                     SelectReader.getReader(clazz)
+                }
             }
-        }
     }

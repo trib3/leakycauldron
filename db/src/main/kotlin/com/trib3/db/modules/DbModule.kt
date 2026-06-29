@@ -28,26 +28,16 @@ class DbModule : AbstractModule() {
         healthCheckRegistry: HealthCheckRegistry,
         metricRegistry: MetricRegistry,
         objectMapper: ObjectMapper,
-    ): DbConfig {
-        return DbConfig(loader, "db", healthCheckRegistry, metricRegistry, objectMapper)
-    }
+    ): DbConfig = DbConfig(loader, "db", healthCheckRegistry, metricRegistry, objectMapper)
 
     @Provides
-    fun provideDataSource(dbConfig: DbConfig): DataSource {
-        return dbConfig.dataSource
-    }
+    fun provideDataSource(dbConfig: DbConfig): DataSource = dbConfig.dataSource
 
     @Provides
-    fun provideDSLContext(dbConfig: DbConfig): DSLContext {
-        return dbConfig.dslContext
-    }
+    fun provideDSLContext(dbConfig: DbConfig): DSLContext = dbConfig.dslContext
 
     // allow multiple installations so that multiple other modules can install this one
-    override fun equals(other: Any?): Boolean {
-        return other is DbModule
-    }
+    override fun equals(other: Any?): Boolean = other is DbModule
 
-    override fun hashCode(): Int {
-        return this::class.hashCode()
-    }
+    override fun hashCode(): Int = this::class.hashCode()
 }

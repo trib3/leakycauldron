@@ -28,9 +28,7 @@ private class DbConfigProvider
         private val metricRegistry: MetricRegistry,
         private val objectMapper: ObjectMapper,
     ) : Provider<DbConfig> {
-        override fun get(): DbConfig {
-            return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper)
-        }
+        override fun get(): DbConfig = DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper)
     }
 
 /**
@@ -45,9 +43,8 @@ private class DataSourceProvider
         private val metricRegistry: MetricRegistry,
         private val objectMapper: ObjectMapper,
     ) : Provider<DataSource> {
-        override fun get(): DataSource {
-            return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dataSource
-        }
+        override fun get(): DataSource =
+            DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dataSource
     }
 
 /**
@@ -62,16 +59,17 @@ private class DSLContextProvider
         private val metricRegistry: MetricRegistry,
         private val objectMapper: ObjectMapper,
     ) : Provider<DSLContext> {
-        override fun get(): DSLContext {
-            return DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dslContext
-        }
+        override fun get(): DSLContext =
+            DbConfig(loader, configPath, healthCheckRegistry, metricRegistry, objectMapper).dslContext
     }
 
 /**
  * Private module that implements the bindings for [NamedDbModule] and allows for multiple
  * installations of [NamedDbModule]s with different [name]s
  */
-private class PrivateDbModule(private val name: String) : KotlinPrivateModule() {
+private class PrivateDbModule(
+    private val name: String,
+) : KotlinPrivateModule() {
     override fun configure() {
         bindConstant().annotatedWith(Names.named("configPath")).to(name)
         bind<DbConfig>().annotatedWith(Names.named(name)).toProvider<DbConfigProvider>()
@@ -94,18 +92,16 @@ private class PrivateDbModule(private val name: String) : KotlinPrivateModule() 
  *
  *     class RedshiftDAO @Inject constructor (@Named("redshift") val redshiftCtx: DSLContext)
  */
-class NamedDbModule(val name: String) : KotlinModule() {
+class NamedDbModule(
+    val name: String,
+) : KotlinModule() {
     override fun configure() {
         install(KMSModule())
         install(PrivateDbModule(name))
     }
 
     // allow multiple installations so that multiple other modules can install this one
-    override fun equals(other: Any?): Boolean {
-        return other is NamedDbModule && other.name == this.name
-    }
+    override fun equals(other: Any?): Boolean = other is NamedDbModule && other.name == this.name
 
-    override fun hashCode(): Int {
-        return Objects.hash(this::class.hashCode(), this.name)
-    }
+    override fun hashCode(): Int = Objects.hash(this::class.hashCode(), this.name)
 }

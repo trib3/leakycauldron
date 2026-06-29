@@ -21,17 +21,23 @@ import com.trib3.server.healthchecks.PingHealthCheck
 import com.trib3.server.healthchecks.VersionHealthCheck
 import com.trib3.server.modules.DefaultApplicationModule
 import com.trib3.server.modules.DropwizardApplicationModule
+import com.trib3.server.modules.EnvironmentCallback
+import com.trib3.server.modules.ServletConfig
 import com.trib3.server.modules.TribeApplicationModule
 import com.trib3.testing.LeakyMock
 import dev.misfitlabs.kotlinguice4.getInstance
+import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.auth.AuthDynamicFeature
 import io.dropwizard.auth.AuthFilter
 import io.dropwizard.core.Configuration
+import io.dropwizard.core.ConfiguredBundle
 import io.dropwizard.core.setup.AdminEnvironment
 import io.dropwizard.core.setup.Bootstrap
 import io.dropwizard.core.setup.Environment
+import io.dropwizard.core.sslreload.SslReloadBundle
 import io.dropwizard.jersey.DropwizardResourceConfig
 import io.dropwizard.jersey.setup.JerseyEnvironment
+import io.dropwizard.jetty.MutableServletContextHandler
 import io.dropwizard.jetty.setup.ServletEnvironment
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet
 import jakarta.servlet.Filter
@@ -40,15 +46,15 @@ import jakarta.servlet.Servlet
 import jakarta.servlet.ServletRegistration
 import jakarta.ws.rs.container.ContainerRequestContext
 import org.easymock.EasyMock
-import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.eclipse.jetty.server.handler.CrossOriginHandler
 import org.glassfish.jersey.internal.inject.InjectionManager
 import org.testng.annotations.Test
 import java.security.Principal
 
-data class TestPrincipal(val _name: String) : Principal {
-    override fun getName(): String {
-        return _name
-    }
+data class TestPrincipal(
+    val _name: String,
+) : Principal {
+    override fun getName(): String = _name
 }
 
 class TestAuthFilter : AuthFilter<String, TestPrincipal>() {
@@ -60,6 +66,15 @@ class TestAuthFilter : AuthFilter<String, TestPrincipal>() {
 class TestModule : TribeApplicationModule() {
     override fun configure() {
         authFilterBinder().setBinding().to<TestAuthFilter>()
+        environmentCallbackBinder().addBinding().toInstance(EnvironmentCallback {})
+        appServletBinder().addBinding().toInstance(
+            ServletConfig(
+                OpenApiServlet::class.java.simpleName,
+                OpenApiServlet(),
+                listOf("/openapi"),
+            ),
+        )
+        KotlinMultibinder.newSetBinder<ConfiguredBundle<Configuration>>(kotlinBinder).addBinding().to<SslReloadBundle>()
         bind<InjectionManager>().toProvider(Providers.of(null))
     }
 }
@@ -77,10 +92,7 @@ class TribeApplicationTest {
             contains(VersionHealthCheck::class)
             contains(PingHealthCheck::class)
         }
-        assertThat(instance.servletFilterConfigs.map { it.filterClass }).all {
-            contains(RequestIdFilter::class.java)
-            contains(CrossOriginFilter::class.java)
-        }
+        assertThat(instance.servletFilterConfigs.map { it.filterClass }).contains(RequestIdFilter::class.java)
         assertThat(instance.adminServletFilterConfigs.map { it.filterClass }).contains(AdminAuthFilter::class.java)
         assertThat(instance.adminServlets.map { it.name }).all {
             contains("SwaggerAssetServlet")
@@ -88,10 +100,12 @@ class TribeApplicationTest {
         }
         assertThat(instance.versionHealthCheck).isNotNull()
         assertThat(instance.appServlets).isNotNull()
+        assertThat(instance.envCallbacks).isNotNull()
         assertThat(instance.dropwizardBundles).isNotNull()
         assertThat(instance.jerseyResources).isNotNull()
         assertThat(instance.jaxrsAppProcessors).isNotNull()
         assertThat(instance.authFilter).isNull()
+        assertThat(instance.rootHandler).isNotNull()
     }
 
     @Test
@@ -120,30 +134,42 @@ class TribeApplicationTest {
             LeakyMock.niceMock<ServletRegistration.Dynamic>()
         val mockFilterRegistration =
             LeakyMock.niceMock<FilterRegistration.Dynamic>()
+        val mockAppContext = LeakyMock.mock<MutableServletContextHandler>()
         var authDynamicRegistered = false
         EasyMock.expect(mockEnv.jersey()).andReturn(mockJersey).anyTimes()
         EasyMock.expect(mockJersey.resourceConfig).andReturn(DropwizardResourceConfig()).anyTimes()
-        EasyMock.expect(mockJersey.register(EasyMock.anyObject<Any?>())).andAnswer {
-            if (EasyMock.getCurrentArgument<Any>(0) is AuthDynamicFeature) {
-                authDynamicRegistered = true
-            }
-        }.anyTimes()
+        EasyMock
+            .expect(mockJersey.register(EasyMock.anyObject<Any?>()))
+            .andAnswer {
+                if (EasyMock.getCurrentArgument<Any>(0) is AuthDynamicFeature) {
+                    authDynamicRegistered = true
+                }
+            }.anyTimes()
         EasyMock.expect(mockEnv.admin()).andReturn(mockAdmin).anyTimes()
-        EasyMock.expect(mockAdmin.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
+        EasyMock
+            .expect(mockAdmin.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
             .andReturn(mockServletRegistration)
             .anyTimes()
         EasyMock.expect(mockEnv.servlets()).andReturn(mockServlet).anyTimes()
         EasyMock.expect(mockEnv.healthChecks()).andReturn(mockHealthChecks).anyTimes()
-        EasyMock.expect(mockServlet.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
-            .andReturn(mockFilterRegistration).anyTimes()
-        EasyMock.expect(mockServlet.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
-            .andReturn(mockServletRegistration).anyTimes()
-        EasyMock.expect(mockAdmin.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
-            .andReturn(mockFilterRegistration).anyTimes()
-        EasyMock.expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<VersionHealthCheck>()))
+        EasyMock
+            .expect(mockServlet.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
+            .andReturn(mockFilterRegistration)
+            .anyTimes()
+        EasyMock
+            .expect(mockServlet.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
+            .andReturn(mockServletRegistration)
+            .anyTimes()
+        EasyMock
+            .expect(mockAdmin.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
+            .andReturn(mockFilterRegistration)
+            .anyTimes()
+        EasyMock
+            .expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<VersionHealthCheck>()))
             .once()
         EasyMock.expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<PingHealthCheck>())).once()
-
+        EasyMock.expect(mockEnv.applicationContext).andReturn(mockAppContext)
+        EasyMock.expect(mockAppContext.insertHandler(LeakyMock.isA<CrossOriginHandler>()))
         EasyMock.replay(
             mockConf,
             mockEnv,
@@ -153,6 +179,7 @@ class TribeApplicationTest {
             mockHealthChecks,
             mockServletRegistration,
             mockFilterRegistration,
+            mockAppContext,
         )
         instance.run(mockConf, mockEnv)
         assertThat(authDynamicRegistered).isFalse()
@@ -184,29 +211,42 @@ class TribeApplicationTest {
             LeakyMock.niceMock<ServletRegistration.Dynamic>()
         val mockFilterRegistration =
             LeakyMock.niceMock<FilterRegistration.Dynamic>()
+        val mockAppContext = LeakyMock.mock<MutableServletContextHandler>()
         var authDynamicRegistered = false
         EasyMock.expect(mockEnv.jersey()).andReturn(mockJersey).anyTimes()
         EasyMock.expect(mockJersey.resourceConfig).andReturn(DropwizardResourceConfig()).anyTimes()
-        EasyMock.expect(mockJersey.register(EasyMock.anyObject<Any?>())).andAnswer {
-            if (EasyMock.getCurrentArgument<Any>(0) is AuthDynamicFeature) {
-                authDynamicRegistered = true
-            }
-        }.anyTimes()
+        EasyMock
+            .expect(mockJersey.register(EasyMock.anyObject<Any?>()))
+            .andAnswer {
+                if (EasyMock.getCurrentArgument<Any>(0) is AuthDynamicFeature) {
+                    authDynamicRegistered = true
+                }
+            }.anyTimes()
         EasyMock.expect(mockEnv.admin()).andReturn(mockAdmin).anyTimes()
-        EasyMock.expect(mockAdmin.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
+        EasyMock
+            .expect(mockAdmin.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
             .andReturn(mockServletRegistration)
             .anyTimes()
         EasyMock.expect(mockEnv.servlets()).andReturn(mockServlet).anyTimes()
         EasyMock.expect(mockEnv.healthChecks()).andReturn(mockHealthChecks).anyTimes()
-        EasyMock.expect(mockServlet.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
-            .andReturn(mockFilterRegistration).anyTimes()
-        EasyMock.expect(mockServlet.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
-            .andReturn(mockServletRegistration).anyTimes()
-        EasyMock.expect(mockAdmin.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
-            .andReturn(mockFilterRegistration).anyTimes()
-        EasyMock.expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<VersionHealthCheck>()))
+        EasyMock
+            .expect(mockServlet.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
+            .andReturn(mockFilterRegistration)
+            .anyTimes()
+        EasyMock
+            .expect(mockServlet.addServlet(LeakyMock.anyString(), LeakyMock.anyObject<Servlet>()))
+            .andReturn(mockServletRegistration)
+            .anyTimes()
+        EasyMock
+            .expect(mockAdmin.addFilter(LeakyMock.anyString(), EasyMock.anyObject<Class<out Filter>>()))
+            .andReturn(mockFilterRegistration)
+            .anyTimes()
+        EasyMock
+            .expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<VersionHealthCheck>()))
             .once()
         EasyMock.expect(mockHealthChecks.register(LeakyMock.anyString(), LeakyMock.anyObject<PingHealthCheck>())).once()
+        EasyMock.expect(mockEnv.applicationContext).andReturn(mockAppContext)
+        EasyMock.expect(mockAppContext.insertHandler(LeakyMock.isA<CrossOriginHandler>()))
 
         EasyMock.replay(
             mockConf,
@@ -217,7 +257,9 @@ class TribeApplicationTest {
             mockHealthChecks,
             mockServletRegistration,
             mockFilterRegistration,
+            mockAppContext,
         )
+        authInstance.initialize(Bootstrap<Configuration>(authInstance))
         authInstance.run(mockConf, mockEnv)
         assertThat(authDynamicRegistered).isTrue()
         EasyMock.verify(

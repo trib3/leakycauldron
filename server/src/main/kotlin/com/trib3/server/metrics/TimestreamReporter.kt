@@ -68,11 +68,13 @@ class TimestreamReporter(
                 }
 
         val recordRequestBuilder =
-            WriteRecordsRequest.builder()
+            WriteRecordsRequest
+                .builder()
                 .databaseName(databaseName)
                 .tableName(tableName)
                 .commonAttributes(
-                    Record.builder()
+                    Record
+                        .builder()
                         .time(System.currentTimeMillis().toString())
                         .timeUnit(software.amazon.awssdk.services.timestreamwrite.model.TimeUnit.MILLISECONDS)
                         .dimensions(
@@ -107,9 +109,7 @@ class TimestreamReporter(
     private fun getCounterRecords(
         counterName: String,
         counter: Counting,
-    ): List<Record> {
-        return listOfNotNull(getRecord("$counterName.count" to counter.count))
-    }
+    ): List<Record> = listOfNotNull(getRecord("$counterName.count" to counter.count))
 
     /**
      * For each [Metered] ([Meter] and [Timer]), send the `mean_rate`, `m1_rate`, `m5_rate` and `m15_rate`
@@ -118,14 +118,13 @@ class TimestreamReporter(
     private fun getMeterRecords(
         meterName: String,
         meter: Metered,
-    ): List<Record> {
-        return listOf(
+    ): List<Record> =
+        listOf(
             "mean_rate" to (meter.meanRate * rateFactor),
             "m1_rate" to (meter.oneMinuteRate * rateFactor),
             "m5_rate" to (meter.fiveMinuteRate * rateFactor),
             "m15_rate" to (meter.fifteenMinuteRate * rateFactor),
         ).mapNotNull { getRecord("$meterName.${it.first}" to it.second) }
-    }
 
     /**
      * For each [Sampling] ([Histogram] and [Timer]), send the `mean`, `max`, `min`, `stddev`,
@@ -162,7 +161,8 @@ class TimestreamReporter(
     private fun getRecord(nameValue: Pair<String, Number>): Record? {
         val doubleRep = nameValue.second.toDouble()
         return if (doubleRep.isFinite()) {
-            Record.builder()
+            Record
+                .builder()
                 .measureName(nameValue.first)
                 .measureValue(doubleRep.toBigDecimal().toPlainString())
                 .build()

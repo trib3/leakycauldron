@@ -26,7 +26,9 @@ import java.security.Principal
     description = "only allows given roles to access the annotated element",
     locations = [Introspection.DirectiveLocation.FIELD_DEFINITION],
 )
-annotation class GraphQLAuth(val roles: Array<String> = [])
+annotation class GraphQLAuth(
+    val roles: Array<String> = [],
+)
 
 /**
  * Directive wiring that checks for auth before fetching data.
@@ -38,20 +40,25 @@ annotation class GraphQLAuth(val roles: Array<String> = [])
  * authenticated but unauthorized user, and [Response.Status.FORBIDDEN] will be returned as an error
  * for an unauthenticated user.
  */
-class GraphQLAuthDirectiveWiring(private val authorizer: Authorizer<Principal>?) : KotlinSchemaDirectiveWiring {
+class GraphQLAuthDirectiveWiring(
+    private val authorizer: Authorizer<Principal>?,
+) : KotlinSchemaDirectiveWiring {
     private fun missingAllowedRole(
         principal: Principal,
         roles: Array<String>,
-    ): Boolean {
-        return authorizer != null && roles.isNotEmpty() &&
+    ): Boolean =
+        authorizer != null &&
+            roles.isNotEmpty() &&
             roles.none {
                 authorizer.authorize(principal, it, null)
             }
-    }
 
     override fun onField(environment: KotlinFieldDirectiveEnvironment): GraphQLFieldDefinition {
         @Suppress("UNCHECKED_CAST")
-        val roles = environment.directive.getArgument("roles").argumentValue.value as Array<String>
+        val roles =
+            environment.directive
+                .getArgument("roles")
+                .argumentValue.value as Array<String>
         val originalDataFetcher = environment.getDataFetcher()
 
         val authFetcher =

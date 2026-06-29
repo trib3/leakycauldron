@@ -1,5 +1,6 @@
 package com.trib3.server.filters
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.FilterConfig
@@ -7,7 +8,6 @@ import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
 import org.slf4j.MDC
 import java.util.UUID
 
@@ -63,9 +63,7 @@ class RequestIdFilter : Filter {
         /**
          * Return the current MDC's RequestId, if set
          */
-        fun getRequestId(): String? {
-            return MDC.get(REQUEST_ID_KEY)
-        }
+        fun getRequestId(): String? = MDC.get(REQUEST_ID_KEY)
 
         /**
          * Remove any RequestId set from the MDC
@@ -90,7 +88,7 @@ class RequestIdFilter : Filter {
                     UUID.fromString(it).toString()
                 } catch (e: IllegalArgumentException) {
                     val newId = UUID.randomUUID().toString()
-                    log.warn("Ignoring invalidly formatted requestId: $it, and using $newId instead", e)
+                    log.warn(e) { "Ignoring invalidly formatted requestId: $it, and using $newId instead" }
                     newId
                 }
             }

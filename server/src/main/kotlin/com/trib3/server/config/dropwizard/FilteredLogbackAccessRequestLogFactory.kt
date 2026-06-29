@@ -1,12 +1,16 @@
 package com.trib3.server.config.dropwizard
 
-import ch.qos.logback.access.spi.IAccessEvent
+import ch.qos.logback.access.common.spi.IAccessEvent
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.filter.Filter
 import ch.qos.logback.core.pattern.PatternLayoutBase
 import ch.qos.logback.core.spi.FilterReply
+import com.fasterxml.jackson.annotation.JacksonInject
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.fasterxml.jackson.annotation.OptBoolean
+import com.trib3.server.config.TribeApplicationConfig
 import io.dropwizard.logging.common.async.AsyncAppenderFactory
 import io.dropwizard.logging.common.filter.LevelFilterFactory
 import io.dropwizard.logging.common.filter.NullLevelFilterFactory
@@ -42,9 +46,7 @@ class RequestIdLogbackAccessRequestLayoutFactory : LayoutFactory<IAccessEvent> {
     override fun build(
         context: LoggerContext,
         timeZone: TimeZone,
-    ): PatternLayoutBase<IAccessEvent> {
-        return RequestIdLogbackAccessRequestLayout(context, timeZone)
-    }
+    ): PatternLayoutBase<IAccessEvent> = RequestIdLogbackAccessRequestLayout(context, timeZone)
 }
 
 /**
@@ -53,7 +55,10 @@ class RequestIdLogbackAccessRequestLayoutFactory : LayoutFactory<IAccessEvent> {
  * layout pattern to include timestamp and requestId prefix.
  */
 @JsonTypeName("filtered-logback-access")
-class FilteredLogbackAccessRequestLogFactory : LogbackAccessRequestLogFactory() {
+class FilteredLogbackAccessRequestLogFactory(
+    @param:JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
+    private val appConfig: TribeApplicationConfig,
+) : LogbackAccessRequestLogFactory() {
     override fun build(name: String): RequestLog {
         // almost the same as super.build(), differences are commented
         val logger =
@@ -63,6 +68,7 @@ class FilteredLogbackAccessRequestLogFactory : LogbackAccessRequestLogFactory() 
         val context = logger.loggerContext
 
         val requestLog = LogbackAccessRequestLog()
+        requestLog.isQuiet = true
 
         val levelFilterFactory: LevelFilterFactory<IAccessEvent> = NullLevelFilterFactory()
         val asyncAppenderFactory: AsyncAppenderFactory<IAccessEvent> = AsyncAccessEventAppenderFactory()
@@ -73,12 +79,13 @@ class FilteredLogbackAccessRequestLogFactory : LogbackAccessRequestLogFactory() 
             requestLog.addAppender(output.build(context, name, layoutFactory, levelFilterFactory, asyncAppenderFactory))
         }
 
-        // add successful ping filter
+        // add successful ping/prometheus scrape filter
+        val ignorePaths = setOf("${appConfig.appContextPath}/ping", "${appConfig.adminContextPath}/prometheus")
         requestLog.addFilter(
             object : Filter<IAccessEvent>() {
                 override fun decide(event: IAccessEvent): FilterReply {
                     if (
-                        event.requestURI == "/app/ping" &&
+                        ignorePaths.contains(event.requestURI) &&
                         event.statusCode == HttpServletResponse.SC_OK &&
                         event.elapsedTime < FAST_RESPONSE_TIME
                     ) {

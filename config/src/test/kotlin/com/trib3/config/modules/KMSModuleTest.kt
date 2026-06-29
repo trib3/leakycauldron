@@ -20,7 +20,8 @@ class KMSModuleTest {
     fun testBind() {
         val fakeKms =
             LeakyMock.mock<KmsClient>().also {
-                EasyMock.expect(it.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
+                EasyMock
+                    .expect(it.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
                     .andReturn(
                         DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build(),
                     ).anyTimes()

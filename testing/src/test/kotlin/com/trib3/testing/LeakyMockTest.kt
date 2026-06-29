@@ -24,7 +24,9 @@ interface TestClass {
     fun getThing(): Thing
 }
 
-open class RealThing(val instance: Int) : Thing {
+open class RealThing(
+    val instance: Int,
+) : Thing {
     override fun equals(other: Any?): Boolean {
         if (other is RealThing) {
             return instance == other.instance
@@ -32,9 +34,7 @@ open class RealThing(val instance: Int) : Thing {
         return false
     }
 
-    override fun hashCode(): Int {
-        return instance.hashCode()
-    }
+    override fun hashCode(): Int = instance.hashCode()
 }
 
 class LeakyMockTest {
@@ -44,40 +44,48 @@ class LeakyMockTest {
         val mock = support.mock<TestClass>()
         EasyMock.expect(mock.manipulateString(LeakyMock.anyString())).andReturn("bah!").once()
         EasyMock.expect(mock.manipulateString(LeakyMock.contains("foo"))).andReturn("bar!").once()
-        EasyMock.expect(
-            mock.manipulateString(
-                LeakyMock.and(
-                    LeakyMock.contains("foo"),
-                    LeakyMock.contains("bar"),
+        EasyMock
+            .expect(
+                mock.manipulateString(
+                    LeakyMock.and(
+                        LeakyMock.contains("foo"),
+                        LeakyMock.contains("bar"),
+                    ),
                 ),
-            ),
-        ).andReturn("baz!").once()
-        EasyMock.expect(
-            mock.manipulateString(
-                LeakyMock.and(
-                    LeakyMock.contains("foo"),
-                    LeakyMock.contains("bar"),
-                    LeakyMock.contains("baz"),
+            ).andReturn("baz!")
+            .once()
+        EasyMock
+            .expect(
+                mock.manipulateString(
+                    LeakyMock.and(
+                        LeakyMock.contains("foo"),
+                        LeakyMock.contains("bar"),
+                        LeakyMock.contains("baz"),
+                    ),
                 ),
-            ),
-        ).andReturn("bazh!").once()
-        EasyMock.expect(
-            mock.manipulateString(
-                LeakyMock.or(
-                    LeakyMock.contains("foo"),
-                    LeakyMock.contains("bar"),
+            ).andReturn("bazh!")
+            .once()
+        EasyMock
+            .expect(
+                mock.manipulateString(
+                    LeakyMock.or(
+                        LeakyMock.contains("foo"),
+                        LeakyMock.contains("bar"),
+                    ),
                 ),
-            ),
-        ).andReturn("bash!").times(2)
-        EasyMock.expect(
-            mock.manipulateString(
-                LeakyMock.or(
-                    LeakyMock.contains("foo"),
-                    LeakyMock.contains("bar"),
-                    LeakyMock.contains("baz"),
+            ).andReturn("bash!")
+            .times(2)
+        EasyMock
+            .expect(
+                mock.manipulateString(
+                    LeakyMock.or(
+                        LeakyMock.contains("foo"),
+                        LeakyMock.contains("bar"),
+                        LeakyMock.contains("baz"),
+                    ),
                 ),
-            ),
-        ).andReturn("bazh!!!").times(3)
+            ).andReturn("bazh!!!")
+            .times(3)
         EasyMock.expect(mock.manipulateString(LeakyMock.not(LeakyMock.contains("foo")))).andReturn("bar!").once()
         EasyMock.expect(mock.manipulateString(LeakyMock.find("\\d+"))).andReturn("nums!").once()
         EasyMock.expect(mock.manipulateString(LeakyMock.matches("\\d+"))).andReturn("matchnums!").once()

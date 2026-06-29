@@ -12,18 +12,19 @@ import jakarta.validation.Validator
  */
 class HoconConfigurationFactoryFactory<T>
     @Inject
-    constructor(val configLoader: ConfigLoader) : ConfigurationFactoryFactory<T> {
+    constructor(
+        val configLoader: ConfigLoader,
+    ) : ConfigurationFactoryFactory<T> {
         override fun create(
             klass: Class<T>,
             validator: Validator,
             objectMapper: ObjectMapper,
             propertyPrefix: String,
-        ): ConfigurationFactory<T> {
-            return HoconConfigurationFactory<T>(
+        ): ConfigurationFactory<T> =
+            HoconConfigurationFactory<T>(
                 klass,
                 validator,
                 objectMapper,
                 configLoader,
             )
-        }
     }

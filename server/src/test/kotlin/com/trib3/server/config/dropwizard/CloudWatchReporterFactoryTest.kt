@@ -27,9 +27,7 @@ import java.util.concurrent.CompletableFuture
  * Extension function to make it easier to find the Type dimension
  * in a MetricDatum for test purposes
  */
-fun MetricDatum.typeDimension(): String? {
-    return this.dimensions().find { it.name() == "Type" }?.value()
-}
+fun MetricDatum.typeDimension(): String? = this.dimensions().find { it.name() == "Type" }?.value()
 
 /**
  * Base test module that configures a mock cloudwatch that expects
@@ -45,8 +43,10 @@ open class MockCloudWatchModule : KotlinModule() {
         val capture = EasyMock.newCapture<PutMetricDataRequest>()
         bind<Capture<PutMetricDataRequest>>().toInstance(capture)
         val mockCloudWatch = LeakyMock.mock<CloudWatchAsyncClient>()
-        EasyMock.expect(mockCloudWatch.putMetricData(EasyMock.capture(capture)))
-            .andReturn(CompletableFuture.completedFuture(null)).atLeastOnce()
+        EasyMock
+            .expect(mockCloudWatch.putMetricData(EasyMock.capture(capture)))
+            .andReturn(CompletableFuture.completedFuture(null))
+            .atLeastOnce()
         EasyMock.replay(mockCloudWatch)
         bind<CloudWatchAsyncClient>().toInstance(mockCloudWatch)
         install(ObjectMapperModule())
@@ -57,7 +57,9 @@ open class MockCloudWatchModule : KotlinModule() {
  * Base class with methods for running a cloudwatch metric report(),
  * after which assertions can be made on the catpured metric data
  */
-open class CloudWatchReporterFactoryTestBase(val mapper: ObjectMapper) {
+open class CloudWatchReporterFactoryTestBase(
+    val mapper: ObjectMapper,
+) {
     fun runReporter(testCaseConfigPath: String) {
         val configFactory =
             HoconConfigurationFactory(
@@ -71,8 +73,8 @@ open class CloudWatchReporterFactoryTestBase(val mapper: ObjectMapper) {
         EasyMock.verify(factory.cloudwatch)
     }
 
-    fun getMetricRegistry(): MetricRegistry {
-        return MetricRegistry().also {
+    fun getMetricRegistry(): MetricRegistry =
+        MetricRegistry().also {
             // create all types of metrics
             it.gauge("g1") {
                 Gauge { 1 }
@@ -84,7 +86,6 @@ open class CloudWatchReporterFactoryTestBase(val mapper: ObjectMapper) {
             it.meter("m1").mark()
             it.timer("t1").time().stop()
         }
-    }
 }
 
 class MockCloudWatchModuleDefault : MockCloudWatchModule()
@@ -105,11 +106,15 @@ class CloudWatchReporterFactoryDefaultTest
             metricData.forEach {
                 assertThat(it.storageResolution()).isEqualTo(60)
                 assertThat(
-                    it.dimensions().first { d -> d.name() == "Hostname" }
+                    it
+                        .dimensions()
+                        .first { d -> d.name() == "Hostname" }
                         ?.value(),
                 ).isEqualTo(InetAddress.getLocalHost().hostName)
                 assertThat(
-                    it.dimensions().first { d -> d.name() == "Application" }
+                    it
+                        .dimensions()
+                        .first { d -> d.name() == "Application" }
                         ?.value(),
                 ).isEqualTo("Test")
             }

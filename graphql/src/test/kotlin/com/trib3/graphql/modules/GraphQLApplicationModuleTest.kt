@@ -20,10 +20,12 @@ import com.trib3.server.filters.RequestIdFilter
 import com.trib3.server.modules.EnvironmentCallback
 import com.trib3.server.modules.TribeApplicationModule
 import com.trib3.testing.LeakyMock
+import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.GraphQLContext
-import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation
-import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentationOptions
+import graphql.execution.instrumentation.Instrumentation
+import graphql.execution.instrumentation.InstrumentationState
+import graphql.execution.instrumentation.parameters.InstrumentationExecutionParameters
 import io.dropwizard.core.setup.Environment
 import io.dropwizard.jetty.MutableServletContextHandler
 import jakarta.inject.Inject
@@ -32,24 +34,29 @@ import jakarta.servlet.ServletContainerInitializer
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderFactory
 import org.easymock.EasyMock
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer
 import org.testng.annotations.Guice
 import org.testng.annotations.Test
 import java.util.concurrent.CompletableFuture
 
 class DummyQuery {
-    fun query(): String {
-        return "test"
-    }
+    fun query(): String = "test"
 }
 
 class DummyModule : GraphQLApplicationModule() {
     override fun configureApplication() {
         graphQLQueriesBinder().addBinding().to<DummyQuery>()
         graphQLInstrumentationsBinder().addBinding().toInstance(
-            DataLoaderDispatcherInstrumentation(
-                DataLoaderDispatcherInstrumentationOptions.newOptions().includeStatistics(true),
-            ),
+            object : Instrumentation {
+                override fun instrumentExecutionResult(
+                    executionResult: ExecutionResult,
+                    parameters: InstrumentationExecutionParameters?,
+                    state: InstrumentationState?,
+                ): CompletableFuture<ExecutionResult> {
+                    executionResult.extensions.put("testinstrumentation", "testvalue")
+                    return CompletableFuture.completedFuture(executionResult)
+                }
+            },
         )
     }
 }
@@ -72,10 +79,7 @@ class GraphQLApplicationModuleTest
             RequestIdFilter.withRequestId("graphQLInstrumentationBindingTest") {
                 val result = graphQL.execute("query test")
                 assertThat(result.extensions["RequestId"]).isEqualTo("graphQLInstrumentationBindingTest")
-                assertThat(result.extensions["dataloader"]).isNotNull()
-                val x = result.extensions["dataloader"] as Map<*, *>
-                assertThat(x["overall-statistics"]).isNotNull()
-                assertThat(x["individual-statistics"]).isNotNull()
+                assertThat(result.extensions["testinstrumentation"]).isEqualTo("testvalue")
             }
         }
 
@@ -99,7 +103,8 @@ class GraphQLApplicationModuleTest
             val mockHandler = LeakyMock.mock<MutableServletContextHandler>()
             val initializerCapture = EasyMock.newCapture<ServletContainerInitializer>()
             EasyMock.expect(environment.applicationContext).andReturn(mockHandler)
-            EasyMock.expect(mockHandler.addServletContainerInitializer(LeakyMock.capture(initializerCapture)))
+            EasyMock
+                .expect(mockHandler.addServletContainerInitializer(LeakyMock.capture(initializerCapture)))
                 .andReturn(null)
             EasyMock.expect(mockHandler.isStopped).andReturn(true)
             EasyMock.replay(environment, mockHandler)
@@ -118,8 +123,8 @@ class OverrideDataLoaderModule : GraphQLApplicationModule() {
                 object : KotlinDataLoader<String, String> {
                     override val dataLoaderName = "loader"
 
-                    override fun getDataLoader(graphQLContext: GraphQLContext): DataLoader<String, String> {
-                        return DataLoaderFactory.newDataLoader { keys: List<String> ->
+                    override fun getDataLoader(graphQLContext: GraphQLContext): DataLoader<String, String> =
+                        DataLoaderFactory.newDataLoader { keys: List<String> ->
                             if (keys != listOf("a", "b")) {
                                 throw IllegalArgumentException("wrong keys!")
                             }
@@ -130,7 +135,6 @@ class OverrideDataLoaderModule : GraphQLApplicationModule() {
                                 ),
                             )
                         }
-                    }
                 },
             ),
         )
@@ -151,8 +155,9 @@ class GraphQLApplicationModuleDataLoaderOverrideTest
             val factory = graphQLResources.first().dataLoaderRegistryFactory
             assertThat(factory).isNotNull()
             val loader =
-                factory!!.generate(GraphQLContext.getDefault())
-                    .getDataLoader<String, String>("loader")
+                factory!!
+                    .generate(GraphQLContext.getDefault())
+                    .getDataLoader<String, String>("loader")!!
             assertThat(loader).isNotNull()
             val future = loader.loadMany(listOf("a", "b"))
             // an actual GraphQL resolver would return CompletableFuture<T> instead of T, and graphql-java would

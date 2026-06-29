@@ -12,10 +12,10 @@ import org.glassfish.jersey.server.ContainerRequest
 import org.testng.annotations.Test
 import java.security.Principal
 
-data class TestPrincipal(val _name: String) : Principal {
-    override fun getName(): String {
-        return _name
-    }
+data class TestPrincipal(
+    val _name: String,
+) : Principal {
+    override fun getName(): String = _name
 }
 
 class TestAuthenticator : AuthFilter<String, TestPrincipal>() {
@@ -29,28 +29,20 @@ class TestAuthenticator : AuthFilter<String, TestPrincipal>() {
             }
         requestContext.securityContext =
             object : SecurityContext {
-                override fun getUserPrincipal(): Principal? {
-                    return principal
-                }
+                override fun getUserPrincipal(): Principal? = principal
 
-                override fun isUserInRole(role: String?): Boolean {
-                    return false
-                }
+                override fun isUserInRole(role: String?): Boolean = false
 
-                override fun isSecure(): Boolean {
-                    return false
-                }
+                override fun isSecure(): Boolean = false
 
-                override fun getAuthenticationScheme(): String {
-                    return "test"
-                }
+                override fun getAuthenticationScheme(): String = "test"
             }
     }
 }
 
 class GraphQLWebSocketDropwizardAuthenticatorTest {
-    private fun getContext(user: String?): ContainerRequestContext {
-        return ContainerRequest(
+    private fun getContext(user: String?): ContainerRequestContext =
+        ContainerRequest(
             null,
             null,
             null,
@@ -60,7 +52,6 @@ class GraphQLWebSocketDropwizardAuthenticatorTest {
         ).apply {
             header("user", user)
         }
-    }
 
     @Test
     fun testAuth() {

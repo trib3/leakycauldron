@@ -42,51 +42,45 @@ open class TribeApplicationModule : KotlinModule() {
     /**
      * Binder for jersey resources
      */
-    fun resourceBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun resourceBinder(): KotlinMultibinder<Any> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(APPLICATION_RESOURCES_BIND_NAME),
         )
-    }
 
     /**
      * Binder for app servlets
      */
-    fun appServletBinder(): KotlinMultibinder<ServletConfig> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun appServletBinder(): KotlinMultibinder<ServletConfig> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(APPLICATION_SERVLETS_BIND_NAME),
         )
-    }
 
     /**
      * Binder for admin servlets
      */
-    fun adminServletBinder(): KotlinMultibinder<ServletConfig> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun adminServletBinder(): KotlinMultibinder<ServletConfig> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(ADMIN_SERVLETS_BIND_NAME),
         )
-    }
 
     /**
      * Optional binder for dropwizard AuthFilter
      */
-    fun authFilterBinder(): KotlinOptionalBinder<AuthFilter<*, *>> {
-        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
-    }
+    fun authFilterBinder(): KotlinOptionalBinder<AuthFilter<*, *>> =
+        KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
 
     /**
      * Optional binder for the role based principal authorizer
      */
-    fun authorizerBinder(): KotlinOptionalBinder<Authorizer<Principal>> {
-        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
-    }
+    fun authorizerBinder(): KotlinOptionalBinder<Authorizer<Principal>> =
+        KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
 
     /**
      * Binder for [EnvironmentCallback]s
      */
-    fun environmentCallbackBinder(): KotlinMultibinder<EnvironmentCallback> {
-        return KotlinMultibinder.newSetBinder(kotlinBinder)
-    }
+    fun environmentCallbackBinder(): KotlinMultibinder<EnvironmentCallback> =
+        KotlinMultibinder.newSetBinder(kotlinBinder)
 }

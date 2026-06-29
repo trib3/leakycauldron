@@ -32,9 +32,7 @@ class HoconConfigurationFactory<T>(
     override fun build(
         provider: ConfigurationSourceProvider,
         path: String,
-    ): T {
-        return build()
-    }
+    ): T = build()
 
     /**
      * Builds the configuration from the configuration loaded by [ConfigLoader.load]

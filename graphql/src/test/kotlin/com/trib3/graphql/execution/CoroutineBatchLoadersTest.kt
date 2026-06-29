@@ -28,13 +28,12 @@ class CoroutineBatchLoadersTest {
                     override suspend fun loadSuspend(
                         keys: List<String>,
                         environment: BatchLoaderEnvironment,
-                    ): List<String> {
-                        return keys.map {
+                    ): List<String> =
+                        keys.map {
                             val charA = 'a'
                             val offset = it.toInt() - 1
                             (charA + offset).toString()
                         }
-                    }
 
                     override val dataLoaderName = "testLoad"
                 }
@@ -54,9 +53,7 @@ class CoroutineBatchLoadersTest {
                     override suspend fun loadSuspend(
                         keys: Set<String>,
                         environment: BatchLoaderEnvironment,
-                    ): Map<String, String> {
-                        return keys.associateBy { it }
-                    }
+                    ): Map<String, String> = keys.associateBy { it }
 
                     override val dataLoaderName = "testLoad"
                 }
@@ -84,9 +81,10 @@ class CoroutineBatchLoadersTest {
                     override val dataLoaderName = "testCancel"
                 }
             val mockEnv = LeakyMock.mock<BatchLoaderEnvironment>()
-            EasyMock.expect(
-                mockEnv.getContext<GraphQLContext>(),
-            ).andReturn(GraphQLContext.of(mapOf(CoroutineScope::class to this)))
+            EasyMock
+                .expect(
+                    mockEnv.getContext<GraphQLContext>(),
+                ).andReturn(GraphQLContext.of(mapOf(CoroutineScope::class to this)))
             EasyMock.replay(mockEnv)
             val loading = loader.load(setOf("1", "2", "3"), mockEnv)
             this.coroutineContext[Job]?.cancelChildren()
@@ -107,11 +105,10 @@ class CoroutineBatchLoadersTest {
                 override suspend fun loadSuspend(
                     keys: List<String>,
                     environment: BatchLoaderEnvironment,
-                ): List<String> {
-                    return keys.map {
-                        it + environment.getContext<GraphQLContext>().get<String>() + environment.keyContexts[it]
+                ): List<String> =
+                    keys.map {
+                        it + environment.getContext<GraphQLContext>()?.get<String>() + environment.keyContexts[it]
                     }
-                }
 
                 override val dataLoaderName = "testListDataLoaderContext"
             }
@@ -131,11 +128,10 @@ class CoroutineBatchLoadersTest {
                 override suspend fun loadSuspend(
                     keys: Set<String>,
                     environment: BatchLoaderEnvironment,
-                ): Map<String, String> {
-                    return keys.associateWith {
-                        it + environment.getContext<GraphQLContext>().get<String>() + environment.keyContexts[it]
+                ): Map<String, String> =
+                    keys.associateWith {
+                        it + environment.getContext<GraphQLContext>()?.get<String>() + environment.keyContexts[it]
                     }
-                }
 
                 override val dataLoaderName = "testMappedDataLoaderContext"
             }

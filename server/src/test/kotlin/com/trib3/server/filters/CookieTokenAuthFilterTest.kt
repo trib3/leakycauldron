@@ -16,23 +16,23 @@ import org.testng.annotations.Test
 import java.security.Principal
 import java.util.Optional
 
-data class Session(val email: String) : Principal {
-    override fun getName(): String {
-        return email
-    }
+data class Session(
+    val email: String,
+) : Principal {
+    override fun getName(): String = email
 }
 
 class CookieTokenAuthFilterTest {
     val filter =
-        CookieTokenAuthFilter.Builder<Session>("cookieName")
+        CookieTokenAuthFilter
+            .Builder<Session>("cookieName")
             .setAuthenticator {
                 if (it == "value") {
                     Optional.of(Session("blah@blee.com"))
                 } else {
                     Optional.empty()
                 }
-            }
-            .buildAuthFilter()
+            }.buildAuthFilter()
 
     @Test
     fun testBuilder() {

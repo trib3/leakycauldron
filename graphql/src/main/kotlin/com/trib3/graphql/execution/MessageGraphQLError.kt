@@ -7,16 +7,12 @@ import graphql.language.SourceLocation
 /**
  * Simple [GraphQLError] implementation that only specified an error message
  */
-class MessageGraphQLError(private val msg: String?) : GraphQLError {
-    override fun getMessage(): String? {
-        return msg
-    }
+class MessageGraphQLError(
+    private val msg: String?,
+) : GraphQLError {
+    override fun getMessage(): String? = msg
 
-    override fun getLocations(): List<SourceLocation> {
-        return listOf()
-    }
+    override fun getLocations(): List<SourceLocation> = listOf()
 
-    override fun getErrorType(): ErrorClassification? {
-        return null
-    }
+    override fun getErrorType(): ErrorClassification? = null
 }

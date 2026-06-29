@@ -1,16 +1,16 @@
 package com.trib3.db.jooqext
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import mu.KotlinLogging
 import org.jooq.Record
 import org.jooq.ResultQuery
 import kotlin.coroutines.CoroutineContext
@@ -26,7 +26,7 @@ private const val DELAY_TIME = 100L
  * Will run an additional coroutine launched with the passed [coroutineContext] that monitors the
  * fetch-ing coroutine for cancellation, and calls [ResultQuery.cancel] when that occurs.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class)
 fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext = Dispatchers.IO): Flow<T> {
     val query = this
     return flow {
@@ -37,7 +37,7 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
                 }
             launch(coroutineContext, CoroutineStart.ATOMIC) {
                 // wait until the fetch job is cancelled or complete before doing anything
-                log.trace("fetch monitor awaiting job cancellation or completion")
+                log.trace { "fetch monitor awaiting job cancellation or completion" }
                 val cancelException =
                     try {
                         while (fetchJob.isActive) {
@@ -47,13 +47,13 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
                     } catch (e: CancellationException) {
                         e
                     }
-                log.trace("fetch monitor awaiting job completion")
+                log.trace { "fetch monitor awaiting job completion" }
                 // wait until the fetch job is actually complete, cancelling the query to speed its completion
                 while (!fetchJob.isCompleted) {
                     query.cancel()
                     delay(DELAY_TIME)
                 }
-                log.trace("fetch monitor job finished, throwing $cancelException")
+                log.trace { "fetch monitor job finished, throwing $cancelException" }
                 if (cancelException != null) {
                     throw cancelException
                 }
@@ -64,7 +64,7 @@ fun <T : Record> ResultQuery<T>.consumeAsFlow(coroutineContext: CoroutineContext
                     emit(i)
                 }
             } finally {
-                log.debug("Closing cursor")
+                log.debug { "Closing cursor" }
                 cursor.close()
             }
         }

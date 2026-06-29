@@ -7,4 +7,6 @@ package com.trib3.server.coroutine
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class AsyncDispatcher(val dispatcher: String)
+annotation class AsyncDispatcher(
+    val dispatcher: String,
+)

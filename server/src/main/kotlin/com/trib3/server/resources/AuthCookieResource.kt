@@ -48,12 +48,14 @@ class AuthCookieResource
                     .getHeaderString("Authorization")
                     ?.split(' ', limit = 2)
             val authToken = authHeaderSplit?.last()
-            return Response.status(HttpStatus.NO_CONTENT_204)
+            return Response
+                .status(HttpStatus.NO_CONTENT_204)
                 .runIf(authToken != null) {
                     cookie(
-                        NewCookie.Builder(getCookieName())
+                        NewCookie
+                            .Builder(getCookieName())
                             .value(authToken)
-                            .path("/app")
+                            .path(appConfig.appContextPath)
                             .secure(containerRequestContext.securityContext.isSecure)
                             .httpOnly(true)
                             .build(),
