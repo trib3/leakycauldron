@@ -94,8 +94,6 @@ jobs:
           name: Maven Setup
           command: |
             ./mvnw --version
-            # mkdir -p ~/.m2
-            # echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             export MAVEN_OPTS=""
             cd build-resources && BASE_VERSION=$(../mvnw -q  -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec|sed 's/-SNAPSHOT.*//') && cd ..
@@ -272,8 +270,6 @@ jobs:
       - run:
           name: Complete release
           command: |
-            # mkdir -p ~/.m2
-            # echo $MAVEN_SETTINGS_XML > ~/.m2/settings.xml
             export MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"
             OSSRH_USER=$(sed -n 's|.*<username>\([^<]*\)</username>.*|\1|p' ~/.m2/settings.xml)
             OSSRH_PASS=$(sed -n 's|.*<password>\([^<]*\)</password>.*|\1|p' ~/.m2/settings.xml)
