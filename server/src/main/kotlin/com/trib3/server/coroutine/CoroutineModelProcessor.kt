@@ -51,21 +51,26 @@ class CoroutineModelProcessor
             }
         }
 
-        private fun createClassWrapper(method: ResourceMethod): Class<*> {
-            return ByteBuddy()
-                .subclass(Object::class.java)
-                .annotateType(method.invocable.definitionMethod.declaringClass.annotations.toList())
-                .defineMethod(
+        private fun createClassWrapper(method: ResourceMethod): Class<*> =
+            ByteBuddy()
+                .subclass(Any::class.java)
+                .name(method.invocable.definitionMethod.declaringClass.name + "CoroutineWrapper")
+                .annotateType(
+                    method.invocable.definitionMethod.declaringClass.annotations
+                        .toList(),
+                ).defineMethod(
                     method.invocable.definitionMethod.name,
-                    getContinuationTypeParameter(method.invocable.parameters.last().type),
+                    getContinuationTypeParameter(
+                        method.invocable.parameters
+                            .last()
+                            .type,
+                    ),
                     Visibility.PUBLIC,
-                )
-                .withParameters(
+                ).withParameters(
                     method.invocable.parameters
                         .slice(0 until method.invocable.parameters.size - 1)
                         .map { it.type },
-                )
-                .intercept(
+                ).intercept(
                     InvocationHandlerAdapter.of(
                         CoroutineInvocationHandler(
                             asyncContextProvider,
@@ -78,8 +83,10 @@ class CoroutineModelProcessor
                             method.isSse || method.isSuspendDeclared,
                         ),
                     ),
+                ).annotateMethod(
+                    method.invocable.definitionMethod.annotations
+                        .toList(),
                 )
-                .annotateMethod(method.invocable.definitionMethod.annotations.toList())
                 // copy the annotations for each parameter in the invocable method
                 // (except for the last/Continuation param)
                 .let { fakeMethod ->
@@ -88,11 +95,9 @@ class CoroutineModelProcessor
                         .foldIndexed(fakeMethod) { index, annotatedMethod, parameter ->
                             annotatedMethod.annotateParameter(index, parameter.toList())
                         }
-                }
-                .make()
+                }.make()
                 .load(this::class.java.classLoader)
                 .loaded
-        }
 
         /**
          * Replace any suspend function (ie, function whose last param is a Continuation)
@@ -103,7 +108,9 @@ class CoroutineModelProcessor
             for (method in resource.resourceMethods) {
                 if (
                     method.invocable.parameters.isNotEmpty() &&
-                    method.invocable.parameters.last().rawType == Continuation::class.java
+                    method.invocable.parameters
+                        .last()
+                        .rawType == Continuation::class.java
                 ) {
                     val fakeClass = createClassWrapper(method)
 
@@ -154,7 +161,5 @@ class CoroutineModelProcessor
         override fun processSubResource(
             subResourceModel: ResourceModel,
             configuration: Configuration,
-        ): ResourceModel {
-            return processResourceModel(subResourceModel, configuration)
-        }
+        ): ResourceModel = processResourceModel(subResourceModel, configuration)
     }

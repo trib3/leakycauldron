@@ -10,21 +10,21 @@ import org.slf4j.MDC
 import org.testng.annotations.Test
 
 class Query {
-    fun test(): String {
-        return "test"
-    }
+    fun test(): String = "test"
 }
 
 class RequestIdInstrumentationTest {
     val config =
         SchemaGeneratorConfig(listOf(this::class.java.packageName))
     val graphQL =
-        GraphQL.newGraphQL(
-            toSchema(
-                config,
-                listOf(TopLevelObject(Query())),
-            ),
-        ).instrumentation(RequestIdInstrumentation()).build()
+        GraphQL
+            .newGraphQL(
+                toSchema(
+                    config,
+                    listOf(TopLevelObject(Query())),
+                ),
+            ).instrumentation(RequestIdInstrumentation())
+            .build()
 
     @Test
     fun testInstrumentation() {

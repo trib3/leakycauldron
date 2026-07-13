@@ -46,8 +46,10 @@ class GraphQLSseResourceTest {
         val graphQL = LeakyMock.mock<GraphQL>()
         val executionResult = ExecutionResultImpl.newExecutionResult().data(mockFlow).build()
 
-        EasyMock.expect(graphQL.executeAsync(EasyMock.anyObject<ExecutionInput>()))
-            .andReturn(CompletableFuture.completedFuture(executionResult)).anyTimes()
+        EasyMock
+            .expect(graphQL.executeAsync(EasyMock.anyObject<ExecutionInput>()))
+            .andReturn(CompletableFuture.completedFuture(executionResult))
+            .anyTimes()
 
         EasyMock.replay(graphQL)
 

@@ -51,80 +51,71 @@ abstract class GraphQLApplicationModule : TribeApplicationModule() {
     /**
      * Binder for graphql packages
      */
-    fun graphQLPackagesBinder(): KotlinMultibinder<String> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun graphQLPackagesBinder(): KotlinMultibinder<String> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(GRAPHQL_PACKAGES_BIND_NAME),
         )
-    }
 
     /**
      * Binder for graphql queries
      */
-    fun graphQLQueriesBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun graphQLQueriesBinder(): KotlinMultibinder<Any> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(GRAPHQL_QUERIES_BIND_NAME),
         )
-    }
 
     /**
      * Binder for graphql mutations
      */
-    fun graphQLMutationsBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun graphQLMutationsBinder(): KotlinMultibinder<Any> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(GRAPHQL_MUTATIONS_BIND_NAME),
         )
-    }
 
     /**
      * Binder for graphql subscriptions
      */
-    fun graphQLSubscriptionsBinder(): KotlinMultibinder<Any> {
-        return KotlinMultibinder.newAnnotatedSetBinder(
+    fun graphQLSubscriptionsBinder(): KotlinMultibinder<Any> =
+        KotlinMultibinder.newAnnotatedSetBinder(
             kotlinBinder,
             Names.named(GRAPHQL_SUBSCRIPTIONS_BIND_NAME),
         )
-    }
 
     /**
      * Optional binder for the dataLoaderRegistryFactory
      */
-    fun dataLoaderRegistryFactoryBinder(): KotlinOptionalBinder<KotlinDataLoaderRegistryFactory> {
-        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
-    }
+    fun dataLoaderRegistryFactoryBinder(): KotlinOptionalBinder<KotlinDataLoaderRegistryFactory> =
+        KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
 
     /**
      * Optional binder for the graphQLWebSocketAuthenticator
      */
-    fun graphQLWebSocketAuthenticatorBinder(): KotlinOptionalBinder<GraphQLWebSocketAuthenticator> {
-        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
-    }
+    fun graphQLWebSocketAuthenticatorBinder(): KotlinOptionalBinder<GraphQLWebSocketAuthenticator> =
+        KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
 
     /**
      * Binder for graphql Instrumentations.  RequestIdInstrumentation
      * will be registered by default, but additional ones can be registered
      * via this binder.
      */
-    fun graphQLInstrumentationsBinder(): KotlinMultibinder<Instrumentation> {
-        return KotlinMultibinder.newSetBinder(kotlinBinder)
-    }
+    fun graphQLInstrumentationsBinder(): KotlinMultibinder<Instrumentation> =
+        KotlinMultibinder.newSetBinder(kotlinBinder)
 
     /**
      * Binder for Schema Directives.  By default an "auth" directive is registered;
      * additional schema directives can be registered via this binder.
      */
-    fun schemaDirectivesBinder(): KotlinMapBinder<String, KotlinSchemaDirectiveWiring> {
-        return KotlinMapBinder.newMapBinder(kotlinBinder)
-    }
+    fun schemaDirectivesBinder(): KotlinMapBinder<String, KotlinSchemaDirectiveWiring> =
+        KotlinMapBinder.newMapBinder(kotlinBinder)
 
     /**
      * Optional binder for specifying a [DataFetcherExceptionHandler] to be used by
      * queries, mutations, and subscriptions to handle errors.  Defaults to one that
      * skips printing of exception stack traces.
      */
-    fun dataFetcherExceptionHandlerBinder(): KotlinOptionalBinder<DataFetcherExceptionHandler> {
-        return KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
-    }
+    fun dataFetcherExceptionHandlerBinder(): KotlinOptionalBinder<DataFetcherExceptionHandler> =
+        KotlinOptionalBinder.newOptionalBinder(kotlinBinder)
 }

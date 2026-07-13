@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trib3</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Trib3 parent pom</name>
@@ -42,101 +42,108 @@
         <skip.source>false</skip.source>
         <skip.tests>false</skip.tests>
 
-        <version.activation>2.1.3</version.activation>
-        <version.angus>2.0.2</version.angus>
+        <version.activation>2.1.4</version.activation>
+        <version.angus>2.0.3</version.angus>
         <version.annotation>3.0.0</version.annotation>
-        <version.ant>1.10.14</version.ant>
+        <version.ant>1.10.17</version.ant>
         <version.argparse4j>0.9.0</version.argparse4j>
+        <version.asm>9.10.1</version.asm>
         <version.assertk>0.28.1</version.assertk>
-        <version.aws.java>2.25.64</version.aws.java>
-        <version.byte-buddy>1.14.17</version.byte-buddy>
-        <version.caffeine>3.1.8</version.caffeine>
-        <version.checker-qual>3.43.0</version.checker-qual>
-        <version.classgraph>4.8.172</version.classgraph>
-        <version.commons-codec>1.17.0</version.commons-codec>
-        <version.commons-compress>1.26.2</version.commons-compress>
-        <version.commons-io>2.16.1</version.commons-io>
-        <version.commons-lang3>3.14.0</version.commons-lang3>
-        <version.commons-text>1.12.0</version.commons-text>
+        <version.aws.java>2.46.15</version.aws.java>
+        <version.byte-buddy>1.18.10</version.byte-buddy>
+        <version.caffeine>3.2.4</version.caffeine>
+        <version.checker-qual>4.2.0</version.checker-qual>
+        <version.classgraph>4.8.184</version.classgraph>
+        <version.commons-codec>1.22.0</version.commons-codec>
+        <version.commons-compress>1.28.0</version.commons-compress>
+        <version.commons-io>2.22.0</version.commons-io>
+        <version.commons-lang3>3.20.0</version.commons-lang3>
+        <version.commons-text>1.15.0</version.commons-text>
         <version.config4k>0.7.0</version.config4k>
-        <version.detekt>1.23.6</version.detekt>
-        <version.dokka>1.9.20</version.dokka>
-        <version.dropwizard>4.0.7</version.dropwizard>
+        <version.detekt>1.23.8</version.detekt>
+        <version.detekt-kotlin>2.2.10</version.detekt-kotlin>
+        <version.dokka>2.2.0</version.dokka>
+        <version.dropwizard>5.0.2</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
-        <version.dropwizard.metrics>4.2.25</version.dropwizard.metrics>
+        <version.dropwizard.metrics>4.2.39</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
-        <version.easymock>5.2.0</version.easymock>
-        <version.errorprone>2.28.0</version.errorprone>
-        <version.expressly>5.0.0</version.expressly>
-        <version.flyway>10.13.0</version.flyway>
-        <version.graphql-kotlin>7.1.1</version.graphql-kotlin>
-        <version.graphql-java>21.5</version.graphql-java>
-        <version.graphql-java-extended-scalars>22.0</version.graphql-java-extended-scalars>
-        <version.graphql-java.dataloader>3.3.0</version.graphql-java.dataloader>
-        <version.guava>33.2.1-jre</version.guava>
+        <version.easymock>5.6.0</version.easymock>
+        <version.errorprone>2.50.0</version.errorprone>
+        <version.expressly>6.0.0</version.expressly>
+        <version.flyway>12.9.0</version.flyway>
+        <version.graphql-kotlin>10.0.1</version.graphql-kotlin>
+        <version.graphql-java>25.0</version.graphql-java>
+        <version.graphql-java-extended-scalars>24.0</version.graphql-java-extended-scalars>
+        <version.graphql-java.dataloader>6.0.0</version.graphql-java.dataloader>
+        <version.guava>33.6.0-jre</version.guava>
         <version.guice>7.0.0</version.guice>
-        <version.hibernate.validator>8.0.1.Final</version.hibernate.validator>
-        <version.hikaricp>5.1.0</version.hikaricp>
-        <version.hk2>3.1.0</version.hk2>
-        <version.httpcomponents.client>5.3.1</version.httpcomponents.client>
-        <version.httpcomponents.core>5.2.4</version.httpcomponents.core>
-        <version.j2objc>3.0.0</version.j2objc>
-        <version.jackson>2.17.1</version.jackson>
+        <version.hibernate.validator>8.0.2.Final</version.hibernate.validator>
+        <version.hikaricp>7.1.0</version.hikaricp>
+        <version.hk2>4.0.1</version.hk2>
+        <version.httpcomponents.client>5.6.1</version.httpcomponents.client>
+        <version.httpcomponents.client4>4.5.14</version.httpcomponents.client4>
+        <version.httpcomponents.core>5.4.2</version.httpcomponents.core>
+        <version.httpcomponents.core4>4.4.16</version.httpcomponents.core4>
+        <version.j2objc>3.1</version.j2objc>
+        <version.jackson>2.22.0</version.jackson>
         <version.jackson.hocon>1.1.0</version.jackson.hocon>
-        <version.jacoco>0.8.12</version.jacoco>
+        <version.jacoco>0.8.15</version.jacoco>
+        <version.jakarta.el>6.0.1</version.jakarta.el>
         <version.jakarta.inject>2.0.1</version.jakarta.inject>
-        <version.java.release>17</version.java.release>
-        <version.jaxb>4.0.2</version.jaxb>
-        <version.jaxb.runtime>4.0.5</version.jaxb.runtime>
+        <version.java.release>21</version.java.release>
+        <version.jaxb>4.0.5</version.jaxb>
+        <version.jaxb.runtime>4.0.9</version.jaxb.runtime>
         <version.jaxrs>4.0.0</version.jaxrs>
-        <version.jboss.logging>3.6.0.Final</version.jboss.logging>
-        <version.jersey>3.1.7</version.jersey>
+        <version.jboss.logging>3.6.3.Final</version.jboss.logging>
+        <version.jersey>3.1.12</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>11.0.21</version.jetty>
-        <version.jna>5.14.0</version.jna>
-        <version.joda>2.12.7</version.joda>
-        <version.jooq>3.19.9</version.jooq>
+        <version.jetty>12.1.10</version.jetty>
+        <version.jna>5.19.1</version.jna>
+        <version.joda>2.14.2</version.joda>
+        <version.jooq>3.21.6</version.jooq>
         <version.jsr305>3.0.2</version.jsr305>
         <version.junit>4.13.2</version.junit>
-        <version.kotlin>2.0.0</version.kotlin>
-        <version.kotlin.coroutines>1.8.1</version.kotlin.coroutines>
+        <version.kotlin>2.4.0</version.kotlin>
+        <version.kotlin.coroutines>1.11.0</version.kotlin.coroutines>
         <version.kotlin.guice>3.0.0</version.kotlin.guice>
-        <version.kotlin.logging>3.0.5</version.kotlin.logging>
-        <version.ktlint>1.2.1</version.ktlint>
+        <version.kotlin.logging>8.0.4</version.kotlin.logging>
+        <version.ktlint>1.8.0</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
-        <version.logback>1.4.14</version.logback>
-        <version.maven.antrun>3.1.0</version.maven.antrun>
-        <version.maven.assembly>3.7.1</version.maven.assembly>
-        <version.maven.buildhelper>3.6.0</version.maven.buildhelper>
-        <version.maven.clean>3.3.2</version.maven.clean>
-        <version.maven.compiler>3.13.0</version.maven.compiler>
-        <version.maven.dependency>3.6.1</version.maven.dependency>
+        <version.logback>1.5.34</version.logback>
+        <version.logback-access>2.0.12</version.logback-access>
+        <version.maven.antrun>3.2.0</version.maven.antrun>
+        <version.maven.assembly>3.8.0</version.maven.assembly>
+        <version.maven.buildhelper>3.6.1</version.maven.buildhelper>
+        <version.maven.clean>3.5.0</version.maven.clean>
+        <version.maven.compiler>3.15.0</version.maven.compiler>
+        <version.maven.dependency>3.11.0</version.maven.dependency>
         <version.maven.dependencyscope>0.10</version.maven.dependencyscope>
-        <version.maven.deploy>3.1.2</version.maven.deploy>
-        <version.maven.enforcer>3.5.0</version.maven.enforcer>
-        <version.maven.failsafe>3.2.5</version.maven.failsafe>
-        <version.maven.git>8.0.2</version.maven.git>
-        <version.maven.gpg>3.2.4</version.maven.gpg>
-        <version.maven.install>3.1.2</version.maven.install>
-        <version.maven.jar>3.4.1</version.maven.jar>
-        <version.maven.properties>1.2.1</version.maven.properties>
-        <version.maven.resources>3.3.1</version.maven.resources>
-        <version.maven.shade>3.6.0</version.maven.shade>
-        <version.maven.source>3.3.1</version.maven.source>
-        <version.maven.surefire>3.2.5</version.maven.surefire>
-        <version.netty>4.1.110.Final</version.netty>
-        <version.postgres>42.7.3</version.postgres>
+        <version.maven.deploy>3.1.4</version.maven.deploy>
+        <version.maven.enforcer>3.6.3</version.maven.enforcer>
+        <version.maven.failsafe>3.5.6</version.maven.failsafe>
+        <version.maven.git>10.0.0</version.maven.git>
+        <version.maven.gpg>3.2.8</version.maven.gpg>
+        <version.maven.install>3.1.4</version.maven.install>
+        <version.maven.jar>3.5.0</version.maven.jar>
+        <version.maven.properties>1.3.0</version.maven.properties>
+        <version.maven.resources>3.5.0</version.maven.resources>
+        <version.maven.shade>3.6.2</version.maven.shade>
+        <version.maven.source>3.4.0</version.maven.source>
+        <version.maven.surefire>3.5.6</version.maven.surefire>
+        <version.netty>4.2.15.Final</version.netty>
+        <version.postgres>42.7.11</version.postgres>
+        <version.prometheus>1.8.0</version.prometheus>
         <version.reactivestreams>1.0.4</version.reactivestreams>
-        <version.redshift>2.1.0.28</version.redshift>
-        <version.servlet>5.0.0</version.servlet>
-        <version.slf4j>2.0.13</version.slf4j>
-        <version.snakeyaml>2.2</version.snakeyaml>
-        <version.swagger>2.2.22</version.swagger>
-        <version.testcontainers>1.19.8</version.testcontainers>
-        <version.testng>7.10.2</version.testng>
-        <version.threeten>1.8.0</version.threeten>
-        <version.typesafe.config>1.4.3</version.typesafe.config>
-        <version.validation>3.1.0</version.validation>
+        <version.redshift>2.2.7</version.redshift>
+        <version.servlet>6.1.0</version.servlet>
+        <version.slf4j>2.0.18</version.slf4j>
+        <version.snakeyaml>2.6</version.snakeyaml>
+        <version.swagger>2.2.51</version.swagger>
+        <version.testcontainers>2.0.5</version.testcontainers>
+        <version.testng>7.12.0</version.testng>
+        <version.threeten>1.10.0</version.threeten>
+        <version.typesafe.config>1.4.9</version.typesafe.config>
+        <version.validation>3.1.1</version.validation>
     </properties>
 
     <dependencyManagement>
@@ -157,15 +164,9 @@
 
             <!-- logging -->
             <dependency>
-                <groupId>io.github.microutils</groupId>
+                <groupId>io.github.oshai</groupId>
                 <artifactId>kotlin-logging-jvm</artifactId>
                 <version>${version.kotlin.logging}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-stdlib-common</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -189,9 +190,14 @@
                 <version>${version.logback}</version>
             </dependency>
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>${version.logback}</version>
+                <groupId>ch.qos.logback.access</groupId>
+                <artifactId>logback-access-common</artifactId>
+                <version>${version.logback-access}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback.access</groupId>
+                <artifactId>logback-access-jetty12</artifactId>
+                <version>${version.logback-access}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
@@ -246,16 +252,6 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-core</artifactId>
                 <version>${version.dropwizard}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>validation-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
@@ -266,12 +262,6 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-auth</artifactId>
                 <version>${version.dropwizard}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
@@ -286,30 +276,6 @@
                     <exclusion>
                         <groupId>org.glassfish.hk2.external</groupId>
                         <artifactId>aopalliance-repackaged</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.xml.bind</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.hibernate.validator</groupId>
-                        <artifactId>hibernate-validator</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>validation-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.activation</groupId>
-                        <artifactId>javax.activation-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -343,31 +309,11 @@
                 <artifactId>dropwizard-testing</artifactId>
                 <version>${version.dropwizard}</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.objenesis</groupId>
-                        <artifactId>objenesis</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-validation</artifactId>
                 <version>${version.dropwizard}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish</groupId>
-                        <artifactId>jakarta.el</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
@@ -398,12 +344,6 @@
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-servlets</artifactId>
                 <version>${version.dropwizard.metrics}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>joda-time</groupId>
-                        <artifactId>joda-time</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>jakarta.activation</groupId>
@@ -432,12 +372,11 @@
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
                 <version>${version.annotation}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.el</groupId>
+                <artifactId>jakarta.el-api</artifactId>
+                <version>${version.jakarta.el}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.ws.rs</groupId>
@@ -492,16 +431,6 @@
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-common</artifactId>
                 <version>${version.jersey}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>aopalliance-repackaged</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.inject</groupId>
@@ -518,24 +447,6 @@
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-server</artifactId>
                 <version>${version.jersey}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>aopalliance-repackaged</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.javassist</groupId>
-                        <artifactId>javassist</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>validation-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.ext</groupId>
@@ -546,41 +457,17 @@
                         <groupId>org.hibernate.validator</groupId>
                         <artifactId>hibernate-validator</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>validation-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish</groupId>
-                        <artifactId>jakarta.el</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.containers</groupId>
                 <artifactId>jersey-container-servlet-core</artifactId>
                 <version>${version.jersey}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.containers</groupId>
                 <artifactId>jersey-container-jetty-http</artifactId>
                 <version>${version.jersey}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.containers</groupId>
@@ -588,20 +475,8 @@
                 <version>${version.jersey}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-util</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-continuation</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-webapp</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -609,71 +484,35 @@
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-client</artifactId>
                 <version>${version.jersey}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.media</groupId>
                 <artifactId>jersey-media-sse</artifactId>
                 <version>${version.jersey}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.test-framework</groupId>
                 <artifactId>jersey-test-framework-core</artifactId>
                 <version>${version.jersey}</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.test-framework.providers</groupId>
                 <artifactId>jersey-test-framework-provider-inmemory</artifactId>
                 <version>${version.jersey}</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.test-framework.providers</groupId>
                 <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
                 <version>${version.jersey}</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.test-framework.providers</groupId>
                 <artifactId>jersey-test-framework-provider-jetty</artifactId>
                 <version>${version.jersey}</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>jakarta.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.expressly</groupId>
@@ -690,52 +529,39 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-annotations</artifactId>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-bom</artifactId>
                 <version>${version.jetty}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.toolchain</groupId>
-                        <artifactId>jetty-jakarta-servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.toolchain</groupId>
-                        <artifactId>jetty-servlet-api</artifactId>
-                    </exclusion>
-                </exclusions>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${version.jetty}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.toolchain</groupId>
-                        <artifactId>jetty-jakarta-servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.toolchain</groupId>
-                        <artifactId>jetty-servlet-api</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${version.asm}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty.websocket</groupId>
-                <artifactId>websocket-jetty-server</artifactId>
-                <version>${version.jetty}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.toolchain</groupId>
-                        <artifactId>jetty-jakarta-servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.toolchain</groupId>
-                        <artifactId>jetty-servlet-api</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-commons</artifactId>
+                <version>${version.asm}</version>
             </dependency>
 
             <!-- swagger -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core-jakarta</artifactId>
+                <version>${version.swagger}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-jsr310</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-models-jakarta</artifactId>
@@ -759,18 +585,6 @@
                         <groupId>com.fasterxml.jackson.datatype</groupId>
                         <artifactId>jackson-datatype-jsr310</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                        <artifactId>jackson-jaxrs-json-provider</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.xml.bind</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>validation-api</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -787,10 +601,6 @@
                         <artifactId>jackson-datatype-jsr310</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                        <artifactId>jackson-jaxrs-json-provider</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>org.javassist</groupId>
                         <artifactId>javassist</artifactId>
                     </exclusion>
@@ -805,11 +615,6 @@
                 <version>${version.jackson}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-guice7</artifactId>
-                <version>${version.jackson}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -865,10 +670,6 @@
                         <groupId>org.reactivestreams</groupId>
                         <artifactId>reactive-streams</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>com.typesafe.netty</groupId>
-                        <artifactId>netty-reactive-streams-http</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -883,10 +684,6 @@
                     <exclusion>
                         <groupId>org.reactivestreams</groupId>
                         <artifactId>reactive-streams</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.typesafe.netty</groupId>
-                        <artifactId>netty-reactive-streams-http</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -912,6 +709,16 @@
                 <version>${version.httpcomponents.client}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${version.httpcomponents.core4}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${version.httpcomponents.client4}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
                 <version>${version.netty}</version>
@@ -922,6 +729,13 @@
                 <groupId>io.github.azagniotov</groupId>
                 <artifactId>dropwizard-metrics-cloudwatch</artifactId>
                 <version>${version.dropwizard.metrics.cloudwatch}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>prometheus-metrics-bom</artifactId>
+                <version>${version.prometheus}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- commons -->
@@ -956,12 +770,6 @@
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>${version.guice}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.inject</groupId>
-                        <artifactId>javax.inject</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.google.inject.extensions</groupId>
@@ -1033,12 +841,7 @@
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
-                <artifactId>jna</artifactId>
-                <version>${version.jna}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.java.dev.jna</groupId>
-                <artifactId>jna-platform</artifactId>
+                <artifactId>jna-jpms</artifactId>
                 <version>${version.jna}</version>
             </dependency>
 
@@ -1047,12 +850,6 @@
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq</artifactId>
                 <version>${version.jooq}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.xml.bind</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jooq</groupId>
@@ -1127,16 +924,6 @@
                 <artifactId>assertk-jvm</artifactId>
                 <version>${version.assertk}</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-stdlib-common</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-stdlib-jdk8</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.easymock</groupId>
@@ -1152,15 +939,21 @@
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>postgresql</artifactId>
+                <artifactId>testcontainers-postgresql</artifactId>
                 <version>${version.testcontainers}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>jdbc</artifactId>
+                <artifactId>testcontainers-jdbc</artifactId>
                 <version>${version.testcontainers}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.java.dev.jna</groupId>
+                        <artifactId>jna</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- graphQL -->
@@ -1168,12 +961,6 @@
                 <groupId>com.graphql-java</groupId>
                 <artifactId>graphql-java</artifactId>
                 <version>${version.graphql-java}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jdk8</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.graphql-java</groupId>
@@ -1242,7 +1029,7 @@
 
         <!-- logging -->
         <dependency>
-            <groupId>io.github.microutils</groupId>
+            <groupId>io.github.oshai</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
         </dependency>
         <dependency>
@@ -1326,6 +1113,9 @@
                         <skip>${skip.checks}</skip>
                         <rules>
                             <dependencyConvergence/>
+                            <requireJavaVersion>
+                                 <version>[${version.java.release},)</version> <!-- skip-dependency-check -->
+                            </requireJavaVersion>
                             <requireMavenVersion>
                                 <version>3.9.6</version>
 			    </requireMavenVersion>
@@ -1355,6 +1145,10 @@
                                     <exclude>org.glassfish:jakarta.el</exclude>
                                     <!-- use com.trib3:metrics-guice since no longer available -->
                                     <exclude>com.palominolabs.metrics:metrics-guice</exclude>
+                                    <!-- use jna-jpms instead -->
+                                    <exclude>net.java.dev.jna:jna</exclude>
+                                    <!-- use io.github.oshai instead -->
+                                    <exclude>io.github.microutils:kotlin-logging-jvm</exclude>
                                 </excludes>
                             </bannedDependencies>
                         </rules>
@@ -1536,7 +1330,12 @@
                         <dependency>
                             <groupId>org.jetbrains.kotlin</groupId>
                             <artifactId>kotlin-stdlib</artifactId>
-                            <version>${version.kotlin}</version>
+			    <version>${version.detekt-kotlin}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-compiler-embeddable</artifactId>
+			    <version>${version.detekt-kotlin}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.apache.ant</groupId>
@@ -1866,7 +1665,7 @@
                                 org.jetbrains:annotations
                             </ignoredUnusedDeclaredDependency>
                             <ignoredUnusedDeclaredDependency>
-                                io.github.microutils:kotlin-logging-jvm
+                                io.github.oshai:kotlin-logging-jvm
                             </ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
                         <!-- workaround for https://issues.apache.org/jira/browse/MDEP-791 -->

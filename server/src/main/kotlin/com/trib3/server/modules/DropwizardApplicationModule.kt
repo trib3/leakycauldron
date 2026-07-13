@@ -53,24 +53,20 @@ class DropwizardApplicationModule : TribeApplicationModule() {
 
     @Provides
     @Named(ADMIN_SERVLET_FILTERS_BIND_NAME)
-    fun getAdminAuthFilter(config: TribeApplicationConfig): Set<ServletFilterConfig> {
-        return config.adminAuthToken?.let {
-            setOf(
-                ServletFilterConfig(
-                    AdminAuthFilter::class.java.simpleName,
-                    AdminAuthFilter::class.java,
-                    mapOf("token" to it),
-                ),
-            )
-        }.orEmpty()
-    }
+    fun getAdminAuthFilter(config: TribeApplicationConfig): Set<ServletFilterConfig> =
+        config.adminAuthToken
+            ?.let {
+                setOf(
+                    ServletFilterConfig(
+                        AdminAuthFilter::class.java.simpleName,
+                        AdminAuthFilter::class.java,
+                        mapOf("token" to it),
+                    ),
+                )
+            }.orEmpty()
 
     // allow multiple installations so that multiple other modules can install this one
-    override fun equals(other: Any?): Boolean {
-        return other is DropwizardApplicationModule
-    }
+    override fun equals(other: Any?): Boolean = other is DropwizardApplicationModule
 
-    override fun hashCode(): Int {
-        return this::class.hashCode()
-    }
+    override fun hashCode(): Int = this::class.hashCode()
 }

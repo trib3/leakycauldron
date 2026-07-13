@@ -8,11 +8,10 @@
     <parent>
         <groupId>com.trib3</groupId>
         <artifactId>leakycauldron</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.trib3</groupId>
     <artifactId>db</artifactId>
 
     <name>Leaky Cauldron :: DB</name>

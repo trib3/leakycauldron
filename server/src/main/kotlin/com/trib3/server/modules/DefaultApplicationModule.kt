@@ -3,6 +3,7 @@ package com.trib3.server.modules
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.health.HealthCheck
 import com.codahale.metrics.health.HealthCheckRegistry
+import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.multibindings.ProvidesIntoSet
 import com.palominolabs.metrics.guice.MetricsInstrumentationModule
@@ -20,17 +21,24 @@ import dev.misfitlabs.kotlinguice4.multibindings.KotlinMultibinder
 import io.dropwizard.auth.AuthValueFactoryProvider
 import io.dropwizard.configuration.ConfigurationFactoryFactory
 import io.dropwizard.core.Configuration
+import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet
 import jakarta.inject.Provider
+import jakarta.servlet.DispatcherType
 import jakarta.servlet.Filter
-import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.eclipse.jetty.servlets.HeaderFilter
+import org.eclipse.jetty.ee10.servlets.HeaderFilter
+import org.eclipse.jetty.server.Handler
+import org.eclipse.jetty.server.handler.CrossOriginHandler
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature
 import java.security.Principal
+import java.util.EnumSet
 
 data class ServletFilterConfig(
     val name: String,
     val filterClass: Class<out Filter>,
     val initParameters: Map<String, String> = emptyMap(),
+    val dispatcherTypes: EnumSet<DispatcherType> = EnumSet.of(DispatcherType.REQUEST),
+    val isMatchAfter: Boolean = false,
+    val urlPatterns: List<String> = listOf("/*"),
 )
 
 /**
@@ -64,6 +72,9 @@ class DefaultApplicationModule : TribeApplicationModule() {
         bind<MetricRegistry>().toInstance(registry)
         install(MetricsInstrumentationModule.builder().withMetricRegistry(registry).build())
         bind<HealthCheckRegistry>().`in`(Scopes.SINGLETON)
+        adminServletBinder().addBinding().toInstance(
+            ServletConfig("prometheus", PrometheusMetricsServlet(), listOf("/prometheus")),
+        )
 
         // Ensure @Auth annotations can be used as long as downstream binds an AuthFilter implementation
         // (and optionally an Authorizer implementation)
@@ -76,26 +87,23 @@ class DefaultApplicationModule : TribeApplicationModule() {
     /**
      * Configure CORS headers to allow the service to be hit from pages hosted
      * by the admin port, the app port, or standard HTTP ports on the configured
-     * [TribeApplicationConfig.corsDomain]
+     * [TribeApplicationConfig.corsDomains]
      */
-    @ProvidesIntoSet
-    fun provideCorsFilter(appConfig: TribeApplicationConfig): ServletFilterConfig {
-        val corsDomain =
-            appConfig.corsDomains.map {
-                "https?://*.?$it," +
-                    "https?://*.?$it:${appConfig.appPort}"
-            }.joinToString(",")
-        val paramMap =
-            mapOf(
-                CrossOriginFilter.ALLOWED_ORIGINS_PARAM to corsDomain,
-                CrossOriginFilter.ALLOWED_METHODS_PARAM to "GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD",
-                CrossOriginFilter.ALLOW_CREDENTIALS_PARAM to "true",
-            )
-        return ServletFilterConfig(
-            CrossOriginFilter::class.java.simpleName,
-            CrossOriginFilter::class.java,
-            paramMap,
-        )
+    @Provides
+    fun provideCorsHandler(appConfig: TribeApplicationConfig): Handler.Singleton {
+        val corsHandler = CrossOriginHandler()
+        val corsDomains =
+            appConfig.corsDomains
+                .flatMap {
+                    listOf(
+                        "https?://*.?$it",
+                        "https?://*.?$it:${appConfig.appPort}",
+                    )
+                }.toSet()
+        corsHandler.allowedOriginPatterns = corsDomains
+        corsHandler.isAllowCredentials = true
+        corsHandler.allowedMethods = setOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
+        return corsHandler
     }
 
     /**
@@ -108,10 +116,9 @@ class DefaultApplicationModule : TribeApplicationModule() {
      * @param appConfig the application configuration setting, including an httpHeaders value
      * @return a ServletFilterConfig object for configuring the Jersey Servlet HeaderFilter.
      */
-
     @ProvidesIntoSet
     fun provideHeaderFilter(appConfig: TribeApplicationConfig): ServletFilterConfig {
-        val headerConfig = appConfig.httpsHeaders.map { "Set $it" }.joinToString(",")
+        val headerConfig = appConfig.httpsHeaders.joinToString(",") { "Set $it" }
         val paramMap =
             mapOf(
                 "headerConfig" to headerConfig,
@@ -124,11 +131,7 @@ class DefaultApplicationModule : TribeApplicationModule() {
     }
 
     // allow multiple installations so that multiple other modules can install this one
-    override fun equals(other: Any?): Boolean {
-        return other is DefaultApplicationModule
-    }
+    override fun equals(other: Any?): Boolean = other is DefaultApplicationModule
 
-    override fun hashCode(): Int {
-        return this::class.hashCode()
-    }
+    override fun hashCode(): Int = this::class.hashCode()
 }

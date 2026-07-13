@@ -17,11 +17,7 @@ class FlywayModule : KotlinModule() {
     }
 
     // allow multiple installations so that multiple other modules can install this one
-    override fun equals(other: Any?): Boolean {
-        return other is FlywayModule
-    }
+    override fun equals(other: Any?): Boolean = other is FlywayModule
 
-    override fun hashCode(): Int {
-        return this::class.hashCode()
-    }
+    override fun hashCode(): Int = this::class.hashCode()
 }

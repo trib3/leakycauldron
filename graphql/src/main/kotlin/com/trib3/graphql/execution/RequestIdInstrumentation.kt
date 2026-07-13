@@ -18,12 +18,12 @@ class RequestIdInstrumentation : SimplePerformantInstrumentation() {
         executionResult: ExecutionResult,
         parameters: InstrumentationExecutionParameters,
         state: InstrumentationState?,
-    ): CompletableFuture<ExecutionResult> {
-        return CompletableFuture.completedFuture(
-            ExecutionResultImpl.newExecutionResult()
+    ): CompletableFuture<ExecutionResult> =
+        CompletableFuture.completedFuture(
+            ExecutionResultImpl
+                .newExecutionResult()
                 .from(executionResult)
                 .addExtension(RequestIdFilter.REQUEST_ID_KEY, RequestIdFilter.getRequestId())
                 .build(),
         )
-    }
 }

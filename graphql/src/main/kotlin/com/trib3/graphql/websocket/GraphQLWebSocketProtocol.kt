@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonValue
 import com.trib3.graphql.execution.MessageGraphQLError
+import org.eclipse.jetty.websocket.api.Callback
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
 import kotlin.reflect.KClass
@@ -74,8 +75,10 @@ enum class GraphQLWebSocketSubProtocol(
         onInvalidMessageCallback = { msgId, msgBody, adapter ->
             adapter.session?.close(
                 GraphQLWebSocketCloseReason.INVALID_MESSAGE.code,
-                GraphQLWebSocketCloseReason.INVALID_MESSAGE.description.replace("<id>", msgId.orEmpty())
+                GraphQLWebSocketCloseReason.INVALID_MESSAGE.description
+                    .replace("<id>", msgId.orEmpty())
                     .replace("<body>", msgBody),
+                Callback.NOOP,
             )
         },
         onDuplicateQueryCallback = { message, adapter ->
@@ -85,6 +88,7 @@ enum class GraphQLWebSocketSubProtocol(
                     "<unique-operation-id>",
                     message.id.orEmpty(),
                 ),
+                Callback.NOOP,
             )
         },
         onDuplicateInitCallback = { _, adapter ->
@@ -96,38 +100,36 @@ enum class GraphQLWebSocketSubProtocol(
     private val apolloToGraphQlWsMapping = messageMapping.entries.associate { it.key.type to it.value.type }
 
     private val graphQlWsToApolloMapping =
-        apolloToGraphQlWsMapping.entries.associate {
-            it.value to it.key
-        }.filter {
-            // don't map PONG to KEEPALIVE even though we map outgoing KEEPALIVE messages to PONGs
-            it.key != OperationType.GQL_PONG.type
-        }
+        apolloToGraphQlWsMapping.entries
+            .associate {
+                it.value to it.key
+            }.filter {
+                // don't map PONG to KEEPALIVE even though we map outgoing KEEPALIVE messages to PONGs
+                it.key != OperationType.GQL_PONG.type
+            }
 
     private fun <T : Any> getMessage(
         message: OperationMessage<T>,
         mapping: Map<String, String>,
-    ): OperationMessage<T> {
-        return if (!mapping.containsKey(message.type?.type)) {
+    ): OperationMessage<T> =
+        if (message.type == null || !mapping.containsKey(message.type.type)) {
             message
         } else {
-            message.copy(type = message.type?.copy(type = mapping.getValue(message.type.type)))
+            message.copy(type = message.type.copy(type = mapping.getValue(message.type.type)))
         }
-    }
 
     /**
      * Before sending a message to the client, map to the appropriate protocol message
      */
-    fun <T : Any> getServerToClientMessage(message: OperationMessage<T>): OperationMessage<T> {
-        return getMessage(message, apolloToGraphQlWsMapping)
-    }
+    fun <T : Any> getServerToClientMessage(message: OperationMessage<T>): OperationMessage<T> =
+        getMessage(message, apolloToGraphQlWsMapping)
 
     /**
      * Upon receiving a message from the client, map from appropriate protocol message to an apollo
      * message for internal consumption
      */
-    fun <T : Any> getClientToServerMessage(message: OperationMessage<T>): OperationMessage<T> {
-        return getMessage(message, graphQlWsToApolloMapping)
-    }
+    fun <T : Any> getClientToServerMessage(message: OperationMessage<T>): OperationMessage<T> =
+        getMessage(message, graphQlWsToApolloMapping)
 
     /**
      * graphql-ws closes the connection upon receiving an invalid message, while apollo just sends
@@ -168,7 +170,10 @@ enum class GraphQLWebSocketSubProtocol(
  * Enum of websocket closure reasons from the graphql-ws protocol specification
  */
 @Suppress("MagicNumber") // constructor values are consts, just put the numbers in instead of declaring const vals.
-enum class GraphQLWebSocketCloseReason(val code: Int, val description: String) {
+enum class GraphQLWebSocketCloseReason(
+    val code: Int,
+    val description: String,
+) {
     NORMAL(StatusCode.NORMAL, "Normal Closure"),
     INVALID_MESSAGE(4400, "Invalid Message with id `<id>`: `<body>`"),
     UNAUTHORIZED(4401, "Unauthorized"),
@@ -182,7 +187,7 @@ enum class GraphQLWebSocketCloseReason(val code: Int, val description: String) {
  * code/description pairs
  */
 fun Session.close(reason: GraphQLWebSocketCloseReason) {
-    this.close(reason.code, reason.description)
+    this.close(reason.code, reason.description, Callback.NOOP)
 }
 
 /**
@@ -254,11 +259,11 @@ data class OperationType<T : Any>(
          */
         @JvmStatic
         @JsonCreator
-        fun getOperationType(type: String): OperationType<*>? {
-            return Companion::class.memberProperties
+        fun getOperationType(type: String): OperationType<*>? =
+            Companion::class
+                .memberProperties
                 .filterIsInstance<KProperty1<Companion, OperationType<*>>>()
                 .map { it.get(Companion) }
                 .find { it.type == type }
-        }
     }
 }

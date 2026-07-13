@@ -9,17 +9,13 @@ import org.easymock.internal.LastControl
  * Extension function to add a `mock<T>()` method to [EasyMockSupport]
  * for less repetition when creating mocks.
  */
-inline fun <reified T> EasyMockSupport.mock(name: String? = null): T {
-    return mock(name, T::class.java)
-}
+inline fun <reified T> EasyMockSupport.mock(name: String? = null): T = mock(name, T::class.java)
 
 /**
  * Extension function to add a `niceMock<T>()` method to [EasyMockSupport]
  * for less repetition when creating nice mocks.
  */
-inline fun <reified T> EasyMockSupport.niceMock(name: String? = null): T {
-    return niceMock(name, T::class.java)
-}
+inline fun <reified T> EasyMockSupport.niceMock(name: String? = null): T = niceMock(name, T::class.java)
 
 /**
  * Collection of static methods to use with EasyMock for a more
@@ -39,16 +35,12 @@ class LeakyMock private constructor() {
         /**
          * Create a mock object of the specified type
          */
-        inline fun <reified T> mock(name: String? = null): T {
-            return EasyMock.mock(name, T::class.java)
-        }
+        inline fun <reified T> mock(name: String? = null): T = EasyMock.mock(name, T::class.java)
 
         /**
          * Create a mock object of the specified type
          */
-        fun <T> mock(clazz: Class<T>): T {
-            return EasyMock.mock(clazz)
-        }
+        fun <T> mock(clazz: Class<T>): T = EasyMock.mock(clazz)
 
         /**
          * Create a named mock object of the specified type
@@ -56,23 +48,17 @@ class LeakyMock private constructor() {
         fun <T> mock(
             name: String,
             clazz: Class<T>,
-        ): T {
-            return EasyMock.mock(name, clazz)
-        }
+        ): T = EasyMock.mock(name, clazz)
 
         /**
          * Create a nice mock object of the specified type
          */
-        inline fun <reified T> niceMock(name: String? = null): T {
-            return EasyMock.niceMock(name, T::class.java)
-        }
+        inline fun <reified T> niceMock(name: String? = null): T = EasyMock.niceMock(name, T::class.java)
 
         /**
          * Create a nice mock object of the specified type
          */
-        fun <T> niceMock(clazz: Class<T>): T {
-            return EasyMock.niceMock(clazz)
-        }
+        fun <T> niceMock(clazz: Class<T>): T = EasyMock.niceMock(clazz)
 
         /**
          * Create a named nice mock object of the specified type
@@ -80,9 +66,7 @@ class LeakyMock private constructor() {
         fun <T> niceMock(
             name: String,
             clazz: Class<T>,
-        ): T {
-            return EasyMock.niceMock(name, clazz)
-        }
+        ): T = EasyMock.niceMock(name, clazz)
 
         /**
          * Expect any object of the specified type and return a mock

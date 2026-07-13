@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/trib3/leakycauldron.svg?style=svg)](https://circleci.com/gh/trib3/leakycauldron)
 [![codecov](https://codecov.io/gh/trib3/leakycauldron/branch/main/graph/badge.svg?token=MmCucLTttM)](https://codecov.io/gh/trib3/leakycauldron)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.trib3/leakycauldron/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.trib3/leakycauldron/)
+[![Maven Central](https://img.shields.io/maven-central/v/com.trib3/leakycauldron)](https://central.sonatype.com/artifact/com.trib3/leakycauldron/)
 
 Tribe Dynamics' Leaky Cauldron
 =======

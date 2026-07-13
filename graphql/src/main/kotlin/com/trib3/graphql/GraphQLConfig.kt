@@ -6,7 +6,9 @@ import jakarta.inject.Inject
 
 class GraphQLConfig
     @Inject
-    constructor(loader: ConfigLoader) {
+    constructor(
+        loader: ConfigLoader,
+    ) {
         val keepAliveIntervalSeconds: Long
         val idleTimeout: Long?
         val maxBinaryMessageSize: Long?

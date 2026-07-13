@@ -12,11 +12,10 @@ class YearQuarterKeyDeserializer : KeyDeserializer() {
     override fun deserializeKey(
         key: String,
         ctxt: DeserializationContext,
-    ): Any {
-        return try {
+    ): Any =
+        try {
             YearQuarter.parse(key)
         } catch (e: DateTimeParseException) {
             ctxt.handleWeirdKey(YearQuarter::class.java, key, "Unexpected quarter: $key")
         }
-    }
 }

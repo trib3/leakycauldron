@@ -13,12 +13,16 @@ import java.security.Principal
  * Authenticator / Authorizers that are configured through the [Builder]
  */
 @Priority(Priorities.AUTHENTICATION)
-class CookieTokenAuthFilter<P : Principal>(val cookieName: String) : AuthFilter<String?, P>() {
+class CookieTokenAuthFilter<P : Principal>(
+    val cookieName: String,
+) : AuthFilter<String?, P>() {
     override fun filter(requestContext: ContainerRequestContext) {
         val credentials =
             requestContext.cookies
                 .filter { it.key == cookieName }
-                .values.map { it.value }.firstOrNull()
+                .values
+                .map { it.value }
+                .firstOrNull()
         if (!authenticate(requestContext, credentials, "Bearer")) {
             throw WebApplicationException(unauthorizedHandler.buildResponse(prefix, realm))
         }
@@ -30,10 +34,9 @@ class CookieTokenAuthFilter<P : Principal>(val cookieName: String) : AuthFilter<
      * authenticate the cookie and return a [Principal] that corresponds to the cookie token value
      * during the building process.
      */
-    class Builder<P : Principal>(private val cookieName: String) :
-        AuthFilterBuilder<String?, P, CookieTokenAuthFilter<P>>() {
-        override fun newInstance(): CookieTokenAuthFilter<P> {
-            return CookieTokenAuthFilter(cookieName)
-        }
+    class Builder<P : Principal>(
+        private val cookieName: String,
+    ) : AuthFilterBuilder<String?, P, CookieTokenAuthFilter<P>>() {
+        override fun newInstance(): CookieTokenAuthFilter<P> = CookieTokenAuthFilter(cookieName)
     }
 }

@@ -14,6 +14,7 @@ import graphql.ExecutionInput
 import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.GraphQLContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.ws.rs.container.ContainerRequestContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -35,7 +36,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.yield
-import mu.KotlinLogging
 import org.glassfish.jersey.internal.MapPropertiesDelegate
 import org.glassfish.jersey.server.ContainerRequest
 import java.security.Principal
@@ -51,7 +51,9 @@ private val log = KotlinLogging.logger {}
  * sending messages back to the WebSocket client
  */
 @OptIn(DelicateCoroutinesApi::class)
-abstract class GraphQLCoroutine(private val channel: Channel<OperationMessage<*>>) {
+abstract class GraphQLCoroutine(
+    private val channel: Channel<OperationMessage<*>>,
+) {
     abstract suspend fun run()
 
     /**
@@ -76,7 +78,7 @@ class KeepAliveCoroutine(
     override suspend fun run() {
         while (true) {
             delay(graphQLConfig.keepAliveIntervalSeconds.toDuration(DurationUnit.SECONDS))
-            log.trace("WebSocket connection keepalive ping")
+            log.trace { "WebSocket connection keepalive ping" }
             queueMessage(
                 OperationMessage(
                     OperationType.GQL_CONNECTION_KEEP_ALIVE,
@@ -107,28 +109,29 @@ class QueryCoroutine(
                 try {
                     result.getData<Flow<ExecutionResult>>() ?: flowOf(result)
                 } catch (e: Exception) {
-                    log.debug("Could not get Flow result, collecting result directly", e)
+                    log.debug(e) { "Could not get Flow result, collecting result directly" }
                     flowOf(result)
                 }
-            flow.onEach {
-                yield() // allow for cancellations to abort the coroutine
-                queueMessage(
-                    OperationMessage(
-                        OperationType.GQL_DATA,
-                        messageId,
-                        it.toGraphQLResponse(),
-                    ),
-                )
-            }.catch {
-                yield() // allow for cancellations to abort the coroutine
-                onChildError(messageId, it)
-            }.onCompletion { maybeException ->
-                // Only send complete if there's no exception
-                if (maybeException == null) {
+            flow
+                .onEach {
                     yield() // allow for cancellations to abort the coroutine
-                    queueMessage(OperationMessage(OperationType.GQL_COMPLETE, messageId))
-                }
-            }.collect()
+                    queueMessage(
+                        OperationMessage(
+                            OperationType.GQL_DATA,
+                            messageId,
+                            it.toGraphQLResponse(),
+                        ),
+                    )
+                }.catch {
+                    yield() // allow for cancellations to abort the coroutine
+                    onChildError(messageId, it)
+                }.onCompletion { maybeException ->
+                    // Only send complete if there's no exception
+                    if (maybeException == null) {
+                        yield() // allow for cancellations to abort the coroutine
+                        queueMessage(OperationMessage(OperationType.GQL_COMPLETE, messageId))
+                    }
+                }.collect()
         } catch (e: Throwable) {
             onChildError(messageId, e)
         }
@@ -144,10 +147,10 @@ class QueryCoroutine(
         cause: Throwable,
     ) {
         if (cause is CancellationException) {
-            log.trace("Rethrowing cancellation")
+            log.trace { "Rethrowing cancellation" }
             throw cause
         }
-        log.error("Downstream error ${cause.message}", cause)
+        log.error(cause) { "Downstream error ${cause.message}" }
         queueMessage(
             OperationMessage(
                 OperationType.GQL_ERROR,
@@ -208,21 +211,31 @@ class GraphQLWebSocketConsumer(
     ) {
         RequestIdFilter.withRequestId(message.id) {
             try {
-                log.trace("WebSocket connection subscription processing $message")
+                log.trace { "WebSocket connection subscription processing $message" }
                 when (message.type) {
                     // Connection control messages from the client
-                    OperationType.GQL_CONNECTION_INIT -> handleConnectionInit(message, scope)
-                    OperationType.GQL_CONNECTION_TERMINATE -> handleConnectionTerminate(message)
+                    OperationType.GQL_CONNECTION_INIT -> {
+                        handleConnectionInit(message, scope)
+                    }
+
+                    OperationType.GQL_CONNECTION_TERMINATE -> {
+                        handleConnectionTerminate(message)
+                    }
 
                     // Query control messages from the client
-                    OperationType.GQL_START -> handleQueryStart(message, scope)
-                    OperationType.GQL_STOP -> handleQueryStop(message)
+                    OperationType.GQL_START -> {
+                        handleQueryStart(message, scope)
+                    }
+
+                    OperationType.GQL_STOP -> {
+                        handleQueryStop(message)
+                    }
 
                     // Query finished messages from child coroutines
                     OperationType.GQL_COMPLETE,
                     OperationType.GQL_ERROR,
                     -> {
-                        log.info("Query ${message.id} completed: $message")
+                        log.info { "Query ${message.id} completed: $message" }
                         if (message.id != null) {
                             queries.remove(message.id)?.cancel()
                         }
@@ -230,7 +243,7 @@ class GraphQLWebSocketConsumer(
                     }
 
                     // Respond to pings with pongs, ignore pongs
-                    OperationType.GQL_PING ->
+                    OperationType.GQL_PING -> {
                         handleClientBoundMessage(
                             OperationMessage(
                                 OperationType.GQL_PONG,
@@ -238,6 +251,7 @@ class GraphQLWebSocketConsumer(
                                 message.payload as Map<*, *>,
                             ),
                         )
+                    }
 
                     OperationType.GQL_PONG -> {
                         // do nothing
@@ -248,19 +262,22 @@ class GraphQLWebSocketConsumer(
                     OperationType.GQL_CONNECTION_ACK,
                     OperationType.GQL_DATA,
                     OperationType.GQL_CONNECTION_KEEP_ALIVE,
-                    ->
+                    -> {
                         handleClientBoundMessage(
                             message,
                         )
+                    }
 
                     // Unknown message type
-                    else -> adapter.subProtocol.onInvalidMessage(message.id, message.toString(), adapter)
+                    else -> {
+                        adapter.subProtocol.onInvalidMessage(message.id, message.toString(), adapter)
+                    }
                 }
             } catch (cancellation: CancellationException) {
-                log.trace("Rethrowing cancellation")
+                log.trace { "Rethrowing cancellation" }
                 throw cancellation
             } catch (error: Throwable) {
-                log.error("Error processing message ${error.message}", error)
+                log.error(error) { "Error processing message ${error.message}" }
                 adapter.sendMessage(OperationType.GQL_ERROR, message.id, listOf(error.toGraphQLError()))
             }
         }
@@ -314,11 +331,10 @@ class GraphQLWebSocketConsumer(
      * First checks any creds from the [OperationType.GQL_CONNECTION_INIT] payload,
      * then falls back to creds from the websocket upgrade request
      */
-    private fun getSocketPrincipal(): Principal? {
-        return connectionInitContainerRequest?.let {
+    private fun getSocketPrincipal(): Principal? =
+        connectionInitContainerRequest?.let {
             graphQLWebSocketAuthenticator?.invoke(it)
         } ?: graphQLWebSocketAuthenticator?.invoke(getReusableUpgradeContainerRequestContext())
-    }
 
     /**
      * Process an [OperationType.GQL_CONNECTION_INIT] message.  If the connection
@@ -357,7 +373,7 @@ class GraphQLWebSocketConsumer(
      * which will close the socket and cancel all associated coroutines.
      */
     private fun handleConnectionTerminate(message: OperationMessage<*>) {
-        log.info("WebSocket connection termination requested by message ${message.id}!")
+        log.info { "WebSocket connection termination requested by message ${message.id}!" }
         adapter.session?.close(GraphQLWebSocketCloseReason.NORMAL)
     }
 
@@ -409,7 +425,7 @@ class GraphQLWebSocketConsumer(
     private fun handleQueryStop(message: OperationMessage<*>) {
         val toStop = queries[message.id]
         if (toStop != null) {
-            log.info("Stopping WebSocket query: ${message.id}!")
+            log.info { "Stopping WebSocket query: ${message.id}!" }
             toStop.cancel()
             handleClientBoundMessage(OperationMessage(OperationType.GQL_COMPLETE, message.id))
             queries.remove(message.id)
@@ -428,7 +444,7 @@ class GraphQLWebSocketConsumer(
      * Send the [message] to the client via the [adapter]
      */
     private fun handleClientBoundMessage(message: OperationMessage<*>) {
-        log.trace("WebSocket connection sending $message")
+        log.trace { "WebSocket connection sending $message" }
         adapter.sendMessage(message)
     }
 }

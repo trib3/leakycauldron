@@ -15,7 +15,7 @@ class FlywayBundleTest {
         val mockFlyway = EasyMock.mock<Flyway>(Flyway::class.java)
         EasyMock.expect(mockConfig.dataSource(mockDatasource)).andReturn(mockConfig).once()
         EasyMock.expect(mockConfig.load()).andReturn(mockFlyway).once()
-        EasyMock.expect(mockFlyway.migrate()).andReturn(MigrateResult("7", "test", "test")).once()
+        EasyMock.expect(mockFlyway.migrate()).andReturn(MigrateResult("7", "test", "test", "PostgreSQL")).once()
         EasyMock.replay(mockConfig, mockDatasource, mockFlyway)
         val bundle = FlywayBundle(mockDatasource, mockConfig)
         bundle.run(null, null)

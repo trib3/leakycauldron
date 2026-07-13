@@ -15,6 +15,7 @@ import graphql.ExecutionResultImpl
 import graphql.GraphQL
 import graphql.GraphQLContext
 import io.dropwizard.auth.Auth
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Parameter
 import jakarta.inject.Inject
 import jakarta.ws.rs.DELETE
@@ -30,6 +31,7 @@ import jakarta.ws.rs.container.ContainerRequestContext
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
+import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
 import jakarta.ws.rs.sse.SseEventSink
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +48,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.yield
-import mu.KotlinLogging
 import org.eclipse.jetty.http.HttpStatus
 import java.security.Principal
 import java.util.Optional
@@ -103,8 +104,8 @@ open class GraphQLSseResource
         private fun CoroutineScope.launchKeepAlive(
             eventSink: SseEventSink,
             sse: Sse,
-        ): Job {
-            return launch(MDCContext()) {
+        ): Job =
+            launch(MDCContext()) {
                 while (isActive) {
                     if (graphQLConfig.keepAliveIntervalSeconds > 0) {
                         eventSink.send(sse.newEventBuilder().comment("ka").build())
@@ -112,7 +113,17 @@ open class GraphQLSseResource
                     delay(graphQLConfig.keepAliveIntervalSeconds.toDuration(DurationUnit.SECONDS))
                 }
             }
-        }
+
+        private fun buildEvent(
+            sse: Sse,
+            name: String,
+            data: Any,
+        ): OutboundSseEvent =
+            sse
+                .newEventBuilder()
+                .name(name)
+                .data(data)
+                .build()
 
         /**
          * Execute a graphql query and send results to the [eventSink]
@@ -133,29 +144,31 @@ open class GraphQLSseResource
                     try {
                         result.getData<Flow<ExecutionResult>>() ?: flowOf(result)
                     } catch (e: Exception) {
-                        log.debug("Could not get Flow result, collecting result directly", e)
+                        log.debug(e) { "Could not get Flow result, collecting result directly" }
                         flowOf(result)
                     }
-                flow.onEach {
-                    yield()
-                    val response = it.toGraphQLResponse()
-                    val nextMessage: Any =
-                        if (operationId != null) {
-                            mapOf("id" to operationId, "payload" to response)
-                        } else {
-                            response
-                        }
-                    eventSink.send(
-                        sse.newEventBuilder().name("next").data(
-                            objectMapper.writeValueAsString(nextMessage),
-                        ).build(),
-                    )
-                }.collect()
+                flow
+                    .onEach {
+                        yield()
+                        val response = it.toGraphQLResponse()
+                        val nextMessage: Any =
+                            if (operationId != null) {
+                                mapOf("id" to operationId, "payload" to response)
+                            } else {
+                                response
+                            }
+                        eventSink.send(
+                            buildEvent(sse, "next", objectMapper.writeValueAsString(nextMessage)),
+                        )
+                    }.collect()
             } catch (e: Exception) {
-                log.warn("Error running sse query: ${e.message}", e)
+                log.warn(e) { "Error running sse query: ${e.message}" }
                 val gqlError =
-                    ExecutionResultImpl.newExecutionResult()
-                        .addError(e.toGraphQLError()).build().toGraphQLResponse()
+                    ExecutionResultImpl
+                        .newExecutionResult()
+                        .addError(e.toGraphQLError())
+                        .build()
+                        .toGraphQLResponse()
                 val nextMessage: Any =
                     if (operationId != null) {
                         mapOf(
@@ -166,19 +179,19 @@ open class GraphQLSseResource
                         gqlError
                     }
                 eventSink.send(
-                    sse.newEventBuilder().name("next").data(
-                        objectMapper.writeValueAsString(nextMessage),
-                    ).build(),
+                    buildEvent(sse, "next", objectMapper.writeValueAsString(nextMessage)),
                 )
             } finally {
-                log.info("Query ${operationId ?: RequestIdFilter.getRequestId()} completed.")
+                log.info { "Query ${operationId ?: RequestIdFilter.getRequestId()} completed." }
                 val completeMessage =
                     if (operationId != null) {
                         objectMapper.writeValueAsString(mapOf("id" to operationId))
                     } else {
                         ""
                     }
-                eventSink.send(sse.newEventBuilder().name("complete").data(completeMessage).build())
+                eventSink.send(
+                    buildEvent(sse, "complete", completeMessage),
+                )
             }
         }
 
@@ -258,9 +271,10 @@ open class GraphQLSseResource
                 return unauthorizedResponse()
             }
             val operationId =
-                query.extensions?.get(
-                    "operationId",
-                )?.toString() ?: RequestIdFilter.getRequestId().toString()
+                query.extensions
+                    ?.get(
+                        "operationId",
+                    )?.toString() ?: RequestIdFilter.getRequestId().toString()
             val newQueryMap = ConcurrentHashMap<String, CoroutineScope>()
             val queryMap = runningOperations.putIfAbsent(streamToken, newQueryMap) ?: newQueryMap
             // launch in the connection's scope so this POST can return immediately with 202

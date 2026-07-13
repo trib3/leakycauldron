@@ -36,8 +36,10 @@ class AdminAuthFilterTest {
         val mockResponse = LeakyMock.niceMock<HttpServletResponse>()
         val mockFilterConfig = LeakyMock.niceMock<FilterConfig>()
         val base64pass = String(base64.encode("abc:123".toByteArray()))
-        EasyMock.expect(mockRequest.getHeader(EasyMock.eq("Authorization")))
-            .andReturn("Basic $base64pass").anyTimes()
+        EasyMock
+            .expect(mockRequest.getHeader(EasyMock.eq("Authorization")))
+            .andReturn("Basic $base64pass")
+            .anyTimes()
         EasyMock.expect(mockFilterConfig.getInitParameter(EasyMock.eq("token"))).andReturn("123").anyTimes()
         EasyMock.replay(mockRequest, mockResponse, mockFilterConfig)
         val filter = AdminAuthFilter()
@@ -59,16 +61,19 @@ class AdminAuthFilterTest {
         val mockRequest = LeakyMock.niceMock<HttpServletRequest>()
         val mockResponse = LeakyMock.niceMock<HttpServletResponse>()
         EasyMock.expect(mockResponse.sendError(EasyMock.eq(HttpServletResponse.SC_UNAUTHORIZED))).once()
-        EasyMock.expect(
-            mockResponse.setHeader(
-                EasyMock.eq("WWW-Authenticate"),
-                EasyMock.eq("Basic realm=\"trib3\""),
-            ),
-        ).once()
+        EasyMock
+            .expect(
+                mockResponse.setHeader(
+                    EasyMock.eq("WWW-Authenticate"),
+                    EasyMock.eq("Basic realm=\"trib3\""),
+                ),
+            ).once()
         val mockFilterConfig = LeakyMock.niceMock<FilterConfig>()
         val base64pass = String(base64.encode("abc:456".toByteArray()))
-        EasyMock.expect(mockRequest.getHeader(EasyMock.eq("Authorization")))
-            .andReturn("Basic $base64pass").anyTimes()
+        EasyMock
+            .expect(mockRequest.getHeader(EasyMock.eq("Authorization")))
+            .andReturn("Basic $base64pass")
+            .anyTimes()
         EasyMock.expect(mockFilterConfig.getInitParameter(EasyMock.eq("token"))).andReturn("123").anyTimes()
         EasyMock.expect(mockFilterConfig.getInitParameter(EasyMock.eq("realm"))).andReturn("trib3").anyTimes()
         EasyMock.replay(mockRequest, mockResponse, mockFilterConfig)
@@ -90,15 +95,18 @@ class AdminAuthFilterTest {
         val mockRequest = LeakyMock.niceMock<HttpServletRequest>()
         val mockResponse = LeakyMock.niceMock<HttpServletResponse>()
         EasyMock.expect(mockResponse.sendError(EasyMock.eq(HttpServletResponse.SC_UNAUTHORIZED))).once()
-        EasyMock.expect(
-            mockResponse.setHeader(
-                EasyMock.eq("WWW-Authenticate"),
-                EasyMock.eq("Basic realm=\"realm\""),
-            ),
-        ).once()
+        EasyMock
+            .expect(
+                mockResponse.setHeader(
+                    EasyMock.eq("WWW-Authenticate"),
+                    EasyMock.eq("Basic realm=\"realm\""),
+                ),
+            ).once()
         val mockFilterConfig = LeakyMock.niceMock<FilterConfig>()
-        EasyMock.expect(mockRequest.getHeader(EasyMock.eq("Authorization")))
-            .andReturn("Raw abc:1213").anyTimes()
+        EasyMock
+            .expect(mockRequest.getHeader(EasyMock.eq("Authorization")))
+            .andReturn("Raw abc:1213")
+            .anyTimes()
         EasyMock.expect(mockFilterConfig.getInitParameter(EasyMock.eq("token"))).andReturn("123").anyTimes()
         EasyMock.replay(mockRequest, mockResponse, mockFilterConfig)
         val filter = AdminAuthFilter()
@@ -118,12 +126,13 @@ class AdminAuthFilterTest {
         val mockRequest = LeakyMock.niceMock<HttpServletRequest>()
         val mockResponse = LeakyMock.niceMock<HttpServletResponse>()
         EasyMock.expect(mockResponse.sendError(EasyMock.eq(HttpServletResponse.SC_UNAUTHORIZED))).once()
-        EasyMock.expect(
-            mockResponse.setHeader(
-                EasyMock.eq("WWW-Authenticate"),
-                EasyMock.eq("Basic realm=\"realm\""),
-            ),
-        ).once()
+        EasyMock
+            .expect(
+                mockResponse.setHeader(
+                    EasyMock.eq("WWW-Authenticate"),
+                    EasyMock.eq("Basic realm=\"realm\""),
+                ),
+            ).once()
         val mockFilterConfig = LeakyMock.niceMock<FilterConfig>()
         EasyMock.expect(mockFilterConfig.getInitParameter(EasyMock.eq("token"))).andReturn("123").anyTimes()
         EasyMock.replay(mockRequest, mockResponse, mockFilterConfig)

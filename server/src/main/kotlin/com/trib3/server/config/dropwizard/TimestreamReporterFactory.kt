@@ -22,9 +22,9 @@ import java.net.InetAddress
  */
 @JsonTypeName("timestream")
 class TimestreamReporterFactory(
-    @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
+    @param:JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     private val appConfig: TribeApplicationConfig,
-    @JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
+    @param:JacksonInject(useInput = OptBoolean.FALSE) @JsonIgnore
     internal val timestreamWriteClient: TimestreamWriteClient,
 ) : BaseReporterFactory() {
     private val hostname = InetAddress.getLocalHost().hostName
@@ -47,12 +47,28 @@ class TimestreamReporterFactory(
     override fun build(registry: MetricRegistry): TimestreamReporter {
         val finalDimensions =
             globalDimensions.map {
-                Dimension.builder().name(it.key).value(it.value).build()
+                Dimension
+                    .builder()
+                    .name(it.key)
+                    .value(it.value)
+                    .build()
             } +
                 listOf(
-                    Dimension.builder().name("hostname").value(hostname).build(),
-                    Dimension.builder().name("application").value(appConfig.appName).build(),
-                    Dimension.builder().name("env").value(appConfig.env).build(),
+                    Dimension
+                        .builder()
+                        .name("hostname")
+                        .value(hostname)
+                        .build(),
+                    Dimension
+                        .builder()
+                        .name("application")
+                        .value(appConfig.appName)
+                        .build(),
+                    Dimension
+                        .builder()
+                        .name("env")
+                        .value(appConfig.env)
+                        .build(),
                 )
         return TimestreamReporter(
             timestreamWriteClient,

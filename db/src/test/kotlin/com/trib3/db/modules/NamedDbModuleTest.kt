@@ -24,8 +24,8 @@ class ModuleFactory : IModuleFactory {
     override fun createModule(
         context: ITestContext?,
         testClass: Class<*>?,
-    ): Module {
-        return object : AbstractModule() {
+    ): Module =
+        object : AbstractModule() {
             override fun configure() {
                 install(DbModule())
                 install(NamedDbModule("test"))
@@ -33,7 +33,6 @@ class ModuleFactory : IModuleFactory {
                 install(NamedDbModule("test3"))
             }
         }
-    }
 }
 
 /**

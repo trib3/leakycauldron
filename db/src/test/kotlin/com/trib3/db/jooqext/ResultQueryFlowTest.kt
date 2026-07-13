@@ -25,9 +25,10 @@ class ResultQueryFlowTest {
     val expectedData = (1..4).toList()
 
     val mockData =
-        expectedData.map {
-            DSL.using(SQLDialect.DEFAULT).newRecord(DSL.field("value")).values(it)
-        }.toMutableList()
+        expectedData
+            .map {
+                DSL.using(SQLDialect.DEFAULT).newRecord(DSL.field("value")).values(it)
+            }.toMutableList()
 
     @Test
     fun testCollect() {
@@ -81,11 +82,13 @@ class ResultQueryFlowTest {
         // allow mockQuery to be invoked from multiple threads so that cancel()
         // can be called when fetchLazy() is executing
         EasyMock.makeThreadSafe(query, false)
-        EasyMock.expect(query.fetchLazy()).andAnswer {
-            iterateLatch.countDown() // signal collection has started
-            cancelLatch.await() // await cancellation
-            throw RuntimeException("cancelled")
-        }.once()
+        EasyMock
+            .expect(query.fetchLazy())
+            .andAnswer {
+                iterateLatch.countDown() // signal collection has started
+                cancelLatch.await() // await cancellation
+                throw RuntimeException("cancelled")
+            }.once()
         EasyMock.expect(query.cancel()).andAnswer {
             cancelLatch.countDown() // signal cancellation
         }

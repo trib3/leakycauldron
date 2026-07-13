@@ -17,8 +17,10 @@ class ExtensionTest {
 
     init {
         val fakeKms = LeakyMock.mock<KmsClient>()
-        EasyMock.expect(fakeKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
-            .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build()).anyTimes()
+        EasyMock
+            .expect(fakeKms.decrypt(EasyMock.anyObject(DecryptRequest::class.java)))
+            .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String(ASSERT_VAL)).build())
+            .anyTimes()
         EasyMock.replay(fakeKms)
         KMSStringSelectReader(fakeKms)
     }

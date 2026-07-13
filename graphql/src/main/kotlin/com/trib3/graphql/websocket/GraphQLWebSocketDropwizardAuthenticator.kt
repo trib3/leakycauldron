@@ -16,10 +16,9 @@ class GraphQLWebSocketDropwizardAuthenticator
     constructor(
         @Nullable val authFilter: AuthFilter<*, *>?,
     ) : GraphQLWebSocketAuthenticator {
-        override fun invoke(containerRequestContext: ContainerRequestContext): Principal? {
-            return runCatching {
+        override fun invoke(containerRequestContext: ContainerRequestContext): Principal? =
+            runCatching {
                 authFilter?.filter(containerRequestContext)
                 containerRequestContext.securityContext?.userPrincipal
             }.getOrNull()
-        }
     }

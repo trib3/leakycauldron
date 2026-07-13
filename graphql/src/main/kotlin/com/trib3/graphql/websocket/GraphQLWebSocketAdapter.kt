@@ -2,6 +2,7 @@ package com.trib3.graphql.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -9,8 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
-import org.eclipse.jetty.websocket.api.WebSocketAdapter
+import org.eclipse.jetty.websocket.api.Callback
+import org.eclipse.jetty.websocket.api.Session
 
 private val log = KotlinLogging.logger {}
 
@@ -24,8 +25,10 @@ open class GraphQLWebSocketAdapter(
     val channel: Channel<OperationMessage<*>>,
     val objectMapper: ObjectMapper,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : WebSocketAdapter(), CoroutineScope by CoroutineScope(dispatcher) {
+) : Session.Listener.AutoDemanding,
+    CoroutineScope by CoroutineScope(dispatcher) {
     val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()!!
+    var session: Session? = null
 
     companion object {
         private val CLIENT_SOURCED_MESSAGES =
@@ -37,6 +40,10 @@ open class GraphQLWebSocketAdapter(
                 OperationType.GQL_PING,
                 OperationType.GQL_PONG,
             )
+    }
+
+    override fun onWebSocketOpen(session: Session?) {
+        this.session = session
     }
 
     /**
@@ -58,7 +65,7 @@ open class GraphQLWebSocketAdapter(
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (error: Throwable) {
-                log.error("Error parsing message: ${error.message}", error)
+                log.error(error) { "Error parsing message: ${error.message}" }
                 subProtocol.onInvalidMessage(null, message, this@GraphQLWebSocketAdapter)
             }
         }
@@ -69,11 +76,13 @@ open class GraphQLWebSocketAdapter(
     override fun onWebSocketClose(
         statusCode: Int,
         reason: String?,
+        callback: Callback?,
     ) {
         val msg = "WebSocket close $statusCode $reason"
-        log.debug(msg)
-        super.onWebSocketClose(statusCode, reason)
+        log.debug { msg }
+        super.onWebSocketClose(statusCode, reason, callback)
         channel.close()
+        callback?.succeed()
         cancel(msg)
     }
 
@@ -81,7 +90,7 @@ open class GraphQLWebSocketAdapter(
      * Just log the error, and rely on the [onWebSocketClose] callback to clean up
      */
     override fun onWebSocketError(cause: Throwable) {
-        log.error("WebSocket error ${cause.message}", cause)
+        log.error(cause) { "WebSocket error ${cause.message}" }
     }
 
     /**
@@ -89,7 +98,7 @@ open class GraphQLWebSocketAdapter(
      * Must be called from the Subscriber's observation context
      */
     internal fun sendMessage(message: OperationMessage<*>) {
-        remote?.sendString(objectWriter.writeValueAsString(subProtocol.getServerToClientMessage(message)))
+        session?.sendText(objectWriter.writeValueAsString(subProtocol.getServerToClientMessage(message)), null)
     }
 
     /**

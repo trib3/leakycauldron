@@ -22,8 +22,10 @@ class KMSStringReaderTest {
     @Test
     fun testFakeKMS() {
         val mockKms = LeakyMock.mock<KmsClient>()
-        EasyMock.expect(mockKms.decrypt(EasyMock.anyObject<DecryptRequest>()))
-            .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String("bleh")).build()).anyTimes()
+        EasyMock
+            .expect(mockKms.decrypt(EasyMock.anyObject<DecryptRequest>()))
+            .andReturn(DecryptResponse.builder().plaintext(SdkBytes.fromUtf8String("bleh")).build())
+            .anyTimes()
         EasyMock.replay(mockKms)
         val reader = KMSStringReader(mockKms)
         val config =

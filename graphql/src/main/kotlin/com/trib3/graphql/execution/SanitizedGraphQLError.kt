@@ -14,14 +14,10 @@ class SanitizedGraphQLError(
     exception: Throwable,
     sourceLocation: SourceLocation,
 ) : ExceptionWhileDataFetching(path, exception, sourceLocation) {
-    override fun getMessage(): String {
-        return getCause(super.getException()).message ?: super.getMessage()
-    }
+    override fun getMessage(): String = getCause(super.getException()).message ?: super.getMessage()
 
     @JsonIgnore
-    override fun getException(): Throwable {
-        return super.getException()
-    }
+    override fun getException(): Throwable = super.getException()
 
     /**
      * Find the root cause of the exception being thrown

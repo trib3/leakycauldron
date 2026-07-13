@@ -4,7 +4,7 @@ import graphql.GraphQLError
 import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.DataFetcherExceptionHandlerParameters
 import graphql.execution.DataFetcherExceptionHandlerResult
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.concurrent.CompletableFuture
 
 private val log = KotlinLogging.logger { }
@@ -20,7 +20,7 @@ class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
         val sourceLocation = handlerParameters.sourceLocation
         val path = handlerParameters.path
         val error: GraphQLError = SanitizedGraphQLError(path, exception, sourceLocation)
-        log.error("Error in data fetching: ${error.message}", exception)
+        log.error(exception) { "Error in data fetching: ${error.message}" }
         return CompletableFuture.completedFuture(DataFetcherExceptionHandlerResult.newResult().error(error).build())
     }
 }

@@ -24,14 +24,21 @@ import io.dropwizard.core.ConfiguredBundle
 import io.dropwizard.core.setup.Bootstrap
 import io.dropwizard.core.setup.Environment
 import io.dropwizard.jetty.setup.ServletEnvironment
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLoggingConfiguration
+import io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports
+import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper
+import io.prometheus.metrics.instrumentation.dropwizard5.labels.MapperConfig
 import jakarta.inject.Inject
 import jakarta.inject.Named
-import jakarta.servlet.DispatcherType
-import mu.KotlinLogging
-import java.util.EnumSet
+import org.eclipse.jetty.server.Handler
 import javax.annotation.Nullable
 
-private val log = KotlinLogging.logger { }
+private val log =
+    run {
+        KotlinLoggingConfiguration.logStartupMessage = false
+        KotlinLogging.logger { }
+    }
 
 /**
  * A dropwizard Application that allows Guice configuration of the application
@@ -59,6 +66,7 @@ class TribeApplication
         val adminServlets: Set<ServletConfig>,
         @Nullable val authFilter: AuthFilter<*, *>?,
         val envCallbacks: Set<EnvironmentCallback>,
+        val rootHandler: Handler.Singleton,
     ) : Application<Configuration>() {
         val versionHealthCheck: VersionHealthCheck =
             healthChecks.first {
@@ -81,9 +89,7 @@ class TribeApplication
         /**
          * returns the application name
          */
-        override fun getName(): String {
-            return appConfig.appName
-        }
+        override fun getName(): String = appConfig.appName
 
         /**
          * Bootstraps the application
@@ -107,6 +113,17 @@ class TribeApplication
             servletConfig.mappings.forEach { mapping -> servlet.addMapping(mapping) }
         }
 
+        fun addServletFilters(
+            target: ServletEnvironment,
+            configs: Set<ServletFilterConfig>,
+        ) {
+            configs.forEach {
+                val filter = target.addFilter(it.name, it.filterClass)
+                filter.initParameters = it.initParameters
+                filter.addMappingForUrlPatterns(it.dispatcherTypes, it.isMatchAfter, *it.urlPatterns.toTypedArray())
+            }
+        }
+
         /**
          * Runs the application
          */
@@ -114,34 +131,45 @@ class TribeApplication
             conf: Configuration,
             env: Environment,
         ) {
+            env.applicationContext.insertHandler(rootHandler)
             jerseyResources.forEach { env.jersey().register(it) }
             authFilter?.let { env.jersey().register(AuthDynamicFeature(it)) }
 
             jaxrsAppProcessors.forEach { it.process(env.jersey().resourceConfig) }
 
-            servletFilterConfigs.forEach {
-                val filter = env.servlets().addFilter(it.filterClass.simpleName, it.filterClass)
-                filter.initParameters = it.initParameters
-                filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
-            }
-
-            adminServletFilterConfigs.forEach {
-                val filter = env.admin().addFilter(it.filterClass.simpleName, it.filterClass)
-                filter.initParameters = it.initParameters
-                filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "/*")
-            }
+            addServletFilters(env.servlets(), servletFilterConfigs)
+            addServletFilters(env.admin(), adminServletFilterConfigs)
 
             appServlets.forEach { addServlet(env.servlets(), it) }
             adminServlets.forEach { addServlet(env.admin(), it) }
 
             healthChecks.forEach { env.healthChecks().register(it::class.simpleName, it) }
             envCallbacks.forEach { it.invoke(env) }
-            log.info(
-                "Initializing service {} in environment {} with version info: {} ",
-                appConfig.appName,
-                appConfig.env,
-                versionHealthCheck.info(),
-            )
+            DropwizardExports
+                .builder()
+                .dropwizardRegistry(metricRegistry)
+                .customLabelMapper(
+                    object : CustomLabelMapper(
+                        listOf(
+                            MapperConfig(
+                                // This config won't actually match what we want because the * glob stops at '.'s
+                                // but we do need a non-empty list of MapperConfigs to use a CustomLabelMapper
+                                "*.total",
+                                $$"${0}.total",
+                                mapOf(),
+                            ),
+                        ),
+                    ) {
+                        override fun getName(dropwizardName: String?): String {
+                            // this one actually remaps **.total -> **.async
+                            return super.getName(dropwizardName?.replace("\\.total$".toRegex(), ".async"))
+                        }
+                    },
+                ).register()
+            log.info {
+                "Initializing service ${appConfig.appName} in environment ${appConfig.env}" +
+                    " with version info: ${versionHealthCheck.info()} "
+            }
         }
     }
 
