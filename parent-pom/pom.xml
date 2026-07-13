@@ -97,7 +97,7 @@
         <version.jboss.logging>3.6.3.Final</version.jboss.logging>
         <version.jersey>3.1.12</version.jersey>
         <version.jetbrains.annotations>13.0</version.jetbrains.annotations>
-        <version.jetty>12.1.10</version.jetty>
+        <version.jetty>12.1.11</version.jetty>
         <version.jna>5.19.1</version.jna>
         <version.joda>2.14.2</version.joda>
         <version.jooq>3.21.6</version.jooq>
