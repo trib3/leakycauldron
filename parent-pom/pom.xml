@@ -109,7 +109,7 @@
         <version.kotlin.logging>8.0.4</version.kotlin.logging>
         <version.ktlint>1.8.0</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
-        <version.logback>1.5.34</version.logback>
+        <version.logback>1.5.38</version.logback>
         <version.logback-access>2.0.12</version.logback-access>
         <version.maven.antrun>3.2.0</version.maven.antrun>
         <version.maven.assembly>3.8.0</version.maven.assembly>
