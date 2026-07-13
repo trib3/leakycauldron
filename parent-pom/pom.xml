@@ -80,7 +80,7 @@
         <version.hibernate.validator>8.0.2.Final</version.hibernate.validator>
         <version.hikaricp>7.1.0</version.hikaricp>
         <version.hk2>4.0.1</version.hk2>
-        <version.httpcomponents.client>5.6.1</version.httpcomponents.client>
+        <version.httpcomponents.client>5.6.2</version.httpcomponents.client>
         <version.httpcomponents.client4>4.5.14</version.httpcomponents.client4>
         <version.httpcomponents.core>5.4.2</version.httpcomponents.core>
         <version.httpcomponents.core4>4.4.16</version.httpcomponents.core4>
