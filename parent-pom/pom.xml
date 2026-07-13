@@ -82,7 +82,7 @@
         <version.hk2>4.0.1</version.hk2>
         <version.httpcomponents.client>5.6.1</version.httpcomponents.client>
         <version.httpcomponents.client4>4.5.14</version.httpcomponents.client4>
-        <version.httpcomponents.core>5.4.2</version.httpcomponents.core>
+        <version.httpcomponents.core>5.4.3</version.httpcomponents.core>
         <version.httpcomponents.core4>4.4.16</version.httpcomponents.core4>
         <version.j2objc>3.1</version.j2objc>
         <version.jackson>2.22.0</version.jackson>
