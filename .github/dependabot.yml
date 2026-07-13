@@ -5,6 +5,8 @@ updates:
   schedule:
     interval: daily
     time: "07:00"
+  cooldown:
+    default-days: 30
   pull-request-branch-name:
     separator: "-"
   open-pull-requests-limit: 99
