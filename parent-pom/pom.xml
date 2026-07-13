@@ -110,7 +110,7 @@
         <version.ktlint>1.8.0</version.ktlint>
         <version.leakycauldron>${project.version}</version.leakycauldron>
         <version.logback>1.5.34</version.logback>
-        <version.logback-access>2.0.12</version.logback-access>
+        <version.logback-access>2.0.13</version.logback-access>
         <version.maven.antrun>3.2.0</version.maven.antrun>
         <version.maven.assembly>3.8.0</version.maven.assembly>
         <version.maven.buildhelper>3.6.1</version.maven.buildhelper>
