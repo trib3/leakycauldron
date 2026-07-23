@@ -124,7 +124,7 @@
         <version.maven.git>10.0.0</version.maven.git>
         <version.maven.gpg>3.2.8</version.maven.gpg>
         <version.maven.install>3.1.4</version.maven.install>
-        <version.maven.jar>3.5.0</version.maven.jar>
+        <version.maven.jar>3.5.1</version.maven.jar>
         <version.maven.properties>1.3.0</version.maven.properties>
         <version.maven.resources>3.5.0</version.maven.resources>
         <version.maven.shade>3.6.2</version.maven.shade>
