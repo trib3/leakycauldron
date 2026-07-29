@@ -71,7 +71,7 @@
         <version.errorprone>2.50.0</version.errorprone>
         <version.expressly>6.0.0</version.expressly>
         <version.flyway>12.9.0</version.flyway>
-        <version.graphql-kotlin>10.0.1</version.graphql-kotlin>
+        <version.graphql-kotlin>10.2.0</version.graphql-kotlin>
         <version.graphql-java>25.0</version.graphql-java>
         <version.graphql-java-extended-scalars>24.0</version.graphql-java-extended-scalars>
         <version.graphql-java.dataloader>6.0.0</version.graphql-java.dataloader>
