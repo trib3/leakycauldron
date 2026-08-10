@@ -134,7 +134,7 @@
         <version.postgres>42.7.11</version.postgres>
         <version.prometheus>1.8.0</version.prometheus>
         <version.reactivestreams>1.0.4</version.reactivestreams>
-        <version.redshift>2.2.7</version.redshift>
+        <version.redshift>2.2.8</version.redshift>
         <version.servlet>6.1.0</version.servlet>
         <version.slf4j>2.0.18</version.slf4j>
         <version.snakeyaml>2.6</version.snakeyaml>
