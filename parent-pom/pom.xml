@@ -65,7 +65,7 @@
         <version.dokka>2.2.0</version.dokka>
         <version.dropwizard>5.0.2</version.dropwizard>
         <version.dropwizard.hocon>0.5.1</version.dropwizard.hocon>
-        <version.dropwizard.metrics>4.2.39</version.dropwizard.metrics>
+        <version.dropwizard.metrics>4.2.40</version.dropwizard.metrics>
         <version.dropwizard.metrics.cloudwatch>2.0.8</version.dropwizard.metrics.cloudwatch>
         <version.easymock>5.6.0</version.easymock>
         <version.errorprone>2.50.0</version.errorprone>
