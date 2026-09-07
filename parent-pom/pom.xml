@@ -45,7 +45,7 @@
         <version.activation>2.1.4</version.activation>
         <version.angus>2.0.3</version.angus>
         <version.annotation>3.0.0</version.annotation>
-        <version.ant>1.10.17</version.ant>
+        <version.ant>1.10.18</version.ant>
         <version.argparse4j>0.9.0</version.argparse4j>
         <version.asm>9.10.1</version.asm>
         <version.assertk>0.28.1</version.assertk>
