@@ -136,7 +136,7 @@
         <version.reactivestreams>1.0.4</version.reactivestreams>
         <version.redshift>2.2.7</version.redshift>
         <version.servlet>6.1.0</version.servlet>
-        <version.slf4j>2.0.18</version.slf4j>
+        <version.slf4j>2.0.19</version.slf4j>
         <version.snakeyaml>2.6</version.snakeyaml>
         <version.swagger>2.2.51</version.swagger>
         <version.testcontainers>2.0.5</version.testcontainers>
